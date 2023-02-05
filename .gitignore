@@ -1,3 +1,9 @@
+## Project Specific Folders
+/bin
+/build
+/share
+/.vscode
+
 ## Standard Git Ignore from GitHub
 ## See: https://github.com/github/gitignore/blob/main/C%2B%2B.gitignore
 # Prerequisites

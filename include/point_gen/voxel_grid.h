@@ -24,8 +24,11 @@ class VoxelGrid
         /// Vector structure for the voxels. Increments fastest in X, then Y, then Z.
         std::vector<uint8_t> grid;
 
-        /// Spacing in the X, Y, and Z direction
+        /// Number of voxels that span the distance between each upper and lower bound
         Vector3ui space;
+
+        /// Edge length of each voxel cube
+        double resolution;
 
         /// Lower (X, Y, Z) bound for coordinates inside of grid
         Eigen::Vector3d lower;
@@ -66,15 +69,16 @@ class VoxelGrid
 
         /// @brief Constructs a voxel representation for the volume between the lower and upper coordinate bounds
         ///        with the given space in each direction.
-        /// @param space The number of spaces in the X, Y, and Z directions. Each must be greater than 0.
+        /// @param resolution The resolution of each voxel. Must be greater than 0.
         /// @param lower The point with the minimum X, Y, and Z coordinates for the voxelized space.
         /// @param upper The point with the maximum X, Y, and Z coordinates for the voxelized space.
         /// @param init Value to initialize all elements to
         /// @param round_points_in Controls how the grid deals with points outside the voxelized space. If true all points
         ///                        will be rounded into the closest voxel.
-        /// @throws `invalid_argument` if the spacing in any direction is 0. Or if any upper bound is less than
+        /// @throws `invalid_argument` if the difference between upper and lower in any direction less than or equal to 0.
+        /// @throws `invalid argument` if resolution is less than or equal to 0.
         ///         the respective lower bound.
-        VoxelGrid(Vector3ui space, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init = 0, bool round_points_in = true);
+        VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init = 0, bool round_points_in = true);
 
         
         /// @brief Sets the given point in space to the provided value

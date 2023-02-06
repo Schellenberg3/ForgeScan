@@ -47,22 +47,19 @@ size_t inline VoxelGrid::grid_idx_to_vector_idx(const Vector3ui& grid_idx)
 }
 
 
-VoxelGrid::VoxelGrid(Vector3ui space, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init, bool round_points_in)
+VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init, bool round_points_in)
 {
-    for (int i = 0; i < 3; ++i)
-    {
-        if (upper[i] <= lower[i])
-            throw std::invalid_argument("Improper upper/lower bounds.");
-        if (space[i] <= 0)
-            throw std::invalid_argument("Shape values cannot be zero.");
+    Vector3d span = upper - lower;
 
-        this->idx_scale[i] = space[i] / (upper[i] - lower[i]);
-    }
+    // Validate user inputs
+    if (resolution <= 0) throw std::invalid_argument("Resolution must be greater than 0.");
+    if ( (span.array() <= 0).any() ) throw std::invalid_argument("Improper upper/lower bounds.");
 
-    // Reserve voxel space
-    this->space = space;
     this->lower = lower;
     this->upper = upper;
+    for (int i = 0; i < 3; ++i)
+        this->space[i] = std::ceil(span[i] / resolution);
+    this->idx_scale = space.cast<double>().array() / span.array();
 
     size_t vec_len = space[0] * space[1] * space[2];
     this->grid.reserve(vec_len);

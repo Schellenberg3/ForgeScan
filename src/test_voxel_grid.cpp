@@ -12,13 +12,13 @@
 int main(int argc, char** argv)
 { 
     Eigen::Vector3d lower, upper;
-    lower << -1.0, -1.0, -1.0;
+    lower << -1.0, -1.0, -1.0;  
     upper << 1.0, 1.0, 1.0;
-    
-    Vector3ui space;
-    space << 100, 100, 100;
 
-    VoxelGrid grid(space, lower, upper);
+    double res = 0.02;
+
+    // 2m x 2m x 2m cube with 0.02 m resolution
+    VoxelGrid grid(res, lower, upper);
     std::cout << "Initialized the VoxelGrid" << std::endl;
 
     double x, y, z, q = 0;

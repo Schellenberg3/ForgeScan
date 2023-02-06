@@ -78,11 +78,12 @@ int main(int argc, char* argv[])
     // Set up the VoxelGrid 
     uint8_t init = 0, surface = 1, line = 2;
     Eigen::Vector3d lower, upper;
-    Vector3ui space;
     lower << -1, -1, -1;
     upper << 1, 1, 1;
-    space << 100, 100, 100;
-    VoxelGrid grid(space, lower, upper, init, false);
+    double res = 0.02;
+
+    // 2m x 2m x 2m cube with 0.02 m resolution
+    VoxelGrid grid(res, lower, upper, init, false);
 
 
     // Set up the simulated sensor

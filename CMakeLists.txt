@@ -70,3 +70,12 @@ TARGET_LINK_LIBRARIES(test_grid HighFive Eigen3::Eigen)
 ### Why the `Library::Component` structure? I don't know...
 ### See the following on CMake namespaces:
 ###     https://stackoverflow.com/questions/60605281/
+
+ADD_EXECUTABLE (
+    sim_sphere_scan 
+
+    src/sim_sphere_scan.cpp
+    src/sim_sensor_reading.cpp
+    src/voxel_grid.cpp
+)
+TARGET_LINK_LIBRARIES(sim_sphere_scan HighFive Eigen3::Eigen)

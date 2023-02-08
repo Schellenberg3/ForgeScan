@@ -1,4 +1,5 @@
 #include <point_gen/voxel_grid.h>
+#include <point_gen/memory_utils.h>
 
 #include <Eigen/Dense>
 
@@ -63,6 +64,9 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
 
     size_t vec_len = space[0] * space[1] * space[2];
     this->grid.reserve(vec_len);
+    double mem = byte_to_megabytes(vector_capacity(this->grid));
+    if (mem > 100.0)
+        std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
 
     for (size_t i = 0; i < vec_len; ++i)
         this->grid.push_back(init);

@@ -54,13 +54,6 @@ class VoxelGrid
         int inc_voxel(const Vector3ui& idx);
 
 
-        /// @brief Transforms a grid coordinate to the index within the actual vector.
-        /// @param grid_idx The X, Y, Z coordinate in the voxel grid.
-        /// @return The 1D vector index for the provided 3D grid index.
-        /// @note This DOES NOT check validity of that index position within the grid.
-        size_t inline grid_idx_to_vector_idx(const Vector3ui& grid_idx);
-
-
     public:
         /// If true will round all coordinates in space to the closest voxel, even if they
         /// would have been outside of the voxel space.
@@ -135,6 +128,21 @@ class VoxelGrid
         /// @brief Loads data from an HDF5 file
         /// @param fname File name
         void load_hdf5(const std::string& fname);
+
+
+        /// @brief Transforms a grid coordinate to the index within the actual vector.
+        /// @param grid_idx The X, Y, Z coordinate in the voxel grid.
+        /// @return The 1D vector index for the provided 3D grid index.
+        /// @note This DOES NOT check validity of that index position within the grid.
+        size_t inline grid_idx_to_vector_idx(const Vector3ui& grid_idx){
+            return ( grid_idx[0] ) + ( grid_idx[1] * this->space[0] ) + ( grid_idx[2] * this->space[0] * this->space[1] );
+        };
+
+
+        /// @brief Turns a vector list index into a a grid coordinate
+        /// @param vector_idx Index in the vector
+        /// @returns X, Y, Z coordinates within the voxel grid
+        Vector3ui vector_idx_to_grid_idx(const size_t& vector_idx);
 
 
         /// @brief Turns coordinates in space into coordinates inside the voxel grid

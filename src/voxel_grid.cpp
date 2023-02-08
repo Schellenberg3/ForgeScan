@@ -42,12 +42,6 @@ int VoxelGrid::inc_voxel(const Vector3ui& idx)
 }
 
 
-size_t inline VoxelGrid::grid_idx_to_vector_idx(const Vector3ui& grid_idx)
-{
-    return ( grid_idx[0] ) + ( grid_idx[1] * this->space[0] ) + ( grid_idx[2] * this->space[0] * this->space[1] );
-}
-
-
 VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init, bool round_points_in)
 {
     Vector3d span = upper - lower;
@@ -259,6 +253,24 @@ void VoxelGrid::load_hdf5(const std::string& fname)
     } catch (const HighFive::Exception& err) {
         std::cerr << err.what() << std::endl;
     }
+}
+
+
+Vector3ui VoxelGrid::vector_idx_to_grid_idx(const size_t& vector_idx)
+{
+    Vector3ui grid_idx;
+    size_t copy_idx = vector_idx;
+    size_t sxsy = this->space[0]*this->space[0];
+
+    grid_idx[2] = std::floor(copy_idx / sxsy);
+
+    copy_idx -= grid_idx[2] * sxsy;
+    grid_idx[1] = std::floor(copy_idx / this->space[0]);
+
+    copy_idx -= grid_idx[1] * this->space[0];
+    grid_idx[0] = copy_idx;
+
+    return grid_idx;
 }
 
 

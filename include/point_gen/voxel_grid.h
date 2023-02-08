@@ -176,6 +176,14 @@ class VoxelGrid
         /// @param voxel_idx The XYZ indices in the voxel grid.
         /// @return True if the space falls withing the bounds of the voxel grid or False otherwise.
         bool voxel_in_grid(const Vector3ui& voxel_idx);
+
+        /// @brief Returns the voxel list indicies of the 6 connected neighbors
+        /// @param grid_idx The input grid space to find the connections of.
+        /// @param connected Target output for the connect voxel-list neighbors.
+        /// @note This does NOT verify if the indicies are valid on the voxel list.
+        /// @note This does NOT turn these into X, Y, Z coordinates in the Voxel Grid or World space.
+        ///       If this is the desired format then you must convert them.
+        void get_6_connect_vector_list_idx(const Vector3ui& grid_idx, std::vector<size_t>& connected);
 };
 
 

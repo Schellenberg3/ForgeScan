@@ -368,3 +368,18 @@ bool VoxelGrid::voxel_in_grid(const Vector3ui& voxel_idx)
 }
 
 
+void VoxelGrid::get_6_connect_vector_list_idx(const Vector3ui& grid_idx, std::vector<size_t>& connected)
+{
+    connected.clear();
+    connected.reserve(6);
+
+    size_t v_idx = this->grid_idx_to_vector_idx(grid_idx);
+    size_t dz = this->space[0] * this->space[1];
+
+    connected.push_back(v_idx - 1);
+    connected.push_back(v_idx + 1);
+    connected.push_back(v_idx + this->space[0]);
+    connected.push_back(v_idx - this->space[0]);
+    connected.push_back(v_idx + dz);
+    connected.push_back(v_idx - dz);
+}

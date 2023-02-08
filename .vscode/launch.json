@@ -12,6 +12,15 @@
         "args": ["5", "2"],
         "cwd": "${workspaceRoot}/bin",
         "stopAtEntry": true,
+        },
+        {
+        "name": "Test Voxel Grid",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceRoot}/bin/test_grid",
+        "args": [],
+        "cwd": "${workspaceRoot}/bin",
+        "stopAtEntry": true,
         }
     ]
 }

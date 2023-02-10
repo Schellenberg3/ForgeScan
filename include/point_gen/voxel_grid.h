@@ -73,7 +73,193 @@ class VoxelGrid
         ///         the respective lower bound.
         VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init = 0, bool round_points_in = true);
 
-        
+
+        /// @brief Transforms the input index into coordinates within the voxel grid.
+        /// @param input Index location within the underlying std::vector
+        /// @param output Index in discrete voxel space
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the transformation is invalid.
+        /// @warning Transforming something from a vector index is hazardous. For space and grid
+        ///          indicies that are out of bounds in X or Y directions, the calculated vector index
+        ///          will be a valid alias for a point which is within the grid but with a different Z index. 
+        /// @note Because of the above warning this function may be removed in the future.
+        int gidx(const size_t& input, Vector3ui& output);
+
+
+        /// @brief Transforms the input index into coordinates within the voxel grid.
+        /// @param input Coordinates in continuous space relative to the VoxelGrid's reference frame
+        /// @param output Index in discrete voxel space
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the transformation is invalid.
+        int gidx(const Vector3d& input, Vector3ui& output);
+
+
+        /// @brief Transforms the input index into coordinates within the continuous space that the grid spans
+        /// @param input Index location within the underlying std::vector
+        /// @param output Coordinates in continuous space relative to the VoxelGrid's reference frame
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the transformation is invalid.
+        /// @warning Transforming something from a vector index is hazardous. For space and grid
+        ///          indicies that are out of bounds in X or Y directions, the calculated vector index
+        ///          will be a valid alias for a point which is within the grid but with a different Z index. 
+        /// @note Because of the above warning this function may be removed in the future.
+        int sidx(const size_t& input, Vector3d& output);
+
+
+        /// @brief Transforms the input index into coordinates within the continuous space that the grid spans
+        /// @param input Index in discrete voxel space
+        /// @param output Coordinates in continuous space relative to the VoxelGrid's reference frame
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the transformation is invalid.
+        int sidx(const Vector3ui& input, Vector3d& output);
+
+
+        /// @brief Transforms the input index into the index location within the underlying std::vector
+        /// @param input Coordinates in continuous space relative to the VoxelGrid's reference frame
+        /// @param output Index location within the underlying std::vector
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the transformation is invalid.
+        int vidx(const Vector3d& input, size_t& output);
+
+
+        /// @brief Transforms the input index into the index location within the underlying std::vector
+        /// @param input Index in discrete voxel space
+        /// @param output Index location within the underlying std::vector
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the transformation is invalid.
+        int vidx(const Vector3ui& input, size_t& output);
+
+
+        /// @brief Checks that the given coordinates are within the grids coordinate bounds
+        /// @param input Coordinates in continuous space relative to the VoxelGrid's reference frame
+        /// @return True if all values are within their respective upper and lower bounds, false otherwise.
+        bool const inline valid(const Vector3d input) {
+            return (this->lower.array() <= input.array() && input.array() <= this->upper.array()).all();
+        }
+
+
+        /// @brief Checks that the given grid indicies are within the grids index bounds 
+        /// @param input Index in discrete voxel space
+        /// @return True if all values are within their respective upper and lower bounds, false otherwise.
+        bool const inline valid(const Vector3ui input) {
+            return (input.array() < this->space.array()).all();
+        }
+
+
+        /// @brief Checks that the given vector index is within the vector bounds
+        /// @param input Index location within the underlying std::vector
+        /// @return True if the value is less than the vector's size, false otherwise.
+        bool const inline valid(const size_t& input) {
+            return input < this->grid.size();
+        }
+
+
+        /// @brief Returns the value at the given location
+        /// @param idx Coordinates in continuous space relative to the VoxelGrid's reference frame
+        /// @return Value at the location
+        uint8_t const inline at(const Vector3d& idx) {
+            size_t vidx;
+            this->vidx(idx, vidx);
+            return this->at(vidx);       
+        }
+
+
+        /// @brief Returns the value at the given location
+        /// @param idx Index in discrete voxel space
+        /// @return Value at the location
+        uint8_t const inline at(const Vector3ui& idx) {
+            // TODO: This and the 
+            size_t vidx;
+            this->vidx(idx, vidx);
+            return this->at(vidx);
+        }
+
+
+        /// @brief Returns the value at the given location
+        /// @param idx Index location within the underlying std::vector
+        /// @return Value at the index
+        /// @throws `std::invalid_argument` if the vector index is out of bounds. 
+        uint8_t const inline at(const size_t& idx) {
+            if (!this->valid(idx)) throw std::invalid_argument("Input resulted in out of bound vector access.");
+            return this->grid[idx];
+        }
+
+
+        /// @brief Sets the value at the given location
+        /// @param idx Coordinates in continuous space relative to the VoxelGrid's reference frame
+        /// @param val Value to set to
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the location is invalid.
+        int inline set(const Vector3d& idx, const uint8_t& val) {
+            size_t vidx;
+            this->vidx(idx, vidx);
+            return this->set(vidx, val);
+        }
+
+
+        /// @brief Sets the value at the given location
+        /// @param idx Index in discrete voxel space
+        /// @param val Value to set to
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the location is invalid.
+        int inline set(const Vector3ui& idx, const uint8_t& val) {
+            size_t vidx;
+            this->vidx(idx, vidx);
+            return this->set(vidx, val);
+        }
+
+
+        /// @brief Sets the value at the given location
+        /// @param idx Index location within the underlying std::vector
+        /// @param val Value to set to
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the transformation is invalid.
+        int inline set(const size_t& idx, const uint8_t& val) {
+            if ( !this->valid(idx) ) return -1;
+            this->grid[idx] = val;
+            return 0;
+        }
+
+
+        /// @brief Increments the value at the given location
+        /// @param idx Coordinates in continuous space relative to the VoxelGrid's reference frame
+        /// @param val Value to Increments by. May be negative.
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the location is invalid.
+        /// @warning This does not check for overflow or underflow.
+        int inline inc(const Vector3d& idx, const uint8_t& val = 1) {
+            size_t vidx;
+            this->vidx(idx, vidx);
+            return this->inc(vidx, val);       
+        }
+
+
+        /// @brief Increments the value at the given location
+        /// @param idx Index in discrete voxel space
+        /// @param val Value to Increments by. May be negative.
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the location is invalid.
+        /// @warning This does not check for overflow or underflow.
+        int inline inc(const Vector3ui& idx, const int& val = 1) {
+            size_t vidx;
+            this->vidx(idx, vidx);
+            return this->inc(vidx, val);       
+        }
+
+
+        /// @brief Increments the value at the given location
+        /// @param idx Index location within the underlying std::vector
+        /// @param val Value to Increments by. May be negative.
+        /// @returns 0 if the transformation is valid.
+        /// @returns A non-zero integer if the location is invalid.
+        /// @warning This does not check for overflow or underflow.
+        int inline inc(const size_t& idx, const int& val = 1) {
+            if ( !this->valid(idx) ) return -1;
+            this->grid[idx] += val;
+            return 0;
+        }
+
+
         /// @brief Sets the given point in space to the provided value
         /// @param point The X, Y, Z coordinate in space.
         /// @param val The value to set the voxel that point is in to. Default is 1.

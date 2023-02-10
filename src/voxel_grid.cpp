@@ -20,6 +20,7 @@
 #include <filesystem>
 
 
+// TODO: REMOVE - replaced by set and its various overloads
 int VoxelGrid::set_voxel(const Vector3ui& idx, const uint8_t& val)
 {
     if (not this->voxel_in_grid(idx) )
@@ -30,6 +31,7 @@ int VoxelGrid::set_voxel(const Vector3ui& idx, const uint8_t& val)
 }
 
 
+// TODO: REMOVE - replaced by inc and tis various overloads
 int VoxelGrid::inc_voxel(const Vector3ui& idx)
 {
     if (not this->voxel_in_grid(idx) )
@@ -69,6 +71,82 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
 }
 
 
+int VoxelGrid::gidx(const size_t& input, Vector3ui& output)
+{
+    static const double sxsy = (double) this->space[0]*this->space[1];
+
+    double copy_idx = (double) input;
+    Vector3d temp;
+
+    temp[2] = std::floor(copy_idx / sxsy);
+
+    copy_idx -= temp[2] * sxsy;
+    temp[1] = std::floor(copy_idx / this->space[0]);
+
+    copy_idx -= temp[1] * this->space[0];
+    temp[0] = copy_idx;
+
+    output = temp.cast<size_t>();
+    if ( (temp.array() < 0.0).any() || (temp.array() >= this->space.cast<double>().array()).any() )
+        return -1;
+    return this->valid(output) ? 0 : -1;
+}
+
+
+int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output)
+{
+    Vector3d temp = (input - lower).array() * this->idx_scale.array();
+    for (int i =0; i < 3; ++i)
+    {
+        temp[i] = std::round(temp[i]);
+        if (this->round_points_in)
+        {
+            if (temp[i] < 0) temp[i] = 0;
+            if (temp[i] >= this->space[i]) temp[i] = this->space[i] - 1;
+        }
+    }
+    output = temp.cast<size_t>();
+    return this->valid(output) ? 0 : -1;
+}
+
+
+int VoxelGrid::sidx(const size_t& input, Vector3d& output)
+{
+    Vector3ui gidx;
+    this->gidx(input, gidx);
+    return this->sidx(gidx, output);
+}
+
+
+int VoxelGrid::sidx(const Vector3ui& input, Vector3d& output)
+{
+    output = (input.cast<double>().array() / this->idx_scale.array()) + this->lower.array();
+
+    // NOTE: Check both input and output. The vector idx to space coordinate overload
+    //       may provide invalid grid indicies.
+    return this->valid(input) && this->valid(output) ? 0 : -1;
+}
+
+
+int VoxelGrid::vidx(const Vector3d& input, size_t& output)
+{
+    Vector3ui gidx;
+    this->gidx(input, gidx);
+    return this->vidx(gidx, output);
+}
+
+
+int VoxelGrid::vidx(const Vector3ui& input, size_t& output)
+{
+    output = ( input[0] ) + ( input[1] * this->space[0] ) + ( input[2] * this->space[0] * this->space[1] );
+
+    // NOTE: Check both input and output. The space coordinate to vector idx overload
+    //       may provide invalid grid indicies.
+    return this->valid(input) && this->valid(output) ? 0 : -1;
+}
+
+
+// TODO: REMOVE
 int VoxelGrid::add_point(const Eigen::Vector3d& point, const uint8_t& val)
 {
     Vector3ui idx;
@@ -79,6 +157,7 @@ int VoxelGrid::add_point(const Eigen::Vector3d& point, const uint8_t& val)
 }
 
 
+// TODO: REMOVE - replaced by inc and its various overloads
 int VoxelGrid::inc_point(const Eigen::Vector3d& point)
 {
     Vector3ui idx;
@@ -256,6 +335,7 @@ void VoxelGrid::load_hdf5(const std::string& fname)
 }
 
 
+// TODO: REMOVE - replaced by gidx for space and vector transformations
 Vector3ui VoxelGrid::vector_idx_to_grid_idx(const size_t& vector_idx)
 {
     Vector3ui grid_idx;
@@ -273,7 +353,7 @@ Vector3ui VoxelGrid::vector_idx_to_grid_idx(const size_t& vector_idx)
     return grid_idx;
 }
 
-
+// TODO: REMOVE - replaced by gidx for space and vector transformations
 int VoxelGrid::space_to_grid_idx(const Eigen::Vector3d& space_xyz, Vector3ui& grid_idx)
 {
     /// NOTE: The logic here could likely be made more efficient. Not a major concern
@@ -316,6 +396,7 @@ int VoxelGrid::space_to_grid_idx(const Eigen::Vector3d& space_xyz, Vector3ui& gr
 }
 
 
+// TODO: REMOVE - replaced by at and its various overloads
 uint8_t VoxelGrid::space_at(const Eigen::Vector3d& space_xyz)
 {
     Vector3ui grid_idx;
@@ -329,6 +410,7 @@ uint8_t VoxelGrid::space_at(const Eigen::Vector3d& space_xyz)
 }
 
 
+// TODO: REMOVE - replaced by valid and its various overloads
 bool VoxelGrid::space_in_grid(const Eigen::Vector3d& space_xyz)
 {
     bool test = true;
@@ -343,7 +425,7 @@ bool VoxelGrid::space_in_grid(const Eigen::Vector3d& space_xyz)
     return test;
 }
 
-
+// TODO: REMOVE - replaced by at and its various overloads
 uint8_t VoxelGrid::voxel_at(const Vector3ui& voxel_idx)
 {
     size_t vec_idx = this->grid_idx_to_vector_idx(voxel_idx);
@@ -352,7 +434,7 @@ uint8_t VoxelGrid::voxel_at(const Vector3ui& voxel_idx)
     return this->grid[vec_idx];
 }
 
-
+// TODO: REMOVE - replaced by valid and its various overloads
 bool VoxelGrid::voxel_in_grid(const Vector3ui& voxel_idx)
 {
     bool test = true;

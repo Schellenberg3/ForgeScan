@@ -24,8 +24,9 @@ class VoxelGrid
         /// Vector structure for the voxels. Increments fastest in X, then Y, then Z.
         std::vector<uint8_t> grid;
 
-        /// Number of voxels that span the distance between each upper and lower bound
-        Vector3ui space;
+        /// Size the the grid in each direction; the number of voxels of the specified resolution needed to
+        /// span the distance starting from the lower bound to include the upper bound. 
+        Vector3ui size;
 
         /// Edge length of each voxel cube
         double resolution;
@@ -40,28 +41,30 @@ class VoxelGrid
         Vector3d idx_scale;
 
     public:
-        /// If true will round all coordinates in space to the closest voxel, even if they
-        /// would have been outside of the voxel space.
+        /// If true will round all coordinates to the closest voxel, even if they would have been outside
+        /// the bounds of the voxelized space.
+        /// @note This functionality may be removed in the future 
         bool round_points_in;
 
 
-        /// @brief Constructs a voxel representation for the volume between the lower and upper coordinate bounds
-        ///        with the given space in each direction.
-        /// @param resolution The resolution of each voxel. Must be greater than 0.
-        /// @param lower The point with the minimum X, Y, and Z coordinates for the voxelized space.
-        /// @param upper The point with the maximum X, Y, and Z coordinates for the voxelized space.
+        /// @brief Constructs a discretized voxel representation of the volume between the given bounds at the given resolution
+        /// @param resolution The edge length of each voxel. Must be greater than 0.
+        /// @param lower The minimum bounds for the discretized volume.
+        /// @param upper The maximum bounds for the discretized volume.
         /// @param init Value to initialize all elements to
         /// @param round_points_in Controls how the grid deals with points outside the voxelized space. If true all points
-        ///                        will be rounded into the closest voxel.
+        ///                        will be rounded into the closest voxel. Default is true.
         /// @throws `invalid_argument` if the difference between upper and lower in any direction less than or equal to 0.
         /// @throws `invalid argument` if resolution is less than or equal to 0.
         ///         the respective lower bound.
+        /// @note The "true" upper bound may be greater than what is given based on the resolution.
+        /// @TODO: The default action to round points in will be changed to false in a future update.
         VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init = 0, bool round_points_in = true);
 
 
         /// @brief Transforms the input index into coordinates within the voxel grid.
         /// @param input Index location within the underlying std::vector
-        /// @param output Index in discrete voxel space
+        /// @param output Index in discrete voxel grid
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
         /// @warning Transforming something from a vector index is hazardous. For space and grid
@@ -73,7 +76,7 @@ class VoxelGrid
 
         /// @brief Transforms the input index into coordinates within the voxel grid.
         /// @param input Coordinates in continuous space relative to the VoxelGrid's reference frame
-        /// @param output Index in discrete voxel space
+        /// @param output Index in discrete voxel grid
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
         int gidx(const Vector3d& input, Vector3ui& output);
@@ -92,7 +95,7 @@ class VoxelGrid
 
 
         /// @brief Transforms the input index into coordinates within the continuous space that the grid spans
-        /// @param input Index in discrete voxel space
+        /// @param input Index in discrete voxel grid
         /// @param output Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
@@ -108,7 +111,7 @@ class VoxelGrid
 
 
         /// @brief Transforms the input index into the index location within the underlying std::vector
-        /// @param input Index in discrete voxel space
+        /// @param input Index in discrete voxel grid
         /// @param output Index location within the underlying std::vector
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
@@ -124,10 +127,10 @@ class VoxelGrid
 
 
         /// @brief Checks that the given grid indicies are within the grids index bounds 
-        /// @param input Index in discrete voxel space
+        /// @param input Index in discrete voxel grid
         /// @return True if all values are within their respective upper and lower bounds, false otherwise.
         bool const inline valid(const Vector3ui input) {
-            return (input.array() < this->space.array()).all();
+            return (input.array() < this->size.array()).all();
         }
 
 
@@ -150,7 +153,7 @@ class VoxelGrid
 
 
         /// @brief Returns the value at the given location
-        /// @param idx Index in discrete voxel space
+        /// @param idx Index in discrete voxel grid
         /// @return Value at the location
         uint8_t const inline at(const Vector3ui& idx) {
             // TODO: This and the 
@@ -183,7 +186,7 @@ class VoxelGrid
 
 
         /// @brief Sets the value at the given location
-        /// @param idx Index in discrete voxel space
+        /// @param idx Index in discrete voxel grid
         /// @param val Value to set to
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the location is invalid.
@@ -220,7 +223,7 @@ class VoxelGrid
 
 
         /// @brief Increments the value at the given location
-        /// @param idx Index in discrete voxel space
+        /// @param idx Index in discrete voxel grid
         /// @param val Value to Increments by. May be negative.
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the location is invalid.
@@ -289,12 +292,12 @@ class VoxelGrid
 
 
         /// @brief Returns the voxel list indicies of the 6 connected neighbors
-        /// @param grid_idx The input grid space to find the connections of.
-        /// @param connected Target output for the connect voxel-list neighbors.
+        /// @param gidx Index in the discrete voxel grid to find the connections of.
+        /// @param output Output of neighbors location in the underlying std::vector.
         /// @note This does NOT verify if the indicies are valid on the voxel list.
         /// @note This does NOT turn these into X, Y, Z coordinates in the Voxel Grid or World space.
         ///       If this is the desired format then you must convert them.
-        void get_6_connect_vector_list_idx(const Vector3ui& grid_idx, std::vector<size_t>& connected);
+        void get_6_connect_vector_list_idx(const Vector3ui& gidx, std::vector<size_t>& output);
 };
 
 

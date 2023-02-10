@@ -31,10 +31,10 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
     this->lower = lower;
     this->upper = upper;
     for (int i = 0; i < 3; ++i)
-        this->space[i] = std::ceil(span[i] / resolution);
-    this->idx_scale = space.cast<double>().array() / span.array();
+        this->size[i] = std::ceil(span[i] / resolution);
+    this->idx_scale = this->size.cast<double>().array() / span.array();
 
-    size_t vec_len = space[0] * space[1] * space[2];
+    size_t vec_len = this->size[0] * this->size[1] * this->size[2];
     this->grid.reserve(vec_len);
     double mem = byte_to_megabytes(vector_capacity(this->grid));
     if (mem > 100.0)
@@ -49,7 +49,7 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
 
 int VoxelGrid::gidx(const size_t& input, Vector3ui& output)
 {
-    static const double sxsy = (double) this->space[0]*this->space[1];
+    static const double sxsy = (double) this->size[0]*this->size[1];
 
     double copy_idx = (double) input;
     Vector3d temp;
@@ -57,13 +57,13 @@ int VoxelGrid::gidx(const size_t& input, Vector3ui& output)
     temp[2] = std::floor(copy_idx / sxsy);
 
     copy_idx -= temp[2] * sxsy;
-    temp[1] = std::floor(copy_idx / this->space[0]);
+    temp[1] = std::floor(copy_idx / this->size[0]);
 
-    copy_idx -= temp[1] * this->space[0];
+    copy_idx -= temp[1] * this->size[0];
     temp[0] = copy_idx;
 
     output = temp.cast<size_t>();
-    if ( (temp.array() < 0.0).any() || (temp.array() >= this->space.cast<double>().array()).any() )
+    if ( (temp.array() < 0.0).any() || (temp.array() >= this->size.cast<double>().array()).any() )
         return -1;
     return this->valid(output) ? 0 : -1;
 }
@@ -78,7 +78,7 @@ int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output)
         if (this->round_points_in)
         {
             if (temp[i] < 0) temp[i] = 0;
-            if (temp[i] >= this->space[i]) temp[i] = this->space[i] - 1;
+            if (temp[i] >= this->size[i]) temp[i] = this->size[i] - 1;
         }
     }
     output = temp.cast<size_t>();
@@ -114,7 +114,7 @@ int VoxelGrid::vidx(const Vector3d& input, size_t& output)
 
 int VoxelGrid::vidx(const Vector3ui& input, size_t& output)
 {
-    output = ( input[0] ) + ( input[1] * this->space[0] ) + ( input[2] * this->space[0] * this->space[1] );
+    output = ( input[0] ) + ( input[1] * this->size[0] ) + ( input[2] * this->size[0] * this->size[1] );
 
     // NOTE: Check both input and output. The space coordinate to vector idx overload
     //       may provide invalid grid indicies.
@@ -169,7 +169,7 @@ int VoxelGrid::add_line_fast(const Eigen::Vector3d& start, const Eigen::Vector3d
     dist = std::sqrt(dist);
 
     /* Average spacing as a hack for now; optional different spacing makes things weird here */
-    int avg_space = ( this->space[0] + this->space[1] + this->space[2] ) / 3;
+    int avg_space = ( this->size[0] + this->size[1] + this->size[2] ) / 3;
 
     // float
 
@@ -264,7 +264,7 @@ void VoxelGrid::save_hdf5(const std::string& fname)
     HighFive::File file(fname, HighFive::File::ReadWrite | HighFive::File::Truncate);
 
     file.createDataSet("/data/grid_vector", this->grid);
-    file.createDataSet("/data/spacing", this->space);
+    file.createDataSet("/data/size", this->size);
 
     file.createDataSet("/position/lower", this->lower);
     file.createDataSet("/position/upper", this->upper);
@@ -279,7 +279,7 @@ void VoxelGrid::load_hdf5(const std::string& fname)
         // Read the data 
         /* TODO Check the saved data validity or if there is data already in the object  */
         file.getDataSet("/data/grid_vector").read(this->grid);
-        file.getDataSet("/data/spacing").read(this->space);
+        file.getDataSet("/data/size").read(this->size);
 
         file.getDataSet("/position/lower").read(this->lower);
         file.getDataSet("/position/upper").read(this->upper);
@@ -289,19 +289,19 @@ void VoxelGrid::load_hdf5(const std::string& fname)
 }
 
 
-void VoxelGrid::get_6_connect_vector_list_idx(const Vector3ui& grid_idx, std::vector<size_t>& connected)
+void VoxelGrid::get_6_connect_vector_list_idx(const Vector3ui& gidx, std::vector<size_t>& output)
 {
-    connected.clear();
-    connected.reserve(6);
+    output.clear();
+    output.reserve(6);
 
-    size_t v_idx;
-    this->vidx(grid_idx, v_idx);
-    size_t dz = this->space[0] * this->space[1];
+    size_t vidx;
+    this->vidx(gidx, vidx);
+    size_t dz = this->size[0] * this->size[1];
 
-    connected.push_back(v_idx - 1);
-    connected.push_back(v_idx + 1);
-    connected.push_back(v_idx + this->space[0]);
-    connected.push_back(v_idx - this->space[0]);
-    connected.push_back(v_idx + dz);
-    connected.push_back(v_idx - dz);
+    output.push_back(vidx - 1);
+    output.push_back(vidx + 1);
+    output.push_back(vidx + this->size[0]);
+    output.push_back(vidx - this->size[0]);
+    output.push_back(vidx + dz);
+    output.push_back(vidx - dz);
 }

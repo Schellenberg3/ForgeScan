@@ -39,21 +39,6 @@ class VoxelGrid
         /// Pre-computed scaling factor for point placement
         Vector3d idx_scale;
 
-
-        /// @brief Sets the voxel to the provided value
-        /// @param idx The index of the voxel within the vector
-        /// @param val The value to insert at the voxel index
-        /// @return 0 if the voxel was accessed successfully or 1 if the index could not be accesses
-        int set_voxel(const Vector3ui& idx, const uint8_t& val = 1);
-
-
-        /// @brief Increases the value at the voxel location by 1
-        /// @param idx The index of the voxel within the vector
-        /// @return 0 if the voxel was incremented successfully; 1 if the index could not be accesses; or 2 
-        ///         if the voxel was already at the maximum count.
-        int inc_voxel(const Vector3ui& idx);
-
-
     public:
         /// If true will round all coordinates in space to the closest voxel, even if they
         /// would have been outside of the voxel space.
@@ -260,19 +245,6 @@ class VoxelGrid
         }
 
 
-        /// @brief Sets the given point in space to the provided value
-        /// @param point The X, Y, Z coordinate in space.
-        /// @param val The value to set the voxel that point is in to. Default is 1.
-        /// @return 0 if the point's value was added successfully; or 1 if the point fell outside the voxel grid.
-        int add_point(const Eigen::Vector3d& point, const uint8_t& val = 1);
-
-        
-        /// @brief Increases the value at the point's location by 1
-        /// @param point The X, Y, Z coordinate in space.
-        /// @return 0 if the point's value was added successfully; or 1 if the point fell outside the voxel grid.
-        int inc_point(const Eigen::Vector3d& point);
-
-
         /// @brief Adds equally-spaced points along the line, including the start and end
         /// @param start Coordinate to start from
         /// @param end Coordinate to end at
@@ -315,53 +287,6 @@ class VoxelGrid
         /// @param fname File name
         void load_hdf5(const std::string& fname);
 
-
-        /// @brief Transforms a grid coordinate to the index within the actual vector.
-        /// @param grid_idx The X, Y, Z coordinate in the voxel grid.
-        /// @return The 1D vector index for the provided 3D grid index.
-        /// @note This DOES NOT check validity of that index position within the grid.
-        size_t inline grid_idx_to_vector_idx(const Vector3ui& grid_idx){
-            return ( grid_idx[0] ) + ( grid_idx[1] * this->space[0] ) + ( grid_idx[2] * this->space[0] * this->space[1] );
-        };
-
-
-        /// @brief Turns a vector list index into a a grid coordinate
-        /// @param vector_idx Index in the vector
-        /// @returns X, Y, Z coordinates within the voxel grid
-        Vector3ui vector_idx_to_grid_idx(const size_t& vector_idx);
-
-
-        /// @brief Turns coordinates in space into coordinates inside the voxel grid
-        /// @param space_xyz The X, Y, Z coordinates in space
-        /// @param grid_idx The X, Y, Z returned coordinates in the grid
-        /// @return 0 if the grid index is valid, or 1 if it is invalid.
-        /// @warning Does not check if the index was out of bounds. See `voxel_in_grid`
-        int space_to_grid_idx(const Eigen::Vector3d& space_xyz, Vector3ui& grid_idx);
-        
-
-        /// @brief Queries the voxel grid to return the value stored at in the specified space
-        /// @param space_xyz The coordinate in space
-        /// @return Value at the voxel grid for the point in space. Or 0 if the space was not inside the voxel grid.
-        uint8_t space_at(const Eigen::Vector3d& space_xyz);
-
-
-        /// @brief Queries the space falls within the voxel grid
-        /// @param space_xyz The coordinate in space
-        /// @return True if the space falls withing the bounds of the voxel grid or False otherwise.
-        bool space_in_grid(const Eigen::Vector3d& space_xyz);
-
-
-        /// @brief Queries the voxel grid to return the value stored at in the specified index
-        /// @param voxel_idx The XYZ indices in the voxel grid.
-        /// @return Value at the voxel grid for the index. Or 0 if the index was not inside the voxel grid.
-        /// @warning Does not check if the index was out of bounds. See `voxel_in_grid`
-        uint8_t voxel_at(const Vector3ui& voxel_idx);
-
-
-        /// @brief Queries the index falls within the voxel grid
-        /// @param voxel_idx The XYZ indices in the voxel grid.
-        /// @return True if the space falls withing the bounds of the voxel grid or False otherwise.
-        bool voxel_in_grid(const Vector3ui& voxel_idx);
 
         /// @brief Returns the voxel list indicies of the 6 connected neighbors
         /// @param grid_idx The input grid space to find the connections of.

@@ -32,7 +32,7 @@ int main(int argc, char** argv)
         xyz[1] = y;
         xyz[2] = z;
 
-        grid.add_point(xyz);
+        grid.set(xyz, 1);
 
     } while (q == 0);
 

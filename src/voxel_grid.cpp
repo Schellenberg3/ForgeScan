@@ -20,30 +20,6 @@
 #include <filesystem>
 
 
-// TODO: REMOVE - replaced by set and its various overloads
-int VoxelGrid::set_voxel(const Vector3ui& idx, const uint8_t& val)
-{
-    if (not this->voxel_in_grid(idx) )
-        return 1;
-    size_t vec_idx = this->grid_idx_to_vector_idx(idx);
-    this->grid[vec_idx] = val;
-    return 0;
-}
-
-
-// TODO: REMOVE - replaced by inc and tis various overloads
-int VoxelGrid::inc_voxel(const Vector3ui& idx)
-{
-    if (not this->voxel_in_grid(idx) )
-        return 1;
-    size_t vec_idx = this->grid_idx_to_vector_idx(idx);
-    if (this->grid[vec_idx] < 255)
-        this->grid[vec_idx] += 1;
-        return 0;
-    return 2;
-}
-
-
 VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init, bool round_points_in)
 {
     Vector3d span = upper - lower;
@@ -146,28 +122,6 @@ int VoxelGrid::vidx(const Vector3ui& input, size_t& output)
 }
 
 
-// TODO: REMOVE
-int VoxelGrid::add_point(const Eigen::Vector3d& point, const uint8_t& val)
-{
-    Vector3ui idx;
-    int result = space_to_grid_idx(point, idx);
-    if (result != 0)
-        return 1;
-    return this->set_voxel(idx, val);
-}
-
-
-// TODO: REMOVE - replaced by inc and its various overloads
-int VoxelGrid::inc_point(const Eigen::Vector3d& point)
-{
-    Vector3ui idx;
-    int result = space_to_grid_idx(point, idx);
-    if (result != 0)
-        return 1;
-    return this->inc_voxel(idx);
-}
-
-
 int VoxelGrid::add_linear_space(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const size_t& num, const uint8_t &surface, const uint8_t &line)
 {
     // Check that num >= 2
@@ -194,12 +148,12 @@ int VoxelGrid::add_linear_space(const Eigen::Vector3d& start, const Eigen::Vecto
 
     for (int j = 0; j < num - 1; ++j)
     {
-        success = this->add_point(place, line);
+        success = this->set(place, line);
         fails += success;
 
         place += line_space;
     }
-    success = this->add_point(place, surface);
+    success = this->set(place, surface);
     fails += success;
 
     return fails;
@@ -335,127 +289,13 @@ void VoxelGrid::load_hdf5(const std::string& fname)
 }
 
 
-// TODO: REMOVE - replaced by gidx for space and vector transformations
-Vector3ui VoxelGrid::vector_idx_to_grid_idx(const size_t& vector_idx)
-{
-    Vector3ui grid_idx;
-    size_t copy_idx = vector_idx;
-    size_t sxsy = this->space[0]*this->space[0];
-
-    grid_idx[2] = std::floor(copy_idx / sxsy);
-
-    copy_idx -= grid_idx[2] * sxsy;
-    grid_idx[1] = std::floor(copy_idx / this->space[0]);
-
-    copy_idx -= grid_idx[1] * this->space[0];
-    grid_idx[0] = copy_idx;
-
-    return grid_idx;
-}
-
-// TODO: REMOVE - replaced by gidx for space and vector transformations
-int VoxelGrid::space_to_grid_idx(const Eigen::Vector3d& space_xyz, Vector3ui& grid_idx)
-{
-    /// NOTE: The logic here could likely be made more efficient. Not a major concern
-    ///       right now but potential future work.
-    int success = 0;
-    double float_idx = 0, max_idx = 0;
-    for (int i = 0; i < 3; ++i)
-    {
-        max_idx = this->space[i] - 1.0;
-        float_idx = std::round( ( space_xyz[i] - this->lower[i] ) * this->idx_scale[i] );
-
-        if (this->round_points_in)
-        {
-            if (float_idx < 0.)
-                float_idx = 0.;
-            else if (float_idx > max_idx)
-                float_idx = max_idx;
-        } else {
-            if (float_idx < 0.0)
-            {
-                if (-1 < float_idx)
-                    float_idx = 0.;
-                else
-                    success = 1;
-            }
-            else if (max_idx < float_idx)  
-            {
-                if (float_idx < max_idx + 1.0)
-                    float_idx = max_idx;
-                else
-                    success = 1;
-            }
-        }
-
-        /// Negatives are messing this up big time!
-        /// This is why the success return variable is needed.
-        grid_idx[i] = (size_t) float_idx;
-    }
-    return success;
-}
-
-
-// TODO: REMOVE - replaced by at and its various overloads
-uint8_t VoxelGrid::space_at(const Eigen::Vector3d& space_xyz)
-{
-    Vector3ui grid_idx;
-    int result = space_to_grid_idx(space_xyz, grid_idx);
-    size_t vec_idx = this->grid_idx_to_vector_idx(grid_idx);
-    
-    if (vec_idx >= this->grid.size() || result != 0)
-        return 0;
-    
-    return this->grid[vec_idx];
-}
-
-
-// TODO: REMOVE - replaced by valid and its various overloads
-bool VoxelGrid::space_in_grid(const Eigen::Vector3d& space_xyz)
-{
-    bool test = true;
-    for (int i = 0; i < 3; ++i)
-    {
-        if (not (this->lower[i] <= space_xyz[i] < this->upper[i]) )
-        {
-            test = false;
-            break;
-        }
-    }
-    return test;
-}
-
-// TODO: REMOVE - replaced by at and its various overloads
-uint8_t VoxelGrid::voxel_at(const Vector3ui& voxel_idx)
-{
-    size_t vec_idx = this->grid_idx_to_vector_idx(voxel_idx);
-    if (vec_idx > this->grid.size())
-        return 0;
-    return this->grid[vec_idx];
-}
-
-// TODO: REMOVE - replaced by valid and its various overloads
-bool VoxelGrid::voxel_in_grid(const Vector3ui& voxel_idx)
-{
-    bool test = true;
-    for (int i = 0; i < 3; ++i)
-    {
-        if (not (0 <= voxel_idx[i] < this->space[i]) )
-        {
-            test = false;
-            break;
-        }
-    }
-    return test;
-}
-
-
 void VoxelGrid::get_6_connect_vector_list_idx(const Vector3ui& grid_idx, std::vector<size_t>& connected)
 {
     connected.clear();
     connected.reserve(6);
 
-    size_t v_idx = this->grid_idx_to_vector_idx(grid_idx);
+    size_t v_idx;
+    this->vidx(grid_idx, v_idx);
     size_t dz = this->space[0] * this->space[1];
 
     connected.push_back(v_idx - 1);

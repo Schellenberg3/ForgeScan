@@ -122,6 +122,30 @@ int VoxelGrid::vidx(const Vector3ui& input, size_t& output)
 }
 
 
+int VoxelGrid::get_6(const Vector3ui& input, std::vector<Vector3ui>& output)
+{
+    output.clear();
+    if (output.capacity() != 6) output.reserve(6);
+    for (int i = 0, j = 0; i < 6; ++i)
+    {
+        output.push_back(input);  // Creates copies of the input
+        if (i % 2 == 0)
+            output[i][j] += 1;
+        else {
+            // Unsigned underflow for an index of 0 results in the maximum value that a size_t
+            // variable van represent. This is defined behaviour and since this is much larger than
+            // any dimension will ever be this will be detected as an invalid index by this->valid 
+            //      https://stackoverflow.com/questions/2760502
+            output[i][j] -= 1;
+            ++j;
+        }
+    }
+    if ( (input.array() == 0).any() || (input.array() == this->size.array()).any() )
+        return -1;
+    return 0;
+}
+
+
 int VoxelGrid::add_linear_space(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const size_t& num, const uint8_t &surface, const uint8_t &line)
 {
     // Check that num >= 2
@@ -289,6 +313,7 @@ void VoxelGrid::load_hdf5(const std::string& fname)
 }
 
 
+// TODO: REMOVE - replaced by get_6 method 
 void VoxelGrid::get_6_connect_vector_list_idx(const Vector3ui& gidx, std::vector<size_t>& output)
 {
     output.clear();

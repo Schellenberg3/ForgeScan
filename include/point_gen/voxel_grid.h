@@ -248,6 +248,15 @@ class VoxelGrid
         }
 
 
+        /// @brief Gets the six connected neighbors.
+        /// @param input  Index in discrete voxel grid
+        /// @param output Neighboring indicies.
+        /// @returns 0 if all neighbors are valid.
+        /// @returns A non-zero integer if at least one neighbor is invalid.
+        /// @note This does not guarantee that the output neighbors are all valid elements.
+        int get_6(const Vector3ui& input, std::vector<Vector3ui>& output);
+
+
         /// @brief Adds equally-spaced points along the line, including the start and end
         /// @param start Coordinate to start from
         /// @param end Coordinate to end at

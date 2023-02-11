@@ -316,22 +316,3 @@ void VoxelGrid::load_hdf5(const std::string& fname)
         std::cerr << err.what() << std::endl;
     }
 }
-
-
-// TODO: REMOVE - replaced by get_6 method 
-void VoxelGrid::get_6_connect_vector_list_idx(const Vector3ui& gidx, std::vector<size_t>& output)
-{
-    output.clear();
-    output.reserve(6);
-
-    size_t vidx;
-    this->vidx(gidx, vidx);
-    size_t dz = this->size[0] * this->size[1];
-
-    output.push_back(vidx - 1);
-    output.push_back(vidx + 1);
-    output.push_back(vidx + this->size[0]);
-    output.push_back(vidx - this->size[0]);
-    output.push_back(vidx + dz);
-    output.push_back(vidx - dz);
-}

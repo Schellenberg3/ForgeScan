@@ -302,15 +302,6 @@ class VoxelGrid
         /// @brief Loads data from an HDF5 file
         /// @param fname File name
         void load_hdf5(const std::string& fname);
-
-
-        /// @brief Returns the voxel list indicies of the 6 connected neighbors
-        /// @param gidx Index in the discrete voxel grid to find the connections of.
-        /// @param output Output of neighbors location in the underlying std::vector.
-        /// @note This does NOT verify if the indicies are valid on the voxel list.
-        /// @note This does NOT turn these into X, Y, Z coordinates in the Voxel Grid or World space.
-        ///       If this is the desired format then you must convert them.
-        void get_6_connect_vector_list_idx(const Vector3ui& gidx, std::vector<size_t>& output);
 };
 
 

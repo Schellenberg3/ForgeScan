@@ -145,6 +145,7 @@ class VoxelGrid
         /// @brief Returns the value at the given location
         /// @param idx Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @return Value at the location
+        /// @throws `std::invalid_argument` if the vector index is out of bounds. 
         uint8_t const inline at(const Vector3d& idx) {
             size_t vidx;
             this->vidx(idx, vidx);
@@ -155,6 +156,7 @@ class VoxelGrid
         /// @brief Returns the value at the given location
         /// @param idx Index in discrete voxel grid
         /// @return Value at the location
+        /// @throws `std::invalid_argument` if the vector index is out of bounds. 
         uint8_t const inline at(const Vector3ui& idx) {
             // TODO: This and the 
             size_t vidx;
@@ -176,7 +178,7 @@ class VoxelGrid
         /// @brief Sets the value at the given location
         /// @param idx Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @param val Value to set to
-        /// @returns 0 if the transformation is valid.
+        /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the location is invalid.
         int inline set(const Vector3d& idx, const uint8_t& val) {
             size_t vidx;
@@ -188,7 +190,7 @@ class VoxelGrid
         /// @brief Sets the value at the given location
         /// @param idx Index in discrete voxel grid
         /// @param val Value to set to
-        /// @returns 0 if the transformation is valid.
+        /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the location is invalid.
         int inline set(const Vector3ui& idx, const uint8_t& val) {
             size_t vidx;
@@ -200,7 +202,7 @@ class VoxelGrid
         /// @brief Sets the value at the given location
         /// @param idx Index location within the underlying std::vector
         /// @param val Value to set to
-        /// @returns 0 if the transformation is valid.
+        /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the transformation is invalid.
         int inline set(const size_t& idx, const uint8_t& val) {
             if ( !this->valid(idx) ) return -1;
@@ -212,7 +214,7 @@ class VoxelGrid
         /// @brief Increments the value at the given location
         /// @param idx Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @param val Value to Increments by. May be negative.
-        /// @returns 0 if the transformation is valid.
+        /// @returns 0 if the increment was successful.
         /// @returns A non-zero integer if the location is invalid.
         /// @warning This does not check for overflow or underflow.
         int inline inc(const Vector3d& idx, const uint8_t& val = 1) {
@@ -225,7 +227,7 @@ class VoxelGrid
         /// @brief Increments the value at the given location
         /// @param idx Index in discrete voxel grid
         /// @param val Value to Increments by. May be negative.
-        /// @returns 0 if the transformation is valid.
+        /// @returns 0 if the increment was successful.
         /// @returns A non-zero integer if the location is invalid.
         /// @warning This does not check for overflow or underflow.
         int inline inc(const Vector3ui& idx, const int& val = 1) {
@@ -238,7 +240,7 @@ class VoxelGrid
         /// @brief Increments the value at the given location
         /// @param idx Index location within the underlying std::vector
         /// @param val Value to Increments by. May be negative.
-        /// @returns 0 if the transformation is valid.
+        /// @returns 0 if the increment was successful.
         /// @returns A non-zero integer if the location is invalid.
         /// @warning This does not check for overflow or underflow.
         int inline inc(const size_t& idx, const int& val = 1) {

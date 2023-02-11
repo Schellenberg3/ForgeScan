@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 
+#define INVALID_INDEX_ERROR_CODE -1
+
 
 /// Convenience typedef for Eigen
 typedef Eigen::Vector3d Vector3d;
@@ -205,7 +207,7 @@ class VoxelGrid
         /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the transformation is invalid.
         int inline set(const size_t& idx, const uint8_t& val) {
-            if ( !this->valid(idx) ) return -1;
+            if ( !this->valid(idx) ) return INVALID_INDEX_ERROR_CODE;
             this->grid[idx] = val;
             return 0;
         }
@@ -244,7 +246,7 @@ class VoxelGrid
         /// @returns A non-zero integer if the location is invalid.
         /// @warning This does not check for overflow or underflow.
         int inline inc(const size_t& idx, const int& val = 1) {
-            if ( !this->valid(idx) ) return -1;
+            if ( !this->valid(idx) ) return INVALID_INDEX_ERROR_CODE;
             this->grid[idx] += val;
             return 0;
         }

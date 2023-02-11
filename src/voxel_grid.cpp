@@ -63,9 +63,14 @@ int VoxelGrid::gidx(const size_t& input, Vector3ui& output)
     temp[0] = copy_idx;
 
     output = temp.cast<size_t>();
+
+    // To return we check if the temp was out of bounds first. The casting behaviour between a double and
+    // unsigned int may be undefined if the cast value cannot be expressed in the destination type.
+    // Essentially, negative values in the temp array are impossible to catch in the output alone. See:
+    //      https://stackoverflow.com/questions/65012526/
     if ( (temp.array() < 0.0).any() || (temp.array() >= this->size.cast<double>().array()).any() )
-        return -1;
-    return this->valid(output) ? 0 : -1;
+        return INVALID_INDEX_ERROR_CODE;
+    return this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
 }
 
 
@@ -82,7 +87,7 @@ int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output)
         }
     }
     output = temp.cast<size_t>();
-    return this->valid(output) ? 0 : -1;
+    return this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
 }
 
 
@@ -100,7 +105,7 @@ int VoxelGrid::sidx(const Vector3ui& input, Vector3d& output)
 
     // NOTE: Check both input and output. The vector idx to space coordinate overload
     //       may provide invalid grid indicies.
-    return this->valid(input) && this->valid(output) ? 0 : -1;
+    return this->valid(input) && this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
 }
 
 
@@ -118,7 +123,7 @@ int VoxelGrid::vidx(const Vector3ui& input, size_t& output)
 
     // NOTE: Check both input and output. The space coordinate to vector idx overload
     //       may provide invalid grid indicies.
-    return this->valid(input) && this->valid(output) ? 0 : -1;
+    return this->valid(input) && this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
 }
 
 
@@ -141,7 +146,7 @@ int VoxelGrid::get_6(const Vector3ui& input, std::vector<Vector3ui>& output)
         }
     }
     if ( (input.array() == 0).any() || (input.array() == this->size.array()).any() )
-        return -1;
+        return INVALID_INDEX_ERROR_CODE;
     return 0;
 }
 

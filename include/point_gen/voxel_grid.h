@@ -255,9 +255,10 @@ class VoxelGrid
         /// @brief Gets the six connected neighbors.
         /// @param input  Index in discrete voxel grid
         /// @param output Neighboring indicies.
-        /// @returns 0 if all neighbors are valid.
-        /// @returns A non-zero integer if at least one neighbor is invalid.
-        /// @note This does not guarantee that the output neighbors are all valid elements.
+        /// @returns 0 if all neighbors are believed to be valid.
+        /// @returns A non-zero integer if at least one neighbor is believed to be invalid invalid.
+        /// @note This does not guarantee that the output neighbors are all valid elements. But does guarantee 6
+        ///       grid indicies will be returned. Call `valid` on the elements to verify that they may be accessed.
         int get_6(const Vector3ui& input, std::vector<Vector3ui>& output);
 
 

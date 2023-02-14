@@ -145,7 +145,9 @@ int VoxelGrid::get_6(const Vector3ui& input, std::vector<Vector3ui>& output)
             ++j;
         }
     }
-    if ( (input.array() == 0).any() || (input.array() == this->size.array()).any() )
+    // By checking if the input is on an surface, edge, or corner we can quickly check the validity
+    // of the output. A more thorough, test would be checking each derived output. 
+    if ( (input.array() == 0).any() || (input.array() >= this->size.array()).any() )
         return INVALID_INDEX_ERROR_CODE;
     return 0;
 }

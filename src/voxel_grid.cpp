@@ -20,34 +20,6 @@
 #include <filesystem>
 
 
-int VoxelGrid::set_voxel(const Vector3ui& idx, const uint8_t& val)
-{
-    if (not this->voxel_in_grid(idx) )
-        return 1;
-    size_t vec_idx = this->grid_idx_to_vector_idx(idx);
-    this->grid[vec_idx] = val;
-    return 0;
-}
-
-
-int VoxelGrid::inc_voxel(const Vector3ui& idx)
-{
-    if (not this->voxel_in_grid(idx) )
-        return 1;
-    size_t vec_idx = this->grid_idx_to_vector_idx(idx);
-    if (this->grid[vec_idx] < 255)
-        this->grid[vec_idx] += 1;
-        return 0;
-    return 2;
-}
-
-
-size_t inline VoxelGrid::grid_idx_to_vector_idx(const Vector3ui& grid_idx)
-{
-    return ( grid_idx[0] ) + ( grid_idx[1] * this->space[0] ) + ( grid_idx[2] * this->space[0] * this->space[1] );
-}
-
-
 VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init, bool round_points_in)
 {
     Vector3d span = upper - lower;
@@ -59,10 +31,10 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
     this->lower = lower;
     this->upper = upper;
     for (int i = 0; i < 3; ++i)
-        this->space[i] = std::ceil(span[i] / resolution);
-    this->idx_scale = space.cast<double>().array() / span.array();
+        this->size[i] = std::ceil(span[i] / resolution);
+    this->idx_scale = this->size.cast<double>().array() / span.array();
 
-    size_t vec_len = space[0] * space[1] * space[2];
+    size_t vec_len = this->size[0] * this->size[1] * this->size[2];
     this->grid.reserve(vec_len);
     double mem = byte_to_megabytes(vector_capacity(this->grid));
     if (mem > 100.0)
@@ -75,23 +47,109 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
 }
 
 
-int VoxelGrid::add_point(const Eigen::Vector3d& point, const uint8_t& val)
+int VoxelGrid::gidx(const size_t& input, Vector3ui& output)
 {
-    Vector3ui idx;
-    int result = space_to_grid_idx(point, idx);
-    if (result != 0)
-        return 1;
-    return this->set_voxel(idx, val);
+    static const double sxsy = (double) this->size[0]*this->size[1];
+
+    double copy_idx = (double) input;
+    Vector3d temp;
+
+    temp[2] = std::floor(copy_idx / sxsy);
+
+    copy_idx -= temp[2] * sxsy;
+    temp[1] = std::floor(copy_idx / this->size[0]);
+
+    copy_idx -= temp[1] * this->size[0];
+    temp[0] = copy_idx;
+
+    output = temp.cast<size_t>();
+
+    // To return we check if the temp was out of bounds first. The casting behaviour between a double and
+    // unsigned int may be undefined if the cast value cannot be expressed in the destination type.
+    // Essentially, negative values in the temp array are impossible to catch in the output alone. See:
+    //      https://stackoverflow.com/questions/65012526/
+    if ( (temp.array() < 0.0).any() || (temp.array() >= this->size.cast<double>().array()).any() )
+        return INVALID_INDEX_ERROR_CODE;
+    return this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
 }
 
 
-int VoxelGrid::inc_point(const Eigen::Vector3d& point)
+int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output)
 {
-    Vector3ui idx;
-    int result = space_to_grid_idx(point, idx);
-    if (result != 0)
-        return 1;
-    return this->inc_voxel(idx);
+    Vector3d temp = (input - lower).array() * this->idx_scale.array();
+    for (int i =0; i < 3; ++i)
+    {
+        temp[i] = std::round(temp[i]);
+        if (this->round_points_in)
+        {
+            if (temp[i] < 0) temp[i] = 0;
+            if (temp[i] >= this->size[i]) temp[i] = this->size[i] - 1;
+        }
+    }
+    output = temp.cast<size_t>();
+    return this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
+}
+
+
+int VoxelGrid::sidx(const size_t& input, Vector3d& output)
+{
+    Vector3ui gidx;
+    this->gidx(input, gidx);
+    return this->sidx(gidx, output);
+}
+
+
+int VoxelGrid::sidx(const Vector3ui& input, Vector3d& output)
+{
+    output = (input.cast<double>().array() / this->idx_scale.array()) + this->lower.array();
+
+    // NOTE: Check both input and output. The vector idx to space coordinate overload
+    //       may provide invalid grid indicies.
+    return this->valid(input) && this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
+}
+
+
+int VoxelGrid::vidx(const Vector3d& input, size_t& output)
+{
+    Vector3ui gidx;
+    this->gidx(input, gidx);
+    return this->vidx(gidx, output);
+}
+
+
+int VoxelGrid::vidx(const Vector3ui& input, size_t& output)
+{
+    output = ( input[0] ) + ( input[1] * this->size[0] ) + ( input[2] * this->size[0] * this->size[1] );
+
+    // NOTE: Check both input and output. The space coordinate to vector idx overload
+    //       may provide invalid grid indicies.
+    return this->valid(input) && this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
+}
+
+
+int VoxelGrid::get_6(const Vector3ui& input, std::vector<Vector3ui>& output)
+{
+    output.clear();
+    if (output.capacity() != 6) output.reserve(6);
+    for (int i = 0, j = 0; i < 6; ++i)
+    {
+        output.push_back(input);  // Creates copies of the input
+        if (i % 2 == 0)
+            output[i][j] += 1;
+        else {
+            // Unsigned underflow for an index of 0 results in the maximum value that a size_t
+            // variable van represent. This is defined behaviour and since this is much larger than
+            // any dimension will ever be this will be detected as an invalid index by this->valid 
+            //      https://stackoverflow.com/questions/2760502
+            output[i][j] -= 1;
+            ++j;
+        }
+    }
+    // By checking if the input is on an surface, edge, or corner we can quickly check the validity
+    // of the output. A more thorough, test would be checking each derived output. 
+    if ( (input.array() == 0).any() || (input.array() >= this->size.array()).any() )
+        return INVALID_INDEX_ERROR_CODE;
+    return 0;
 }
 
 
@@ -121,12 +179,12 @@ int VoxelGrid::add_linear_space(const Eigen::Vector3d& start, const Eigen::Vecto
 
     for (int j = 0; j < num - 1; ++j)
     {
-        success = this->add_point(place, line);
+        success = this->set(place, line);
         fails += success;
 
         place += line_space;
     }
-    success = this->add_point(place, surface);
+    success = this->set(place, surface);
     fails += success;
 
     return fails;
@@ -142,7 +200,7 @@ int VoxelGrid::add_line_fast(const Eigen::Vector3d& start, const Eigen::Vector3d
     dist = std::sqrt(dist);
 
     /* Average spacing as a hack for now; optional different spacing makes things weird here */
-    int avg_space = ( this->space[0] + this->space[1] + this->space[2] ) / 3;
+    int avg_space = ( this->size[0] + this->size[1] + this->size[2] ) / 3;
 
     // float
 
@@ -237,7 +295,7 @@ void VoxelGrid::save_hdf5(const std::string& fname)
     HighFive::File file(fname, HighFive::File::ReadWrite | HighFive::File::Truncate);
 
     file.createDataSet("/data/grid_vector", this->grid);
-    file.createDataSet("/data/spacing", this->space);
+    file.createDataSet("/data/size", this->size);
 
     file.createDataSet("/position/lower", this->lower);
     file.createDataSet("/position/upper", this->upper);
@@ -252,7 +310,7 @@ void VoxelGrid::load_hdf5(const std::string& fname)
         // Read the data 
         /* TODO Check the saved data validity or if there is data already in the object  */
         file.getDataSet("/data/grid_vector").read(this->grid);
-        file.getDataSet("/data/spacing").read(this->space);
+        file.getDataSet("/data/size").read(this->size);
 
         file.getDataSet("/position/lower").read(this->lower);
         file.getDataSet("/position/upper").read(this->upper);
@@ -260,99 +318,3 @@ void VoxelGrid::load_hdf5(const std::string& fname)
         std::cerr << err.what() << std::endl;
     }
 }
-
-
-int VoxelGrid::space_to_grid_idx(const Eigen::Vector3d& space_xyz, Vector3ui& grid_idx)
-{
-    /// NOTE: The logic here could likely be made more efficient. Not a major concern
-    ///       right now but potential future work.
-    int success = 0;
-    double float_idx = 0, max_idx = 0;
-    for (int i = 0; i < 3; ++i)
-    {
-        max_idx = this->space[i] - 1.0;
-        float_idx = std::round( ( space_xyz[i] - this->lower[i] ) * this->idx_scale[i] );
-
-        if (this->round_points_in)
-        {
-            if (float_idx < 0.)
-                float_idx = 0.;
-            else if (float_idx > max_idx)
-                float_idx = max_idx;
-        } else {
-            if (float_idx < 0.0)
-            {
-                if (-1 < float_idx)
-                    float_idx = 0.;
-                else
-                    success = 1;
-            }
-            else if (max_idx < float_idx)  
-            {
-                if (float_idx < max_idx + 1.0)
-                    float_idx = max_idx;
-                else
-                    success = 1;
-            }
-        }
-
-        /// Negatives are messing this up big time!
-        /// This is why the success return variable is needed.
-        grid_idx[i] = (size_t) float_idx;
-    }
-    return success;
-}
-
-
-uint8_t VoxelGrid::space_at(const Eigen::Vector3d& space_xyz)
-{
-    Vector3ui grid_idx;
-    int result = space_to_grid_idx(space_xyz, grid_idx);
-    size_t vec_idx = this->grid_idx_to_vector_idx(grid_idx);
-    
-    if (vec_idx >= this->grid.size() || result != 0)
-        return 0;
-    
-    return this->grid[vec_idx];
-}
-
-
-bool VoxelGrid::space_in_grid(const Eigen::Vector3d& space_xyz)
-{
-    bool test = true;
-    for (int i = 0; i < 3; ++i)
-    {
-        if (not (this->lower[i] <= space_xyz[i] < this->upper[i]) )
-        {
-            test = false;
-            break;
-        }
-    }
-    return test;
-}
-
-
-uint8_t VoxelGrid::voxel_at(const Vector3ui& voxel_idx)
-{
-    size_t vec_idx = this->grid_idx_to_vector_idx(voxel_idx);
-    if (vec_idx > this->grid.size())
-        return 0;
-    return this->grid[vec_idx];
-}
-
-
-bool VoxelGrid::voxel_in_grid(const Vector3ui& voxel_idx)
-{
-    bool test = true;
-    for (int i = 0; i < 3; ++i)
-    {
-        if (not (0 <= voxel_idx[i] < this->space[i]) )
-        {
-            test = false;
-            break;
-        }
-    }
-    return test;
-}
-
-

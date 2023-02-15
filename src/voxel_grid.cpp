@@ -35,13 +35,10 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
     this->idx_scale = this->size.cast<double>().array() / span.array();
 
     size_t vec_len = this->size[0] * this->size[1] * this->size[2];
-    this->grid->reserve(vec_len);
+    this->grid = std::make_shared<std::vector<uint8_t>>(vec_len, init);
     double mem = byte_to_megabytes(vector_capacity(*this->grid));
     if (mem > 100.0)
         std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
-
-    std::fill(this->grid->begin(), this->grid->end(), init);
-
     this->round_points_in = round_points_in;
 }
 

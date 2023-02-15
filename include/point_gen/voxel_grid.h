@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #define INVALID_INDEX_ERROR_CODE -1
 
@@ -24,7 +25,7 @@ class VoxelGrid
 {
     private:
         /// Vector structure for the voxels. Increments fastest in X, then Y, then Z.
-        std::vector<uint8_t> *grid;
+        std::shared_ptr<std::vector<uint8_t>> grid;
 
         /// Size the the grid in each direction; the number of voxels of the specified resolution needed to
         /// span the distance starting from the lower bound to include the upper bound. 

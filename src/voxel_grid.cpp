@@ -40,8 +40,7 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
     if (mem > 100.0)
         std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
 
-    for (size_t i = 0; i < vec_len; ++i)
-        this->grid->push_back(init);
+    std::fill(this->grid->begin(), this->grid->end(), init);
 
     this->round_points_in = round_points_in;
 }

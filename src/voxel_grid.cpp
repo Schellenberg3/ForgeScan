@@ -35,13 +35,13 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
     this->idx_scale = this->size.cast<double>().array() / span.array();
 
     size_t vec_len = this->size[0] * this->size[1] * this->size[2];
-    this->grid.reserve(vec_len);
-    double mem = byte_to_megabytes(vector_capacity(this->grid));
+    this->grid->reserve(vec_len);
+    double mem = byte_to_megabytes(vector_capacity(*this->grid));
     if (mem > 100.0)
         std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
 
     for (size_t i = 0; i < vec_len; ++i)
-        this->grid.push_back(init);
+        this->grid->push_back(init);
 
     this->round_points_in = round_points_in;
 }
@@ -281,7 +281,7 @@ void VoxelGrid::save_csv(const std::string& fname)
     file << "Test Voxel Grid Format File" << std::endl;
     file << "occupancy value" << std::endl;
 
-    for (auto voxel = this->grid.begin(); voxel != this->grid.end(); ++voxel)
+    for (auto voxel = this->grid->begin(); voxel != this->grid->end(); ++voxel)
     {
         file << (int)*voxel << std::endl;
     }
@@ -294,7 +294,7 @@ void VoxelGrid::save_hdf5(const std::string& fname)
 {
     HighFive::File file(fname, HighFive::File::ReadWrite | HighFive::File::Truncate);
 
-    file.createDataSet("/data/grid_vector", this->grid);
+    file.createDataSet("/data/grid_vector", *this->grid);
     file.createDataSet("/data/size", this->size);
 
     file.createDataSet("/position/lower", this->lower);
@@ -309,7 +309,7 @@ void VoxelGrid::load_hdf5(const std::string& fname)
 
         // Read the data 
         /* TODO Check the saved data validity or if there is data already in the object  */
-        file.getDataSet("/data/grid_vector").read(this->grid);
+        file.getDataSet("/data/grid_vector").read(*this->grid);
         file.getDataSet("/data/size").read(this->size);
 
         file.getDataSet("/position/lower").read(this->lower);

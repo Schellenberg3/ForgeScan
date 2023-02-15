@@ -24,7 +24,7 @@ class VoxelGrid
 {
     private:
         /// Vector structure for the voxels. Increments fastest in X, then Y, then Z.
-        std::vector<uint8_t> grid;
+        std::vector<uint8_t> *grid;
 
         /// Size the the grid in each direction; the number of voxels of the specified resolution needed to
         /// span the distance starting from the lower bound to include the upper bound. 
@@ -140,7 +140,7 @@ class VoxelGrid
         /// @param input Index location within the underlying std::vector
         /// @return True if the value is less than the vector's size, false otherwise.
         bool const inline valid(const size_t& input) {
-            return input < this->grid.size();
+            return input < this->grid->size();
         }
 
 
@@ -173,7 +173,7 @@ class VoxelGrid
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
         uint8_t const inline at(const size_t& idx) {
             if (!this->valid(idx)) throw std::invalid_argument("Input resulted in out of bound vector access.");
-            return this->grid[idx];
+            return this->grid->at(idx);
         }
 
 
@@ -208,7 +208,7 @@ class VoxelGrid
         /// @returns A non-zero integer if the transformation is invalid.
         int inline set(const size_t& idx, const uint8_t& val) {
             if ( !this->valid(idx) ) return INVALID_INDEX_ERROR_CODE;
-            this->grid[idx] = val;
+            this->grid->at(idx) = val;
             return 0;
         }
 
@@ -247,7 +247,7 @@ class VoxelGrid
         /// @warning This does not check for overflow or underflow.
         int inline inc(const size_t& idx, const int& val = 1) {
             if ( !this->valid(idx) ) return INVALID_INDEX_ERROR_CODE;
-            this->grid[idx] += val;
+            this->grid->at(idx) += val;
             return 0;
         }
 

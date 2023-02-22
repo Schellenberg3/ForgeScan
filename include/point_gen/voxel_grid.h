@@ -2,6 +2,7 @@
 # define MY_VOXEL_H
 
 #include <point_gen/sim_sensor_reading.h>
+#include <point_gen/grid_processor.h>
 
 #include <Eigen/Geometry>
 
@@ -23,6 +24,9 @@ typedef Eigen::Matrix<size_t, 3, 1> Vector3ui;
 /// @brief Container for a 3 dimensional grid ov voxels.
 class VoxelGrid
 {
+    friend class GridProcessor;
+
+
     private:
         /// Vector structure for the voxels. Increments fastest in X, then Y, then Z.
         std::shared_ptr<std::vector<uint8_t>> grid;

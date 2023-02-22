@@ -1,5 +1,5 @@
-#ifndef MY_GRID_PROCESSOR_H
-#define MY_GRID_PROCESSOR_H
+#ifndef FORGESCAN_GRID_PROCESSOR_H
+#define FORGESCAN_GRID_PROCESSOR_H
 
 #include <ForgeScan/voxel_grid.h>
 
@@ -92,4 +92,4 @@ class GridProcessor {
         }
 };
 
-#endif // MY_GRID_PROCESSOR_H
+#endif // FORGESCAN_GRID_PROCESSOR_H

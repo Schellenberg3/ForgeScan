@@ -1,5 +1,5 @@
-# ifndef MY_VOXEL_H
-# define MY_VOXEL_H
+# ifndef FORGESCAN_VOXEL_GRID_H
+# define FORGESCAN_VOXEL_GRID_H
 
 #include <ForgeScan/sim_sensor_reading.h>
 #include <ForgeScan/grid_processor.h>
@@ -311,4 +311,4 @@ class VoxelGrid
 };
 
 
-# endif // MY_VOXEL_H
+# endif // FORGESCAN_VOXEL_GRID_H

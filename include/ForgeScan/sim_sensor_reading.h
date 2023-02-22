@@ -1,5 +1,5 @@
-#ifndef SIM_SENSOR_READING_H
-#define SIM_SENSOR_READING_H
+#ifndef FORGESCAN_SIM_SENSOR_READING_H
+#define FORGESCAN_SIM_SENSOR_READING_H
 
 #include <Eigen/Geometry>
 
@@ -66,4 +66,4 @@ public:
         { sensor(n * m) = val;}
 };
 
-#endif // SIM_SENSOR_READING_H
+#endif // FORGESCAN_SIM_SENSOR_READING_H

@@ -1,6 +1,7 @@
 # ifndef FORGESCAN_VOXEL_GRID_H
 # define FORGESCAN_VOXEL_GRID_H
 
+#include <ForgeScan/voxel_element.h>
 #include <ForgeScan/sim_sensor_reading.h>
 #include <ForgeScan/grid_processor.h>
 
@@ -29,7 +30,7 @@ class VoxelGrid
 
     private:
         /// Vector structure for the voxels. Increments fastest in X, then Y, then Z.
-        std::shared_ptr<std::vector<uint8_t>> grid;
+        std::shared_ptr<std::vector<VoxelElement>> grid;
 
         /// Size the the grid in each direction; the number of voxels of the specified resolution needed to
         /// span the distance starting from the lower bound to include the upper bound. 
@@ -58,7 +59,6 @@ class VoxelGrid
         /// @param resolution The edge length of each voxel. Must be greater than 0.
         /// @param lower The minimum bounds for the discretized volume.
         /// @param upper The maximum bounds for the discretized volume.
-        /// @param init Value to initialize all elements to
         /// @param round_points_in Controls how the grid deals with points outside the voxelized space. If true all points
         ///                        will be rounded into the closest voxel. Default is true.
         /// @throws `invalid_argument` if the difference between upper and lower in any direction less than or equal to 0.
@@ -66,7 +66,7 @@ class VoxelGrid
         ///         the respective lower bound.
         /// @note The "true" upper bound may be greater than what is given based on the resolution.
         /// @TODO: The default action to round points in will be changed to false in a future update.
-        VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init = 0, bool round_points_in = true);
+        VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, bool round_points_in = true);
 
 
         /// @brief Transforms the input index into coordinates within the voxel grid.
@@ -153,7 +153,7 @@ class VoxelGrid
         /// @param idx Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @return Value at the location
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
-        uint8_t const inline at(const Vector3d& idx) {
+        VoxelElement const inline at(const Vector3d& idx) {
             size_t vidx;
             this->vidx(idx, vidx);
             return this->at(vidx);       
@@ -164,7 +164,7 @@ class VoxelGrid
         /// @param idx Index in discrete voxel grid
         /// @return Value at the location
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
-        uint8_t const inline at(const Vector3ui& idx) {
+        VoxelElement const inline at(const Vector3ui& idx) {
             // TODO: This and the 
             size_t vidx;
             this->vidx(idx, vidx);
@@ -176,7 +176,7 @@ class VoxelGrid
         /// @param idx Index location within the underlying std::vector
         /// @return Value at the index
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
-        uint8_t const inline at(const size_t& idx) {
+        VoxelElement const inline at(const size_t& idx) {
             if (!this->valid(idx)) throw std::invalid_argument("Input resulted in out of bound vector access.");
             return this->grid->at(idx);
         }
@@ -252,7 +252,7 @@ class VoxelGrid
         /// @warning This does not check for overflow or underflow.
         int inline inc(const size_t& idx, const int& val = 1) {
             if ( !this->valid(idx) ) return INVALID_INDEX_ERROR_CODE;
-            this->grid->at(idx) += val;
+            this->grid->at(idx).inc_views();
             return 0;
         }
 

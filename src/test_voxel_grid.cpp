@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     double res = 0.02;
 
     // 2m x 2m x 2m cube with 0.02 m resolution
-    VoxelGrid grid(res, lower, upper, 0, true);
+    VoxelGrid grid(res, lower, upper, true);
     std::cout << "Initialized the VoxelGrid!" << std::endl;
 
     GridProcessor processor(grid);

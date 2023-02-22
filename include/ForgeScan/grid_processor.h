@@ -1,6 +1,7 @@
 #ifndef FORGESCAN_GRID_PROCESSOR_H
 #define FORGESCAN_GRID_PROCESSOR_H
 
+#include <ForgeScan/voxel_element.h>
 #include <ForgeScan/voxel_grid.h>
 
 #include <vector>
@@ -17,7 +18,7 @@ class VoxelGrid;  // Promise to compiler that the VoxelGrid class will be define
 class GridProcessor {
     private:
         /// Temporary vector that is the destination for changes when running a filter process 
-        std::shared_ptr<std::vector<uint8_t>> temp;
+        std::shared_ptr<std::vector<VoxelElement>> temp;
 
         /// Pointer to the VoxelGrid to act upon.
         /// Using pointer to allow nullptr as a valid input.
@@ -42,12 +43,8 @@ class GridProcessor {
         /// @brief Resets the temporary vector to the provided value
         /// @param val Value to reset each temp vector element to. Default 0.
         void inline reset_temp(const size_t& val = 0) {
-            // TODO: While resetting to 0 after each operation an valid option, there are be cases where
-            //       it is more optimal to have the current value of the voxel_grid. Essentially, for erosion
-            //       and dilation it would mean we only need to flip when the threshold it met. 
-            //       However, future changes - especially moving away from categorization - may mean the effort
-            //       to make this change would be wasted. For now, this note is just a reminder for future me.
-            std::fill(this->temp->begin(), this->temp->end(), val);
+            for (auto& element : *temp)
+                element.reset();
         }
 
 

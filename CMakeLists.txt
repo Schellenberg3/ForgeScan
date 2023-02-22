@@ -66,6 +66,7 @@ ADD_EXECUTABLE (
     src/test_voxel_grid.cpp
     src/voxel_grid.cpp
     src/grid_processor.cpp
+    src/voxel_element.cpp
 )
 TARGET_LINK_LIBRARIES(test_grid HighFive Eigen3::Eigen)
 ### Why the `Library::Component` structure? I don't know...
@@ -78,5 +79,15 @@ ADD_EXECUTABLE (
     src/sim_sphere_scan.cpp
     src/sim_sensor_reading.cpp
     src/voxel_grid.cpp
+    src/voxel_element.cpp
 )
 TARGET_LINK_LIBRARIES(sim_sphere_scan HighFive Eigen3::Eigen)
+
+
+ADD_EXECUTABLE (
+    test_voxel_element
+
+    src/test_voxel_element.cpp
+    src/voxel_element.cpp
+)
+TARGET_LINK_LIBRARIES(test_voxel_element)

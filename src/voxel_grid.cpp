@@ -20,7 +20,7 @@
 #include <filesystem>
 
 
-VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init, bool round_points_in)
+VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, bool round_points_in)
 {
     Vector3d span = upper - lower;
 
@@ -35,7 +35,8 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
     this->idx_scale = this->size.cast<double>().array() / span.array();
 
     size_t vec_len = this->size[0] * this->size[1] * this->size[2];
-    this->grid = std::make_shared<std::vector<uint8_t>>(vec_len, init);
+
+    this->grid = std::make_shared<std::vector<VoxelElement>>(vec_len, VoxelElement());
     double mem = byte_to_megabytes(vector_capacity(*this->grid));
     if (mem > 100.0)
         std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
@@ -278,13 +279,15 @@ void VoxelGrid::save_csv(const std::string& fname)
     file << "occupancy value" << std::endl;
 
     for (const auto& voxel : *this->grid)
-        file << (int)voxel << std::endl;
+        file << voxel.get_view_count() << std::endl;
     file.close();
 }
 
 
 void VoxelGrid::save_hdf5(const std::string& fname)
 {
+    throw std::logic_error("Not implemented");
+    /*
     HighFive::File file(fname, HighFive::File::ReadWrite | HighFive::File::Truncate);
 
     file.createDataSet("/data/grid_vector", *this->grid);
@@ -292,16 +295,19 @@ void VoxelGrid::save_hdf5(const std::string& fname)
 
     file.createDataSet("/position/lower", this->lower);
     file.createDataSet("/position/upper", this->upper);
+    */
 }
 
 
 void VoxelGrid::load_hdf5(const std::string& fname)
 {
+    throw std::logic_error("Not implemented");
+
+    /*
     try {
         HighFive::File file(fname, HighFive::File::ReadOnly);
-
-        // Read the data 
-        /* TODO Check the saved data validity or if there is data already in the object  */
+        // Read the data
+        // TODO Check the saved data validity or if there is data already in the object
         file.getDataSet("/data/grid_vector").read(*this->grid);
         file.getDataSet("/data/size").read(this->size);
 
@@ -310,4 +316,5 @@ void VoxelGrid::load_hdf5(const std::string& fname)
     } catch (const HighFive::Exception& err) {
         std::cerr << err.what() << std::endl;
     }
+    */
 }

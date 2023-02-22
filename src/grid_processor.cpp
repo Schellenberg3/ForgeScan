@@ -4,14 +4,14 @@
 GridProcessor::GridProcessor()
 {
     this->voxel_grid = nullptr;
-    this->temp = std::make_shared<std::vector<uint8_t>>();
+    this->temp = std::make_shared<std::vector<VoxelElement>>();
 }
 
 
 GridProcessor::GridProcessor(VoxelGrid& target)
 {
     this->voxel_grid = &target;
-    this->temp = std::make_shared<std::vector<uint8_t>>();
+    this->temp = std::make_shared<std::vector<VoxelElement>>();
     this->setup_temp_vector();
 }
 
@@ -22,7 +22,7 @@ void inline GridProcessor::setup_temp_vector()
     // of an incomplete type of VoxelGrid
     size_t grid_size = this->voxel_grid->grid->size();
     if ( this->temp->size() != grid_size)
-        this->temp = std::make_shared<std::vector<uint8_t>>(grid_size, 0);
+        this->temp = std::make_shared<std::vector<VoxelElement>>(grid_size, VoxelElement());
 }
 
 
@@ -57,16 +57,16 @@ void GridProcessor::dilate_element(const Vector3ui& element, const int& n)
     static size_t element_vidx = 0;
     
     this->voxel_grid->vidx(element, element_vidx);
-    int known_neighbor_count = this->voxel_grid->at(element_vidx)!= 0 ? 1 : 0;
+    int known_neighbor_count = this->voxel_grid->at(element_vidx).view_count != 0 ? 1 : 0;
 
     this->voxel_grid->get_6(element, neighbors);
 
     for (const auto& neighbor : neighbors)
-        if (this->voxel_grid->valid(neighbor) && this->voxel_grid->at(neighbor) != 0) 
+        if (this->voxel_grid->valid(neighbor) && this->voxel_grid->at(neighbor).view_count != 0)
             ++known_neighbor_count;
 
     if (known_neighbor_count >= n)
-        this->temp->at(element_vidx) = 1;
+        this->temp->at(element_vidx).view_count = 1;
 }
 
 
@@ -78,17 +78,17 @@ void GridProcessor::erode_element(const Vector3ui& element, const int& n)
     this->voxel_grid->vidx(element, element_vidx);
     // int known_neighbor_count = this->voxel_grid->at(element_vidx) == 0 ? 1 : 0;
     int known_neighbor_count = 1;
-    if (this->voxel_grid->at(element_vidx) != 0)
+    if (this->voxel_grid->at(element_vidx).view_count != 0)
         known_neighbor_count = 0;
 
     this->voxel_grid->get_6(element, neighbors);
 
     for (const auto& neighbor : neighbors)
-        if (this->voxel_grid->valid(neighbor) && this->voxel_grid->at(neighbor) == 0) 
+        if (this->voxel_grid->valid(neighbor) && this->voxel_grid->at(neighbor).view_count == 0)
             ++known_neighbor_count;
 
     if (known_neighbor_count >= n)
-        this->temp->at(element_vidx) = 0;
+        this->temp->at(element_vidx).view_count = 0;
     else  // Otherwise, stay the same
-        this->temp->at(element_vidx) = this->voxel_grid->at(element_vidx);
+        this->temp->at(element_vidx) = this->voxel_grid->at(element_vidx).view_count;
 }

@@ -277,11 +277,8 @@ void VoxelGrid::save_csv(const std::string& fname)
     file << "Test Voxel Grid Format File" << std::endl;
     file << "occupancy value" << std::endl;
 
-    for (auto voxel = this->grid->begin(); voxel != this->grid->end(); ++voxel)
-    {
-        file << (int)*voxel << std::endl;
-    }
-
+    for (const auto& voxel : *this->grid)
+        file << (int)voxel << std::endl;
     file.close();
 }
 

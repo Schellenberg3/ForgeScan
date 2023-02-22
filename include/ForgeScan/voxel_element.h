@@ -63,24 +63,24 @@ public:
 
     /// @brief Gets count for the number of views the voxel has.
     /// @return Number of views.
-    voxel_views const inline get_view_count() { return view_count; }
+    voxel_views inline get_view_count() const { return view_count; }
 
     /// @brief Gets the voxels truncated distance to the measured surface. 
     /// @return Truncated distance to surface.
     /// @note Positive values are away from the surface.
-    voxel_distance const inline get_distance() { return dist; }
+    voxel_distance inline get_distance() const { return dist; }
 
     /// @brief Gets the centrality value for the voxel.
     /// @return Centrality value.
-    voxel_centrality const inline get_centrality() { return cent; }
+    voxel_centrality inline get_centrality() const { return cent; }
 
     /// @brief Gets the normality information about the voxel.
     /// @return Normality score.
-    voxel_normality const inline get_normality() { return norm; }
+    voxel_normality inline get_normality() const { return norm; }
 
     /// @brief Gets the density of sensed points within the voxel.
     /// @return Sensor measurement density.
-    voxel_density const inline get_density() { return density; }
+    voxel_density inline get_density() const { return density; }
 
     /// @brief Increments the view counter without changing other information.
     void inline inc_views() { ++view_count; }

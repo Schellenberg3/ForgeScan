@@ -6,6 +6,9 @@
 #include <stdexcept>
 
 
+class GridProcessor;  // Promise to compiler that the GridProcessor class will be defined later
+
+
 // Effectively sets the max at 65,353 views with just 2 Bytes.
 typedef uint16_t voxel_views;
 
@@ -35,6 +38,8 @@ typedef float voxel_density;
 ///       float (4 Bytes), the overall class size is 20. Not 18 as it should be. This is annoying. Perhaps it
 ///       has to do with my compiler settings. But it is not of immediate importance.
 class VoxelElement {
+    friend class GridProcessor;
+
     /// @brief Records number of times a voxel has been updated with new information.
     voxel_views view_count = 0;
     

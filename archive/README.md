@@ -36,4 +36,13 @@ ADD_EXECUTABLE (
     src/voxel_grid.cpp
 )
 TARGET_LINK_LIBRARIES(depth_camera_sim HighFive Eigen3::Eigen)
+
+ADD_EXECUTABLE (
+    test_index 
+
+    src/test_indices.cpp
+    src/voxel_grid.cpp
+    src/grid_processor.cpp
+)
+TARGET_LINK_LIBRARIES(test_index HighFive Eigen3::Eigen)
 ```

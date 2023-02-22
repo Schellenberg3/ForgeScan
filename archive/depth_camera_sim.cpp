@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include <point_gen/voxel_grid.h>
+#include <ForgeScan/voxel_grid.h>
 
 
 /// @brief   Generates a VoxelGrid which illustrates what a depth camera would look like if it did not intersect

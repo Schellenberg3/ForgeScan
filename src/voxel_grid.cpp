@@ -1,5 +1,5 @@
-#include <point_gen/voxel_grid.h>
-#include <point_gen/memory_utils.h>
+#include <ForgeScan/voxel_grid.h>
+#include <ForgeScan/memory_utils.h>
 
 #include <Eigen/Dense>
 

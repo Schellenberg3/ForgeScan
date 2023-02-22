@@ -1,4 +1,4 @@
-#include <point_gen/sim_sensor_reading.h>
+#include <ForgeScan/sim_sensor_reading.h>
 
 #include <highfive/H5Easy.hpp>
 

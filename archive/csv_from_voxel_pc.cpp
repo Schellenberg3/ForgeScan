@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include <point_gen/voxel_grid.h>
+#include <ForgeScan/voxel_grid.h>
 
 #include <octomap/octomap.h>
 #include <octomap/Pointcloud.h>

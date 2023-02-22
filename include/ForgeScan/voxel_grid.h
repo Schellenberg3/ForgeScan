@@ -1,8 +1,8 @@
 # ifndef MY_VOXEL_H
 # define MY_VOXEL_H
 
-#include <point_gen/sim_sensor_reading.h>
-#include <point_gen/grid_processor.h>
+#include <ForgeScan/sim_sensor_reading.h>
+#include <ForgeScan/grid_processor.h>
 
 #include <Eigen/Geometry>
 

@@ -1,5 +1,5 @@
-#include <point_gen/sim_sensor_reading.h>
-#include <point_gen/voxel_grid.h>
+#include <ForgeScan/sim_sensor_reading.h>
+#include <ForgeScan/voxel_grid.h>
 
 #include <Eigen/Geometry>
 

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include <point_gen/voxel_grid.h>
+#include <ForgeScan/voxel_grid.h>
 
 /// @brief Simple script for manually adding points to a VoxelGrid within [-1,-1,-1] and [+1,+1,+1].
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.

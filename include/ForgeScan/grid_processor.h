@@ -1,7 +1,7 @@
 #ifndef MY_GRID_PROCESSOR_H
 #define MY_GRID_PROCESSOR_H
 
-#include <point_gen/voxel_grid.h>
+#include <ForgeScan/voxel_grid.h>
 
 #include <vector>
 #include <memory>

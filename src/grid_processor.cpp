@@ -1,4 +1,4 @@
-#include <point_gen/grid_processor.h>
+#include <ForgeScan/grid_processor.h>
 
 #include <algorithm>
 

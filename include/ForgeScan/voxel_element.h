@@ -55,6 +55,15 @@ class VoxelElement {
     /// @brief Measurement density of sensed points within the voxel based on its views.
     voxel_density density = 0;
 
+    /// @brief Resets all members to zero.
+    void inline reset() {
+        view_count = 0;
+        dist = 0;
+        cent = 0;
+        norm = 0;
+        density = 0;
+    }
+
 public:
     VoxelElement() : view_count(0), dist(0), cent(0), density(0), norm(0) { }
 

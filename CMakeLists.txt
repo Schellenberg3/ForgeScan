@@ -65,6 +65,7 @@ ADD_EXECUTABLE (
 
     src/test_voxel_grid.cpp
     src/voxel_grid.cpp
+    src/grid_processor.cpp
 )
 TARGET_LINK_LIBRARIES(test_grid HighFive Eigen3::Eigen)
 ### Why the `Library::Component` structure? I don't know...

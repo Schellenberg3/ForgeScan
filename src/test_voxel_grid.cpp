@@ -2,6 +2,7 @@
 #include <string>
 
 #include <point_gen/voxel_grid.h>
+#include <point_gen/grid_processor.h>
 
 #include <octomap/octomap.h>
 #include <octomap/Pointcloud.h>
@@ -18,8 +19,10 @@ int main(int argc, char** argv)
     double res = 0.02;
 
     // 2m x 2m x 2m cube with 0.02 m resolution
-    VoxelGrid grid(res, lower, upper);
-    std::cout << "Initialized the VoxelGrid" << std::endl;
+    VoxelGrid grid(res, lower, upper, 0, true);
+    std::cout << "Initialized the VoxelGrid!" << std::endl;
+
+    GridProcessor processor(grid);
 
     double x, y, z, q = 0;
     Eigen::Vector3d xyz;
@@ -40,12 +43,37 @@ int main(int argc, char** argv)
     start << 0, 0, 1.5;
     end << 0, -1.5, 0;
 
-    grid.add_linear_space(start, end, 40);
+    std::cout << "Adding a linear space..." << std::endl;
+    grid.add_linear_space(start, end, 100);
 
+
+    int n_ops = 0;
+    do {
+        std::cout << "Enter 1 to dilate, 2 to erode, or 0 to continue: ";
+        std::cin >> q;
+
+        if (q == 1)
+        {
+            std::cout << "Performing strong  dilation n=1...";
+            processor.dilate(1);
+        }
+        else if (q == 2)
+        {
+            std::cout << "Performing soft erosion n=5...";
+            processor.erode(5);
+        }
+        
+        if (q != 0)
+        {
+            ++n_ops;
+            std::cout << " operation " << n_ops << " finished," << std::endl;
+        }
+
+    } while (q != 0);
+
+    std::cout << "Saving to CSV..."  << std::endl;
     grid.save_csv("test_points.csv");
 
-    grid.save_hdf5("test_points.h5");
-    grid.load_hdf5("test_points.h5");
-
+    std::cout << "Exiting program."  << std::endl;
     return 0;
 }

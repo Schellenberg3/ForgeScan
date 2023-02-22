@@ -1,7 +1,5 @@
 #include <ForgeScan/grid_processor.h>
 
-#include <algorithm>
-
 
 GridProcessor::GridProcessor()
 {
@@ -49,7 +47,7 @@ void GridProcessor::elementwise_operation(const std::function<void(const Vector3
             }
         }
     }
-    std::swap(this->temp, this->voxel_grid->grid);
+    this->voxel_grid->grid.swap(this->temp);
 }
 
 

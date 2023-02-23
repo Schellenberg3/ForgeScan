@@ -3,7 +3,7 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.7.2)
 # of CMake Server mode for Debugging.For more, see:
 #   https://vector-of-bool.github.io/docs/vscode-cmake-tools/debugging.html#target-debugging-and-launching
 
-PROJECT ( Forge_Scan )
+PROJECT ( ForgeScan )
 
 SET ( CMAKE_BUILD_TYPE Debug)
 SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")

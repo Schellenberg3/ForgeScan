@@ -5,6 +5,9 @@ This directory contains code that was developed during the project to test new f
 To use any of this code, move the file to the `/src` directory and add the relevant section of the following to the package CMake file:
 
 ```CMake
+FIND_PACKAGE (octomap REQUIRED)
+
+
 ADD_EXECUTABLE (
     sample_sphere 
     

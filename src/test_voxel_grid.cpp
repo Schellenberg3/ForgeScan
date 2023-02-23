@@ -4,9 +4,6 @@
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/grid_processor.h>
 
-#include <octomap/octomap.h>
-#include <octomap/Pointcloud.h>
-
 
 /// @brief Simple script for manually adding points to a VoxelGrid within [-1,-1,-1] and [+1,+1,+1].
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.

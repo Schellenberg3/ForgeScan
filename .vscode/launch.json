@@ -21,6 +21,15 @@
         "args": [],
         "cwd": "${workspaceRoot}/bin",
         "stopAtEntry": true,
+        },
+        {
+        "name": "Test Voxel Element",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceRoot}/bin/test_voxel_element",
+        "args": [],
+        "cwd": "${workspaceRoot}/bin",
+        "stopAtEntry": true,
         }
     ]
 }

@@ -43,8 +43,14 @@ class VoxelElement {
     /// @brief Records number of times a voxel has been updated with new information.
     voxel_views view_count = 0;
     
-    /// @brief Truncated distance from the voxel to the object surface 
-    voxel_distance dist = 0;
+    /// @brief Truncated distance, minimum, from the voxel to the object surface
+    voxel_distance min_dist = std::numeric_limits<voxel_distance>::infinity();
+
+    /// @brief Running average of the truncated signed distances.
+    voxel_distance avg_dist = 0;
+
+    /// @brief Running aggregation of squared distances for Welford's algorithm.
+    voxel_distance agg_sq_dist = 0;
 
     /// @brief Centrality score for the voxel based on its views.  
     voxel_centrality cent = 0;
@@ -58,31 +64,44 @@ class VoxelElement {
     /// @brief Resets all members to zero.
     void inline reset() {
         view_count = 0;
-        dist = 0;
+        min_dist = 0;
+        avg_dist = 0;
+        agg_sq_dist = 0;
         cent = 0;
         norm = 0;
         density = 0;
     }
 
 public:
-    VoxelElement() : view_count(0), dist(0), cent(0), density(0), norm(0) { }
+    /// TODO: How to properly initialize? Zero votes do not seem correct.
+    VoxelElement() : view_count(0), min_dist(0), avg_dist(0), agg_sq_dist(0), cent(0), density(0), norm(0) { }
 
     /// @param view_count Number of views, typically 0 at the beginning. 
     /// @param dist Initial truncated distance.
     /// @param cent Initial centrality score.
     /// @param density  Initial density score.
     /// @param norm Initial normality score.
-    VoxelElement(voxel_views view_count, voxel_distance dist = 0, voxel_centrality cent = 0, voxel_normality norm = 0, voxel_density density = 0) :
-    view_count(view_count), dist(dist), cent(cent), density(density), norm(norm) { }
+    VoxelElement(voxel_views view_count, voxel_distance min_dist = 0, voxel_distance avg_dist = 0, voxel_distance agg_sq_dist = 0,
+                 voxel_centrality cent = 0, voxel_normality norm = 0, voxel_density density = 0) :
+    view_count(view_count), min_dist(min_dist), avg_dist(avg_dist), agg_sq_dist(agg_sq_dist), cent(cent), density(density), norm(norm) { }
 
     /// @brief Gets count for the number of views the voxel has.
     /// @return Number of views.
     voxel_views inline get_view_count() const { return view_count; }
 
-    /// @brief Gets the voxels truncated distance to the measured surface. 
-    /// @return Truncated distance to surface.
+    /// @brief Gets the voxels minimum truncated distance to the measured surface.
+    /// @return Minimum truncated distance to surface.
     /// @note Positive values are away from the surface.
-    voxel_distance inline get_distance() const { return dist; }
+    voxel_distance inline get_min_distance() const { return min_dist; }
+
+    /// @brief Gets the voxels average truncated to the measured surface.
+    /// @return Average truncated distance to surface.
+    /// @note Positive values are away from the surface.
+    voxel_distance inline get_avg_distance() const { return avg_dist; }
+
+    /// @brief Gets the standard deviation of the voxels truncated distance to the measured surface.
+    /// @return Standard deviation for the  average truncated distance to surface.
+    voxel_distance inline get_std_distance() const { return agg_sq_dist / view_count; }
 
     /// @brief Gets the centrality value for the voxel.
     /// @return Centrality value.
@@ -99,17 +118,21 @@ public:
     /// @brief Increments the view counter without changing other information.
     void inline inc_views() { ++view_count; }
 
-    /// @brief Updates the truncated distance with a running average.
-    /// @param new_dist New truncated distance.
-    void inline update_dist_average(const voxel_distance& new_dist ) {
-        dist += (new_dist - dist) / (view_count + 1);
-    }
-
     /// @brief Updates the truncated distance by taking the minimum distance.
     /// @param new_dist New truncated distance.
-    void inline update_dist_min(const voxel_distance& new_dist ) {
-        if (new_dist < dist)
-            dist = new_dist;
+    void inline update_min_dist(const voxel_distance& new_dist ) {
+        if (new_dist < min_dist)
+            min_dist = new_dist;
+    }
+
+    /// @brief Updates the truncated distance with a running average and running standard deviation.
+    /// @param new_dist New truncated distance.
+    /// @note Applies Welford's online algorithm. See:
+    ///       https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
+    void inline update_avg_std_dist(const voxel_distance& new_dist ) {
+        float delta = (new_dist - avg_dist);
+        avg_dist += delta / (view_count + 1);
+        agg_sq_dist += (new_dist - avg_dist) * delta;  // Divide by N for the standard deviation
     }
 
     /// @brief Updates the centrality score by taking the minimum centrality value.

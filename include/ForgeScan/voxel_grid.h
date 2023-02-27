@@ -16,7 +16,6 @@
 
 /// Convenience typedef for Eigen
 typedef Eigen::Vector3d Vector3d;
-typedef Eigen::Vector3i Vector3i;
 
 /// Convenience typedef for Eigen; 32 bit unsigned
 typedef Eigen::Matrix<size_t, 3, 1> Vector3ui;

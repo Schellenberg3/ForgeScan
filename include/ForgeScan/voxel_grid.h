@@ -266,27 +266,6 @@ class VoxelGrid
         int get_6(const Vector3ui& input, std::vector<Vector3ui>& output);
 
 
-        /// @brief Adds equally-spaced points along the line, including the start and end
-        /// @param start Coordinate to start from
-        /// @param end Coordinate to end at
-        /// @param num The number of points to add. Minimum of two
-        /// @param surface Value to set elements on the surface (end of the line) to
-        /// @param line Value to set elements along the line to.
-        /// @return 0 if the line was added without issue
-        int add_linear_space(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const size_t& num = 2, const uint8_t &surface = 1, const uint8_t &line = 2);
-
-
-        /// @brief Adds a line between the start and end point that places approximately one point in each voxel the line touches
-        /// @param start Coordinate to start from
-        /// @param end Coordinate to end at
-        /// @param vox_res TODO: unsure how to treat this tuning variable yet
-        /// @param surface Value to set elements on the surface (end of the line) to
-        /// @param line Value to set elements along the line to.
-        /// @return 0 if the line was added without issue
-        /// @note TODO: This is NOT IMPLEMENTED YET
-        int add_line_fast(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const double& vox_res, const uint8_t& surface = 1, const uint8_t& line = 2);
-
-
         /// @brief Adds the provided sensor to the grid
         /// @param scanner SimSensorReading object to add
         /// @return 0 if the scanner was added without issue

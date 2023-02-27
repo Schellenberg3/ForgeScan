@@ -150,80 +150,7 @@ int VoxelGrid::get_6(const Vector3ui& input, std::vector<Vector3ui>& output)
 }
 
 
-int VoxelGrid::add_linear_space(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const size_t& num, const uint8_t &surface, const uint8_t &line)
-{
-    // Check that num >= 2
-
-    if (num < 1)
-        std::invalid_argument("Must place at least two points on the line segment.");
-
-    // ray = end - start
-    Eigen::Vector3d ray, line_space, place;
-    ray = end - start;
-
-    // Length of line
-    double length = 0;
-    for (int i = 0; i < 3; ++i)
-        length += std::pow(ray[i], 2);
-    length = std::sqrt(length);
-
-    // Normalize the ray
-    line_space = ray / (num - 1);
-
-    // Initialize and run the loop
-    int success = 0, fails = 0;
-    place = start;
-
-    for (int j = 0; j < num - 1; ++j)
-    {
-        success = this->set(place, line);
-        fails += success;
-
-        place += line_space;
-    }
-    success = this->set(place, surface);
-    fails += success;
-
-    return fails;
-}
-
-
-int VoxelGrid::add_line_fast(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const double& vox_res, const uint8_t &surface, const uint8_t &line)
-{
-    /* Length of the line segment */
-    double dist = 0;
-    for (int i =0; i <3; ++i)
-        dist += std::pow(end[i] - start [i], 2);
-    dist = std::sqrt(dist);
-
-    /* Average spacing as a hack for now; optional different spacing makes things weird here */
-    int avg_space = ( this->size[0] + this->size[1] + this->size[2] ) / 3;
-
-    // float
-
-    int num_voxels = dist / avg_space;
-
-    /* Tracks if the line has entered the voxel grid */
-    bool entered_grid = false;
-
-    size_t num_vox = dist * vox_res;
-
-    /*
-    
-    
-    for num point in disc. line
-        point = start + fraction * (end - start)
-    
-    
-    
-    */
-    
-
-
-    return 0;
-}
-
-
+/// WARNING: Non-functional
 int VoxelGrid::add_sensor(const SimSensorReading& scanner, const uint8_t& surface, const uint8_t& line)
 {
     /// @note This has not been fully tested. It could be optimized. And it could mirror or rotate improperly.
@@ -232,6 +159,7 @@ int VoxelGrid::add_sensor(const SimSensorReading& scanner, const uint8_t& surfac
     ///       away from a sphere of 0.75 meter radius. All lines should be under 3.25 meters thus this value would place
     ///       at least 1 point in each voxel along the line. TODO: make a more robust method: `add_line_fast`.
 
+    throw std::logic_error("Temporarially depreciated as add ray methods are updated.");
     static const Eigen::Vector3d camera_z_axis(0, 0, 1);
 
     Eigen::MatrixXd copy = scanner.sensor;
@@ -255,7 +183,7 @@ int VoxelGrid::add_sensor(const SimSensorReading& scanner, const uint8_t& surfac
     for (size_t i = 0, ncols = copy.cols(); i < ncols; ++i)
     {
         /// TODO: no clue how many points to space. 300 will do for now. See note above.
-        this->add_linear_space(scanner.position, copy.col(i), 300, surface, line);
+        // this->add_linear_space(scanner.position, copy.col(i), 300, surface, line);
         // std::cout << "[" << i << "]" << " Added final point located at:\n\t" << copy.col(i).transpose() << std::endl;
         // std::cout << "    Sensed point was:\n\t" << scanner.sensor.row(i) << std::endl;
     }

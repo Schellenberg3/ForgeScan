@@ -44,7 +44,7 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
 }
 
 
-int VoxelGrid::gidx(const size_t& input, Vector3ui& output)
+int VoxelGrid::gidx(const size_t& input, Vector3ui& output) const
 {
     static const double sxsy = (double) this->size[0]*this->size[1];
 
@@ -71,7 +71,7 @@ int VoxelGrid::gidx(const size_t& input, Vector3ui& output)
 }
 
 
-int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output)
+int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output) const
 {
     Vector3d temp = (input - lower).array() * this->idx_scale.array();
     for (int i =0; i < 3; ++i)
@@ -88,7 +88,7 @@ int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output)
 }
 
 
-int VoxelGrid::sidx(const size_t& input, Vector3d& output)
+int VoxelGrid::sidx(const size_t& input, Vector3d& output) const
 {
     Vector3ui gidx;
     this->gidx(input, gidx);
@@ -96,7 +96,7 @@ int VoxelGrid::sidx(const size_t& input, Vector3d& output)
 }
 
 
-int VoxelGrid::sidx(const Vector3ui& input, Vector3d& output)
+int VoxelGrid::sidx(const Vector3ui& input, Vector3d& output) const
 {
     output = (input.cast<double>().array() / this->idx_scale.array()) + this->lower.array();
 
@@ -106,7 +106,7 @@ int VoxelGrid::sidx(const Vector3ui& input, Vector3d& output)
 }
 
 
-int VoxelGrid::vidx(const Vector3d& input, size_t& output)
+int VoxelGrid::vidx(const Vector3d& input, size_t& output) const
 {
     Vector3ui gidx;
     this->gidx(input, gidx);
@@ -114,7 +114,7 @@ int VoxelGrid::vidx(const Vector3d& input, size_t& output)
 }
 
 
-int VoxelGrid::vidx(const Vector3ui& input, size_t& output)
+int VoxelGrid::vidx(const Vector3ui& input, size_t& output) const
 {
     output = ( input[0] ) + ( input[1] * this->size[0] ) + ( input[2] * this->size[0] * this->size[1] );
 
@@ -263,7 +263,7 @@ int VoxelGrid::add_sensor(const SimSensorReading& scanner, const uint8_t& surfac
 }
 
 
-void VoxelGrid::save_csv(const std::string& fname)
+void VoxelGrid::save_csv(const std::string& fname) const
 {  
     std::ofstream file;
 
@@ -284,7 +284,7 @@ void VoxelGrid::save_csv(const std::string& fname)
 }
 
 
-void VoxelGrid::save_hdf5(const std::string& fname)
+void VoxelGrid::save_hdf5(const std::string& fname) const
 {
     throw std::logic_error("Not implemented");
     /*

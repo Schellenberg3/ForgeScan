@@ -78,7 +78,7 @@ class VoxelGrid
         ///          indicies that are out of bounds in X or Y directions, the calculated vector index
         ///          will be a valid alias for a point which is within the grid but with a different Z index. 
         /// @note Because of the above warning this function may be removed in the future.
-        int gidx(const size_t& input, Vector3ui& output);
+        int gidx(const size_t& input, Vector3ui& output) const;
 
 
         /// @brief Transforms the input index into coordinates within the voxel grid.
@@ -86,7 +86,7 @@ class VoxelGrid
         /// @param output Index in discrete voxel grid
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
-        int gidx(const Vector3d& input, Vector3ui& output);
+        int gidx(const Vector3d& input, Vector3ui& output) const;
 
 
         /// @brief Transforms the input index into coordinates within the continuous space that the grid spans
@@ -98,7 +98,7 @@ class VoxelGrid
         ///          indicies that are out of bounds in X or Y directions, the calculated vector index
         ///          will be a valid alias for a point which is within the grid but with a different Z index. 
         /// @note Because of the above warning this function may be removed in the future.
-        int sidx(const size_t& input, Vector3d& output);
+        int sidx(const size_t& input, Vector3d& output) const;
 
 
         /// @brief Transforms the input index into coordinates within the continuous space that the grid spans
@@ -106,7 +106,7 @@ class VoxelGrid
         /// @param output Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
-        int sidx(const Vector3ui& input, Vector3d& output);
+        int sidx(const Vector3ui& input, Vector3d& output) const;
 
 
         /// @brief Transforms the input index into the index location within the underlying std::vector
@@ -114,7 +114,7 @@ class VoxelGrid
         /// @param output Index location within the underlying std::vector
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
-        int vidx(const Vector3d& input, size_t& output);
+        int vidx(const Vector3d& input, size_t& output) const;
 
 
         /// @brief Transforms the input index into the index location within the underlying std::vector
@@ -122,13 +122,13 @@ class VoxelGrid
         /// @param output Index location within the underlying std::vector
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
-        int vidx(const Vector3ui& input, size_t& output);
+        int vidx(const Vector3ui& input, size_t& output) const;
 
 
         /// @brief Checks that the given coordinates are within the grids coordinate bounds
         /// @param input Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @return True if all values are within their respective upper and lower bounds, false otherwise.
-        bool const inline valid(const Vector3d input) {
+        bool inline valid(const Vector3d input) const {
             return (this->lower.array() <= input.array() && input.array() <= this->upper.array()).all();
         }
 
@@ -136,7 +136,7 @@ class VoxelGrid
         /// @brief Checks that the given grid indicies are within the grids index bounds 
         /// @param input Index in discrete voxel grid
         /// @return True if all values are within their respective upper and lower bounds, false otherwise.
-        bool const inline valid(const Vector3ui input) {
+        bool inline valid(const Vector3ui input) const {
             return (input.array() < this->size.array()).all();
         }
 
@@ -144,7 +144,7 @@ class VoxelGrid
         /// @brief Checks that the given vector index is within the vector bounds
         /// @param input Index location within the underlying std::vector
         /// @return True if the value is less than the vector's size, false otherwise.
-        bool const inline valid(const size_t& input) {
+        bool inline valid(const size_t& input) const {
             return input < this->grid->size();
         }
 
@@ -153,7 +153,7 @@ class VoxelGrid
         /// @param idx Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @return Value at the location
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
-        VoxelElement const inline at(const Vector3d& idx) {
+        VoxelElement inline at(const Vector3d& idx) const {
             size_t vidx;
             this->vidx(idx, vidx);
             return this->at(vidx);       
@@ -164,8 +164,7 @@ class VoxelGrid
         /// @param idx Index in discrete voxel grid
         /// @return Value at the location
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
-        VoxelElement const inline at(const Vector3ui& idx) {
-            // TODO: This and the 
+        VoxelElement inline at(const Vector3ui& idx) const {
             size_t vidx;
             this->vidx(idx, vidx);
             return this->at(vidx);
@@ -176,7 +175,7 @@ class VoxelGrid
         /// @param idx Index location within the underlying std::vector
         /// @return Value at the index
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
-        VoxelElement const inline at(const size_t& idx) {
+        VoxelElement inline at(const size_t& idx) const {
             if (!this->valid(idx)) throw std::invalid_argument("Input resulted in out of bound vector access.");
             return this->grid->at(idx);
         }
@@ -297,12 +296,12 @@ class VoxelGrid
         /// @brief Saves the grids points in a CSV-line format.
         ///        The values are stored incrementing in fastest in  X, then Y, then Z.
         /// @param fname The name for the save file. 
-        void save_csv(const std::string& fname);
+        void save_csv(const std::string& fname) const;
 
 
         /// @brief Saves in the HDF5 Format
         /// @param fname File name
-        void save_hdf5(const std::string& fname);
+        void save_hdf5(const std::string& fname) const;
 
 
         /// @brief Loads data from an HDF5 file

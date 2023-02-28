@@ -3,7 +3,10 @@
 void update_voxel_element(VoxelElement& element, const VoxelElementUpdate& update)
 {
     if (update.new_dist)
-        element.update_dist_average(*update.new_dist);
+    {
+        element.update_min_dist(*update.new_dist);
+        element.update_avg_std_dist(*update.new_dist);
+    }
 
     if (update.new_cent)
         element.update_cent(*update.new_cent);

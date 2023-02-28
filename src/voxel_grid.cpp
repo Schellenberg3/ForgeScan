@@ -20,7 +20,7 @@
 #include <filesystem>
 
 
-VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, bool round_points_in)
+VoxelGrid::VoxelGrid(double resolution, point lower, point upper, bool round_points_in)
 {
     Vector3d span = upper - lower;
 
@@ -44,7 +44,7 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
 }
 
 
-int VoxelGrid::gidx(const size_t& input, Vector3ui& output) const
+int VoxelGrid::toGrid(const vector_idx& input, Vector3ui& output) const
 {
     static const double sxsy = (double) this->size[0]*this->size[1];
 
@@ -71,7 +71,7 @@ int VoxelGrid::gidx(const size_t& input, Vector3ui& output) const
 }
 
 
-int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output) const
+int VoxelGrid::toGrid(const point& input, grid_idx& output) const
 {
     Vector3d temp = (input - lower).array() * this->idx_scale.array();
     for (int i =0; i < 3; ++i)
@@ -88,15 +88,15 @@ int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output) const
 }
 
 
-int VoxelGrid::sidx(const size_t& input, Vector3d& output) const
+int VoxelGrid::toPoint(const vector_idx& input, point& output) const
 {
-    Vector3ui gidx;
-    this->gidx(input, gidx);
-    return this->sidx(gidx, output);
+    grid_idx gidx;
+    this->toGrid(input, gidx);
+    return this->toPoint(gidx, output);
 }
 
 
-int VoxelGrid::sidx(const Vector3ui& input, Vector3d& output) const
+int VoxelGrid::toPoint(const grid_idx& input, point& output) const
 {
     output = (input.cast<double>().array() / this->idx_scale.array()) + this->lower.array();
 
@@ -106,15 +106,15 @@ int VoxelGrid::sidx(const Vector3ui& input, Vector3d& output) const
 }
 
 
-int VoxelGrid::vidx(const Vector3d& input, size_t& output) const
+int VoxelGrid::toVector(const point& input, vector_idx& output) const
 {
-    Vector3ui gidx;
-    this->gidx(input, gidx);
-    return this->vidx(gidx, output);
+    grid_idx gidx;
+    this->toGrid(input, gidx);
+    return this->toVector(gidx, output);
 }
 
 
-int VoxelGrid::vidx(const Vector3ui& input, size_t& output) const
+int VoxelGrid::toVector(const grid_idx& input, vector_idx& output) const
 {
     output = ( input[0] ) + ( input[1] * this->size[0] ) + ( input[2] * this->size[0] * this->size[1] );
 
@@ -124,7 +124,7 @@ int VoxelGrid::vidx(const Vector3ui& input, size_t& output) const
 }
 
 
-int VoxelGrid::get_6(const Vector3ui& input, std::vector<Vector3ui>& output)
+int VoxelGrid::get_6(const grid_idx& input, std::vector<grid_idx>& output)
 {
     output.clear();
     if (output.capacity() != 6) output.reserve(6);

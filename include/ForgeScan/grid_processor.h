@@ -1,6 +1,7 @@
 #ifndef FORGESCAN_GRID_PROCESSOR_H
 #define FORGESCAN_GRID_PROCESSOR_H
 
+#include <ForgeScan/forgescan_types.h>
 #include <ForgeScan/voxel_element.h>
 #include <ForgeScan/voxel_grid.h>
 
@@ -9,8 +10,6 @@
 #include <functional>
 #include <Eigen/Geometry>
 
-
-typedef Eigen::Matrix<size_t, 3, 1> Vector3ui;
 
 class VoxelGrid;  // Promise to compiler that the VoxelGrid class will be defined later
 
@@ -52,19 +51,19 @@ class GridProcessor {
         /// @param operation Function to perform. Function must take a constant reference to an element.
         /// @param target Pointer to a VoxelGrid. If this is something other than null and not whatever 
         ///               the class is currently pointint to, then it will resize the vector for this new target.
-        void elementwise_operation(const std::function<void(const Vector3ui&)>& operation, VoxelGrid* target);
+        void elementwise_operation(const std::function<void(const grid_idx&)>& operation, VoxelGrid* target);
 
 
         /// @brief Erodes the element in the temporary vector at the provided location. 
         /// @param element Location to erode.
         /// @param n Number of un-sensed (zero) neighbors. If n or greater are un-sensed, then the element is set to 0.
-        void erode_element(const Vector3ui& element, const int& n);
+        void erode_element(const grid_idx& element, const int& n);
 
 
         /// @brief Dilates the element in the temporary vector at the provided location. 
         /// @param element Location to dilate.
         /// @param n Number of sensed (non-zero) neighbors. If n or greater are sense, then the element is set to 1.
-        void dilate_element(const Vector3ui& element, const int& n);
+        void dilate_element(const grid_idx& element, const int& n);
 
 
     public:

@@ -1,6 +1,7 @@
 # ifndef FORGESCAN_VOXEL_GRID_H
 # define FORGESCAN_VOXEL_GRID_H
 
+#include <ForgeScan/forgescan_types.h>
 #include <ForgeScan/voxel_element.h>
 #include <ForgeScan/sim_sensor_reading.h>
 #include <ForgeScan/grid_processor.h>
@@ -12,13 +13,6 @@
 #include <memory>
 
 #define INVALID_INDEX_ERROR_CODE -1
-
-
-/// Convenience typedef for Eigen
-typedef Eigen::Vector3d Vector3d;
-
-/// Convenience typedef for Eigen; 32 bit unsigned
-typedef Eigen::Matrix<size_t, 3, 1> Vector3ui;
 
 
 /// @brief Container for a 3 dimensional grid ov voxels.
@@ -39,10 +33,10 @@ class VoxelGrid
         double resolution;
 
         /// Lower (X, Y, Z) bound for coordinates inside of grid
-        Eigen::Vector3d lower;
+        point lower;
 
         /// Upper (X, Y, Z) bound for coordinates inside of grid
-        Vector3d upper;
+        point upper;
 
         /// Pre-computed scaling factor for point placement
         Vector3d idx_scale;
@@ -65,7 +59,7 @@ class VoxelGrid
         ///         the respective lower bound.
         /// @note The "true" upper bound may be greater than what is given based on the resolution.
         /// @TODO: The default action to round points in will be changed to false in a future update.
-        VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, bool round_points_in = true);
+        VoxelGrid(double resolution, point lower, point upper, bool round_points_in = true);
 
 
         /// @brief Transforms the input index into coordinates within the voxel grid.
@@ -77,7 +71,7 @@ class VoxelGrid
         ///          indicies that are out of bounds in X or Y directions, the calculated vector index
         ///          will be a valid alias for a point which is within the grid but with a different Z index. 
         /// @note Because of the above warning this function may be removed in the future.
-        int gidx(const size_t& input, Vector3ui& output) const;
+        int toGrid(const vector_idx& input, grid_idx& output) const;
 
 
         /// @brief Transforms the input index into coordinates within the voxel grid.
@@ -85,7 +79,7 @@ class VoxelGrid
         /// @param output Index in discrete voxel grid
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
-        int gidx(const Vector3d& input, Vector3ui& output) const;
+        int toGrid(const point& input, grid_idx& output) const;
 
 
         /// @brief Transforms the input index into coordinates within the continuous space that the grid spans
@@ -97,7 +91,7 @@ class VoxelGrid
         ///          indicies that are out of bounds in X or Y directions, the calculated vector index
         ///          will be a valid alias for a point which is within the grid but with a different Z index. 
         /// @note Because of the above warning this function may be removed in the future.
-        int sidx(const size_t& input, Vector3d& output) const;
+        int toPoint(const vector_idx& input, point& output) const;
 
 
         /// @brief Transforms the input index into coordinates within the continuous space that the grid spans
@@ -105,7 +99,7 @@ class VoxelGrid
         /// @param output Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
-        int sidx(const Vector3ui& input, Vector3d& output) const;
+        int toPoint(const grid_idx& input, point& output) const;
 
 
         /// @brief Transforms the input index into the index location within the underlying std::vector
@@ -113,7 +107,7 @@ class VoxelGrid
         /// @param output Index location within the underlying std::vector
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
-        int vidx(const Vector3d& input, size_t& output) const;
+        int toVector(const point& input, vector_idx& output) const;
 
 
         /// @brief Transforms the input index into the index location within the underlying std::vector
@@ -121,13 +115,13 @@ class VoxelGrid
         /// @param output Index location within the underlying std::vector
         /// @returns 0 if the transformation is valid.
         /// @returns A non-zero integer if the transformation is invalid.
-        int vidx(const Vector3ui& input, size_t& output) const;
+        int toVector(const grid_idx& input, vector_idx& output) const;
 
 
         /// @brief Checks that the given coordinates are within the grids coordinate bounds
         /// @param input Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @return True if all values are within their respective upper and lower bounds, false otherwise.
-        bool inline valid(const Vector3d input) const {
+        bool inline valid(const point input) const {
             return (this->lower.array() <= input.array() && input.array() <= this->upper.array()).all();
         }
 
@@ -135,7 +129,7 @@ class VoxelGrid
         /// @brief Checks that the given grid indicies are within the grids index bounds 
         /// @param input Index in discrete voxel grid
         /// @return True if all values are within their respective upper and lower bounds, false otherwise.
-        bool inline valid(const Vector3ui input) const {
+        bool inline valid(const grid_idx input) const {
             return (input.array() < this->size.array()).all();
         }
 
@@ -143,7 +137,7 @@ class VoxelGrid
         /// @brief Checks that the given vector index is within the vector bounds
         /// @param input Index location within the underlying std::vector
         /// @return True if the value is less than the vector's size, false otherwise.
-        bool inline valid(const size_t& input) const {
+        bool inline valid(const vector_idx& input) const {
             return input < this->grid->size();
         }
 
@@ -152,9 +146,9 @@ class VoxelGrid
         /// @param idx Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @return Value at the location
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
-        VoxelElement inline at(const Vector3d& idx) const {
-            size_t vidx;
-            this->vidx(idx, vidx);
+        VoxelElement inline at(const point& idx) const {
+            vector_idx vidx;
+            this->toVector(idx, vidx);
             return this->at(vidx);       
         }
 
@@ -163,9 +157,9 @@ class VoxelGrid
         /// @param idx Index in discrete voxel grid
         /// @return Value at the location
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
-        VoxelElement inline at(const Vector3ui& idx) const {
-            size_t vidx;
-            this->vidx(idx, vidx);
+        VoxelElement inline at(const grid_idx& idx) const {
+            vector_idx vidx;
+            this->toVector(idx, vidx);
             return this->at(vidx);
         }
 
@@ -174,7 +168,7 @@ class VoxelGrid
         /// @param idx Index location within the underlying std::vector
         /// @return Value at the index
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
-        VoxelElement inline at(const size_t& idx) const {
+        VoxelElement inline at(const vector_idx& idx) const {
             if (!this->valid(idx)) throw std::invalid_argument("Input resulted in out of bound vector access.");
             return this->grid->at(idx);
         }
@@ -185,9 +179,9 @@ class VoxelGrid
         /// @param val Value to set to
         /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the location is invalid.
-        int inline set(const Vector3d& idx, const uint8_t& val) {
-            size_t vidx;
-            this->vidx(idx, vidx);
+        int inline set(const point& idx, const uint8_t& val) {
+            vector_idx vidx;
+            this->toVector(idx, vidx);
             return this->set(vidx, val);
         }
 
@@ -197,9 +191,9 @@ class VoxelGrid
         /// @param val Value to set to
         /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the location is invalid.
-        int inline set(const Vector3ui& idx, const uint8_t& val) {
-            size_t vidx;
-            this->vidx(idx, vidx);
+        int inline set(const grid_idx& idx, const uint8_t& val) {
+            vector_idx vidx;
+            this->toVector(idx, vidx);
             return this->set(vidx, val);
         }
 
@@ -209,7 +203,7 @@ class VoxelGrid
         /// @param val Value to set to
         /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the transformation is invalid.
-        int inline set(const size_t& idx, const uint8_t& val) {
+        int inline set(const vector_idx& idx, const uint8_t& val) {
             if ( !this->valid(idx) ) return INVALID_INDEX_ERROR_CODE;
             this->grid->at(idx) = val;
             return 0;
@@ -222,9 +216,9 @@ class VoxelGrid
         /// @returns 0 if the increment was successful.
         /// @returns A non-zero integer if the location is invalid.
         /// @warning This does not check for overflow or underflow.
-        int inline inc(const Vector3d& idx, const uint8_t& val = 1) {
-            size_t vidx;
-            this->vidx(idx, vidx);
+        int inline inc(const point& idx, const uint8_t& val = 1) {
+            vector_idx vidx;
+            this->toVector(idx, vidx);
             return this->inc(vidx, val);       
         }
 
@@ -235,9 +229,9 @@ class VoxelGrid
         /// @returns 0 if the increment was successful.
         /// @returns A non-zero integer if the location is invalid.
         /// @warning This does not check for overflow or underflow.
-        int inline inc(const Vector3ui& idx, const int& val = 1) {
-            size_t vidx;
-            this->vidx(idx, vidx);
+        int inline inc(const grid_idx& idx, const int& val = 1) {
+            vector_idx vidx;
+            this->toVector(idx, vidx);
             return this->inc(vidx, val);       
         }
 
@@ -248,7 +242,7 @@ class VoxelGrid
         /// @returns 0 if the increment was successful.
         /// @returns A non-zero integer if the location is invalid.
         /// @warning This does not check for overflow or underflow.
-        int inline inc(const size_t& idx, const int& val = 1) {
+        int inline inc(const vector_idx& idx, const int& val = 1) {
             if ( !this->valid(idx) ) return INVALID_INDEX_ERROR_CODE;
             this->grid->at(idx).inc_views();
             return 0;
@@ -262,7 +256,7 @@ class VoxelGrid
         /// @returns A non-zero integer if at least one neighbor is believed to be invalid invalid.
         /// @note This does not guarantee that the output neighbors are all valid elements. But does guarantee 6
         ///       grid indicies will be returned. Call `valid` on the elements to verify that they may be accessed.
-        int get_6(const Vector3ui& input, std::vector<Vector3ui>& output);
+        int get_6(const grid_idx& input, std::vector<grid_idx>& output);
 
 
         /// @brief Adds the provided sensor to the grid

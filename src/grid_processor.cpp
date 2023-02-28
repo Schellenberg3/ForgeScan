@@ -26,12 +26,12 @@ void inline GridProcessor::setup_temp_vector()
 }
 
 
-void GridProcessor::elementwise_operation(const std::function<void(const Vector3ui&)>& operation, VoxelGrid* target)
+void GridProcessor::elementwise_operation(const std::function<void(const grid_idx&)>& operation, VoxelGrid* target)
 {
     if (this->set_new_target(target)) this->setup_temp_vector();
     this->reset_temp();
 
-    Vector3ui current_gidx(0, 0, 0);
+    grid_idx current_gidx(0, 0, 0);
     size_t current_vidx = 0;
 
     for (size_t z = 0, z_max = this->voxel_grid->size[2]; z < z_max; ++z)
@@ -51,12 +51,12 @@ void GridProcessor::elementwise_operation(const std::function<void(const Vector3
 }
 
 
-void GridProcessor::dilate_element(const Vector3ui& element, const int& n)
+void GridProcessor::dilate_element(const grid_idx& element, const int& n)
 {
-    static std::vector<Vector3ui> neighbors(6, Vector3ui(0, 0, 0));
-    static size_t element_vidx = 0;
+    static std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
+    static vector_idx element_vidx = 0;
     
-    this->voxel_grid->vidx(element, element_vidx);
+    this->voxel_grid->toVector(element, element_vidx);
     int known_neighbor_count = this->voxel_grid->at(element_vidx).view_count != 0 ? 1 : 0;
 
     this->voxel_grid->get_6(element, neighbors);
@@ -70,12 +70,12 @@ void GridProcessor::dilate_element(const Vector3ui& element, const int& n)
 }
 
 
-void GridProcessor::erode_element(const Vector3ui& element, const int& n)
+void GridProcessor::erode_element(const grid_idx& element, const int& n)
 {
-    static std::vector<Vector3ui> neighbors(6, Vector3ui(0, 0, 0));
-    static size_t element_vidx = 0;
+    static std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
+    static vector_idx element_vidx = 0;
     
-    this->voxel_grid->vidx(element, element_vidx);
+    this->voxel_grid->toVector(element, element_vidx);
     // int known_neighbor_count = this->voxel_grid->at(element_vidx) == 0 ? 1 : 0;
     int known_neighbor_count = 1;
     if (this->voxel_grid->at(element_vidx).view_count != 0)

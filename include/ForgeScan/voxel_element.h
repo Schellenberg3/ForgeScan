@@ -29,6 +29,22 @@ typedef float voxel_normality;
 typedef float voxel_density;
 
 
+/// @brief Container for updates to a voxel. Using pointers we can indicate if information
+///        does not exist (and the should not be updated) by setting it to nullptr.
+/// @note  Does not contain a new voxel_view; incrementing the count is implicit.
+struct VoxelElementUpdate {
+    voxel_distance*   new_dist    = nullptr;
+    voxel_centrality* new_cent    = nullptr;
+    voxel_normality*  new_norm    = nullptr;
+    voxel_density*    new_density = nullptr;
+
+    /// @brief Constructor for distance-only update.
+    /// @param new_dist Pointer to new voxel_distance variable.
+    VoxelElementUpdate(voxel_distance* new_dist) :
+        new_dist(new_dist), new_cent(nullptr), new_norm(nullptr), new_density(nullptr) { }
+};
+
+
 /// @brief A compact container for attributes relevant to each voxel within a grid.
 ///
 /// @details It is important for this class to be relatively small. At present it should be just 18 Bytes.
@@ -156,22 +172,6 @@ public:
         if (new_density < density)
             density = new_density;
     }
-};
-
-
-/// @brief Container for updates to a voxel. Using pointers we can indicate if information
-///        does not exist (and the should not be updated) by setting it to nullptr.
-/// @note  Does not contain a new voxel_view; incrementing the count is implicit.
-struct VoxelElementUpdate {
-    voxel_distance*   new_dist    = nullptr;
-    voxel_centrality* new_cent    = nullptr;
-    voxel_normality*  new_norm    = nullptr;
-    voxel_density*    new_density = nullptr;
-
-    /// @brief Constructor for distance-only update.
-    /// @param new_dist Pointer to new voxel_distance variable.
-    VoxelElementUpdate(voxel_distance* new_dist) :
-        new_dist(new_dist), new_cent(nullptr), new_norm(nullptr), new_density(nullptr) { }
 };
 
 

@@ -56,6 +56,9 @@ struct VoxelElementUpdate {
 class VoxelElement {
     friend class GridProcessor;
 
+    friend void init_voxel_element(VoxelElement& element, const VoxelElementUpdate& update);
+
+private:
     /// @brief Records number of times a voxel has been updated with new information.
     voxel_views view_count = 0;
     
@@ -181,6 +184,9 @@ public:
 ///                to nullptr will be skipped.
 /// @note Always increments the view count of the targeted VoxelElement.
 void update_voxel_element(VoxelElement& element, const VoxelElementUpdate& update);
+
+
+void init_voxel_element(VoxelElement& element, const VoxelElementUpdate& update);
 
 
 #endif // FORGESCAN_VOXEL_ELEMENT_H

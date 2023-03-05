@@ -136,7 +136,7 @@ public:
 
     /// @brief Updates the truncated distance by taking the minimum distance.
     /// @param new_dist New truncated distance.
-    void inline update_min_dist(const voxel_distance& new_dist ) {
+    void inline update_min_dist(const voxel_distance& new_dist) {
         if (new_dist < min_dist)
             min_dist = new_dist;
     }
@@ -145,7 +145,7 @@ public:
     /// @param new_dist New truncated distance.
     /// @note Applies Welford's online algorithm. See:
     ///       https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
-    void inline update_avg_std_dist(const voxel_distance& new_dist ) {
+    void inline update_avg_std_dist(const voxel_distance& new_dist) {
         float delta = (new_dist - avg_dist);
         avg_dist += delta / (view_count + 1);
         agg_sq_dist += (new_dist - avg_dist) * delta;  // Divide by N for the standard deviation
@@ -175,11 +175,11 @@ public:
 };
 
 
-/// @brief Updates the specified VoxelElement with the provided VoxelElementUpdate. 
+/// @brief Updates the specified VoxelElement with the provided VoxelElementUpdate.
 /// @param element Element to target with the updates.
 /// @param update  Values to update the target members with. Update members pointing
 ///                to nullptr will be skipped.
-/// @note Always increments the view count of the targeted VoxelElement. 
+/// @note Always increments the view count of the targeted VoxelElement.
 void update_voxel_element(VoxelElement& element, const VoxelElementUpdate& update);
 
 

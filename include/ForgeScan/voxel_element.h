@@ -60,7 +60,7 @@ class VoxelElement {
     voxel_views view_count = 0;
     
     /// @brief Truncated distance, minimum, from the voxel to the object surface
-    voxel_distance min_dist = std::numeric_limits<voxel_distance>::infinity();
+    voxel_distance min_dist = 0;
 
     /// @brief Running average of the truncated signed distances.
     voxel_distance avg_dist = 0;
@@ -89,17 +89,17 @@ class VoxelElement {
     }
 
 public:
-    /// TODO: How to properly initialize? Zero votes do not seem correct.
-    VoxelElement() : view_count(0), min_dist(0), avg_dist(0), agg_sq_dist(0), cent(0), density(0), norm(0) { }
+    VoxelElement(){};
 
     /// @param view_count Number of views, typically 0 at the beginning. 
     /// @param dist Initial truncated distance.
     /// @param cent Initial centrality score.
     /// @param density  Initial density score.
     /// @param norm Initial normality score.
-    VoxelElement(voxel_views view_count, voxel_distance min_dist = 0, voxel_distance avg_dist = 0, voxel_distance agg_sq_dist = 0,
-                 voxel_centrality cent = 0, voxel_normality norm = 0, voxel_density density = 0) :
-    view_count(view_count), min_dist(min_dist), avg_dist(avg_dist), agg_sq_dist(agg_sq_dist), cent(cent), density(density), norm(norm) { }
+    VoxelElement(voxel_views view_count, voxel_distance distance = 0, voxel_centrality cent = 0,
+                 voxel_normality norm = 0, voxel_density density = 0) :
+                 view_count(view_count), min_dist(distance), avg_dist(distance),
+                 cent(cent), density(density), norm(norm) { }
 
     /// @brief Gets count for the number of views the voxel has.
     /// @return Number of views.

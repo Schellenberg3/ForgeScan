@@ -210,44 +210,6 @@ class VoxelGrid
         }
 
 
-        /// @brief Increments the value at the given location
-        /// @param idx Coordinates in continuous space relative to the VoxelGrid's reference frame
-        /// @param val Value to Increments by. May be negative.
-        /// @returns 0 if the increment was successful.
-        /// @returns A non-zero integer if the location is invalid.
-        /// @warning This does not check for overflow or underflow.
-        int inline inc(const point& idx, const uint8_t& val = 1) {
-            vector_idx vidx;
-            this->toVector(idx, vidx);
-            return this->inc(vidx, val);       
-        }
-
-
-        /// @brief Increments the value at the given location
-        /// @param idx Index in discrete voxel grid
-        /// @param val Value to Increments by. May be negative.
-        /// @returns 0 if the increment was successful.
-        /// @returns A non-zero integer if the location is invalid.
-        /// @warning This does not check for overflow or underflow.
-        int inline inc(const grid_idx& idx, const int& val = 1) {
-            vector_idx vidx;
-            this->toVector(idx, vidx);
-            return this->inc(vidx, val);       
-        }
-
-
-        /// @brief Increments the value at the given location
-        /// @param idx Index location within the underlying std::vector
-        /// @param val Value to Increments by. May be negative.
-        /// @returns 0 if the increment was successful.
-        /// @returns A non-zero integer if the location is invalid.
-        /// @warning This does not check for overflow or underflow.
-        int inline inc(const vector_idx& idx, const int& val = 1) {
-            if ( !this->valid(idx) ) return INVALID_INDEX_ERROR_CODE;
-            this->grid->at(idx).inc_views();
-            return 0;
-        }
-
 
         /// @brief Gets the six connected neighbors.
         /// @param input  Index in discrete voxel grid

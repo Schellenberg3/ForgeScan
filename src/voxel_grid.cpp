@@ -28,6 +28,7 @@ VoxelGrid::VoxelGrid(double resolution, point lower, point upper, bool round_poi
     if (resolution <= 0) throw std::invalid_argument("Resolution must be greater than 0.");
     if ( (span.array() <= 0).any() ) throw std::invalid_argument("Improper upper/lower bounds.");
 
+    this->resolution = resolution;
     this->lower = lower;
     this->upper = upper;
     for (int i = 0; i < 3; ++i)

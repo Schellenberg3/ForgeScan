@@ -20,6 +20,14 @@ class VoxelGrid
 {
     friend class GridProcessor;
 
+    friend bool addRayExact(VoxelGrid&, const VoxelElementUpdate&, const point&, const point&,
+                            const std::function<void(const grid_idx&)>, const double&, const double&);
+
+    friend bool addRayLinspace(VoxelGrid&, const VoxelElementUpdate&, const point&, const point&,
+                               const size_t&, const std::function<void(const grid_idx&)>);
+
+    friend bool addRayApprox(VoxelGrid&, const VoxelElementUpdate&, const point&, const point&,
+                             const double&, const std::function<void(const grid_idx&)>);
 
     private:
         /// Vector structure for the voxels. Increments fastest in X, then Y, then Z.
@@ -179,7 +187,7 @@ class VoxelGrid
         /// @param val Value to set to
         /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the location is invalid.
-        int inline set(const point& idx, const uint8_t& val) {
+        int inline set(const point& idx, const VoxelElementUpdate& val) {
             vector_idx vidx;
             this->toVector(idx, vidx);
             return this->set(vidx, val);
@@ -191,7 +199,7 @@ class VoxelGrid
         /// @param val Value to set to
         /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the location is invalid.
-        int inline set(const grid_idx& idx, const uint8_t& val) {
+        int inline set(const grid_idx& idx, const VoxelElementUpdate& val) {
             vector_idx vidx;
             this->toVector(idx, vidx);
             return this->set(vidx, val);
@@ -203,12 +211,11 @@ class VoxelGrid
         /// @param val Value to set to
         /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the transformation is invalid.
-        int inline set(const vector_idx& idx, const uint8_t& val) {
+        int inline set(const vector_idx& idx, const VoxelElementUpdate& val) {
             if ( !this->valid(idx) ) return INVALID_INDEX_ERROR_CODE;
-            this->grid->at(idx) = val;
+            update_voxel_element(this->grid->at(idx), val);
             return 0;
         }
-
 
 
         /// @brief Gets the six connected neighbors.

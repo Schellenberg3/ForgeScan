@@ -3,6 +3,7 @@
 
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/grid_processor.h>
+#include <ForgeScan/grid_traversal.h>
 
 
 /// @brief Simple script for manually adding points to a VoxelGrid within [-1,-1,-1] and [+1,+1,+1].
@@ -15,8 +16,11 @@ int main(int argc, char** argv)
 
     double res = 0.02;
 
+    voxel_distance d = 1;
+    VoxelElementUpdate update(&d);
+
     // 2m x 2m x 2m cube with 0.02 m resolution
-    VoxelGrid grid(res, lower, upper, 0, true);
+    VoxelGrid grid(res, lower, upper, false);
     std::cout << "Initialized the VoxelGrid!" << std::endl;
 
     GridProcessor processor(grid);
@@ -32,7 +36,7 @@ int main(int argc, char** argv)
         xyz[1] = y;
         xyz[2] = z;
 
-        grid.set(xyz, 1);
+        grid.set(xyz, update);
 
     } while (q == 0);
 
@@ -40,33 +44,32 @@ int main(int argc, char** argv)
     start << 0, 0, 1.5;
     end << 0, -1.5, 0;
 
-    std::cout << "Adding a linear space..." << std::endl;
-    grid.add_linear_space(start, end, 100);
-
-
     int n_ops = 0;
-    do {
-        std::cout << "Enter 1 to dilate, 2 to erode, or 0 to continue: ";
-        std::cin >> q;
+    if (false)
+    {
+        do {
+            std::cout << "Enter 1 to dilate, 2 to erode, or 0 to continue: ";
+            std::cin >> q;
 
-        if (q == 1)
-        {
-            std::cout << "Performing strong  dilation n=1...";
-            processor.dilate(1);
-        }
-        else if (q == 2)
-        {
-            std::cout << "Performing soft erosion n=5...";
-            processor.erode(5);
-        }
-        
-        if (q != 0)
-        {
-            ++n_ops;
-            std::cout << " operation " << n_ops << " finished," << std::endl;
-        }
+            if (q == 1)
+            {
+                std::cout << "Performing strong  dilation n=1...";
+                processor.dilate(1);
+            }
+            else if (q == 2)
+            {
+                std::cout << "Performing soft erosion n=5...";
+                processor.erode(5);
+            }
+            
+            if (q != 0)
+            {
+                ++n_ops;
+                std::cout << " operation " << n_ops << " finished," << std::endl;
+            }
 
-    } while (q != 0);
+        } while (q != 0);
+    }
 
     std::cout << "Saving to CSV..."  << std::endl;
     grid.save_csv("test_points.csv");

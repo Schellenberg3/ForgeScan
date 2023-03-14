@@ -20,7 +20,7 @@
 #include <filesystem>
 
 
-VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d upper, const uint8_t& init, bool round_points_in)
+VoxelGrid::VoxelGrid(double resolution, point lower, point upper, bool round_points_in)
 {
     Vector3d span = upper - lower;
 
@@ -28,6 +28,7 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
     if (resolution <= 0) throw std::invalid_argument("Resolution must be greater than 0.");
     if ( (span.array() <= 0).any() ) throw std::invalid_argument("Improper upper/lower bounds.");
 
+    this->resolution = resolution;
     this->lower = lower;
     this->upper = upper;
     for (int i = 0; i < 3; ++i)
@@ -35,7 +36,8 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
     this->idx_scale = this->size.cast<double>().array() / span.array();
 
     size_t vec_len = this->size[0] * this->size[1] * this->size[2];
-    this->grid = std::make_shared<std::vector<uint8_t>>(vec_len, init);
+
+    this->grid = std::make_shared<std::vector<VoxelElement>>(vec_len, VoxelElement());
     double mem = byte_to_megabytes(vector_capacity(*this->grid));
     if (mem > 100.0)
         std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
@@ -43,7 +45,7 @@ VoxelGrid::VoxelGrid(double resolution, Eigen::Vector3d lower, Eigen::Vector3d u
 }
 
 
-int VoxelGrid::gidx(const size_t& input, Vector3ui& output)
+int VoxelGrid::toGrid(const vector_idx& input, Vector3ui& output) const
 {
     static const double sxsy = (double) this->size[0]*this->size[1];
 
@@ -70,7 +72,7 @@ int VoxelGrid::gidx(const size_t& input, Vector3ui& output)
 }
 
 
-int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output)
+int VoxelGrid::toGrid(const point& input, grid_idx& output) const
 {
     Vector3d temp = (input - lower).array() * this->idx_scale.array();
     for (int i =0; i < 3; ++i)
@@ -87,15 +89,15 @@ int VoxelGrid::gidx(const Vector3d& input, Vector3ui& output)
 }
 
 
-int VoxelGrid::sidx(const size_t& input, Vector3d& output)
+int VoxelGrid::toPoint(const vector_idx& input, point& output) const
 {
-    Vector3ui gidx;
-    this->gidx(input, gidx);
-    return this->sidx(gidx, output);
+    grid_idx gidx;
+    this->toGrid(input, gidx);
+    return this->toPoint(gidx, output);
 }
 
 
-int VoxelGrid::sidx(const Vector3ui& input, Vector3d& output)
+int VoxelGrid::toPoint(const grid_idx& input, point& output) const
 {
     output = (input.cast<double>().array() / this->idx_scale.array()) + this->lower.array();
 
@@ -105,15 +107,15 @@ int VoxelGrid::sidx(const Vector3ui& input, Vector3d& output)
 }
 
 
-int VoxelGrid::vidx(const Vector3d& input, size_t& output)
+int VoxelGrid::toVector(const point& input, vector_idx& output) const
 {
-    Vector3ui gidx;
-    this->gidx(input, gidx);
-    return this->vidx(gidx, output);
+    grid_idx gidx;
+    this->toGrid(input, gidx);
+    return this->toVector(gidx, output);
 }
 
 
-int VoxelGrid::vidx(const Vector3ui& input, size_t& output)
+int VoxelGrid::toVector(const grid_idx& input, vector_idx& output) const
 {
     output = ( input[0] ) + ( input[1] * this->size[0] ) + ( input[2] * this->size[0] * this->size[1] );
 
@@ -123,7 +125,7 @@ int VoxelGrid::vidx(const Vector3ui& input, size_t& output)
 }
 
 
-int VoxelGrid::get_6(const Vector3ui& input, std::vector<Vector3ui>& output)
+int VoxelGrid::get_6(const grid_idx& input, std::vector<grid_idx>& output)
 {
     output.clear();
     if (output.capacity() != 6) output.reserve(6);
@@ -149,80 +151,7 @@ int VoxelGrid::get_6(const Vector3ui& input, std::vector<Vector3ui>& output)
 }
 
 
-int VoxelGrid::add_linear_space(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const size_t& num, const uint8_t &surface, const uint8_t &line)
-{
-    // Check that num >= 2
-
-    if (num < 1)
-        std::invalid_argument("Must place at least two points on the line segment.");
-
-    // ray = end - start
-    Eigen::Vector3d ray, line_space, place;
-    ray = end - start;
-
-    // Length of line
-    double length = 0;
-    for (int i = 0; i < 3; ++i)
-        length += std::pow(ray[i], 2);
-    length = std::sqrt(length);
-
-    // Normalize the ray
-    line_space = ray / (num - 1);
-
-    // Initialize and run the loop
-    int success = 0, fails = 0;
-    place = start;
-
-    for (int j = 0; j < num - 1; ++j)
-    {
-        success = this->set(place, line);
-        fails += success;
-
-        place += line_space;
-    }
-    success = this->set(place, surface);
-    fails += success;
-
-    return fails;
-}
-
-
-int VoxelGrid::add_line_fast(const Eigen::Vector3d& start, const Eigen::Vector3d& end, const double& vox_res, const uint8_t &surface, const uint8_t &line)
-{
-    /* Length of the line segment */
-    double dist = 0;
-    for (int i =0; i <3; ++i)
-        dist += std::pow(end[i] - start [i], 2);
-    dist = std::sqrt(dist);
-
-    /* Average spacing as a hack for now; optional different spacing makes things weird here */
-    int avg_space = ( this->size[0] + this->size[1] + this->size[2] ) / 3;
-
-    // float
-
-    int num_voxels = dist / avg_space;
-
-    /* Tracks if the line has entered the voxel grid */
-    bool entered_grid = false;
-
-    size_t num_vox = dist * vox_res;
-
-    /*
-    
-    
-    for num point in disc. line
-        point = start + fraction * (end - start)
-    
-    
-    
-    */
-    
-
-
-    return 0;
-}
-
-
+/// WARNING: Non-functional
 int VoxelGrid::add_sensor(const SimSensorReading& scanner, const uint8_t& surface, const uint8_t& line)
 {
     /// @note This has not been fully tested. It could be optimized. And it could mirror or rotate improperly.
@@ -231,6 +160,7 @@ int VoxelGrid::add_sensor(const SimSensorReading& scanner, const uint8_t& surfac
     ///       away from a sphere of 0.75 meter radius. All lines should be under 3.25 meters thus this value would place
     ///       at least 1 point in each voxel along the line. TODO: make a more robust method: `add_line_fast`.
 
+    throw std::logic_error("Temporarially depreciated as add ray methods are updated.");
     static const Eigen::Vector3d camera_z_axis(0, 0, 1);
 
     Eigen::MatrixXd copy = scanner.sensor;
@@ -254,7 +184,7 @@ int VoxelGrid::add_sensor(const SimSensorReading& scanner, const uint8_t& surfac
     for (size_t i = 0, ncols = copy.cols(); i < ncols; ++i)
     {
         /// TODO: no clue how many points to space. 300 will do for now. See note above.
-        this->add_linear_space(scanner.position, copy.col(i), 300, surface, line);
+        // this->add_linear_space(scanner.position, copy.col(i), 300, surface, line);
         // std::cout << "[" << i << "]" << " Added final point located at:\n\t" << copy.col(i).transpose() << std::endl;
         // std::cout << "    Sensed point was:\n\t" << scanner.sensor.row(i) << std::endl;
     }
@@ -262,7 +192,7 @@ int VoxelGrid::add_sensor(const SimSensorReading& scanner, const uint8_t& surfac
 }
 
 
-void VoxelGrid::save_csv(const std::string& fname)
+void VoxelGrid::save_csv(const std::string& fname) const
 {  
     std::ofstream file;
 
@@ -278,13 +208,15 @@ void VoxelGrid::save_csv(const std::string& fname)
     file << "occupancy value" << std::endl;
 
     for (const auto& voxel : *this->grid)
-        file << (int)voxel << std::endl;
+        file << voxel.get_view_count() << std::endl;
     file.close();
 }
 
 
-void VoxelGrid::save_hdf5(const std::string& fname)
+void VoxelGrid::save_hdf5(const std::string& fname) const
 {
+    throw std::logic_error("Not implemented");
+    /*
     HighFive::File file(fname, HighFive::File::ReadWrite | HighFive::File::Truncate);
 
     file.createDataSet("/data/grid_vector", *this->grid);
@@ -292,16 +224,19 @@ void VoxelGrid::save_hdf5(const std::string& fname)
 
     file.createDataSet("/position/lower", this->lower);
     file.createDataSet("/position/upper", this->upper);
+    */
 }
 
 
 void VoxelGrid::load_hdf5(const std::string& fname)
 {
+    throw std::logic_error("Not implemented");
+
+    /*
     try {
         HighFive::File file(fname, HighFive::File::ReadOnly);
-
-        // Read the data 
-        /* TODO Check the saved data validity or if there is data already in the object  */
+        // Read the data
+        // TODO Check the saved data validity or if there is data already in the object
         file.getDataSet("/data/grid_vector").read(*this->grid);
         file.getDataSet("/data/size").read(this->size);
 
@@ -310,4 +245,5 @@ void VoxelGrid::load_hdf5(const std::string& fname)
     } catch (const HighFive::Exception& err) {
         std::cerr << err.what() << std::endl;
     }
+    */
 }

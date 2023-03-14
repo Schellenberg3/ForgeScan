@@ -30,6 +30,15 @@
         "args": [],
         "cwd": "${workspaceRoot}/bin",
         "stopAtEntry": true,
+        },
+        {
+        "name": "Test Traversal",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceRoot}/bin/test_traversal",
+        "args": [],
+        "cwd": "${workspaceRoot}/bin",
+        "stopAtEntry": true,
         }
     ]
 }

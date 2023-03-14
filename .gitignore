@@ -3,6 +3,7 @@ bin/*
 build/*
 share/*
 .vscode/*
+.devcontainer/*
 
 # Do store the launch.json file
 !.vscode/launch.json

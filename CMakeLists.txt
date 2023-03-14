@@ -12,10 +12,18 @@ SET ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BASE_DIR}/lib )
 SET ( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BASE_DIR}/lib )
 SET ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BASE_DIR}/bin )
 SET ( FORGESCAN_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include)
+SET ( HIGHFIVE_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/deps/HighFive/include)
 
+# HIGHFIVE OPTIONS
+# Set a number of HighFive options to off by default. Essentially prevents their examples and
+# unit tests from being compiled automatically when building all available targets.
+set ( HIGHFIVE_UNIT_TESTS OFF CACHE BOOL "Enable unit tests (requires Catch2 to be present)" )
+set ( HIGHFIVE_BUILD_DOCS OFF CACHE BOOL "Enable documentation building" )
+set ( HIGHFIVE_EXAMPLES OFF CACHE BOOL "Compile examples" )
+
+add_subdirectory ( ${BASE_DIR}/deps/HighFive )
 
 FIND_PACKAGE (HDF5 REQUIRED COMPONENTS C CXX)
-FIND_PACKAGE (HighFive REQUIRED)
 FIND_PACKAGE (Eigen3 REQUIRED NO_MODULE)
 ### Why `NO_MODULE` ono Eigen3? I don't know
 ### Ask their CMake guide:
@@ -42,6 +50,7 @@ INCLUDE_DIRECTORIES (
     ${HDF5_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIRS}
     ${FORGESCAN_INCLUDE_DIRS}
+    ${HIGHFIVE_INCLUDE_DIRS}
 )
 
 LINK_DIRECTORIES ( 

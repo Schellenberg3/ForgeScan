@@ -21,7 +21,7 @@ class VoxelGrid
     friend class GridProcessor;
 
     friend bool addRayExact(VoxelGrid&, const VoxelElementUpdate&, const point&, const point&,
-                            const std::function<void(const grid_idx&)>, const double&, const double&);
+                            const double&, const double&, const std::function<void(const grid_idx&)>);
 
     friend bool addRayLinspace(VoxelGrid&, const VoxelElementUpdate&, const point&, const point&,
                                const size_t&, const std::function<void(const grid_idx&)>);

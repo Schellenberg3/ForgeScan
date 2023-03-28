@@ -5,10 +5,23 @@
 #define MIN(X, Y) X < Y ? X : Y
 #define MAX_UI64 std::numeric_limits<size_t>::max()
 
-/// OPTIMIZE: There is a chance that Eigen has more overhead for the simple operations we are performing
-///           and a custom Vector3 could improve performance.
 
-
+/// @brief Verifies that a given ray does intersect the given axis-aligned box.
+/// @details This checks several early exit conditions and may not return accurate the adjusted start and end times
+///          in the case that the box is not intersected.
+///          The values for ts and te are in multiples of the unit-vector direction.
+/// @param lower Lower bound for the box.
+/// @param upper Upper bound for the box.
+/// @param ray_origin Origin of the ray.
+/// @param ray_direction Direction of the ray.
+/// @param ts Start time for walking the array. A value of zero indicates starting at the origin.
+/// @param te End time for walking the array.
+/// @param ts_adj An adjusted start time for when the begins intersecting the box.
+/// @param te_adj An adjusted end time for when the ray finishes intersecting the box.
+/// @return True if the ray intersects the box in the region given by `ts` and `te`
+/// @warning Does not verify if `ray_direction` is a unit vector.
+/// @warning Does not verify if the upper point is greater than the lower point.
+/// @warning Does not check that `te` is less than `ts`.
 bool findRayAlignedBoxIntersection(const point& lower,      const point& upper, 
                                    const point& ray_origin, const point& ray_direction,
                                    const double& ts,        const double& te,
@@ -20,13 +33,11 @@ bool findRayAlignedBoxIntersection(const point& lower,      const point& upper,
     
     double t_min_y, t_max_y, t_min_z, t_max_z;
 
-    /// OPTIMIZE: Possibly do these one at a time in case we return early and a value is not needed.
-
     const Vector3d inv_direction = ray_direction.cwiseInverse();
     const Vector3d min_dist = (lower - ray_origin).array() * inv_direction.array();
     const Vector3d max_dist = (upper - ray_origin).array() * inv_direction.array();
 
-    if (inv_direction[0])
+    if (inv_direction[0] >= 0)
     {
         ts_adj = min_dist[0];
         te_adj = max_dist[0];
@@ -35,7 +46,7 @@ bool findRayAlignedBoxIntersection(const point& lower,      const point& upper,
         te_adj = min_dist[0];
     }
 
-    if (inv_direction[1])
+    if (inv_direction[1] >= 0)
     {
         t_min_y = min_dist[1];
         t_max_y = max_dist[1];
@@ -47,9 +58,9 @@ bool findRayAlignedBoxIntersection(const point& lower,      const point& upper,
     if (ts_adj > t_max_y || t_min_y > te_adj) return false;
 
     if (t_min_y > ts_adj) ts_adj = t_min_y;
-    if (t_max_y < te_adj)   te_adj   = t_max_y;
+    if (t_max_y < te_adj) te_adj = t_max_y;
 
-    if (inv_direction[2])
+    if (inv_direction[2] >= 0)
     {
         t_min_z = min_dist[2];
         t_max_z = max_dist[2];
@@ -61,34 +72,57 @@ bool findRayAlignedBoxIntersection(const point& lower,      const point& upper,
     if (ts_adj > t_max_z || t_min_z > te_adj) return false;
 
     if (t_min_z > ts_adj) ts_adj = t_min_z;
-    if (t_max_z < te_adj)   te_adj   = t_max_z;
+    if (t_max_z < te_adj) te_adj = t_max_z;
 
     return (ts_adj < te && ts < te_adj);
 }
 
 
 bool addRayExact(VoxelGrid& grid,  const VoxelElementUpdate& update,
-                 const point& rs,  const point& re, 
-                 const std::function<void(const grid_idx&)> operation,
-                 const double& ts, const double& te)
+                 const point& rs,  const point& re,
+                 const double& ts, const double& te,
+                 const std::function<void(const grid_idx&)> operation)
 {
-    double ts_adj, te_adj;
+    /// @note: This method works quite well and is very fast. However it tends to miss the final
+    ///        1 to 3 voxels. The exit condition is a bit imperfect. Maybe some boolean flags rather
+    ///        than comparisons will correct this. But this is a minor error at the moment.
 
-    Vector3d ray = rs - re;
+    Vector3d ray = re - rs;
     double   len = ray.norm();
     Vector3d dir = ray / len;
-    
+
+    // We must update the precents given as an input to multiples of the unit vector direction. 
+    double ts_units = ts * len;
+    double te_units = te * len;
+
+    // We declare adjusted start and end times (in multiples of the unit vector) so the
+    // findRayAlignedBoxIntersection method can adjust our times so we only look at valid voxels.
+    double ts_adj, te_adj;
+
+    // Early exit for segments outside of the grid or for equal start/end points. 
     bool valid_segment = findRayAlignedBoxIntersection(grid.lower, grid.upper, rs, dir,
-                                                       ts, te, ts_adj, te_adj);
-    if (valid_segment == false) return false;
+                                                       ts_units, te_units, ts_adj, te_adj);
+    if (valid_segment == false)
+    {
+        // Invalid cases could be completely outside the grid or an invalid line.
+        // We try to update the starting point in case we have the case of an invalid line because
+        // the start/end points are the same. If this is inside the grid we get the proper update.
+        int res = grid.set(rs, update);
+        return res == 0;
+    }
 
-    ts_adj = MAX(ts_adj, ts);
-    te_adj = MIN(te_adj, te);
+    // From the adjusted times and given unit-vector multiple times we want to find the max start time
+    // and the min end time. This is 
+    ts_adj = MAX(ts_adj, ts_units);
+    te_adj = MIN(te_adj, te_units);
 
-    const point rs_adj = rs + dir * len * ts_adj;
-    const point re_adj = rs + dir * len * te_adj;
+    const point rs_adj = rs + dir * ts_adj;
+    const point re_adj = rs + dir * te_adj;
+
     Vector3ui current_gidx(0,0,0);
-    Vector3ui end_gidx(0,0,0);
+
+    // For debugging it is helpful to know the end index but it is not used in the traversal algorithm.
+    // Vector3ui end_gidx(0,0,0);  
     
     /// [voxel] For each direction, as the ray is traversed, we either increment (+1) or decrement (-1) the index
     /// when we choose to step in that direction.
@@ -112,7 +146,8 @@ bool addRayExact(VoxelGrid& grid,  const VoxelElementUpdate& update,
     auto initTraversalInfo = [&](int& s_d, double& t_d, double& dt_d, const int& d)
     {
         current_gidx[d] = MAX(0,            std::floor((rs_adj[d] - grid.lower[d]) / grid.resolution));
-        end_gidx[d]     = MIN(grid.size[d], std::floor((re_adj[d]   - grid.lower[d]) / grid.resolution));
+        // See note above. Helpful for debugging but not needed for the algorithm.
+        // end_gidx[d]     = MIN(grid.size[d], std::floor((re_adj[d] - grid.lower[d]) / grid.resolution));
         if (dir[d] > 0)
         {
             s_d  = 1;
@@ -138,12 +173,11 @@ bool addRayExact(VoxelGrid& grid,  const VoxelElementUpdate& update,
     initTraversalInfo(s_y, t_y, dt_y, 1);
     initTraversalInfo(s_z, t_z, dt_z, 2);
 
-    // Traversal loop
-    /// OPTIMIZE: Call operation once on current voxel, then enter the loop. No need to enter the loop/increment in the
-    ///           case that the ray starts/ends in the same voxel.
-    /// TODO:     Is there an alternative case where traversal time is used instead? Fewer compares?
-    grid.set(current_gidx, update);
-    while ( (current_gidx.array() != end_gidx.array()).all() ){
+    /// NOTE: The exact start/end voxels hit tend to be a bit off from what might be "exact".
+    ///       I belive that there may be slight differences with rounding and from voxel resolution.
+    ///       But I will return to this another time.
+    while (t_x <= te_adj || t_y <= te_adj || t_z <= te_adj)
+    {
         if (t_x < t_y && t_x < t_z)
         {
             current_gidx[0] += s_x;
@@ -161,7 +195,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelElementUpdate& update,
         }
         // operation(current_gidx);
         grid.set(current_gidx, update);
-    } 
+    }
     return true;
 }
 
@@ -203,16 +237,33 @@ bool addRayApprox(VoxelGrid& grid, const VoxelElementUpdate& update,
 
     point place = rs;
 
-    Vector3d ray  = (re - rs);
-    double norm   = ray.norm();
-    Vector3d step = (ray / norm) * rr * grid.resolution;
+    Vector3d ray     = (re - rs);
+    double ray_norm  = ray.norm();
+    Vector3d step    = (ray / ray_norm) * rr * grid.resolution;\
+    double step_norm = step.norm();
 
+    int num = std::ceil(ray_norm / step_norm);
+
+    Vector3ui current_gidx, previous_gidx;
+    for (int j = 0; j < num; ++j)
+    {
+        grid.toGrid(place, current_idx);
+        if ( (current_idx.array() != previous_idx.array()).all() )
+            grid.set(place, update);
+        previous_idx = current_idx;
+        place += step;
+    }
+
+    return true;
+    /*
     do {
         grid.toGrid(place, current_idx);
         if ( (current_idx.array() != previous_idx.array()).all() )
             grid.set(place, update);
         previous_idx = current_idx;
         place   += step;
+        /// BUG: This is incorrect. This comparison does not work.
     } while ( (place.array() < re.array()).any() );
     return true;
+    */
 }

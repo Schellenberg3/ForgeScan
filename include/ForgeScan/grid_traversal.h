@@ -37,14 +37,14 @@ bool inline findRayAlignedBoxIntersection(const point& lower,      const point& 
 /// @param grid The VoxelGrid to traverse.
 /// @param rs Ray start position.
 /// @param re Ray end position.
-/// @param operation Function to apply at each voxel that the ray traverses. Default, an empty lambda, does nothing.
 /// @param ts Start time for walking the ray (e.g., 0 begins traversal at the given start).
 /// @param te End time for walking the ray (e.g., 1 finishes traversal at the given end).
+/// @param operation Function to apply at each voxel that the ray traverses. Default, an empty lambda, does nothing.
 /// @return True if voxels were traversed for the ray. False if the ray did not intersect the grid.
 bool addRayExact(VoxelGrid& grid,      const VoxelElementUpdate& update,
                  const point& rs,      const point& re,
-                 const std::function<void(const grid_idx&)> operation = [](const grid_idx& gidx){},
-                 const double& ts = 0, const double& te = 1);
+                 const double& ts = 0, const double& te = 1,
+                 const std::function<void(const grid_idx&)> operation = [](const grid_idx& gidx){});
 
 
 /// @brief Performs approximate ray addition by a linear spacing of a specific number of points

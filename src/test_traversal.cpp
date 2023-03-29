@@ -25,14 +25,14 @@ int main(int argc, char** argv)
     voxel_distance distance = 1;
     VoxelElementUpdate voxel_update(&distance);
 
-    int num = argc > 1 ? std::stoi(argv[1]) : 5000;
+    int num = argc > 1 ? std::stoi(argv[1]) : (1280 * 720) ; // Defualt to RealSense D455 resolution
     std::vector<Vector3d> start_vecs, end_vecs;
     start_vecs.reserve(num);
     end_vecs.reserve(num);
     {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_real_distribution<> dist(-0.9, 0.9);
+        std::uniform_real_distribution<> dist(-1.9, 1.9);
         
         for (int i = 0; i < num; ++i)
         {
@@ -40,8 +40,11 @@ int main(int argc, char** argv)
             end_vecs.push_back(Vector3d(dist(gen), dist(gen), dist(gen)));
         }
 
+        // Set the first value to the case where the start/end point are the same.
         end_vecs[0] = start_vecs[0];
-        for (int i = 0; i < 10; ++i)
+
+        // Display the first 10 (or all if the requested number is less than 10)
+        for (int i = 0, max_idx = num > 10 ? 10 : num; i < max_idx; ++i)
         {
             std::cout << "["<<i<<"] " << start_vecs[i].transpose() << " -> " << end_vecs[i].transpose() << std::endl; 
         }

@@ -41,10 +41,9 @@ bool inline findRayAlignedBoxIntersection(const point& lower,      const point& 
 /// @param te End time for walking the ray (e.g., 1 finishes traversal at the given end).
 /// @param operation Function to apply at each voxel that the ray traverses. Default, an empty lambda, does nothing.
 /// @return True if voxels were traversed for the ray. False if the ray did not intersect the grid.
-bool addRayExact(VoxelGrid& grid,      const VoxelElementUpdate& update,
+bool addRayExact(VoxelGrid& grid,      const VoxelUpdate& update,
                  const point& rs,      const point& re,
-                 const double& ts = 0, const double& te = 1,
-                 const std::function<void(const grid_idx&)> operation = [](const grid_idx& gidx){});
+                 const double& ts = 0, const double& te = 1);
 
 
 /// @brief Performs approximate ray addition by a linear spacing of a specific number of points
@@ -54,9 +53,8 @@ bool addRayExact(VoxelGrid& grid,      const VoxelElementUpdate& update,
 /// @param num Number of points to add. Must be greater than 2.
 /// @param operation Function to apply at each voxel that the ray traverses. Default, an empty lambda, does nothing.
 /// @return True.
-bool addRayLinspace(VoxelGrid& grid, const VoxelElementUpdate& update,
-                    const point& rs, const point& re, const size_t& num,
-                    const std::function<void(const grid_idx&)> operation = [](const grid_idx& gidx){});
+bool addRayLinspace(VoxelGrid& grid, const VoxelUpdate& update,
+                    const point& rs, const point& re, const size_t& num);
 
 
 /// @brief Performs approximate ray addition by spacing
@@ -66,9 +64,8 @@ bool addRayLinspace(VoxelGrid& grid, const VoxelElementUpdate& update,
 /// @param rr Ray resolution. Percent 0 to 1 relative to the VoxelGrid resolution which determines spacing.
 /// @param operation Function to apply at each voxel that the ray traverses. Default, an empty lambda, does nothing.
 /// @return True.
-bool addRayApprox(VoxelGrid& grid, const VoxelElementUpdate& update,
-                  const point& rs, const point& re, const double& rr = 0.9,
-                  const std::function<void(const grid_idx&)> operation = [](const grid_idx& gidx){});
+bool addRayApprox(VoxelGrid& grid, const VoxelUpdate& update,
+                  const point& rs, const point& re, const double& rr = 0.9);
 
 
 #endif // FORGESCAN_GRID_TRAVERSAL

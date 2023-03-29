@@ -20,14 +20,12 @@ class VoxelGrid
 {
     friend class GridProcessor;
 
-    friend bool addRayExact(VoxelGrid&, const VoxelElementUpdate&, const point&, const point&,
-                            const double&, const double&, const std::function<void(const grid_idx&)>);
+    friend bool addRayExact(VoxelGrid&, const VoxelUpdate&, const point&, const point&,
+                            const double&, const double&);
 
-    friend bool addRayLinspace(VoxelGrid&, const VoxelElementUpdate&, const point&, const point&,
-                               const size_t&, const std::function<void(const grid_idx&)>);
+    friend bool addRayLinspace(VoxelGrid&, const VoxelUpdate&, const point&, const point&, const size_t&);
 
-    friend bool addRayApprox(VoxelGrid&, const VoxelElementUpdate&, const point&, const point&,
-                             const double&, const std::function<void(const grid_idx&)>);
+    friend bool addRayApprox(VoxelGrid&, const VoxelUpdate&, const point&, const point&, const double&);
 
     private:
         /// Vector structure for the voxels. Increments fastest in X, then Y, then Z.
@@ -130,7 +128,7 @@ class VoxelGrid
         /// @param input Coordinates in continuous space relative to the VoxelGrid's reference frame
         /// @return True if all values are within their respective upper and lower bounds, false otherwise.
         bool inline valid(const point input) const {
-            return (this->lower.array() <= input.array() && input.array() <= this->upper.array()).all();
+            return ( (this->lower.array() <= input.array()).all() && (input.array() <= this->upper.array()).all() );
         }
 
 
@@ -187,9 +185,10 @@ class VoxelGrid
         /// @param val Value to set to
         /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the location is invalid.
-        int inline set(const point& idx, const VoxelElementUpdate& val) {
+        int inline set(const point& idx, const VoxelUpdate& val) {
             vector_idx vidx;
-            this->toVector(idx, vidx);
+            int result = this->toVector(idx, vidx);
+            if (result != 0) return INVALID_INDEX_ERROR_CODE;
             return this->set(vidx, val);
         }
 
@@ -199,9 +198,10 @@ class VoxelGrid
         /// @param val Value to set to
         /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the location is invalid.
-        int inline set(const grid_idx& idx, const VoxelElementUpdate& val) {
+        int inline set(const grid_idx& idx, const VoxelUpdate& val) {
             vector_idx vidx;
-            this->toVector(idx, vidx);
+            int result = this->toVector(idx, vidx);
+            if (result != 0) return INVALID_INDEX_ERROR_CODE;
             return this->set(vidx, val);
         }
 
@@ -211,9 +211,9 @@ class VoxelGrid
         /// @param val Value to set to
         /// @returns 0 if the set was successful.
         /// @returns A non-zero integer if the transformation is invalid.
-        int inline set(const vector_idx& idx, const VoxelElementUpdate& val) {
+        int inline set(const vector_idx& idx, const VoxelUpdate& val) {
             if ( !this->valid(idx) ) return INVALID_INDEX_ERROR_CODE;
-            update_voxel_element(this->grid->at(idx), val);
+            updateVoxel(this->grid->at(idx), val);
             return 0;
         }
 

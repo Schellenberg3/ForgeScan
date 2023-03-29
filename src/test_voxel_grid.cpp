@@ -16,8 +16,7 @@ int main(int argc, char** argv)
 
     double res = 0.02;
 
-    voxel_distance d = 1;
-    VoxelElementUpdate update(&d);
+    VoxelUpdate update(1);
 
     // 2m x 2m x 2m cube with 0.02 m resolution
     VoxelGrid grid(res, lower, upper, false);

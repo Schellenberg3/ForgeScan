@@ -109,8 +109,10 @@ int VoxelGrid::toPoint(const grid_idx& input, point& output) const
 
 int VoxelGrid::toVector(const point& input, vector_idx& output) const
 {
+    if ( !valid(input) )
+        return INVALID_INDEX_ERROR_CODE;
     grid_idx gidx;
-    this->toGrid(input, gidx);
+    int valid = this->toGrid(input, gidx);
     return this->toVector(gidx, output);
 }
 
@@ -205,10 +207,10 @@ void VoxelGrid::save_csv(const std::string& fname) const
 
     file << std::fixed << std::setprecision(8);
     file << "Test Voxel Grid Format File" << std::endl;
-    file << "occupancy value" << std::endl;
+    file << "Voxel Updates" << std::endl;
 
     for (const auto& voxel : *this->grid)
-        file << voxel.get_view_count() << std::endl;
+        file << voxel.updates << std::endl;
     file.close();
 }
 

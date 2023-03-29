@@ -43,7 +43,7 @@ class GridProcessor {
         /// @param val Value to reset each temp vector element to. Default 0.
         void inline reset_temp(const size_t& val = 0) {
             for (auto& element : *temp)
-                element.reset();
+                resetVoxel(element);
         }
 
 

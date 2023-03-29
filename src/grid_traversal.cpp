@@ -78,10 +78,9 @@ bool findRayAlignedBoxIntersection(const point& lower,      const point& upper,
 }
 
 
-bool addRayExact(VoxelGrid& grid,  const VoxelElementUpdate& update,
+bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
                  const point& rs,  const point& re,
-                 const double& ts, const double& te,
-                 const std::function<void(const grid_idx&)> operation)
+                 const double& ts, const double& te)
 {
     /// @note: This method works quite well and is very fast. However it tends to miss the final
     ///        1 to 3 voxels. The exit condition is a bit imperfect. Maybe some boolean flags rather
@@ -205,9 +204,8 @@ bool addRayExact(VoxelGrid& grid,  const VoxelElementUpdate& update,
 }
 
 
-bool addRayLinspace(VoxelGrid& grid, const VoxelElementUpdate& update,
-                    const point& rs, const point& re, const size_t& num,
-                    const std::function<void(const grid_idx&)> operation)
+bool addRayLinspace(VoxelGrid& grid, const VoxelUpdate& update,
+                    const point& rs, const point& re, const size_t& num)
 {
     if (num < 1) std::invalid_argument("Must place at least two points on the line segment.");
 
@@ -218,12 +216,12 @@ bool addRayLinspace(VoxelGrid& grid, const VoxelElementUpdate& update,
 
     Vector3d step  = (re - rs) / num;
 
-    Vector3ui current_gidx, previous_gidx;
+    int sucess = -1;
     for (int j = 0; j < num; ++j)
     {
         grid.toGrid(place, current_idx);
         if ( (current_idx.array() != previous_idx.array()).all() )
-            grid.set(place, update);
+            sucess = grid.set(place, update);
         previous_idx = current_idx;
         place += step;
     }
@@ -231,9 +229,8 @@ bool addRayLinspace(VoxelGrid& grid, const VoxelElementUpdate& update,
 }
 
 
-bool addRayApprox(VoxelGrid& grid, const VoxelElementUpdate& update,
-                  const point& rs, const point& re, const double& rr,
-                  const std::function<void(const grid_idx&)> operation)
+bool addRayApprox(VoxelGrid& grid, const VoxelUpdate& update,
+                  const point& rs, const point& re, const double& rr)
 {
     if (rr < 0) std::invalid_argument("Resolution must be greater than 0.");
 
@@ -244,17 +241,17 @@ bool addRayApprox(VoxelGrid& grid, const VoxelElementUpdate& update,
 
     Vector3d ray     = (re - rs);
     double ray_norm  = ray.norm();
-    Vector3d step    = (ray / ray_norm) * rr * grid.resolution;\
+    Vector3d step    = (ray / ray_norm) * rr * grid.resolution;
     double step_norm = step.norm();
 
     int num = std::ceil(ray_norm / step_norm);
 
-    Vector3ui current_gidx, previous_gidx;
+    int sucess = -1;
     for (int j = 0; j < num; ++j)
     {
         grid.toGrid(place, current_idx);
         if ( (current_idx.array() != previous_idx.array()).all() )
-            grid.set(place, update);
+            sucess = grid.set(place, update);
         previous_idx = current_idx;
         place += step;
     }

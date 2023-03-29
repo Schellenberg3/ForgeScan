@@ -22,16 +22,15 @@ int main(int argc, char** argv)
     VoxelGrid grid_exact(res, lower, upper, false);
     std::cout << "Initialized each VoxelGrid!" << std::endl;
 
-    voxel_distance distance = 1;
-    VoxelElementUpdate voxel_update(&distance);
+    VoxelUpdate update(1, 0, 0, 0);
 
     int num = argc > 1 ? std::stoi(argv[1]) : (1280 * 720) ; // Defualt to RealSense D455 resolution
     std::vector<Vector3d> start_vecs, end_vecs;
     start_vecs.reserve(num);
     end_vecs.reserve(num);
     {
-        std::random_device rd;
-        std::mt19937 gen(rd());
+        // std::random_device rd; // Call rd() for a random seed while initializing the generator.
+        std::mt19937 gen(1);
         std::uniform_real_distribution<> dist(-1.9, 1.9);
         
         for (int i = 0; i < num; ++i)
@@ -59,10 +58,12 @@ int main(int argc, char** argv)
         t_lin.start();
         for (int i = 0; i < num; ++i)
             {
+            // A linear spacing of 400 points should put two update per voxel in the
+            // worst-case scenario of opposite corner ray start/end points.
             addRayLinspace(
-                grid_linear, voxel_update,
+                grid_linear, update,
                 start_vecs[i], end_vecs[i],
-                60
+                400
             );
         }
         t_lin.stop();
@@ -77,7 +78,7 @@ int main(int argc, char** argv)
         for (int i = 0; i < num; ++i)
             {
             addRayApprox(
-                grid_approx, voxel_update,
+                grid_approx, update,
                 start_vecs[i], end_vecs[i],
                 rr
             );
@@ -94,9 +95,9 @@ int main(int argc, char** argv)
         for (int i = 0; i < num; ++i)
             {
             addRayExact(
-                grid_exact, voxel_update,
+                grid_exact, update,
                 start_vecs[i], end_vecs[i], 
-                0.0, 1.0, [](const grid_idx & gidx){}
+                0.0, 1.0
             );
         }
         t_exa.stop();
@@ -108,7 +109,7 @@ int main(int argc, char** argv)
               << "\n\tExact\n\t\t" << t_exa.elapsedMilliseconds() << std::endl;
 
     
-    if (argc > 2 && argv[2] == "--save")
+    if (argc > 2)
     {
         std::cout << "Saving to CSV..."  << std::endl;
         grid_linear.save_csv("test_linear.csv");

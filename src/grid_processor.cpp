@@ -53,42 +53,42 @@ void GridProcessor::elementwise_operation(const std::function<void(const grid_id
 
 void GridProcessor::dilate_element(const grid_idx& element, const int& n)
 {
-    static std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
-    static vector_idx element_vidx = 0;
+    std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
+    vector_idx element_vidx = 0;
     
     this->voxel_grid->toVector(element, element_vidx);
-    int known_neighbor_count = this->voxel_grid->at(element_vidx).view_count != 0 ? 1 : 0;
+    int known_neighbor_count = this->voxel_grid->at(element_vidx).updates != 0 ? 1 : 0;
 
     this->voxel_grid->get_6(element, neighbors);
 
     for (const auto& neighbor : neighbors)
-        if (this->voxel_grid->valid(neighbor) && this->voxel_grid->at(neighbor).view_count != 0)
+        if (this->voxel_grid->valid(neighbor) && this->voxel_grid->at(neighbor).updates != 0)
             ++known_neighbor_count;
 
     if (known_neighbor_count >= n)
-        this->temp->at(element_vidx).view_count = 1;
+        this->temp->at(element_vidx).updates = 1;
 }
 
 
 void GridProcessor::erode_element(const grid_idx& element, const int& n)
 {
-    static std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
-    static vector_idx element_vidx = 0;
+    std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
+    vector_idx element_vidx = 0;
     
     this->voxel_grid->toVector(element, element_vidx);
     // int known_neighbor_count = this->voxel_grid->at(element_vidx) == 0 ? 1 : 0;
     int known_neighbor_count = 1;
-    if (this->voxel_grid->at(element_vidx).view_count != 0)
+    if (this->voxel_grid->at(element_vidx).updates != 0)
         known_neighbor_count = 0;
 
     this->voxel_grid->get_6(element, neighbors);
 
     for (const auto& neighbor : neighbors)
-        if (this->voxel_grid->valid(neighbor) && this->voxel_grid->at(neighbor).view_count == 0)
+        if (this->voxel_grid->valid(neighbor) && this->voxel_grid->at(neighbor).updates == 0)
             ++known_neighbor_count;
 
     if (known_neighbor_count >= n)
-        this->temp->at(element_vidx).view_count = 0;
+        this->temp->at(element_vidx).updates = 0;
     else  // Otherwise, stay the same
-        this->temp->at(element_vidx) = this->voxel_grid->at(element_vidx).view_count;
+        this->temp->at(element_vidx).updates = this->voxel_grid->at(element_vidx).updates;
 }

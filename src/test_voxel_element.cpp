@@ -2,6 +2,7 @@
 #include <ForgeScan/grid_traversal.h>
 
 #include <iostream>
+#include <bitset>
 
 
 /// @brief Displays memory size and numeric limits for VoxelElement class and its
@@ -14,32 +15,27 @@ void display_vector_memory_size_and_limits();
 
 int main()
 {
-    VoxelElement ve0(0, 0,0,0,0);
-    VoxelElement ve1;
+    VoxelElement t;
+    
+    VoxelUpdate u0(10);
+    VoxelUpdate u1(5);
+    VoxelUpdate u2(-5);
+
+    updateVoxel(t, u0);
+    updateVoxel(t, u1);
+    updateVoxel(t, u2);
+    ++t.views;
+
+    std::cout << "Target:\n";    
+    std::cout << t.min << " min" << std::endl;
+    std::cout << t.avg << " avg" << std::endl;
+    std::cout << t.var << " var" << std::endl;
 
 
-    display_voxel_element_memory_size_and_limits();
+    std::cout << std::bitset<16>(t.views) << std::endl;
+    resetUpdateFlag(t.views);
 
-
-    auto c0 = ve0.get_centrality();
-    auto c1 = ve1.get_centrality();
-
-
-    voxel_distance d = 1;
-    VoxelElementUpdate updates(&d);
-
-    update_voxel_element(ve0, updates);
-
-    d = -2;
-
-    update_voxel_element(ve0, updates);
-
-
-    update_voxel_element(ve1, updates);
-    update_voxel_element(ve1, updates);
-
-    display_vector_memory_size_and_limits();
-
+    std::cout << std::bitset<16>(t.views) << std::endl;
     return 0;
 }
 

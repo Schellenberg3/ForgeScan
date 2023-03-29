@@ -48,14 +48,17 @@ include_directories(
 link_directories(
     ${EIGEN3_LIBRARY_DIRS}
     ${PCL_LIBRARY_DIRS}
+    ${HDF5_LIBRARY_DIRS}
 )
 
 link_libraries(
     ${EIGEN3_LIBRARIES}
+    ${HDF5_LIBRARIES}
 )
 
 add_definitions(
     ${PCL_DEFINITIONS}
+    ${HDF5_DEFINITIONS}
 )
 
 ##########################################

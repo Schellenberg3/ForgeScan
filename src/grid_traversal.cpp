@@ -87,6 +87,10 @@ bool addRayExact(VoxelGrid& grid,  const VoxelElementUpdate& update,
     ///        1 to 3 voxels. The exit condition is a bit imperfect. Maybe some boolean flags rather
     ///        than comparisons will correct this. But this is a minor error at the moment.
 
+    /// OPTIMIZE: Would using a custom Vector3 class improve perfeormance by reducinc call overhead?
+    ///           Eigen is nice. But it wraps a lot of un-needed functionality, especially for just
+    ///           a collection of 3 elements. 
+
     Vector3d ray = re - rs;
     double   len = ray.norm();
     Vector3d dir = ray / len;
@@ -145,7 +149,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelElementUpdate& update,
     ///             Must be 0 for X, 1 for Y or 2 for Z. But this is not verified.
     auto initTraversalInfo = [&](int& s_d, double& t_d, double& dt_d, const int& d)
     {
-        current_gidx[d] = MAX(0,            std::floor((rs_adj[d] - grid.lower[d]) / grid.resolution));
+        current_gidx[d] = MAX(0, std::floor((rs_adj[d] - grid.lower[d]) / grid.resolution));
         // See note above. Helpful for debugging but not needed for the algorithm.
         // end_gidx[d]     = MIN(grid.size[d], std::floor((re_adj[d] - grid.lower[d]) / grid.resolution));
         if (dir[d] > 0)
@@ -158,7 +162,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelElementUpdate& update,
         {
             s_d  = -1;
             dt_d = -1 * grid.resolution / dir[d];
-            const size_t previous_gidx = current_gidx[d] - 1;
+            const int previous_gidx = current_gidx[d] - 1;  // size_t casued an error here if current == 0
             t_d  = ts_adj + (grid.lower[d] + previous_gidx * grid.resolution - rs_adj[d]) / dir[d];
         }
         else
@@ -176,6 +180,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelElementUpdate& update,
     /// NOTE: The exact start/end voxels hit tend to be a bit off from what might be "exact".
     ///       I belive that there may be slight differences with rounding and from voxel resolution.
     ///       But I will return to this another time.
+    grid.set(current_gidx, update); // update current element befor entering the loop.
     while (t_x <= te_adj || t_y <= te_adj || t_z <= te_adj)
     {
         if (t_x < t_y && t_x < t_z)

@@ -2,6 +2,7 @@
 bin/*
 build/*
 share/*
+archive/*
 .vscode/*
 .devcontainer/*
 

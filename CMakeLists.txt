@@ -4,8 +4,10 @@ cmake_minimum_required(VERSION 3.7.2)
 
 project(ForgeScan)
 
-set(CMAKE_BUILD_TYPE Debug)
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 # LOCAL DIRECTORY VARIABLES
 set(BASE_DIR ${CMAKE_SOURCE_DIR})

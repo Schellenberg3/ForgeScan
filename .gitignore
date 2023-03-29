@@ -5,9 +5,6 @@ share/*
 .vscode/*
 .devcontainer/*
 
-# Do store the launch.json file
-!.vscode/launch.json
-
 ## Standard Git Ignore from GitHub
 ## See: https://github.com/github/gitignore/blob/main/C%2B%2B.gitignore
 # Prerequisites

@@ -47,6 +47,10 @@ class VoxelGrid
         /// Pre-computed scaling factor for point placement
         Vector3d idx_scale;
 
+        /// @brief Helper function to write the XDMF file.
+        /// @param fname Name for the XDMF file.
+        void writeXDMF(const std::string &fname) const;
+
     public:
         /// If true will round all coordinates to the closest voxel, even if they would have been outside
         /// the bounds of the voxelized space.
@@ -234,20 +238,35 @@ class VoxelGrid
         int add_sensor(const SimSensorReading& scanner, const uint8_t& surface = 1, const uint8_t& line = 2);
 
 
-        /// @brief Saves the grids points in a CSV-line format.
-        ///        The values are stored incrementing in fastest in  X, then Y, then Z.
-        /// @param fname The name for the save file. 
-        void save_csv(const std::string& fname) const;
+        /// @brief Saves the grids points in a CSV format.
+        ///        The values are stored incrementing in fastest in  X, then Y, then Z and each line is a comma
+        ///        seperate list of attributes. the first line is a header with what each attribute is
+        /// @param fname The name for the save file.  Automatically adds ".csv" when writing.
+        /// @details This format is available for ease of data introspection. It simply writes the voxel data
+        ///          out but provides little detail about the VoxelGrid's parameters.
+        /// @note    No read method is available for this format.
+        void saveCSV(const std::string& fname) const;
 
 
-        /// @brief Saves in the HDF5 Format
-        /// @param fname File name
-        void save_hdf5(const std::string& fname) const;
+        /// @brief Saves in the XDMF format (XDMF file references to an HDF5 data file). 
+        /// @param fname File name. Automatically adds ".h5" when writing the HDF5 file and ".xdmf"
+        ///              to the XDMF file of the same name.
+        /// @details This format makes it easier to visualize in tools like Paraview with the built-in
+        ///          XDMF readers. But is slightly less efficient to save.
+        /// @note    No read method is available for this format.
+        void saveXDMF(const std::string& fname) const;
 
 
-        /// @brief Loads data from an HDF5 file
-        /// @param fname File name
-        void load_hdf5(const std::string& fname);
+        /// @brief Saves in the HDF5 format.
+        /// @param fname File name. Automatically adds ".h5" when writing.
+        /// @details This is the fastest save mathod and the recomended one if the grid is to be re-loaded
+        ///          into a VoxelGrid object.
+        void saveHDF5(const std::string& fname) const;
+
+
+        /// @brief Loads data from an HDF5 file.
+        /// @param fname File name. Automatically adds ".h5" when searching.
+        void loadHDF5(const std::string& fname);
 };
 
 

@@ -111,10 +111,10 @@ int main(int argc, char** argv)
     
     if (argc > 2)
     {
-        std::cout << "Saving to CSV..."  << std::endl;
-        grid_linear.save_csv("test_linear.csv");
-        grid_approx.save_csv("test_approx.csv");
-        grid_exact.save_csv("test_exact.csv");
+        std::cout << "Saving to disk in XDMF format..."  << std::endl;
+        grid_linear.saveXDMF("test_linear");
+        grid_approx.saveXDMF("test_approx");
+        grid_exact.saveXDMF("test_exact");
     }
     else {
         std::cout << "Not saving data."  << std::endl;

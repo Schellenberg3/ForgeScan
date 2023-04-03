@@ -71,7 +71,7 @@ int main(int argc, char** argv)
     }
 
     std::cout << "Saving to CSV..."  << std::endl;
-    grid.save_csv("test_points.csv");
+    grid.saveXDMF("test_points.csv");
 
     std::cout << "Exiting program."  << std::endl;
     return 0;

@@ -118,8 +118,8 @@ int main(int argc, char* argv[])
         // std::cout << "With normal of: \n" << laser_scan.normal.transpose() << std::endl;
         grid.add_sensor(laser_scan);
     }
-    std::string fname = "sim_sphere_scan.csv";
-    grid.save_csv(fname);
+    std::string fname = "sim_sphere_scan";
+    grid.saveXDMF(fname);
     std::cout << "Complete! Saved file as: " + fname << std::endl;
     return 0;
 }

@@ -33,7 +33,7 @@ int main()
 
 
     std::cout << std::bitset<16>(t.views) << std::endl;
-    resetUpdateFlag(t.views);
+    resetViewUpdateFlag(t.views);
 
     std::cout << std::bitset<16>(t.views) << std::endl;
     return 0;

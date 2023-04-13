@@ -1,4 +1,6 @@
 #include <ForgeScan/grid_traversal.h>
+#include <ForgeScan/sim_sensor_reading.h>
+
 #include <iostream>
 
 #define MAX(X, Y) X > Y ? X : Y
@@ -201,6 +203,164 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
         grid.set(current_gidx, update);
     }
     return true;
+}
+
+
+void addSensor(VoxelGrid &grid, const SimSensorReading &sensor)
+{
+    const Eigen::Vector3d camera_z_axis(0, 0, 1);
+
+    Eigen::MatrixXd copy = sensor.sensor;
+    copy.transposeInPlace();  // 3xN matrix
+
+    Eigen::Matrix3d R;
+    R = Eigen::Quaterniond().setFromTwoVectors(camera_z_axis, sensor.normal);
+
+    // APPLY ROTATION
+    copy = R*copy;
+
+    // APPLY TRANSLATION
+    copy.colwise() += sensor.position;  // Removed previously
+
+    for (int i = 0, num_pts = sensor.m * sensor.n; i < num_pts; ++i)
+    {
+        addRayTSDFandView(grid, sensor.position, copy.col(i));
+    }
+
+    for (auto& ve : *(grid.grid))
+    {
+        if (ve.views >> 15)
+        {   // Checks if the MSB of the views is set to 1 and 
+            if (ve.views != 0xFFFF) ++ve.views;   // Caps updates and prevents rollover at 0x7FFF (32767 views.)
+            resetViewUpdateFlag(ve);
+        }
+    }
+}
+
+
+/// @note: This method works quite well and is very fast. However it tends to miss the final 1 to 3 voxels. The exit condition
+///        is a bit imperfect. Maybe some boolean flags rather than comparisons will correct this. But this is a minor error at the moment.
+void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed)
+{
+    /// [Distance] Adjusted traversal distances that are inside the grid. Given a grid's tuncation distance the adjusted values follow:
+    ///  NEGATIVE TRUCATION DISTANCE <= t_neg_adj <= t_pos_adj <= POSITIVE TRUCATION DISTANCE,
+    ///  t_pos_adj <= t_far_adj
+    ///  In some conditions the adjusted negative value may be greater than zero (and the adjusted positive value less than zero). 
+    double t_pos_adj = 0, t_neg_adj = 0, t_far_adj = 0;
+    Vector3ui current_gidx(0,0,0);
+    VoxelUpdate update(0);
+
+    Vector3d ray    = origin - sensed;
+    double t_far    = ray.norm();
+    Vector3d normal = ray / t_far;
+
+    /// [Voxel] For each direction, as the ray is traversed, we either increment (+1) or decrement (-1) the index
+    /// when we choose to step in that direction.
+    int s_x = 0, s_y = 0, s_z = 0;
+
+    /// [Distance] For each direction, we record the cumulative traveled distance that direction. We always step in
+    /// the direction that has been traversed the least.
+    double t_x = 0, t_y = 0, t_z = 0;
+
+    /// [Distance] For each direction, we find amount of travel required to move the distance of one voxel edge length in
+    /// that direction. For each movement in a direction, this is added to the cumulative total for that direction.
+    double dt_x = 0,  dt_y = 0,  dt_z = 0;
+
+    // Early exit for segments outside of the grid or for equal start/end points. 
+    bool intersects_grid = findRayAlignedBoxIntersection(grid.lower, grid.upper, sensed, normal, grid.neg_trunc_dist, t_far, t_neg_adj, t_far_adj);
+
+    t_far_adj = MIN(t_far_adj, t_far);
+    t_pos_adj = MIN(t_far_adj, grid.pos_trunc_dist);
+    t_neg_adj = MAX(t_neg_adj, grid.neg_trunc_dist);
+
+    bool correct_traversal_direction = t_neg_adj < t_far_adj;
+    if (intersects_grid == false || correct_traversal_direction == false)
+        return;
+
+    const point neg_dist = sensed + normal * t_neg_adj;
+
+    /// @brief Helper lambda to initialize the step, cumulative time, and delta time for each direction.
+    /// @param s_d  Step in the direction. Will be one of increment (+1), decrement (-1), or nothing (0).
+    /// @param t_d  Cumulative time moved in that direction.
+    ///             This is initialized to the time needed to intersect the next boundary in the given direction.
+    /// @param dt_d Time required to move one voxel unit in a direction. 
+    /// @param d    Direction. This index retrieves required information from vectors related to the grid and the ray.
+    ///             Must be 0 for X, 1 for Y or 2 for Z. But this is not verified.
+    auto initTraversalInfo = [&](int& s_d, double& t_d, double& dt_d, const int& d)
+    {
+        /// TODO: Should this -1 be here? Does that make sense. Ran into boundary condition issues when the
+        ///       Far distance point was EXACTLY on the boundary of the grid.
+        current_gidx[d] = MAX(0, std::floor((neg_dist[d] - grid.lower[d]) / grid.resolution - 1));
+        if (normal[d] > 0)
+        {
+            s_d  = 1;
+            dt_d = grid.resolution / normal[d];
+            t_d  = t_neg_adj + abs( (grid.lower[d] + current_gidx[d] * grid.resolution - neg_dist[d]) / normal[d] );
+        }
+        else if (normal[d] != 0)
+        {
+            s_d  = -1;
+            dt_d = -1 * grid.resolution / normal[d];
+            int previous_gidx = current_gidx[d] - 1;
+            t_d  = t_neg_adj + abs( (grid.lower[d] + previous_gidx * grid.resolution - neg_dist[d]) / normal[d] );
+        }
+        else
+        {
+            s_d  = 0;
+            dt_d = t_far_adj;
+            t_d  = t_far_adj;
+        }
+    };
+
+    initTraversalInfo(s_x, t_x, dt_x, 0);
+    initTraversalInfo(s_y, t_y, dt_y, 1);
+    initTraversalInfo(s_z, t_z, dt_z, 2);
+
+    // Perform updates withing the truncation distance. Moving from neg_dist to pos_dist.
+    update.dist = t_neg_adj;
+    while (t_x <= t_pos_adj || t_y <= t_pos_adj || t_z <= t_pos_adj)
+    {
+        grid.set(current_gidx, update);
+        if (t_x < t_y && t_x < t_z)
+        {
+            update.dist = t_x;
+            current_gidx[0] += s_x;
+            t_x += dt_x;
+        }
+        else if (t_y < t_z) // Y is implicitly less than X 
+        {
+            update.dist = t_y;
+            current_gidx[1] += s_y;
+            t_y += dt_y;
+        }
+        else // Z is implicitly less than both X and Y 
+        {
+            update.dist = t_z;
+            current_gidx[2] += s_z;
+            t_z += dt_z;
+        }
+    }
+
+    // Mark voxels as viewed; no information updated. Moving from pos_dist to far_dist.
+    while (t_x <= t_far_adj || t_y <= t_far_adj || t_z <= t_far_adj)
+    {
+        setViewUpdateFlag( grid.at(current_gidx) );
+        if (t_x < t_y && t_x < t_z)
+        {
+            current_gidx[0] += s_x;
+            t_x += dt_x;
+        }
+        else if (t_y < t_z) // Y is implicitly less than X 
+        {
+            current_gidx[1] += s_y;
+            t_y += dt_y;
+        }
+        else // Z is implicitly less than both X and Y 
+        {
+            current_gidx[2] += s_z;
+            t_z += dt_z;
+        }
+    }
 }
 
 

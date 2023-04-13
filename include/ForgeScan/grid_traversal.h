@@ -46,6 +46,11 @@ bool addRayExact(VoxelGrid& grid,      const VoxelUpdate& update,
                  const double& ts = 0, const double& te = 1);
 
 
+void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed);
+
+void addSensor(VoxelGrid &grid, const SimSensorReading &sensor);
+
+
 /// @brief Performs approximate ray addition by a linear spacing of a specific number of points
 /// @param grid The VoxelGrid to traverse.
 /// @param rs Ray start position.

@@ -20,6 +20,10 @@ class VoxelGrid
 {
     friend class GridProcessor;
 
+    friend void addRayTSDFandView(VoxelGrid &, const point &, const point &);
+
+    friend void addSensor(VoxelGrid &, const SimSensorReading &);
+
     friend bool addRayExact(VoxelGrid&, const VoxelUpdate&, const point&, const point&,
                             const double&, const double&);
 
@@ -37,6 +41,9 @@ class VoxelGrid
 
         /// Edge length of each voxel cube
         double resolution;
+
+        /// TODO: Need to fit this into the constructor. Ensure that neg_trunc_dist is forced to be negative.
+        double pos_trunc_dist = 0.2, neg_trunc_dist = - 0.2;
 
         /// Lower (X, Y, Z) bound for coordinates inside of grid
         point lower;

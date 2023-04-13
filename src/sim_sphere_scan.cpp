@@ -1,5 +1,6 @@
 #include <ForgeScan/sim_sensor_reading.h>
 #include <ForgeScan/voxel_grid.h>
+#include <ForgeScan/grid_traversal.h>
 
 #include <Eigen/Geometry>
 
@@ -96,7 +97,8 @@ int main(int argc, char* argv[])
     {
         laser_scan.position << 0, 0, SIM_RHO;
         laser_scan.normal << 0, 0, -1;
-        grid.add_sensor(laser_scan);
+
+        addSensor(grid, laser_scan);
 
         // std::cout << "\nAdding first scanner at: \n" << laser_scan.position.transpose() << std::endl;
         // std::cout << "With normal of: \n" << laser_scan.normal.transpose() << std::endl;
@@ -116,7 +118,7 @@ int main(int argc, char* argv[])
 
         // std::cout << "\nAdding scanner at: \n" << laser_scan.position.transpose() << std::endl;
         // std::cout << "With normal of: \n" << laser_scan.normal.transpose() << std::endl;
-        grid.add_sensor(laser_scan);
+        addSensor(grid, laser_scan);
     }
     std::string fname = "sim_sphere_scan";
     grid.saveXDMF(fname);

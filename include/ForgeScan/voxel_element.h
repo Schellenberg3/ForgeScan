@@ -50,32 +50,33 @@ void inline set_MSB_high(uint16_t &in) { in |= 0x8000; }
 /// @brief Sets the most significant bit of an unsigned 16-bit integer to 0.
 void inline set_MSB_low(uint16_t &in)  { in &= 0x7FFF; }
 
+
 /// @brief Marks a VoxelElement's `view_count` attribute. This signals that at least one ray from a new view
 ///        has updated that VoxelElement.
 /// @param in The VoxelElement's `views` attribute.
 /// @warning When this flag is set, the `view_count` attribute is not accurate when viewed as an integer. It
-///          should only be incremented when the flag is high. Call `resetUpdateFlag` before using this number
-void inline flagUpdate(view_count &in)  { set_MSB_high(in); }
+///          should only be incremented when the flag is high. Call `resetViewUpdateFlag` before using this number
+void inline setViewUpdateFlag(view_count &in)  { set_MSB_high(in); }
 
 
 /// @brief Marks a VoxelElement's `view_count` attribute. This signals that at least one ray from a new view
 ///        has updated that VoxelElement.
 /// @param in The VoxelElement to flag.
 /// @warning When this flag is set, the `view_count` attribute is not accurate when viewed as an integer. It
-///          should only be incremented when the flag is high. Call `resetUpdateFlag` before using this number
-void inline flagUpdate(VoxelElement &in)  { set_MSB_high(in.views); }
+///          should only be incremented when the flag is high. Call `resetViewUpdateFlag` before using this number
+void inline setViewUpdateFlag(VoxelElement &in)  { set_MSB_high(in.views); }
 
 
 /// @brief Resets the flag on a a VoxelElement's `view_count`. This should be called after the the VoxelElement's
 ///        `view_count` has been incremented for the latest view so the element is ready to accept new views.
 /// @param in The VoxelElement to un-flag.
-void inline resetUpdateFlag(VoxelElement &in) { set_MSB_low(in.views); }
+void inline resetViewUpdateFlag(VoxelElement &in) { set_MSB_low(in.views); }
 
 
 /// @brief Resets the flag on a a VoxelElement's `view_count`. This should be called after the the VoxelElement's
 ///        `view_count` has been incremented for the latest view so the element is ready to accept new views.
 /// @param in The VoxelElement's `views` attribute.
-void inline resetUpdateFlag(view_count &in) { set_MSB_low(in); }
+void inline resetViewUpdateFlag(view_count &in) { set_MSB_low(in); }
 
 
 /// @brief Updates the information within a VoxelElement.
@@ -112,7 +113,7 @@ void inline updateVoxel(VoxelElement& target, const VoxelUpdate &update)
     if (target.rho < update.rho)
         target.rho = update.rho;
 
-    flagUpdate(target.views);
+    setViewUpdateFlag(target.views);
 }
 
 /// @brief Restores the information within a VoxelElement as if it has never been updated.

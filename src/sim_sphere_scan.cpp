@@ -76,10 +76,8 @@ int main(int argc, char* argv[])
     std::cout << "Running for " << num_view << " sensors with " << num_pts << " samples each." << std::endl;
 
     // Set up the VoxelGrid 
-    uint8_t surface = 1, line = 2;
-    Eigen::Vector3d lower, upper;
-    lower << -1, -1, -1;
-    upper << 1, 1, 1;
+    Eigen::Vector3d lower(-1, -1, -1), upper(1, 1, 1);
+
     double res = 0.02;
 
     // 2m x 2m x 2m cube with 0.02 m resolution

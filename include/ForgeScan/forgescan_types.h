@@ -128,6 +128,11 @@ struct ForgeScanEntity
     /// @return The extrinsic transformation to change points from this reference frame to the other.
     extrinsic getTransformationTo(const ForgeScanEntity& other) const { return other.extr.inverse() * this->extr; }
 
+    /// @brief Generates a transformation from another entity's reference to this entity's reference frame.
+    /// @param other The reference frame.
+    /// @return The extrinsic transformation to change points from this reference frame to the other.
+    extrinsic getTransformationFrom(const ForgeScanEntity& other) const { return this->extr.inverse() * other.extr; }
+
     /// @brief Coordinate transformation, in-place, on the provided point to shift it into this entity's frame. 
     /// @param p Point in the world frame.
     void fromWorldToThis(point& p) const { p = extr.inverse() * p.homogeneous(); }

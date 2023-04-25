@@ -130,35 +130,35 @@ struct ForgeScanEntity
 
     /// @brief Coordinate transformation, in-place, on the provided point to shift it into this entity's frame. 
     /// @param p Point in the world frame.
-    void transformFromWorldToThisFrame(point& p) const { p = extr.inverse() * p.homogeneous(); }
+    void fromWorldToThis(point& p) const { p = extr.inverse() * p.homogeneous(); }
 
     /// @brief Coordinate transformation, in-place, on the provided set of points to shift them into this entity's frame. 
     /// @param p_list List (matrix) of points in the world frame.
-    void transformFromWorldToThisFrame(point_list& p_list) const { p_list = extr.inverse() * p_list.colwise().homogeneous(); }
+    void fromWorldToThis(point_list& p_list) const { p_list = extr.inverse() * p_list.colwise().homogeneous(); }
 
     /// @brief Coordinate transformation on the provided point to shift it into this entity's frame.
     /// @param p Point in the world frame.
-    point transformFromWorldToThisFrame(const point& p) const { return extr.inverse() * p.homogeneous(); }
+    point fromWorldToThis(const point& p) const { return extr.inverse() * p.homogeneous(); }
 
     /// @brief Coordinate transformation on the provided set of points to shift them into this entity's frame. 
     /// @param p_list List (Eigen::Matrix3Xd) of points in the world frame.
-    point_list transformFromWorldToThisFrame(const point_list& p_list) const { return extr.inverse() * p_list.colwise().homogeneous(); }
+    point_list fromWorldToThis(const point_list& p_list) const { return extr.inverse() * p_list.colwise().homogeneous(); }
 
     /// @brief Coordinate transformation, in-place, on the provided point to shift it into the world frame. 
     /// @param p Point in this entity's frame.
-    void transformFromThisToWorldFrame(point& p) const { p = extr * p.homogeneous(); }
+    void toWorldFromThis(point& p) const { p = extr * p.homogeneous(); }
 
     /// @brief Coordinate transformation, in-place, on the provided set of points to shift them into the world frame.
     /// @param p_list List (matrix) of points in this entity's frame.
-    void transformFromThisToWorldFrame(point_list& p_list) const { p_list = extr * p_list.colwise().homogeneous(); }
+    void toWorldFromThis(point_list& p_list) const { p_list = extr * p_list.colwise().homogeneous(); }
 
     /// @brief Coordinate transformation on the provided point to shift it into the world frame.
     /// @param p Point in this entity's frame.
-    point transformFromThisToWorldFrame(const point& p) const { return extr * p.homogeneous(); }
+    point toWorldFromThis(const point& p) const { return extr * p.homogeneous(); }
 
     /// @brief Coordinate transformation on the provided set of points to shift them into the world frame.
     /// @param p_list List (Eigen::Matrix3Xd) of points in this entity's frame.
-    point_list transformFromThisToWorldFrame(const point_list& p_list) const { return extr * p_list.colwise().homogeneous(); }
+    point_list toWorldFromThis(const point_list& p_list) const { return extr * p_list.colwise().homogeneous(); }
 };
 
 

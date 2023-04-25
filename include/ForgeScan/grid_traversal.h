@@ -51,26 +51,4 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
 void addSensor(VoxelGrid &grid, const SimSensorReading &sensor);
 
 
-/// @brief Performs approximate ray addition by a linear spacing of a specific number of points
-/// @param grid The VoxelGrid to traverse.
-/// @param rs Ray start position.
-/// @param re Ray end position.
-/// @param num Number of points to add. Must be greater than 2.
-/// @param operation Function to apply at each voxel that the ray traverses. Default, an empty lambda, does nothing.
-/// @return True.
-bool addRayLinspace(VoxelGrid& grid, const VoxelUpdate& update,
-                    const point& rs, const point& re, const size_t& num);
-
-
-/// @brief Performs approximate ray addition by spacing
-/// @param grid The VoxelGrid to traverse.
-/// @param rs Ray start position.
-/// @param re Ray end position.
-/// @param rr Ray resolution. Percent 0 to 1 relative to the VoxelGrid resolution which determines spacing.
-/// @param operation Function to apply at each voxel that the ray traverses. Default, an empty lambda, does nothing.
-/// @return True.
-bool addRayApprox(VoxelGrid& grid, const VoxelUpdate& update,
-                  const point& rs, const point& re, const double& rr = 0.9);
-
-
 #endif // FORGESCAN_GRID_TRAVERSAL

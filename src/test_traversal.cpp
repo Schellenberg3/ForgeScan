@@ -17,9 +17,7 @@ int main(int argc, char** argv)
     Eigen::Vector3d lower(-1.0, -1.0, -1.0), upper(1.0, 1.0, 1.0);
     double res = 0.02;
 
-    VoxelGrid grid_linear(res, lower, upper, false);  // 2m x 2m x 2m cube with 0.02 m resolution
-    VoxelGrid grid_approx(res, lower, upper, false);
-    VoxelGrid grid_exact(res, lower, upper, false);
+    VoxelGrid grid_exact(res, lower, upper, false);  // 2m x 2m x 2m cube with 0.02 m resolution
     std::cout << "Initialized each VoxelGrid!" << std::endl;
 
     VoxelUpdate update(1, 0, 0, 0);
@@ -52,68 +50,26 @@ int main(int argc, char** argv)
 
     SimpleTimer t_lin, t_apr, t_exa;
 
-    // Linear Space
-    if (true)
-    {
-        t_lin.start();
-        for (int i = 0; i < num; ++i)
-            {
-            // A linear spacing of 400 points should put two update per voxel in the
-            // worst-case scenario of opposite corner ray start/end points.
-            addRayLinspace(
-                grid_linear, update,
-                start_vecs[i], end_vecs[i],
-                400
-            );
-        }
-        t_lin.stop();
-        std::cout << "Added " << num << " with linear method" << std::endl;
-    }
 
-    // Approx Line
-    if (true)
-    {
-        float rr = 0.9;
-        t_apr.start();
-        for (int i = 0; i < num; ++i)
-            {
-            addRayApprox(
-                grid_approx, update,
-                start_vecs[i], end_vecs[i],
-                rr
-            );
-        }
-        t_apr.stop();
-        std::cout << "Added " << num << " with approximate method. Resolution parameter rr="
-                  << rr << std::endl;
+    t_exa.start();
+    for (int i = 0; i < num; ++i)
+        {
+        addRayExact(
+            grid_exact, update,
+            start_vecs[i], end_vecs[i], 
+            0.0, 1.0
+        );
     }
+    t_exa.stop();
+    std::cout << "Added " << num << " with exact method" << std::endl;
 
-    // Exact Line
-    if (true)
-    {
-        t_exa.start();
-        for (int i = 0; i < num; ++i)
-            {
-            addRayExact(
-                grid_exact, update,
-                start_vecs[i], end_vecs[i], 
-                0.0, 1.0
-            );
-        }
-        t_exa.stop();
-        std::cout << "Added " << num << " with exact method" << std::endl;
-    }
-
-    std::cout << "Run times in ms were:\n\tLinear\n\t\t" << t_lin.elapsedMilliseconds()
-              << "\n\tApprox.\n\t\t" << t_apr.elapsedMilliseconds()
-              << "\n\tExact\n\t\t" << t_exa.elapsedMilliseconds() << std::endl;
+    std::cout << "Run time in ms was:\n\tLinear\n\t\t"
+              << "\n\tExact method:\n\t\t" << t_exa.elapsedMilliseconds() << std::endl;
 
     
     if (argc > 2)
     {
         std::cout << "Saving to disk in XDMF format..."  << std::endl;
-        grid_linear.saveXDMF("test_linear");
-        grid_approx.saveXDMF("test_approx");
         grid_exact.saveXDMF("test_exact");
     }
     else {

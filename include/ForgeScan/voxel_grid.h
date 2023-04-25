@@ -27,10 +27,6 @@ class VoxelGrid
     friend bool addRayExact(VoxelGrid&, const VoxelUpdate&, const point&, const point&,
                             const double&, const double&);
 
-    friend bool addRayLinspace(VoxelGrid&, const VoxelUpdate&, const point&, const point&, const size_t&);
-
-    friend bool addRayApprox(VoxelGrid&, const VoxelUpdate&, const point&, const point&, const double&);
-
     private:
         /// Vector structure for the voxels. Increments fastest in X, then Y, then Z.
         std::shared_ptr<std::vector<VoxelElement>> grid;

@@ -59,7 +59,7 @@ typedef float normality;
 typedef float density;
 
 
-/// @brief Transformation matrix from the world coordinate system to an entities local coordinate system. 
+/// @brief Transformation matrix from the world coordinate system to an entity's local coordinate system. 
 typedef Eigen::Transform<double, 3, Eigen::Isometry> extrinsic;
 
 
@@ -123,7 +123,7 @@ struct ForgeScanEntity
     /// @param other Rotation matrix to apply.
     void rotateWorldFrame(const rotation& other) { extr.prerotate(other); }
 
-    /// @brief Generates a transformation from this entities reference frame to the other entities frame.
+    /// @brief Generates a transformation from this entity's reference frame to the other entity's frame.
     /// @param other The reference frame.
     /// @return The extrinsic transformation to change points from this reference frame to the other.
     extrinsic getTransformationTo(const ForgeScanEntity& other) const { return other.extr.inverse() * this->extr; }

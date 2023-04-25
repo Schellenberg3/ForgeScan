@@ -90,7 +90,7 @@ void inline updateVoxel(VoxelElement& target, const VoxelUpdate &update)
 
     /// NOTE: Standard deviation is tracked with Welford's Algorithm. What this actually tracks is
     ///       the sum of square differences (from the current mean). Dividing this sum by the number of
-    ///       samples (updates) gets the variance. Thus to update we need this annoying mutiplication
+    ///       samples (updates) gets the variance. Thus to update we need this annoying multiplication
     ///       and subsequent division. For more, see: 
     ///       https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
     target.var *= target.updates;

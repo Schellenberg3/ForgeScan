@@ -39,7 +39,7 @@ typedef uint16_t view_count;
 
 
 /// @brief A distance value stored in a VoxelElement. Negative values indicate the voxel is behind the
-///        surface while positive ones indicate it is in fron of the surface; the surface is implicitly
+///        surface while positive ones indicate it is in from of the surface; the surface is implicitly
 ///        represented by the zero-level of the VoxelGrid.
 typedef float voxel_dist;
 
@@ -49,7 +49,7 @@ typedef float voxel_dist;
 typedef float centrality;
 
 
-/// @brief Normality score for a VoxelElement. Score decreases to zere when a ray direction is perpendicular
+/// @brief Normality score for a VoxelElement. Score decreases to zero when a ray direction is perpendicular
 ///        to the estimated surface normal at a point and is close to one when these vectors are parallel.
 typedef float normality;
 

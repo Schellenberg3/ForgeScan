@@ -88,7 +88,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
     ///        1 to 3 voxels. The exit condition is a bit imperfect. Maybe some boolean flags rather
     ///        than comparisons will correct this. But this is a minor error at the moment.
 
-    /// OPTIMIZE: Would using a custom Vector3 class improve perfeormance by reducinc call overhead?
+    /// OPTIMIZE: Would using a custom Vector3 class improve performance by reducing call overhead?
     ///           Eigen is nice. But it wraps a lot of un-needed functionality, especially for just
     ///           a collection of 3 elements. 
 
@@ -179,7 +179,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
     initTraversalInfo(s_z, t_z, dt_z, 2);
 
     /// NOTE: The exact start/end voxels hit tend to be a bit off from what might be "exact".
-    ///       I belive that there may be slight differences with rounding and from voxel resolution.
+    ///       I believe that there may be slight differences with rounding and from voxel resolution.
     ///       But I will return to this another time.
     grid.set(current_gidx, update); // update current element befor entering the loop.
     while (t_x <= te_adj || t_y <= te_adj || t_z <= te_adj)

@@ -50,6 +50,11 @@ struct BaseDepthSensorIntrinsics
         u(u),
         v(v)
         { }
+
+
+    /// @brief Returns the total number of data elements in the sensor.
+    /// @return Total number of data elements in the sensor.
+    constexpr uint32_t size() const { return u * v; }
 };
 
 

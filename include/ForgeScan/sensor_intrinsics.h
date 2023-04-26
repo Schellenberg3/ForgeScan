@@ -34,8 +34,10 @@ static float setDepthCameraPrinciplePoint(const float& od, const int& n)
 /// @brief Generic base class for depth sensor intrinsics.
 struct BaseDepthSensorIntrinsics
 {
-    /// @brief Dimensions of the sensors data: N by M
-    const uint32_t u, v, c;
+    /// @brief Dimensions of the sensors data: U element in the X-direction and V elements in the Y-direction.
+    const uint32_t u, v;
+
+    /// @brief Maximum depth for the sensor.
     const float max_depth;
 
     /// @brief Creates generic sensor intrinsics for an N by M sensor.
@@ -43,11 +45,10 @@ struct BaseDepthSensorIntrinsics
     /// @param u Size in the Y-dimension.
     /// @param v Size in the X-dimension.
     /// @param c Number of data channels, including depth (e.g., 1 for only depth or 4 for RGB and depth).
-    BaseDepthSensorIntrinsics(float max_depth, uint32_t u, uint32_t v, int c) :
+    BaseDepthSensorIntrinsics(float max_depth, uint32_t u, uint32_t v) :
         max_depth(std::fabs(max_depth)),
         u(u),
-        v(v),
-        c(c)
+        v(v)
         { }
 };
 
@@ -76,7 +77,7 @@ struct LaserScannerIntrinsics : public BaseDepthSensorIntrinsics
                            float theta_max = M_PI_4, float phi_max = M_PI_4,
                            float theta_min = M_PI_4, float phi_min = M_PI_4,
                            bool symmetric = true) :
-        BaseDepthSensorIntrinsics(max_depth, u, v, 1),
+        BaseDepthSensorIntrinsics(max_depth, u, v),
         theta_max(std::fabs(theta_max)),
         phi_max(  std::fabs(phi_max)),
         theta_min(-1 * std::fabs( setLaserScannerAngleMin(theta_min, theta_max, symmetric) ) ),
@@ -126,7 +127,7 @@ struct DepthCameraIntrinsics : public BaseDepthSensorIntrinsics
     DepthCameraIntrinsics(float max_depth = 100, uint32_t u = 100,  uint32_t v = 100,
                           float fx = 300, float fy = 300,
                           float ox = -1, float oy = -1) :
-        BaseDepthSensorIntrinsics(100, u, v, 1),
+        BaseDepthSensorIntrinsics(100, u, v),
         fx(fx), fy(fy),
         ox(setDepthCameraPrinciplePoint(ox, v)),
         oy(setDepthCameraPrinciplePoint(oy, u))

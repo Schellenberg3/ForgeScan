@@ -94,22 +94,12 @@ struct LaserScannerIntrinsics : public BaseDepthSensorIntrinsics
 /// @brief Simplified intrinsics for a random point laser scanner measurement device.
 struct RandomLaserScannerIntrinsics : public LaserScannerIntrinsics
 {
-    /// @brief Constructs sensor intrinsics for a random point laser depth scanner.
+    /// @brief Constructs sensor intrinsics for a random point laser depth scanner with a conic shape.
     /// @param max_depth Maximum depth value for the laser scanner.
-    /// @param u Number of random theta/phi sensed points for the laser scanner.
-    /// @param theta_max Magnitude for the maximum theta value.
-    /// @param phi_max   Magnitude for the maximum phi value.
-    /// @param theta_min Magnitude for the minimum theta value.
-    /// @param phi_min   Magnitude for the minimum phi value.
-    /// @param symmetric If true (default), the same magnitude is used for the min/max of theta and phi. If false, then the
-    ///                  user-specified values are used.
-    /// @note Input signs do not matter for the minimum/maximum for phi or theta. Absolute values are used to ensure that the
-    ///       member attributes for maximum are guaranteed to be positive and the minimums are guaranteed to be negative.
-    RandomLaserScannerIntrinsics(float max_depth = 100, uint32_t u = 10000,
-                                 float theta_max = M_PI_4, float phi_max = M_PI_4,
-                                 float theta_min = M_PI_4, float phi_min = M_PI_4,
-                                 bool symmetric = true) :
-        LaserScannerIntrinsics(max_depth, u, 1, theta_max, phi_max, theta_min, phi_min, symmetric)
+    /// @param u Number of randomly sensed points for the laser scanner.
+    /// @param phi Size of the cone. Half-angle at the conic vertex.
+    RandomLaserScannerIntrinsics(float max_depth = 100, uint32_t u = 10000, float phi = M_PI_4) :
+        LaserScannerIntrinsics(max_depth, u, 1, M_PI, phi)
         { }
 };
 

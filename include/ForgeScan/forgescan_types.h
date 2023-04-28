@@ -85,11 +85,11 @@ struct ForgeScanEntity
 
     /// @brief Constructs the generic entity.
     /// @param extr Initial pose for the entity.
-    ForgeScanEntity(extrinsic extr) : extr(extr) { }
+    ForgeScanEntity(const extrinsic& extr) : extr(extr) { }
 
     /// @brief Constructs the generic entity at the position, no rotation.
     /// @param position Initial position for the entity.
-    ForgeScanEntity(translation position)
+    ForgeScanEntity(const translation& position)
     { 
         extr.setIdentity();
         translate(position);
@@ -97,7 +97,7 @@ struct ForgeScanEntity
 
     /// @brief Constructs the generic entity at the world origin with the given rotation.
     /// @param orientation Initial rotation for the entity.
-    ForgeScanEntity(rotation orientation)
+    ForgeScanEntity(const rotation& orientation)
     { 
         extr.setIdentity();
         rotateBodyFrame(orientation);

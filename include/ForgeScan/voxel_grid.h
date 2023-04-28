@@ -235,12 +235,6 @@ class VoxelGrid
         int get_6(const grid_idx& input, std::vector<grid_idx>& output);
 
 
-        /// @brief Adds the provided sensor to the grid
-        /// @param scanner SimSensorReading object to add
-        /// @return 0 if the scanner was added without issue
-        int add_sensor(const SimSensorReading& scanner, const uint8_t& surface = 1, const uint8_t& line = 2);
-
-
         /// @brief Saves the grids points in a CSV format.
         ///        The values are stored incrementing in fastest in  X, then Y, then Z and each line is a comma
         ///        seperate list of attributes. the first line is a header with what each attribute is

@@ -152,47 +152,6 @@ int VoxelGrid::get_6(const grid_idx& input, std::vector<grid_idx>& output)
 }
 
 
-/// WARNING: Non-functional
-int VoxelGrid::add_sensor(const SimSensorReading& scanner, const uint8_t& surface, const uint8_t& line)
-{
-    /// @note This has not been fully tested. It could be optimized. And it could mirror or rotate improperly.
-    ///       If there are issues this is the place to start debugging.
-    /// @note The spacing across the line is set at 300. This is based on the assumption of a camera placed 2.5 meter
-    ///       away from a sphere of 0.75 meter radius. All lines should be under 3.25 meters thus this value would place
-    ///       at least 1 point in each voxel along the line. TODO: make a more robust method: `add_line_fast`.
-
-    throw std::logic_error("Temporarially depreciated as add ray methods are updated.");
-    static const Eigen::Vector3d camera_z_axis(0, 0, 1);
-
-    Eigen::MatrixXd copy = scanner.sensor;
-    copy.transposeInPlace();  // 3xN matrix
-
-    Eigen::Matrix3d R;
-    R = Eigen::Quaterniond().setFromTwoVectors(camera_z_axis, scanner.normal);
-
-    // std::cout << "Camera Z axis:\n" << camera_z_axis << std::endl;
-    // std::cout << "scanner position:\n" << scanner.position.transpose() << std::endl;
-    // std::cout << "scanner normal:\n" << scanner.normal.transpose() << std::endl;
-    // std::cout << "Rotation matrix:\n" << R << std::endl;
-    // std::cout << "Prior 10 positions:\n" << scanner.sensor.block(0,0,10,3) << std::endl;
-
-    // APPLY ROTATION
-    copy = R*copy;
-
-    // APPLY TRANSLATION
-    copy.colwise() += scanner.position;  // Removed previously
-
-    for (size_t i = 0, ncols = copy.cols(); i < ncols; ++i)
-    {
-        /// TODO: no clue how many points to space. 300 will do for now. See note above.
-        // this->add_linear_space(scanner.position, copy.col(i), 300, surface, line);
-        // std::cout << "[" << i << "]" << " Added final point located at:\n\t" << copy.col(i).transpose() << std::endl;
-        // std::cout << "    Sensed point was:\n\t" << scanner.sensor.row(i) << std::endl;
-    }
-    return 0;
-}
-
-
 void VoxelGrid::saveCSV(const std::string& fname) const
 {  
     std::ofstream file;

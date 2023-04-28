@@ -171,8 +171,9 @@ class VoxelGrid
         /// @return Value at the location
         /// @throws `std::invalid_argument` if the vector index is out of bounds. 
         inline VoxelElement& at(const grid_idx& idx) const {
+            if (!valid(idx)) throw std::out_of_range("Grid index was out of bounds in at least one dimension leading to incorrect vector access.");
             vector_idx vidx;
-            if (this->toVector(idx, vidx) != 0) throw std::invalid_argument("Input resulted in out of bound vector access.");
+            this->toVector(idx, vidx);
             return this->at(vidx);
         }
 
@@ -180,9 +181,8 @@ class VoxelGrid
         /// @brief Returns the value at the given location
         /// @param idx Index location within the underlying std::vector
         /// @return Value at the index
-        /// @throws `std::invalid_argument` if the vector index is out of bounds. 
+        /// @throws `std::std::out_of_range` if the vector index is out of bounds.
         inline VoxelElement& at(const vector_idx& idx) const {
-            if (!this->valid(idx)) throw std::invalid_argument("Input resulted in out of bound vector access.");
             return this->grid->at(idx);
         }
 

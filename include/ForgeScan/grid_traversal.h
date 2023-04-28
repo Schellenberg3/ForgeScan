@@ -48,7 +48,6 @@ bool addRayExact(VoxelGrid& grid,      const VoxelUpdate& update,
 
 void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed);
 
-void addSensor(VoxelGrid &grid, const SimSensorReading &sensor);
 
 
 #endif // FORGESCAN_GRID_TRAVERSAL

@@ -3,7 +3,6 @@
 
 #include <ForgeScan/forgescan_types.h>
 #include <ForgeScan/voxel_element.h>
-#include <ForgeScan/sim_sensor_reading.h>
 #include <ForgeScan/grid_processor.h>
 
 #include <Eigen/Geometry>
@@ -22,7 +21,6 @@ class VoxelGrid
 
     friend void addRayTSDFandView(VoxelGrid &, const point &, const point &);
 
-    friend void addSensor(VoxelGrid &, const SimSensorReading &);
 
     friend bool addRayExact(VoxelGrid&, const VoxelUpdate&, const point&, const point&,
                             const double&, const double&);

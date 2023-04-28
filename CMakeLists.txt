@@ -86,7 +86,6 @@ add_executable(
     sim_sphere_scan 
 
     src/sim_sphere_scan.cpp
-    src/sim_sensor_reading.cpp
     src/voxel_grid.cpp
     src/grid_traversal.cpp
 )

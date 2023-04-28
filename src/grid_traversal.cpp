@@ -1,5 +1,4 @@
 #include <ForgeScan/grid_traversal.h>
-#include <ForgeScan/sim_sensor_reading.h>
 
 #include <iostream>
 
@@ -203,38 +202,6 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
         grid.set(current_gidx, update);
     }
     return true;
-}
-
-
-void addSensor(VoxelGrid &grid, const SimSensorReading &sensor)
-{
-    const Eigen::Vector3d camera_z_axis(0, 0, 1);
-
-    Eigen::MatrixXd copy = sensor.sensor;
-    copy.transposeInPlace();  // 3xN matrix
-
-    Eigen::Matrix3d R;
-    R = Eigen::Quaterniond().setFromTwoVectors(camera_z_axis, sensor.normal);
-
-    // APPLY ROTATION
-    copy = R*copy;
-
-    // APPLY TRANSLATION
-    copy.colwise() += sensor.position;  // Removed previously
-
-    for (int i = 0, num_pts = sensor.m * sensor.n; i < num_pts; ++i)
-    {
-        addRayTSDFandView(grid, sensor.position, copy.col(i));
-    }
-
-    for (auto& ve : *(grid.grid))
-    {
-        if (ve.views >> 15)
-        {   // Checks if the MSB of the views is set to 1 and 
-            if (ve.views != 0xFFFF) ++ve.views;   // Caps updates and prevents rollover at 0x7FFF (32767 views.)
-            resetViewUpdateFlag(ve);
-        }
-    }
 }
 
 

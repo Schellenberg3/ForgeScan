@@ -320,7 +320,13 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
     update.dist = t_neg_adj;
     while (t_x <= t_pos_adj || t_y <= t_pos_adj || t_z <= t_pos_adj)
     {
-        grid.set(current_gidx, update);
+        try {
+            grid.set(current_gidx, update);
+        } catch (const std::out_of_range& e) {
+            break; // Break if the next update tried to put us out of range.
+                   // Technically, the next loop would not execute after this.
+                   // Perhaps we could return rather than perform that check.
+        }
         if (t_x < t_y && t_x < t_z)
         {
             update.dist = t_x;
@@ -344,7 +350,11 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
     // Mark voxels as viewed; no information updated. Moving from pos_dist to far_dist.
     while (t_x <= t_far_adj || t_y <= t_far_adj || t_z <= t_far_adj)
     {
-        setViewUpdateFlag( grid.at(current_gidx) );
+        try {
+            setViewUpdateFlag( grid.at(current_gidx) );
+        } catch (const std::out_of_range& e) {
+            break; // Break if the next update tried to put us out of range.
+        }
         if (t_x < t_y && t_x < t_z)
         {
             current_gidx[0] += s_x;

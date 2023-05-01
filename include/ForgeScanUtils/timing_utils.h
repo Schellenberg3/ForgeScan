@@ -1,3 +1,6 @@
+#ifndef FORGESCANUTILS_TIMING_UTILS_H
+#define FORGESCANUTILS_TIMING_UTILS_H
+
 #include <iostream>
 #include <chrono>
 #include <ctime>
@@ -44,3 +47,5 @@ private:
     std::chrono::time_point<std::chrono::system_clock> m_EndTime;
     bool                                               m_bRunning = false;
 };
+
+#endif // FORGESCANUTILS_TIMING_UTILS_H

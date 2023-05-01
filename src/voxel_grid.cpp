@@ -1,5 +1,5 @@
 #include <ForgeScan/voxel_grid.h>
-#include <ForgeScan/memory_utils.h>
+#include <ForgeScanUtils/memory_utils.h>
 
 /// Eigen is used when saving/loading from HDF5 files.
 #define H5_USE_EIGEN 1

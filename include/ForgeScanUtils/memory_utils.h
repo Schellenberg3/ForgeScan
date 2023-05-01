@@ -1,5 +1,5 @@
-#ifndef FORGESCAN_MEMORY_UTILS_H
-#define FORGESCAN_MEMORY_UTILS_H
+#ifndef FORGESCANUTILS_MEMORY_UTILS_H
+#define FORGESCANUTILS_MEMORY_UTILS_H
 
 #include <cstddef>
 #include <vector>
@@ -37,4 +37,4 @@ double const inline byte_to_megabytes(const size_t& bytes)
 }
 
 
-#endif // FORGESCAN_MEMORY_UTILS_H
+#endif // FORGESCANUTILS_MEMORY_UTILS_H

@@ -1,186 +1,160 @@
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/memory_utils.h>
 
-#include <Eigen/Dense>
-
+/// Eigen is used when saving/loading from HDF5 files.
 #define H5_USE_EIGEN 1
 #include <highfive/H5File.hpp>
 
-#include <stdexcept>
-
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <cassert>
 #include <cmath>
 
-#include <cstdint>
 
-#include <iostream>
-#include <iomanip>
-
-#include <fstream>
-#include <filesystem>
+/// TODO: VoxelGrid::loadHDF5 cannot function as designed. See not in function. Move this to its own stand-alone function.
 
 
-VoxelGrid::VoxelGrid(double resolution, point lower, point upper, bool round_points_in)
+/// @brief A long helper function that modifies the input VoxelGridProperties to be valid for a voxel grid.
+/// @note  It preferences keeping the user's resolution and adjusting the grid size then dimensions as needed.
+///        It may expand the grid size and dimensions, but cannot shrink it.
+/// @param input_properties User's provided input properties.
+/// @return VoxelGridProperties which are valid and attempt to stay true to the user's input properties.
+/// @throws `std::invalid_argument` if the resolution and dimensions cannot be determined -- where the resolution
+///         is non-positive and any dimension is non-positive in any direction.
+static VoxelGridProperties setVoxelGridProperties(const VoxelGridProperties& input_properties)
 {
-    Vector3d span = upper - lower;
+    VoxelGridProperties adjusted_properties = input_properties;
 
-    // Validate user inputs
-    if (resolution <= 0) throw std::invalid_argument("Resolution must be greater than 0.");
-    if ( (span.array() <= 0).any() ) throw std::invalid_argument("Improper upper/lower bounds.");
+    if(std::isnan(adjusted_properties.max_dist)|| std::isnan(adjusted_properties.max_dist))
+        throw std::invalid_argument("setVoxelGridProperties:: Input properties minimum and maximum truncation distances cannot be NAN.");
 
-    this->resolution = resolution;
-    this->lower = lower;
-    this->upper = upper;
-    for (int i = 0; i < 3; ++i)
-        this->size[i] = std::ceil(span[i] / resolution);
-    this->idx_scale = this->size.cast<double>().array() / span.array();
+    /// Flags for each key voxel grid attribute. Set to true if the input values MUST be changed. However,
+    /// even if these are false, the adjusted properties may differ slightly from the input properties
+    bool set_resolution = input_properties.resolution <= 0,
+         set_grid_size  = (input_properties.grid_size.array() == 0).any(),
+         set_dimensions = (input_properties.dimensions.array() <= 0).any();
 
-    size_t vec_len = this->size[0] * this->size[1] * this->size[2];
+    if (set_resolution)
+    {   /// If the adjusted resolution MUST BE SET...
+        if (!set_dimensions)
+        {   /// If the adjusted dimension MUST BE SIMILAR TO THE INPUT... 
+            if (set_grid_size)
+            {   /// If the adjusted grid MUST BE SET... 
+                /// The resolution IS SET so 100 voxels would span the average of all 3 dimensions.
+                adjusted_properties.resolution = input_properties.dimensions.sum() / 300;
+            }
+            else
+            {   /// If the adjusted grid size MUST BE SIMILAR TO THE INPUT...
+                /// The resolution IS SET so the most restrictive dimension of the grid size given the dimensions is met.
+                Vector3d voxel_cuboid_size = input_properties.dimensions.array() / input_properties.grid_size.cast<double>().array();
+                adjusted_properties.resolution = voxel_cuboid_size.minCoeff();
+            }
 
-    this->grid = std::make_shared<std::vector<VoxelElement>>(vec_len, VoxelElement());
-    double mem = byte_to_megabytes(vector_capacity(*this->grid));
-    if (mem > 100.0)
-        std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
-    this->round_points_in = round_points_in;
-}
+            /// The grid size IS SET or IS ADJUSTED, based on the resolution, to enclose the input dimensions.
+            adjusted_properties.grid_size = (input_properties.dimensions / adjusted_properties.resolution).array().ceil().cast<size_t>();
 
+            /// The dimensions ARE ADJUSTED to match the grid size and dimension.
+            adjusted_properties.dimensions = adjusted_properties.grid_size.cast<double>() * adjusted_properties.resolution;
 
-int VoxelGrid::toGrid(const vector_idx& input, Vector3ui& output) const
-{
-    static const double sxsy = (double) this->size[0]*this->size[1];
+            /// Sanity checks to ensure that grid size and dimensions ARE SIMILAR TO THE INPUT.
+            /// We want to ensure that we have only expanded the grid_size and dimensions.
+            if (!set_grid_size) { 
+                assert((adjusted_properties.grid_size.array() >= input_properties.grid_size.array()).all() &&
+                        "Adjustments should never shrink the input grid size in any direction.");
+            }
+            assert((adjusted_properties.dimensions.array() >= input_properties.dimensions.array()).all() &&
+                    "Adjustments should never shrink the input grid dimensions in any direction.");
 
-    double copy_idx = (double) input;
-    Vector3d temp;
-
-    temp[2] = std::floor(copy_idx / sxsy);
-
-    copy_idx -= temp[2] * sxsy;
-    temp[1] = std::floor(copy_idx / this->size[0]);
-
-    copy_idx -= temp[1] * this->size[0];
-    temp[0] = copy_idx;
-
-    output = temp.cast<size_t>();
-
-    // To return we check if the temp was out of bounds first. The casting behaviour between a double and
-    // unsigned int may be undefined if the cast value cannot be expressed in the destination type.
-    // Essentially, negative values in the temp array are impossible to catch in the output alone. See:
-    //      https://stackoverflow.com/questions/65012526/
-    if ( (temp.array() < 0.0).any() || (temp.array() >= this->size.cast<double>().array()).any() )
-        return INVALID_INDEX_ERROR_CODE;
-    return this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
-}
-
-
-int VoxelGrid::toGrid(const point& input, grid_idx& output) const
-{
-    Vector3d temp = (input - lower).array() * this->idx_scale.array();
-    for (int i =0; i < 3; ++i)
-    {
-        temp[i] = std::round(temp[i]);
-        if (this->round_points_in)
-        {
-            if (temp[i] < 0) temp[i] = 0;
-            if (temp[i] >= this->size[i]) temp[i] = this->size[i] - 1;
+            /// Resolution IS SET, grid size IS SET or IS ADJUSTED, and dimensions ARE ADJUSTED.
+            /// We can now exit function to return valid adjusted_properties.
+        }
+        else
+        {   /// No valid cases for:
+            ///     adjusted resolution MUST BE SET and adjusted dimensions MUST BE SET for any provided grid size.
+            throw std::invalid_argument(
+                "setVoxelGridProperties:: Input properties must, at least, have a meaningful resolution OR meaningful dimensions."
+            );
         }
     }
-    output = temp.cast<size_t>();
-    return this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
-}
+    else
+    {   /// If the adjusted resolution MUST BE EQUAL TO THE INPUT...
+        if (set_dimensions)
+        {   /// If the adjusted dimensions MUST BE SET...
+            if (set_grid_size)
+            {   /// If the adjusted grid size MUST BE SET...
+                /// The grid size IS SET to a default of 100 voxels in each dimension.
+                adjusted_properties.grid_size = Vector3ui(100, 100, 100);
+            }
 
+            /// The dimensions IS SET based on the INPUT resolution and grid size (either INPUT, as copied to adjusted, or SET) .
+            adjusted_properties.dimensions = adjusted_properties.grid_size.cast<double>() * input_properties.resolution;
 
-int VoxelGrid::toPoint(const vector_idx& input, point& output) const
-{
-    grid_idx gidx;
-    this->toGrid(input, gidx);
-    return this->toPoint(gidx, output);
-}
+            /// Resolution IS INPUT, grid size IS INPUT or IS SET, and dimensions ARE ADJUSTED.
+            /// We can now exit function to return valid adjusted_properties.
+        }
+        else if (!set_dimensions)
+        {   /// If the adjusted dimension MUST BE SIMILAR TO THE INPUT...
+            /// The grid size IS SET, regardless of the value of `set_grid_size`.
+            adjusted_properties.grid_size = (input_properties.dimensions / adjusted_properties.resolution).array().ceil().cast<size_t>();
 
+            /// The dimensions ARE ADJUSTED to match the grid size and dimension.
+            adjusted_properties.dimensions = adjusted_properties.grid_size.cast<double>() * input_properties.resolution;
 
-int VoxelGrid::toPoint(const grid_idx& input, point& output) const
-{
-    output = (input.cast<double>().array() / this->idx_scale.array()) + this->lower.array();
+            /// Sanity checks to ensure that dimensions ARE SIMILAR TO THE INPUT.
+            /// We want to ensure that we have only expanded the and dimensions.
+            assert((adjusted_properties.dimensions.array() >= input_properties.dimensions.array()).all() &&
+                    "Adjustments should never shrink the input grid dimensions in any direction.");
 
-    // NOTE: Check both input and output. The vector idx to space coordinate overload
-    //       may provide invalid grid indicies.
-    return this->valid(input) && this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
-}
-
-
-int VoxelGrid::toVector(const point& input, vector_idx& output) const
-{
-    if ( !valid(input) )
-        return INVALID_INDEX_ERROR_CODE;
-    grid_idx gidx;
-    int valid = this->toGrid(input, gidx);
-    return this->toVector(gidx, output);
-}
-
-
-int VoxelGrid::toVector(const grid_idx& input, vector_idx& output) const
-{
-    output = ( input[0] ) + ( input[1] * this->size[0] ) + ( input[2] * this->size[0] * this->size[1] );
-
-    // NOTE: Check both input and output. The space coordinate to vector idx overload
-    //       may provide invalid grid indicies.
-    return this->valid(input) && this->valid(output) ? 0 : INVALID_INDEX_ERROR_CODE;
-}
-
-
-int VoxelGrid::get_6(const grid_idx& input, std::vector<grid_idx>& output)
-{
-    output.clear();
-    if (output.capacity() != 6) output.reserve(6);
-    for (int i = 0, j = 0; i < 6; ++i)
-    {
-        output.push_back(input);  // Creates copies of the input
-        if (i % 2 == 0)
-            output[i][j] += 1;
-        else {
-            // Unsigned underflow for an index of 0 results in the maximum value that a size_t
-            // variable van represent. This is defined behaviour and since this is much larger than
-            // any dimension will ever be this will be detected as an invalid index by this->valid 
-            //      https://stackoverflow.com/questions/2760502
-            output[i][j] -= 1;
-            ++j;
+            /// Resolution IS INPUT, grid size IS SET or IS ADJUSTED, and dimensions ARE SET.
+            /// We can now exit function to return valid adjusted_properties.
         }
     }
-    // By checking if the input is on an surface, edge, or corner we can quickly check the validity
-    // of the output. A more thorough, test would be checking each derived output. 
-    if ( (input.array() == 0).any() || (input.array() >= this->size.array()).any() )
-        return INVALID_INDEX_ERROR_CODE;
-    return 0;
+
+    /// The maximum and minimum distances MUST BE positive and negative, respectively. 
+    if(adjusted_properties.max_dist < 0) adjusted_properties.max_dist *= 1;
+    if(adjusted_properties.min_dist > 0) adjusted_properties.max_dist *= 1;
+
+    return adjusted_properties;
 }
 
-
-void VoxelGrid::saveCSV(const std::string& fname) const
-{  
-    std::ofstream file;
-    file.exceptions( std::ofstream::failbit | std::ofstream::badbit );
-    try
-    {
-        file.open(fname + ".csv");
-        file << std::fixed << std::setprecision(8);
-        file << "Voxel Grid CSV Format\n";
-        file << "Updates, Views, Min, Avg, Var, Cent, Norm, Rho\n";
-        for (const auto& voxel : *this->grid)
-            file << voxel.updates << ", "
-                << voxel.views   << ", "
-                << voxel.min     << ", "
-                << voxel.avg     << ", "
-                << voxel.var     << ", "
-                << voxel.cent    << ", "
-                << voxel.norm    << ", "
-                << voxel.rho     << ",\n";
-        file.close();
-    }
-    catch (std::ofstream::failure e)
-    {
-        std::cerr << "Encountered error in VoxelGrid::saveCSV. See message:\n" << e.what();
-    }
+VoxelGrid::VoxelGrid(const VoxelGridProperties& properties) :
+    ForgeScanEntity(),
+    properties(setVoxelGridProperties(properties))
+{ 
+    setup();
 }
 
+VoxelGrid::VoxelGrid(const VoxelGridProperties& properties, const extrinsic& extr) :
+    ForgeScanEntity(extr),
+    properties(setVoxelGridProperties(properties))
+{
+    setup();
+}
 
-HighFive::CompoundType create_compound_VoxelElement() {
+VoxelGrid::VoxelGrid(const VoxelGridProperties& properties, const translation& position) :
+    ForgeScanEntity(position),
+    properties(setVoxelGridProperties(properties))
+{
+    setup();
+}
+
+VoxelGrid::VoxelGrid(const VoxelGridProperties& properties, const rotation& orientation) :
+    ForgeScanEntity(orientation),
+    properties(setVoxelGridProperties(properties))
+{
+    setup();
+}
+
+void VoxelGrid::clear()
+{
+    for (auto& element : voxel_element_vector)
+        resetVoxel(element);
+}
+
+/// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_element_vector`
+///        by the 
+static HighFive::CompoundType create_compound_VoxelElement() {
     return {
         {"views",  HighFive::AtomicType<view_count>{}},
         {"updates",  HighFive::AtomicType<update_count>{}},
@@ -194,10 +168,7 @@ HighFive::CompoundType create_compound_VoxelElement() {
         {"rho", HighFive::AtomicType<density>{}}
     };
 }
-
-
 HIGHFIVE_REGISTER_TYPE(VoxelElement, create_compound_VoxelElement)
-
 
 void VoxelGrid::saveHDF5(const std::string& fname) const
 {
@@ -210,18 +181,17 @@ void VoxelGrid::saveHDF5(const std::string& fname) const
 
         auto g1 = file.createGroup("VoxelGrid");
 
-        g1.createDataSet("VoxelData", *grid);
+        g1.createDataSet("VoxelData", voxel_element_vector);
 
-        g1.createAttribute("Resolution", resolution);
-        g1.createAttribute("Upper", upper);
-        g1.createAttribute("Lower", lower);
+        g1.createAttribute("Resolution", properties.resolution);
+        g1.createAttribute("Dimensions", properties.dimensions);
+        g1.createAttribute("GridSize", properties.grid_size);
     }
     catch (const HighFive::Exception& err)
     {
         std::cerr << err.what() << std::endl;
     } 
 }
-
 
 void VoxelGrid::loadHDF5(const std::string& fname)
 {
@@ -232,28 +202,33 @@ void VoxelGrid::loadHDF5(const std::string& fname)
         auto g1 = file.getGroup("VoxelGrid");
 
         auto dset = g1.getDataSet("VoxelData");
-        dset.read(*grid);
+        dset.read(voxel_element_vector);
 
+        /// Cannot use this function right now - My design choice of public but const properties means we cannot
+        /// set these variables when we load an HDF5 file.
+        /// Instead we could return a new object. Though this would be best as a stand-alone function.
+        throw std::logic_error("VoxelGrid::loadHDF5:: Function not implemented.");
+        /*
         auto res = g1.getAttribute("Resolution");
-        res.read(resolution);
+        res.read(properties.resolution);
 
-        auto ub = g1.getAttribute("Upper");
-        ub.read(upper);
+        auto dimensions = g1.getAttribute("Dimensions");
+        dimensions.read(properties.dimensions);
 
-        auto lb = g1.getAttribute("Lower");
-        lb.read(lower);
+        auto grid_size = g1.getAttribute("GridSize");
+        grid_size.read(properties.grid_size);
+        */
     }
     catch (const HighFive::Exception& err)
     {
         std::cerr << err.what() << std::endl;
     }
-}
 
+}
 
 void VoxelGrid::saveXDMF(const std::string &fname) const
 {
-    const int num_element = grid->size();
-    VoxelElement const *voxel_ref;  // 
+    const int num_element = voxel_element_vector.size();
     try
     {
         HighFive::File file(fname + ".h5", HighFive::File::Truncate);
@@ -281,17 +256,16 @@ void VoxelGrid::saveXDMF(const std::string &fname) const
         vec_norm.reserve(num_element);
         vec_rho.reserve(num_element);
 
-        for (int i = 0; i < num_element; ++i)
+        for (const auto& voxel_ref : voxel_element_vector)
         {
-            voxel_ref = &grid->at(i);
-            vec_updates.push_back(voxel_ref->updates);
-            vec_views.push_back(voxel_ref->views);
-            vec_min.push_back(voxel_ref->min);
-            vec_avg.push_back(voxel_ref->avg);
-            vec_var.push_back(voxel_ref->var);
-            vec_cent.push_back(voxel_ref->cent);
-            vec_norm.push_back(voxel_ref->norm);
-            vec_rho.push_back(voxel_ref->rho);
+            vec_updates.push_back(voxel_ref.updates);
+            vec_views.push_back(voxel_ref.views);
+            vec_min.push_back(voxel_ref.min);
+            vec_avg.push_back(voxel_ref.avg);
+            vec_var.push_back(voxel_ref.var);
+            vec_cent.push_back(voxel_ref.cent);
+            vec_norm.push_back(voxel_ref.norm);
+            vec_rho.push_back(voxel_ref.rho);
         }
 
         g1.createDataSet("Updates",    vec_updates);
@@ -303,9 +277,9 @@ void VoxelGrid::saveXDMF(const std::string &fname) const
         g1.createDataSet("Normality",  vec_norm);
         g1.createDataSet("Density",    vec_rho);
 
-        g1.createAttribute("Resolution", resolution);
-        g1.createAttribute("Upper", upper);
-        g1.createAttribute("Lower", lower);
+        g1.createAttribute("Resolution", properties.resolution);
+        g1.createAttribute("Dimensions", properties.dimensions);
+        g1.createAttribute("GridSize", properties.grid_size);
 
         writeXDMF(fname);
     }
@@ -314,17 +288,15 @@ void VoxelGrid::saveXDMF(const std::string &fname) const
     } 
 }
 
-
 void VoxelGrid::writeXDMF(const std::string &fname) const
 {
     std::string hdf5_fname = fname + ".h5";
 
-    const int num_element = grid->size();
+    const int num_element = voxel_element_vector.size();
 
-    point lower_zyx = lower;
-    lower_zyx.reverseInPlace();
+    point lower_zyx = Eigen::Vector3d::Zero();
 
-    Vector3ui size_1 = size.array() + 1;
+    Vector3ui size_1 = properties.grid_size.array() + 1;
     size_1.reverseInPlace();
 
     std::ofstream file;
@@ -345,7 +317,8 @@ void VoxelGrid::writeXDMF(const std::string &fname) const
         "      <!-- Origin  Z, Y, X -->\n"
         "      <DataItem Format=\"XML\" Dimensions=\"3\">" << lower_zyx.transpose() << "</DataItem>\n" <<
         "      <!-- DxDyDz (Spacing/Resolution) Z, Y, X -->\n"
-        "      <DataItem Format=\"XML\" Dimensions=\"3\">" << resolution << " " << resolution << " " << resolution << "</DataItem>\n"
+        "      <DataItem Format=\"XML\" Dimensions=\"3\">" << 
+                   properties.resolution << " " << properties.resolution << " " << properties.resolution << "</DataItem>\n"
         "    </Geometry>\n"
 
         //  Updates
@@ -415,3 +388,12 @@ void VoxelGrid::writeXDMF(const std::string &fname) const
         std::cerr << "Encountered error in VoxelGrid::writeXDMF. See message:\n" << e.what();
     }
 }
+
+void VoxelGrid::setup()
+{
+    voxel_element_vector.resize(properties.grid_size.prod());
+    double mem = byte_to_megabytes(vector_capacity(voxel_element_vector));
+    if (mem > 100.0)
+        std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
+}
+

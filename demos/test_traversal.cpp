@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 
     VoxelUpdate update(1, 0, 0, 0);
 
-    int num = argc > 1 ? std::stoi(argv[1]) : (1280 * 720) ; // Defualt to RealSense D455 resolution
+    int num = argc > 1 ? std::stoi(argv[1]) : (1280 * 720) ; // Default to RealSense D455 resolution
     std::vector<Vector3d> start_vecs, end_vecs;
     start_vecs.reserve(num);
     end_vecs.reserve(num);

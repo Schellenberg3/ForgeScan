@@ -1,13 +1,11 @@
 #ifndef FORGESCAN_SENSOR_READING_H
 #define FORGESCAN_SENSOR_READING_H
 
-#include <ForgeScan/forgescan_types.h>
-#include <ForgeScan/sensor_intrinsics.h>
-
-#include <Eigen/Geometry>
-
 #include <random>
 #include <stdexcept>
+
+#include <ForgeScan/forgescan_types.h>
+#include <ForgeScan/sensor_intrinsics.h>
 
 
 static constexpr float FLOATING_POINT_INF = std::numeric_limits<float>::infinity();

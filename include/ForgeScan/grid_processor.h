@@ -1,12 +1,12 @@
 #ifndef FORGESCAN_GRID_PROCESSOR_H
 #define FORGESCAN_GRID_PROCESSOR_H
 
+#include <vector>
+#include <functional>
+
 #include <ForgeScan/forgescan_types.h>
 #include <ForgeScan/voxel_element.h>
 #include <ForgeScan/voxel_grid.h>
-
-#include <vector>
-#include <functional>
 
 
 class VoxelGrid;  // Promise to compiler that the VoxelGrid class will be defined later

@@ -1,15 +1,16 @@
-#include <ForgeScan/voxel_grid.h>
-#include <ForgeScanUtils/memory_utils.h>
-
-/// Eigen is used when saving/loading from HDF5 files.
-#define H5_USE_EIGEN 1
-#include <highfive/H5File.hpp>
-
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <cassert>
 #include <cmath>
+
+/// Eigen is used when saving/loading from HDF5 files.
+#define H5_USE_EIGEN 1
+#include <highfive/H5File.hpp>
+
+#include <ForgeScan/voxel_grid.h>
+#include <ForgeScanUtils/memory_utils.h>
+
 
 /// @note The methods for `VoxelGrid::implementAddRayExact` and `VoxelGrid::implementAddRayTSDF` are defined in `voxel_grid_traversal.cpp`.
 

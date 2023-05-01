@@ -1,7 +1,7 @@
-#include <ForgeScan/voxel_element.h>
-
 #include <iostream>
 #include <bitset>
+
+#include <ForgeScan/voxel_element.h>
 
 
 /// @brief Displays memory size and numeric limits for VoxelElement class and its

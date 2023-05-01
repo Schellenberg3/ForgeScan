@@ -1,13 +1,13 @@
 # ifndef FORGESCAN_VOXEL_GRID_H
 # define FORGESCAN_VOXEL_GRID_H
 
+#include <vector>
+#include <stdexcept>
+
 #include <ForgeScan/forgescan_types.h>
 #include <ForgeScan/voxel_element.h>
 #include <ForgeScan/sensor_reading.h>
 #include <ForgeScan/grid_processor.h>
-
-#include <vector>
-#include <stdexcept>
 
 
 /// @brief Storage for VoxelGrid properties.

@@ -1,8 +1,6 @@
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/sensor_reading.h>
 
-#include <Eigen/Geometry>
-
 #include <iostream>
 #include <random>
 #include <cmath>

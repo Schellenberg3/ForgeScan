@@ -50,24 +50,4 @@ bool addRayExact(VoxelGrid& grid,      const VoxelUpdate& update,
 void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed);
 
 
-template <typename T>
-void addSensor(VoxelGrid &grid, const BaseDepthSensor<T> &sensor)
-{
-    point_list points = sensor.getAllPositions();
-    sensor.toWorldFromThis(points);
-    for (int i = 0, n = points.cols(); i < n; ++i) {
-        addRayTSDFandView(grid, sensor.extr.translation(), points.col(i));
-    }
-
-    for (auto& ve : *(grid.grid))
-    {
-        if (ve.views >> 15)
-        {   // Checks if the MSB of the views is set to 1 and 
-            if (ve.views != 0xFFFF) ++ve.views;   // Caps updates to prevent rollover after 0x7FFF (32767 views.)
-            resetViewUpdateFlag(ve);
-        }
-    }
-}
-
-
 #endif // FORGESCAN_GRID_TRAVERSAL

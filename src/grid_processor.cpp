@@ -1,57 +1,44 @@
 #include <ForgeScan/grid_processor.h>
 
 
-GridProcessor::GridProcessor()
-{
-    this->voxel_grid = nullptr;
-    this->temp = std::make_shared<std::vector<VoxelElement>>();
-}
-
 
 GridProcessor::GridProcessor(VoxelGrid& target)
 {
-    this->voxel_grid = &target;
-    this->temp = std::make_shared<std::vector<VoxelElement>>();
-    this->setup_temp_vector();
+    setTarget(target);
+}
+
+inline void GridProcessor::setTarget(VoxelGrid& new_target)
+{
+    target = &new_target;
+    temp.resize(target->voxel_element_vector.size());
+}
+
+void inline GridProcessor::swap()
+{
+    target->voxel_element_vector.swap(temp);
 }
 
 
-void inline GridProcessor::setup_temp_vector()
+void GridProcessor::operation(const std::function<void(const grid_idx&)>& operation)
 {
-    // Despite being inline we define this here to avoid invalid usage 
-    // of an incomplete type of VoxelGrid
-    size_t grid_size = this->voxel_grid->grid->size();
-    if ( this->temp->size() != grid_size)
-        this->temp = std::make_shared<std::vector<VoxelElement>>(grid_size, VoxelElement());
-}
-
-
-void GridProcessor::elementwise_operation(const std::function<void(const grid_idx&)>& operation, VoxelGrid* target)
-{
-    if (this->set_new_target(target)) this->setup_temp_vector();
-    this->reset_temp();
-
-    grid_idx current_gidx(0, 0, 0);
-    size_t current_vidx = 0;
-
-    for (size_t z = 0, z_max = this->voxel_grid->size[2]; z < z_max; ++z)
-    {
-        current_gidx[2] = z;
-        for (size_t y = 0, y_max = this->voxel_grid->size[1]; y < y_max; ++y)
-        {
-            current_gidx[1] = y;
-            for (size_t x = 0, x_max = this->voxel_grid->size[0]; x < x_max; ++x)
-            {
-                current_gidx[0] = x;
-                operation(current_gidx);
+    resetTempVector();
+    grid_idx index(0, 0, 0);
+    // Iterate fastest in X, then Y, and then Z and call the operation function on the element at that index.
+    for (size_t z = 0, z_max = target->properties.grid_size[2]; z < z_max; ++z) {
+        index[2] = z;
+        for (size_t y = 0, y_max = target->properties.grid_size[1]; y < y_max; ++y) {
+            index[1] = y;
+            for (size_t x = 0, x_max = target->properties.grid_size[0]; x < x_max; ++x) {
+                index[0] = x;
+                operation(index);
             }
         }
     }
-    this->voxel_grid->grid.swap(this->temp);
+    swap();
 }
 
-
-void GridProcessor::dilate_element(const grid_idx& element, const int& n)
+/*
+void GridProcessor::dilate(const grid_idx& element, const int& n)
 {
     std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
     vector_idx element_vidx = 0;
@@ -70,7 +57,7 @@ void GridProcessor::dilate_element(const grid_idx& element, const int& n)
 }
 
 
-void GridProcessor::erode_element(const grid_idx& element, const int& n)
+void GridProcessor::erode(const grid_idx& element, const int& n)
 {
     std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
     vector_idx element_vidx = 0;
@@ -92,3 +79,4 @@ void GridProcessor::erode_element(const grid_idx& element, const int& n)
     else  // Otherwise, stay the same
         this->temp->at(element_vidx).updates = this->voxel_grid->at(element_vidx).updates;
 }
+*/

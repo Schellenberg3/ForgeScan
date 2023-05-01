@@ -192,10 +192,10 @@ public:
     friend class GridProcessor;
 
     /// @brief Accesses voxel elements for ray tracing.
-    friend void addRayTSDFandView(VoxelGrid &, const point &, const point &);
+    friend bool addRayTSDFandView(VoxelGrid &, const point &, const point &);
 
     /// @brief Accesses voxel elements for ray tracing.
-    friend bool addRayExact(VoxelGrid&, const VoxelUpdate&, const point&, const point&, const double&, const double&);
+    friend bool addRayExact(VoxelGrid&, const VoxelUpdate&, const point&, const point&);
 
 
 private:

@@ -61,9 +61,7 @@ int main(int argc, char** argv)
         {
         addRayExact(
             grid_exact, update,
-            start_vecs[i], end_vecs[i], 
-            0.0, 1.0
-        );
+            start_vecs[i], end_vecs[i]);
     }
     t_exa.stop();
     std::cout << "Added " << num << " with exact method" << std::endl;

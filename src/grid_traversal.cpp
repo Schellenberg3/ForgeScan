@@ -1,6 +1,21 @@
 #include <ForgeScan/grid_traversal.h>
 
-#include <iostream>
+
+/// @details The methods in this file follow the the Amanatides-Woo algorithm for fast voxel traversal. See:
+///             http://www.cse.yorku.ca/~amana/research/grid.pdf
+///
+///         Essentially, this treats the ray as a line parametrized by a variable for time. This time factor describes how
+///         long the distance we "walk" from the given start position. We then consider "walking" each cartesian direction
+///         and find the next voxel by selecting the direction that we have spent the least time "walking" along.
+///
+///         For all of these methods and the axis-aligned bounding-box (AABB) check, it is important that the VoxelGrid is
+///         aligned to the axis and that any provided points are transformed to the relevant coordinate system. Other code
+///         should handle this well before these functions are called. But it is important to know if you expand or edit these.
+
+
+/// @TODO: This method works quite well and is very fast. However it tends to miss the final few voxels. At lease how I've
+///        implemented it and from my empirical observations. More testing is required here to check the start/end conditions
+///        and the initial distances for each voxel.
 
 
 /// @brief Checks if, and then where, the ray intersects the Axis-Aligned Bounding Box (AABB).
@@ -73,49 +88,31 @@ static bool zeroBoundedAABBintersection(const Vector3d& bound, const point& orig
 } 
 
 
-bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
-                 const point& rs,  const point& re,
-                 const double& ts, const double& te)
+bool addRayExact(VoxelGrid& grid, const VoxelUpdate& update, const point& rs,  const point& re)
 {
-    /// @note: This method works quite well and is very fast. However it tends to miss the final
-    ///        1 to 3 voxels. The exit condition is a bit imperfect. Maybe some boolean flags rather
-    ///        than comparisons will correct this. But this is a minor error at the moment.
-
-    /// OPTIMIZE: Would using a custom Vector3 class improve performance by reducing call overhead?
-    ///           Eigen is nice. But it wraps a lot of un-needed functionality, especially for just
-    ///           a collection of 3 elements. 
-
     Vector3d ray = re - rs;
-    double   len = ray.norm();
-    Vector3d dir = ray / len;
-    Vector3d inv_dir = dir.cwiseInverse();
+    double   te = ray.norm();  // also the ray's length
+    Vector3d normal = ray / te;
+    Vector3d inverse_normal = normal.cwiseInverse();
 
-    // We must update the percents given as an input to multiples of the unit vector direction. 
-    double ts_units = ts * len;
-    double te_units = te * len;
+    double ts = 0;
 
     // We declare adjusted start and end times (in multiples of the unit vector) so the
     // findRayAlignedBoxIntersection method can adjust our times so we only look at valid voxels.
     double ts_adj, te_adj;
 
     // Early exit for segments outside of the grid or for equal start/end points. 
-    bool valid_segment = zeroBoundedAABBintersection(grid.properties.dimensions, rs, inv_dir,
-                                                     ts_units, te_units, ts_adj, te_adj);
+    bool valid_segment = zeroBoundedAABBintersection(grid.properties.dimensions, rs, inverse_normal,
+                                                     ts, te, ts_adj, te_adj);
     if (valid_segment == false)
-    {
-        // Invalid cases could be completely outside the grid or an invalid line.
-        // We try to update the starting point in case we have the case of an invalid line because
-        // the start/end points are the same. If this is inside the grid we get the proper update.
         return false;
-    }
 
     // From the adjusted times and given unit-vector multiple times we want to find the max start time
     // and the min end time. This is 
-    ts_adj = std::max(ts_adj, ts_units);
-    te_adj = std::min(te_adj, te_units);
+    ts_adj = std::max(ts_adj, ts);
+    te_adj = std::min(te_adj, te);
 
-    const point rs_adj = rs + dir * ts_adj;
-    const point re_adj = rs + dir * te_adj;
+    const point rs_adj = rs + normal * ts_adj;
 
     Vector3ui current_gidx(0,0,0);
 
@@ -124,11 +121,11 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
     
     /// [voxel] For each direction, as the ray is traversed, we either increment (+1) or decrement (-1) the index
     /// when we choose to step in that direction.
-    int s_x = 0, s_y = 0, s_z = 0;
+    int s_x = 1, s_y = 1, s_z = 1;
 
     /// [time] For each direction, we record the cumulative time spent traversing that direction. We always step in
     /// the direction that has been traversed the least.
-    double t_x = 0, t_y = 0, t_z = 0;
+    double t_x = ts_adj, t_y = ts_adj, t_z = ts_adj;
 
     /// [time] For each direction, we find amount of time required to move the distance of one voxel edge length in
     /// that direction. For each movement in a direction, this is added to the cumulative total for that direction.
@@ -143,27 +140,29 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
     ///             Must be 0 for X, 1 for Y or 2 for Z. But this is not verified.
     auto initTraversalInfo = [&](int& s_d, double& t_d, double& dt_d, const int& d)
     {
-        current_gidx[d] = std::max(0, (int)std::floor((rs_adj[d] - 0) / grid.properties.resolution));
-        // See note above. Helpful for debugging but not needed for the algorithm.
-        // end_gidx[d]     = MIN(grid.size[d], std::floor((re_adj[d] - grid.lower[d]) / grid.resolution));
-        if (dir[d] > 0)
-        {
-            s_d  = 1;
-            dt_d = grid.properties.resolution / dir[d];
-            t_d  = ts_adj + (current_gidx[d] * grid.properties.resolution - rs_adj[d]) * inv_dir[d];
+        /// TODO: Should this -1 be here? Does that make sense. Ran into boundary condition issues when the
+        ///       Far distance point was EXACTLY on the boundary of the grid.
+        /// TODO: Can this be optimized or pre-computed?
+        /// Calculate the current index for this direction.
+        current_gidx[d] = std::max(0, (int)std::floor((rs_adj[d] / grid.properties.resolution) - 1));
+    
+        dt_d = grid.properties.resolution * inverse_normal[d];
+        if (normal[d] > 0)
+        {   /// If we increase in a direction, set the start time based on the current index.
+            t_d  += abs( (current_gidx[d] * grid.properties.resolution - rs_adj[d]) * inverse_normal[d] );
         }
-        else if (dir[d] != 0)
-        {
-            s_d  = -1;
-            dt_d = -1 * grid.properties.resolution / dir[d];
-            const int previous_gidx = current_gidx[d] - 1;  // size_t caused an error here if current == 0
-            t_d  = ts_adj + (previous_gidx * grid.properties.resolution - rs_adj[d]) * inv_dir[d];
+        else if (normal[d] != 0)
+        {   /// If we decrease in a direction...
+            s_d  *= -1;  /// Ensures that we decrement the current index in this direction with each step in this direction.
+            dt_d *= -1;  /// Ensures that we increase the traversal time with each step, correcting the negative sign from above.
+            /// Use the previous index in the direction when setting its start time.
+            t_d  += abs( ((current_gidx[d] - 1) * grid.properties.resolution - rs_adj[d]) * inverse_normal[d] );
         }
         else
-        {
-            s_d  = 0;
-            dt_d = te_adj;
-            t_d  = te_adj;
+        {   /// In the rare case where the normal is EXACTLY zero we set the step to zero...
+            s_d  = 0;          /// Set the step size to zero.
+            dt_d = te_adj;  /// Set the travel time update to the final time.
+            t_d  = te_adj;  /// Set the initial time to the final time.
         }
     };
 
@@ -192,7 +191,6 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
             current_gidx[2] += s_z;
             t_z += dt_z;
         }
-        // operation(current_gidx);
         updateVoxel(grid.at(current_gidx), update);
     }
     return true;
@@ -201,7 +199,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
 
 /// @note: This method works quite well and is very fast. However it tends to miss the final 1 to 3 voxels. The exit condition
 ///        is a bit imperfect. Maybe some boolean flags rather than comparisons will correct this. But this is a minor error at the moment.
-void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed)
+bool addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed)
 {
     /// [Distance] Adjusted traversal distances that are inside the grid. Given a grid's truncation distance the adjusted values follow:
     ///  NEGATIVE TRUCATION DISTANCE <= t_neg_adj <= t_pos_adj <= POSITIVE TRUCATION DISTANCE,
@@ -216,18 +214,6 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
     Vector3d normal = ray / t_far;
     Vector3d inverse_normal = normal.cwiseInverse();
 
-    /// [Voxel] For each direction, as the ray is traversed, we either increment (+1) or decrement (-1) the index
-    /// when we choose to step in that direction.
-    int s_x = 0, s_y = 0, s_z = 0;
-
-    /// [Distance] For each direction, we record the cumulative traveled distance that direction. We always step in
-    /// the direction that has been traversed the least.
-    double t_x = 0, t_y = 0, t_z = 0;
-
-    /// [Distance] For each direction, we find amount of travel required to move the distance of one voxel edge length in
-    /// that direction. For each movement in a direction, this is added to the cumulative total for that direction.
-    double dt_x = 0,  dt_y = 0,  dt_z = 0;
-
     // Early exit for segments outside of the grid or for equal start/end points. 
     bool intersects_grid = zeroBoundedAABBintersection(grid.properties.dimensions, sensed, inverse_normal,
                                                        grid.properties.min_dist, t_far,
@@ -239,9 +225,22 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
 
     bool correct_traversal_direction = t_neg_adj < t_far_adj;
     if (intersects_grid == false || correct_traversal_direction == false)
-        return;
+        return false;
 
     const point neg_dist = sensed + normal * t_neg_adj;
+
+    /// [Voxel] For each direction, as the ray is traversed, we either increment (+1) or decrement (-1) the index
+    /// when we choose to step in that direction.
+    int s_x = 1, s_y = 1, s_z = 1;
+
+    /// [Distance] For each direction, we record the cumulative traveled distance that direction. We always step in
+    /// the direction that has been traversed the least.
+    double t_x = t_neg_adj, t_y = t_neg_adj, t_z = t_neg_adj;
+
+    /// [Distance] For each direction, we find amount of travel required to move the distance of one voxel edge length in
+    /// that direction. For each movement in a direction, this is added to the cumulative total for that direction.
+    double dt_x = 0,  dt_y = 0,  dt_z = 0;
+
 
     /// @brief Helper lambda to initialize the step, cumulative time, and delta time for each direction.
     /// @param s_d  Step in the direction. Will be one of increment (+1), decrement (-1), or nothing (0).
@@ -254,25 +253,27 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
     {
         /// TODO: Should this -1 be here? Does that make sense. Ran into boundary condition issues when the
         ///       Far distance point was EXACTLY on the boundary of the grid.
+        /// TODO: Can this be optimized or pre-computed?
+        /// Calculate the current index for this direction.
         current_gidx[d] = std::max(0, (int)std::floor((neg_dist[d] / grid.properties.resolution) - 1));
+    
+        dt_d = grid.properties.resolution * inverse_normal[d];
         if (normal[d] > 0)
-        {
-            s_d  = 1;
-            dt_d = grid.properties.resolution / normal[d];
-            t_d  = t_neg_adj + abs( (current_gidx[d] * grid.properties.resolution - neg_dist[d]) * inverse_normal[d] );
+        {   /// If we increase in a direction, set the start time based on the current index.
+            t_d  += abs( (current_gidx[d] * grid.properties.resolution - neg_dist[d]) * inverse_normal[d] );
         }
         else if (normal[d] != 0)
-        {
-            s_d  = -1;
-            dt_d = -1 * grid.properties.resolution / normal[d];
-            int previous_gidx = current_gidx[d] - 1;
-            t_d  = t_neg_adj + abs( (previous_gidx * grid.properties.resolution - neg_dist[d]) * inverse_normal[d] );
+        {   /// If we decrease in a direction...
+            s_d  *= -1;  /// Ensures that we decrement the current index in this direction with each step in this direction.
+            dt_d *= -1;  /// Ensures that we increase the traversal time with each step, correcting the negative sign from above.
+            /// Use the previous index in the direction when setting its start time.
+            t_d  += abs( ((current_gidx[d] - 1) * grid.properties.resolution - neg_dist[d]) * inverse_normal[d] );
         }
         else
-        {
-            s_d  = 0;
-            dt_d = t_far_adj;
-            t_d  = t_far_adj;
+        {   /// In the rare case where the normal is EXACTLY zero we set the step to zero...
+            s_d  = 0;          /// Set the step size to zero.
+            dt_d = t_far_adj;  /// Set the travel time update to the final time.
+            t_d  = t_far_adj;  /// Set the initial time to the final time.
         }
     };
 
@@ -335,4 +336,5 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
             t_z += dt_z;
         }
     }
+    return true;
 }

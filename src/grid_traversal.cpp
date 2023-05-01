@@ -2,41 +2,37 @@
 
 #include <iostream>
 
-#define ZEROS Eigen::Vector3d::Zero()
 
-
-/// @brief Verifies that a given ray does intersect the given axis-aligned box.
-/// @details This checks several early exit conditions and may not return accurate the adjusted start and end times
-///          in the case that the box is not intersected.
-///          The values for ts and te are in multiples of the unit-vector direction.
-/// @param lower Lower bound for the box.
-/// @param upper Upper bound for the box.
-/// @param ray_origin Origin of the ray.
-/// @param ray_direction Direction of the ray.
-/// @param ts Start time for walking the array. A value of zero indicates starting at the origin.
-/// @param te End time for walking the array.
-/// @param ts_adj An adjusted start time for when the begins intersecting the box.
-/// @param te_adj An adjusted end time for when the ray finishes intersecting the box.
-/// @return True if the ray intersects the box in the region given by `ts` and `te`
-/// @warning Does not verify if `ray_direction` is a unit vector.
-/// @warning Does not verify if the upper point is greater than the lower point.
-/// @warning Does not check that `te` is less than `ts`.
-static bool findRayAlignedBoxIntersection(const point& lower,      const point& upper, 
-                                          const point& ray_origin, const point& ray_direction,
-                                          const double& ts,        const double& te,
-                                          double& ts_adj, double& te_adj)
+/// @brief Checks if, and then where, the ray intersects the Axis-Aligned Bounding Box (AABB).
+///        Optimized for lower bounds at the origin and pre-computed inverse of the ray's normal. 
+/// @param bound  Upper bound of the box. Since it is zero-bounded this is equivelent to the box's dimensions.
+/// @param origin Origin of the ray to check.
+/// @param inverse_direction The element-wise inverse of unit vector direction for the ray.
+/// @param ts Start time for the intersection check. A value of 0 begins the check at the ray origin. Negative values are valid.
+/// @param te End time for the intersection check. This is in multiples of the unit vector from the origin.
+/// @param ts_adj Adjusted start time. When the ray first enters the AABB along any axis. May be less than the provided ts.
+/// @param te_adj Adjusted end time. When the ray first exits the AABB along any axis. May be greater than the provided te.
+/// @return False if the ray never enters the AABB. True otherwise.
+/// @warning This assumes that all values in `bound` are positive, but does not check this.
+/// @warning This requires that `direction` is normalized but does neither checks nor performs this operation.
+/// @warning This assumes `te` is greater than `ts` but does not check this. Incorrect times may cause the function
+///          to incorrectly conclude that a ray does not intersect and end early.
+/// @todo This function works but needs to be tested for robustness then optimized for speed. Testing should
+///       qualify how results are effected in cases where the assumptions stated in the warnings are incorrect.
+static bool zeroBoundedAABBintersection(const Vector3d& bound, const point& origin, const Vector3d& inverse_direction,
+                                        const double& ts, const double& te, double& ts_adj, double& te_adj)
 {
-    /// @note This checks for several early exit conditions. These are cases where the vector is out of bounds in
-    ///       at least one direction over the specified time. The main operation here is computing the time at which
-    ///       the ray hits the min/max bounds of the box in each direction. This is why we must have the box aligned
-    
     double t_min_y, t_max_y, t_min_z, t_max_z;
 
-    const Vector3d inv_direction = ray_direction.cwiseInverse();
-    const Vector3d min_dist = (lower - ray_origin).array() * inv_direction.array();
-    const Vector3d max_dist = (upper - ray_origin).array() * inv_direction.array();
+    // inverse_direction = direction.cwiseInverse();
 
-    if (inv_direction[0] >= 0)
+    /// Minimum distance = ([lower bounds] - [ray origin]) / [direction]
+    const Vector3d min_dist =  -1 * origin.array() * inverse_direction.array();
+
+    /// Maximum distance = ([Upper bounds] - [ray origin]) / [direction]
+    const Vector3d max_dist = (bound - origin).array() * inverse_direction.array();
+
+    if (inverse_direction[0] >= 0)
     {
         ts_adj = min_dist[0];
         te_adj = max_dist[0];
@@ -45,7 +41,7 @@ static bool findRayAlignedBoxIntersection(const point& lower,      const point& 
         te_adj = min_dist[0];
     }
 
-    if (inv_direction[1] >= 0)
+    if (inverse_direction[1] >= 0)
     {
         t_min_y = min_dist[1];
         t_max_y = max_dist[1];
@@ -59,7 +55,7 @@ static bool findRayAlignedBoxIntersection(const point& lower,      const point& 
     if (t_min_y > ts_adj) ts_adj = t_min_y;
     if (t_max_y < te_adj) te_adj = t_max_y;
 
-    if (inv_direction[2] >= 0)
+    if (inverse_direction[2] >= 0)
     {
         t_min_z = min_dist[2];
         t_max_z = max_dist[2];
@@ -74,7 +70,7 @@ static bool findRayAlignedBoxIntersection(const point& lower,      const point& 
     if (t_max_z < te_adj) te_adj = t_max_z;
 
     return (ts_adj < te && ts < te_adj);
-}
+} 
 
 
 bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
@@ -92,6 +88,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
     Vector3d ray = re - rs;
     double   len = ray.norm();
     Vector3d dir = ray / len;
+    Vector3d inv_dir = dir.cwiseInverse();
 
     // We must update the percents given as an input to multiples of the unit vector direction. 
     double ts_units = ts * len;
@@ -102,8 +99,8 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
     double ts_adj, te_adj;
 
     // Early exit for segments outside of the grid or for equal start/end points. 
-    bool valid_segment = findRayAlignedBoxIntersection(ZEROS, grid.properties.dimensions, rs, dir,
-                                                       ts_units, te_units, ts_adj, te_adj);
+    bool valid_segment = zeroBoundedAABBintersection(grid.properties.dimensions, rs, inv_dir,
+                                                     ts_units, te_units, ts_adj, te_adj);
     if (valid_segment == false)
     {
         // Invalid cases could be completely outside the grid or an invalid line.
@@ -153,14 +150,14 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
         {
             s_d  = 1;
             dt_d = grid.properties.resolution / dir[d];
-            t_d  = ts_adj + (current_gidx[d] * grid.properties.resolution - rs_adj[d]) / dir[d];
+            t_d  = ts_adj + (current_gidx[d] * grid.properties.resolution - rs_adj[d]) * inv_dir[d];
         }
         else if (dir[d] != 0)
         {
             s_d  = -1;
             dt_d = -1 * grid.properties.resolution / dir[d];
             const int previous_gidx = current_gidx[d] - 1;  // size_t caused an error here if current == 0
-            t_d  = ts_adj + (previous_gidx * grid.properties.resolution - rs_adj[d]) / dir[d];
+            t_d  = ts_adj + (previous_gidx * grid.properties.resolution - rs_adj[d]) * inv_dir[d];
         }
         else
         {
@@ -217,6 +214,7 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
     Vector3d ray    = origin - sensed;
     double t_far    = ray.norm();
     Vector3d normal = ray / t_far;
+    Vector3d inverse_normal = normal.cwiseInverse();
 
     /// [Voxel] For each direction, as the ray is traversed, we either increment (+1) or decrement (-1) the index
     /// when we choose to step in that direction.
@@ -231,8 +229,9 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
     double dt_x = 0,  dt_y = 0,  dt_z = 0;
 
     // Early exit for segments outside of the grid or for equal start/end points. 
-    bool intersects_grid = findRayAlignedBoxIntersection(ZEROS, grid.properties.dimensions, sensed, normal,
-                                                         grid.properties.min_dist, t_far, t_neg_adj, t_far_adj);
+    bool intersects_grid = zeroBoundedAABBintersection(grid.properties.dimensions, sensed, inverse_normal,
+                                                       grid.properties.min_dist, t_far,
+                                                       t_neg_adj, t_far_adj);
 
     t_far_adj = std::min(t_far_adj, t_far);
     t_pos_adj = std::min(t_far_adj, grid.properties.max_dist);
@@ -260,14 +259,14 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
         {
             s_d  = 1;
             dt_d = grid.properties.resolution / normal[d];
-            t_d  = t_neg_adj + abs( (current_gidx[d] * grid.properties.resolution - neg_dist[d]) / normal[d] );
+            t_d  = t_neg_adj + abs( (current_gidx[d] * grid.properties.resolution - neg_dist[d]) * inverse_normal[d] );
         }
         else if (normal[d] != 0)
         {
             s_d  = -1;
             dt_d = -1 * grid.properties.resolution / normal[d];
             int previous_gidx = current_gidx[d] - 1;
-            t_d  = t_neg_adj + abs( (previous_gidx * grid.properties.resolution - neg_dist[d]) / normal[d] );
+            t_d  = t_neg_adj + abs( (previous_gidx * grid.properties.resolution - neg_dist[d]) * inverse_normal[d] );
         }
         else
         {

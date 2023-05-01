@@ -98,8 +98,13 @@ int main(int argc, char* argv[])
     std::cout << "Running for " << num_view << " sensors with " << num_pts << " samples each." << std::endl;
 
     // Set up the VoxelGrid as a 2m x 2m x 2m cube with 0.02 m resolution
-    Eigen::Vector3d lower(-1, -1, -1), upper(1, 1, 1);
-    VoxelGrid grid(0.02, lower, upper, false);
+    VoxelGridProperties props(0.2);
+    props.dimensions = Vector3d(2, 2, 2);
+    props.grid_size = Vector3ui(100, 100, 100);
+    props.resolution = -1;  // Let the grid size and dimensions set the resolution.
+    translation move(-1, -1, -1);
+
+    VoxelGrid grid(props, move);
 
     Sphere sphere(0.5);
 
@@ -112,7 +117,7 @@ int main(int argc, char* argv[])
         laser_scanner.orientPrincipleAxis(WORLD_ORIGIN);
 
         imageSphereLaserScanner(laser_scanner, sphere);
-        addSensor(grid, laser_scanner);
+        grid.addSensor(laser_scanner);
 
         std::cout << "Added deterministic first view." << std::endl;
         --num_view;  // Decrement the number of requested views for the rest of the program
@@ -128,7 +133,7 @@ int main(int argc, char* argv[])
             getSensorPoseUniform(laser_scanner, camera_radius, i, num_view);
         }
         imageSphereLaserScanner(laser_scanner, sphere);
-        addSensor(grid, laser_scanner);
+        grid.addSensor(laser_scanner);
     }
     std::string fname = "sim_sphere_scan";
     grid.saveXDMF(fname);

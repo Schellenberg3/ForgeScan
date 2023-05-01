@@ -14,10 +14,15 @@
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
 int main(int argc, char** argv)
 { 
-    Eigen::Vector3d lower(-1.0, -1.0, -1.0), upper(1.0, 1.0, 1.0);
-    double res = 0.02;
+    // 2m x 2m x 2m cube with 0.02 m resolution
+    VoxelGridProperties props(0.2);
+    props.dimensions = Vector3d(2, 2, 2);
+    props.grid_size = Vector3ui(100, 100, 100);
+    props.resolution = -1;  // Let the grid size and dimensions set the resolution.
+    translation move(-1, -1, -1);
 
-    VoxelGrid grid_exact(res, lower, upper, false);  // 2m x 2m x 2m cube with 0.02 m resolution
+    VoxelGrid grid_exact(props, move);
+
     std::cout << "Initialized each VoxelGrid!" << std::endl;
 
     VoxelUpdate update(1, 0, 0, 0);

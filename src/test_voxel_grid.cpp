@@ -10,22 +10,24 @@
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
 int main(int argc, char** argv)
 { 
-    Eigen::Vector3d lower, upper;
-    lower << -1.0, -1.0, -1.0;  
-    upper << 1.0, 1.0, 1.0;
-
-    double res = 0.02;
-
     VoxelUpdate update(1);
 
     // 2m x 2m x 2m cube with 0.02 m resolution
-    VoxelGrid grid(res, lower, upper, false);
+    VoxelGridProperties props(0.2);
+    props.dimensions = Vector3d(2, 2, 2);
+    props.grid_size = Vector3ui(100, 100, 100);
+    props.resolution = -1;  // Let the grid size and dimensions set the resolution.
+    translation move(-1, -1, -1);
+
+    VoxelGrid grid(props, move);
+
     std::cout << "Initialized the VoxelGrid!" << std::endl;
 
     GridProcessor processor(grid);
 
     double x, y, z, q = 0;
-    Eigen::Vector3d xyz;
+    Vector3d xyz;
+    Vector3ui grid_index;
     do
     {
         std::cout << "enter the next point in cartesian space: ";
@@ -35,8 +37,10 @@ int main(int argc, char** argv)
         xyz[1] = y;
         xyz[2] = z;
 
-        grid.set(xyz, update);
-
+        /// Transform xyz to the grid frame and then convert to grid indicies.
+        grid.fromWorldToThis(xyz);
+        grid_index = grid.pointToGrid(xyz);
+        updateVoxel(grid.at(grid.pointToGrid(xyz)), update);
     } while (q == 0);
 
     Eigen::Vector3d start, end;
@@ -53,12 +57,12 @@ int main(int argc, char** argv)
             if (q == 1)
             {
                 std::cout << "Performing strong  dilation n=1...";
-                processor.dilate(1);
+                // processor.dilate(1);
             }
             else if (q == 2)
             {
                 std::cout << "Performing soft erosion n=5...";
-                processor.erode(5);
+                // processor.erode(5);
             }
             
             if (q != 0)

@@ -93,7 +93,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
     double   len = ray.norm();
     Vector3d dir = ray / len;
 
-    // We must update the precents given as an input to multiples of the unit vector direction. 
+    // We must update the percents given as an input to multiples of the unit vector direction. 
     double ts_units = ts * len;
     double te_units = te * len;
 
@@ -159,7 +159,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
         {
             s_d  = -1;
             dt_d = -1 * grid.properties.resolution / dir[d];
-            const int previous_gidx = current_gidx[d] - 1;  // size_t casued an error here if current == 0
+            const int previous_gidx = current_gidx[d] - 1;  // size_t caused an error here if current == 0
             t_d  = ts_adj + (previous_gidx * grid.properties.resolution - rs_adj[d]) / dir[d];
         }
         else
@@ -206,7 +206,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
 ///        is a bit imperfect. Maybe some boolean flags rather than comparisons will correct this. But this is a minor error at the moment.
 void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed)
 {
-    /// [Distance] Adjusted traversal distances that are inside the grid. Given a grid's tuncation distance the adjusted values follow:
+    /// [Distance] Adjusted traversal distances that are inside the grid. Given a grid's truncation distance the adjusted values follow:
     ///  NEGATIVE TRUCATION DISTANCE <= t_neg_adj <= t_pos_adj <= POSITIVE TRUCATION DISTANCE,
     ///  t_pos_adj <= t_far_adj
     ///  In some conditions the adjusted negative value may be greater than zero (and the adjusted positive value less than zero). 

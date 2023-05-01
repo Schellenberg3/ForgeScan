@@ -1,5 +1,4 @@
 #include <ForgeScan/voxel_grid.h>
-#include <ForgeScan/grid_traversal.h>
 #include <ForgeScan/sensor_reading.h>
 
 #include <Eigen/Geometry>

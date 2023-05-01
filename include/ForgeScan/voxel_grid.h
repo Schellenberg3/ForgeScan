@@ -121,6 +121,31 @@ public:
         return temp.cast<size_t>();
     }
 
+    /// @brief Updates voxel on the line between the two specified points.
+    ///        Points are assumed to be relative to the world frame.
+    /// @param update VoxelUpdate to apply to each voxel on the ray.
+    /// @param rs Ray start position, world coordinates.
+    /// @param re Ray end position, world coordinates.
+    /// @returns False if the ray did not intersect the voxel grid. True otherwise.
+    bool addRayExact(const VoxelUpdate& update, const point& rs, const point& re) {
+        point rs_this = fromWorldToThis(rs);
+        point re_this = fromWorldToThis(re);
+        return implementAddRayExact(update, rs_this, re_this);
+    }
+
+
+    /// @brief Adds data to the grid, updating voxels near the sensed point with truncated distance and marking the voxels
+    ///        between the origin and positive truncation as viewed. Points are assumed to be relative to the world frame.
+    /// @param grid The VoxelGrid to add data to.
+    /// @param origin Origin for the ray, world coordinates.
+    /// @param sensed Sensed point, world coordinates.
+    /// @returns False if the ray did not intersect the voxel grid. True otherwise.
+    bool addRayTSDF(const point &origin, const point &sensed) {
+        point origin_this = fromWorldToThis(origin);
+        point sensed_this = fromWorldToThis(sensed);
+        return implementAddRayTSDF(origin_this, sensed_this);
+    }
+
     /// @brief Adds the measurements from the sensor to the VoxelGrid, performing required coordinate transformations.
     /// @tparam T Templated on different DepthSensor types.
     /// @param sensor Sensor with measurements to add.
@@ -139,7 +164,7 @@ public:
 
         /// The points variables is a 3xN matrix, add each one.
         for (int i = 0, n = points.cols(); i < n; ++i) {
-            addRayTSDF(*this, sensor_pose, points.col(i));
+            addRayTSDF(sensor_pose, points.col(i));
         }
 
         /// Reset any element viewed flags.
@@ -191,13 +216,6 @@ public:
     /// @brief Accesses voxel elements operations on the voxels.
     friend class GridProcessor;
 
-    /// @brief Accesses voxel elements for ray tracing.
-    friend bool addRayTSDF(VoxelGrid &, const point &, const point &);
-
-    /// @brief Accesses voxel elements for ray tracing.
-    friend bool addRayExact(VoxelGrid&, const VoxelUpdate&, const point&, const point&);
-
-
 private:
     /// @brief Container for VoxelElements. Users see a 3D grid, but this is really just a vector.
     std::vector<VoxelElement> voxel_element_vector;
@@ -222,6 +240,22 @@ private:
             throw std::out_of_range("Requested voxel was not within the bounds of the 3D grid.");
         return indiciesToVector(voxel);
     }
+
+    /// @brief Updates voxel on the line between the two specified points. Points are in the VoxelGrid's frame.
+    /// @details Actual implementation of ray tracing.
+    /// @param update VoxelUpdate to apply to each voxel on the ray.
+    /// @param rs Ray start position, local coordinates.
+    /// @param re Ray end position, local coordinates.
+    /// @returns False if the ray did not intersect the voxel grid. True otherwise.
+    bool implementAddRayExact(const VoxelUpdate& update, const point& rs, const point& re);
+
+    /// @brief Adds data to the grid, updating voxels near the sensed point with truncated distance and marking
+    ///        the voxels between the origin and positive truncation as viewed.
+    /// @details Actual implementation of ray tracing.
+    /// @param origin Origin for the ray, local coordinates.
+    /// @param sensed Sensed point, local coordinates.
+    /// @returns False if the ray did not intersect the voxel grid. True otherwise.
+    bool implementAddRayTSDF(const point &origin, const point &sensed);
 
     /// @brief Helper function to write the XDMF file.
     /// @param fname Name for the XDMF file.

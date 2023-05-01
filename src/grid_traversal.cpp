@@ -1,4 +1,4 @@
-#include <ForgeScan/grid_traversal.h>
+#include <ForgeScan/voxel_grid.h>
 
 
 /// @details The methods in this file follow the the Amanatides-Woo algorithm for fast voxel traversal. See:
@@ -88,7 +88,7 @@ static bool zeroBoundedAABBintersection(const Vector3d& bound, const point& orig
 } 
 
 
-bool addRayExact(VoxelGrid& grid, const VoxelUpdate& update, const point& rs,  const point& re)
+bool VoxelGrid::implementAddRayExact(const VoxelUpdate& update, const point& rs,  const point& re)
 {
     Vector3d ray = re - rs;
     double   te = ray.norm();  // also the ray's length
@@ -102,7 +102,7 @@ bool addRayExact(VoxelGrid& grid, const VoxelUpdate& update, const point& rs,  c
     double ts_adj, te_adj;
 
     // Early exit for segments outside of the grid or for equal start/end points. 
-    bool valid_segment = zeroBoundedAABBintersection(grid.properties.dimensions, rs, inverse_normal,
+    bool valid_segment = zeroBoundedAABBintersection(properties.dimensions, rs, inverse_normal,
                                                      ts, te, ts_adj, te_adj);
     if (valid_segment == false)
         return false;
@@ -144,19 +144,19 @@ bool addRayExact(VoxelGrid& grid, const VoxelUpdate& update, const point& rs,  c
         ///       Far distance point was EXACTLY on the boundary of the grid.
         /// TODO: Can this be optimized or pre-computed?
         /// Calculate the current index for this direction.
-        current_gidx[d] = std::max(0, (int)std::floor((rs_adj[d] / grid.properties.resolution) - 1));
+        current_gidx[d] = std::max(0, (int)std::floor((rs_adj[d] / properties.resolution) - 1));
     
-        dt_d = grid.properties.resolution * inverse_normal[d];
+        dt_d = properties.resolution * inverse_normal[d];
         if (normal[d] > 0)
         {   /// If we increase in a direction, set the start time based on the current index.
-            t_d  += abs( (current_gidx[d] * grid.properties.resolution - rs_adj[d]) * inverse_normal[d] );
+            t_d  += abs( (current_gidx[d] * properties.resolution - rs_adj[d]) * inverse_normal[d] );
         }
         else if (normal[d] != 0)
         {   /// If we decrease in a direction...
             s_d  *= -1;  /// Ensures that we decrement the current index in this direction with each step in this direction.
             dt_d *= -1;  /// Ensures that we increase the traversal time with each step, correcting the negative sign from above.
             /// Use the previous index in the direction when setting its start time.
-            t_d  += abs( ((current_gidx[d] - 1) * grid.properties.resolution - rs_adj[d]) * inverse_normal[d] );
+            t_d  += abs( ((current_gidx[d] - 1) * properties.resolution - rs_adj[d]) * inverse_normal[d] );
         }
         else
         {   /// In the rare case where the normal is EXACTLY zero we set the step to zero...
@@ -173,7 +173,7 @@ bool addRayExact(VoxelGrid& grid, const VoxelUpdate& update, const point& rs,  c
     /// NOTE: The exact start/end voxels hit tend to be a bit off from what might be "exact".
     ///       I believe that there may be slight differences with rounding and from voxel resolution.
     ///       But I will return to this another time.
-    updateVoxel(grid.at(current_gidx), update);  // update current element befor entering the loop.
+    updateVoxel( at(current_gidx), update );  // update current element befor entering the loop.
     while (t_x <= te_adj || t_y <= te_adj || t_z <= te_adj)
     {
         if (t_x < t_y && t_x < t_z)
@@ -191,7 +191,7 @@ bool addRayExact(VoxelGrid& grid, const VoxelUpdate& update, const point& rs,  c
             current_gidx[2] += s_z;
             t_z += dt_z;
         }
-        updateVoxel(grid.at(current_gidx), update);
+        updateVoxel (at(current_gidx), update );
     }
     return true;
 }
@@ -199,7 +199,7 @@ bool addRayExact(VoxelGrid& grid, const VoxelUpdate& update, const point& rs,  c
 
 /// @note: This method works quite well and is very fast. However it tends to miss the final 1 to 3 voxels. The exit condition
 ///        is a bit imperfect. Maybe some boolean flags rather than comparisons will correct this. But this is a minor error at the moment.
-bool addRayTSDF(VoxelGrid &grid, const point &origin, const point &sensed)
+bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed)
 {
     /// [Distance] Adjusted traversal distances that are inside the grid. Given a grid's truncation distance the adjusted values follow:
     ///  NEGATIVE TRUCATION DISTANCE <= t_neg_adj <= t_pos_adj <= POSITIVE TRUCATION DISTANCE,
@@ -215,13 +215,13 @@ bool addRayTSDF(VoxelGrid &grid, const point &origin, const point &sensed)
     Vector3d inverse_normal = normal.cwiseInverse();
 
     // Early exit for segments outside of the grid or for equal start/end points. 
-    bool intersects_grid = zeroBoundedAABBintersection(grid.properties.dimensions, sensed, inverse_normal,
-                                                       grid.properties.min_dist, t_far,
+    bool intersects_grid = zeroBoundedAABBintersection(properties.dimensions, sensed, inverse_normal,
+                                                       properties.min_dist, t_far,
                                                        t_neg_adj, t_far_adj);
 
     t_far_adj = std::min(t_far_adj, t_far);
-    t_pos_adj = std::min(t_far_adj, grid.properties.max_dist);
-    t_neg_adj = std::max(t_neg_adj, grid.properties.min_dist);
+    t_pos_adj = std::min(t_far_adj, properties.max_dist);
+    t_neg_adj = std::max(t_neg_adj, properties.min_dist);
 
     bool correct_traversal_direction = t_neg_adj < t_far_adj;
     if (intersects_grid == false || correct_traversal_direction == false)
@@ -255,19 +255,19 @@ bool addRayTSDF(VoxelGrid &grid, const point &origin, const point &sensed)
         ///       Far distance point was EXACTLY on the boundary of the grid.
         /// TODO: Can this be optimized or pre-computed?
         /// Calculate the current index for this direction.
-        current_gidx[d] = std::max(0, (int)std::floor((neg_dist[d] / grid.properties.resolution) - 1));
+        current_gidx[d] = std::max(0, (int)std::floor((neg_dist[d] / properties.resolution) - 1));
     
-        dt_d = grid.properties.resolution * inverse_normal[d];
+        dt_d = properties.resolution * inverse_normal[d];
         if (normal[d] > 0)
         {   /// If we increase in a direction, set the start time based on the current index.
-            t_d  += abs( (current_gidx[d] * grid.properties.resolution - neg_dist[d]) * inverse_normal[d] );
+            t_d  += abs( (current_gidx[d] * properties.resolution - neg_dist[d]) * inverse_normal[d] );
         }
         else if (normal[d] != 0)
         {   /// If we decrease in a direction...
             s_d  *= -1;  /// Ensures that we decrement the current index in this direction with each step in this direction.
             dt_d *= -1;  /// Ensures that we increase the traversal time with each step, correcting the negative sign from above.
             /// Use the previous index in the direction when setting its start time.
-            t_d  += abs( ((current_gidx[d] - 1) * grid.properties.resolution - neg_dist[d]) * inverse_normal[d] );
+            t_d  += abs( ((current_gidx[d] - 1) * properties.resolution - neg_dist[d]) * inverse_normal[d] );
         }
         else
         {   /// In the rare case where the normal is EXACTLY zero we set the step to zero...
@@ -286,7 +286,7 @@ bool addRayTSDF(VoxelGrid &grid, const point &origin, const point &sensed)
     while (t_x <= t_pos_adj || t_y <= t_pos_adj || t_z <= t_pos_adj)
     {
         try {
-            updateVoxel(grid.at(current_gidx), update);
+            updateVoxel( at(current_gidx), update );
         } catch (const std::out_of_range& e) {
             break; // Break if the next update tried to put us out of range.
                    // Technically, the next loop would not execute after this.
@@ -316,7 +316,7 @@ bool addRayTSDF(VoxelGrid &grid, const point &origin, const point &sensed)
     while (t_x <= t_far_adj || t_y <= t_far_adj || t_z <= t_far_adj)
     {
         try {
-            setViewUpdateFlag( grid.at(current_gidx) );
+            setViewUpdateFlag( at(current_gidx) );
         } catch (const std::out_of_range& e) {
             break; // Break if the next update tried to put us out of range.
         }

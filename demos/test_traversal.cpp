@@ -6,7 +6,6 @@
 
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/grid_processor.h>
-#include <ForgeScan/grid_traversal.h>
 #include <ForgeScanUtils/timing_utils.h>
 
 
@@ -59,9 +58,7 @@ int main(int argc, char** argv)
     t_exa.start();
     for (int i = 0; i < num; ++i)
         {
-        addRayExact(
-            grid_exact, update,
-            start_vecs[i], end_vecs[i]);
+        grid_exact.addRayExact(update, start_vecs[i], end_vecs[i]);
     }
     t_exa.stop();
     std::cout << "Added " << num << " with exact method" << std::endl;

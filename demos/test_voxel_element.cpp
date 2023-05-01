@@ -1,5 +1,4 @@
 #include <ForgeScan/voxel_element.h>
-#include <ForgeScan/grid_traversal.h>
 
 #include <iostream>
 #include <bitset>

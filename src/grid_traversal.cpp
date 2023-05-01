@@ -2,9 +2,7 @@
 
 #include <iostream>
 
-#define MAX(X, Y) X > Y ? X : Y
-#define MIN(X, Y) X < Y ? X : Y
-#define MAX_UI64 std::numeric_limits<size_t>::max()
+#define ZEROS Eigen::Vector3d::Zero()
 
 
 /// @brief Verifies that a given ray does intersect the given axis-aligned box.
@@ -104,21 +102,20 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
     double ts_adj, te_adj;
 
     // Early exit for segments outside of the grid or for equal start/end points. 
-    bool valid_segment = findRayAlignedBoxIntersection(grid.lower, grid.upper, rs, dir,
+    bool valid_segment = findRayAlignedBoxIntersection(ZEROS, grid.properties.dimensions, rs, dir,
                                                        ts_units, te_units, ts_adj, te_adj);
     if (valid_segment == false)
     {
         // Invalid cases could be completely outside the grid or an invalid line.
         // We try to update the starting point in case we have the case of an invalid line because
         // the start/end points are the same. If this is inside the grid we get the proper update.
-        int res = grid.set(rs, update);
-        return res == 0;
+        return false;
     }
 
     // From the adjusted times and given unit-vector multiple times we want to find the max start time
     // and the min end time. This is 
-    ts_adj = MAX(ts_adj, ts_units);
-    te_adj = MIN(te_adj, te_units);
+    ts_adj = std::max(ts_adj, ts_units);
+    te_adj = std::min(te_adj, te_units);
 
     const point rs_adj = rs + dir * ts_adj;
     const point re_adj = rs + dir * te_adj;
@@ -149,21 +146,21 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
     ///             Must be 0 for X, 1 for Y or 2 for Z. But this is not verified.
     auto initTraversalInfo = [&](int& s_d, double& t_d, double& dt_d, const int& d)
     {
-        current_gidx[d] = MAX(0, std::floor((rs_adj[d] - grid.lower[d]) / grid.resolution));
+        current_gidx[d] = std::max(0, (int)std::floor((rs_adj[d] - 0) / grid.properties.resolution));
         // See note above. Helpful for debugging but not needed for the algorithm.
         // end_gidx[d]     = MIN(grid.size[d], std::floor((re_adj[d] - grid.lower[d]) / grid.resolution));
         if (dir[d] > 0)
         {
             s_d  = 1;
-            dt_d = grid.resolution / dir[d];
-            t_d  = ts_adj + (grid.lower[d] + current_gidx[d] * grid.resolution - rs_adj[d]) / dir[d];
+            dt_d = grid.properties.resolution / dir[d];
+            t_d  = ts_adj + (current_gidx[d] * grid.properties.resolution - rs_adj[d]) / dir[d];
         }
         else if (dir[d] != 0)
         {
             s_d  = -1;
-            dt_d = -1 * grid.resolution / dir[d];
+            dt_d = -1 * grid.properties.resolution / dir[d];
             const int previous_gidx = current_gidx[d] - 1;  // size_t casued an error here if current == 0
-            t_d  = ts_adj + (grid.lower[d] + previous_gidx * grid.resolution - rs_adj[d]) / dir[d];
+            t_d  = ts_adj + (previous_gidx * grid.properties.resolution - rs_adj[d]) / dir[d];
         }
         else
         {
@@ -180,7 +177,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
     /// NOTE: The exact start/end voxels hit tend to be a bit off from what might be "exact".
     ///       I believe that there may be slight differences with rounding and from voxel resolution.
     ///       But I will return to this another time.
-    grid.set(current_gidx, update); // update current element befor entering the loop.
+    updateVoxel(grid.at(current_gidx), update);  // update current element befor entering the loop.
     while (t_x <= te_adj || t_y <= te_adj || t_z <= te_adj)
     {
         if (t_x < t_y && t_x < t_z)
@@ -199,7 +196,7 @@ bool addRayExact(VoxelGrid& grid,  const VoxelUpdate& update,
             t_z += dt_z;
         }
         // operation(current_gidx);
-        grid.set(current_gidx, update);
+        updateVoxel(grid.at(current_gidx), update);
     }
     return true;
 }
@@ -234,11 +231,12 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
     double dt_x = 0,  dt_y = 0,  dt_z = 0;
 
     // Early exit for segments outside of the grid or for equal start/end points. 
-    bool intersects_grid = findRayAlignedBoxIntersection(grid.lower, grid.upper, sensed, normal, grid.neg_trunc_dist, t_far, t_neg_adj, t_far_adj);
+    bool intersects_grid = findRayAlignedBoxIntersection(ZEROS, grid.properties.dimensions, sensed, normal,
+                                                         grid.properties.min_dist, t_far, t_neg_adj, t_far_adj);
 
-    t_far_adj = MIN(t_far_adj, t_far);
-    t_pos_adj = MIN(t_far_adj, grid.pos_trunc_dist);
-    t_neg_adj = MAX(t_neg_adj, grid.neg_trunc_dist);
+    t_far_adj = std::min(t_far_adj, t_far);
+    t_pos_adj = std::min(t_far_adj, grid.properties.max_dist);
+    t_neg_adj = std::max(t_neg_adj, grid.properties.min_dist);
 
     bool correct_traversal_direction = t_neg_adj < t_far_adj;
     if (intersects_grid == false || correct_traversal_direction == false)
@@ -257,19 +255,19 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
     {
         /// TODO: Should this -1 be here? Does that make sense. Ran into boundary condition issues when the
         ///       Far distance point was EXACTLY on the boundary of the grid.
-        current_gidx[d] = MAX(0, std::floor((neg_dist[d] - grid.lower[d]) / grid.resolution - 1));
+        current_gidx[d] = std::max(0, (int)std::floor((neg_dist[d] / grid.properties.resolution) - 1));
         if (normal[d] > 0)
         {
             s_d  = 1;
-            dt_d = grid.resolution / normal[d];
-            t_d  = t_neg_adj + abs( (grid.lower[d] + current_gidx[d] * grid.resolution - neg_dist[d]) / normal[d] );
+            dt_d = grid.properties.resolution / normal[d];
+            t_d  = t_neg_adj + abs( (current_gidx[d] * grid.properties.resolution - neg_dist[d]) / normal[d] );
         }
         else if (normal[d] != 0)
         {
             s_d  = -1;
-            dt_d = -1 * grid.resolution / normal[d];
+            dt_d = -1 * grid.properties.resolution / normal[d];
             int previous_gidx = current_gidx[d] - 1;
-            t_d  = t_neg_adj + abs( (grid.lower[d] + previous_gidx * grid.resolution - neg_dist[d]) / normal[d] );
+            t_d  = t_neg_adj + abs( (previous_gidx * grid.properties.resolution - neg_dist[d]) / normal[d] );
         }
         else
         {
@@ -288,7 +286,7 @@ void addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed
     while (t_x <= t_pos_adj || t_y <= t_pos_adj || t_z <= t_pos_adj)
     {
         try {
-            grid.set(current_gidx, update);
+            updateVoxel(grid.at(current_gidx), update);
         } catch (const std::out_of_range& e) {
             break; // Break if the next update tried to put us out of range.
                    // Technically, the next loop would not execute after this.

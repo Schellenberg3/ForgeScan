@@ -11,6 +11,7 @@
 #include <cassert>
 #include <cmath>
 
+/// @note The methods for `VoxelGrid::implementAddRayExact` and `VoxelGrid::implementAddRayTSDF` are defined in `voxel_grid_traversal.cpp`.
 
 /// TODO: VoxelGrid::loadHDF5 cannot function as designed. See not in function. Move this to its own stand-alone function.
 

@@ -242,7 +242,7 @@ private:
     }
 
     /// @brief Updates voxel on the line between the two specified points. Points are in the VoxelGrid's frame.
-    /// @details Actual implementation of ray tracing.
+    /// @details Actual implementation of ray tracing. Defined in `src/voxel_grid_traversal.cpp`.
     /// @param update VoxelUpdate to apply to each voxel on the ray.
     /// @param rs Ray start position, local coordinates.
     /// @param re Ray end position, local coordinates.
@@ -251,7 +251,7 @@ private:
 
     /// @brief Adds data to the grid, updating voxels near the sensed point with truncated distance and marking
     ///        the voxels between the origin and positive truncation as viewed.
-    /// @details Actual implementation of ray tracing.
+    /// @details Actual implementation of ray tracing. Defined in `src/voxel_grid_traversal.cpp`.
     /// @param origin Origin for the ray, local coordinates.
     /// @param sensed Sensed point, local coordinates.
     /// @returns False if the ray did not intersect the voxel grid. True otherwise.

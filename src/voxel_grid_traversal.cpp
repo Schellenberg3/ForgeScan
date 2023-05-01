@@ -1,16 +1,18 @@
 #include <ForgeScan/voxel_grid.h>
 
 
-/// @details The methods in this file follow the the Amanatides-Woo algorithm for fast voxel traversal. See:
-///             http://www.cse.yorku.ca/~amana/research/grid.pdf
+/// @details This implements the ray traversal methods declared in the VoxelGrid class.
 ///
-///         Essentially, this treats the ray as a line parametrized by a variable for time. This time factor describes how
-///         long the distance we "walk" from the given start position. We then consider "walking" each cartesian direction
-///         and find the next voxel by selecting the direction that we have spent the least time "walking" along.
+/// The methods in this file follow the the Amanatides-Woo algorithm for fast voxel traversal. See:
+///     http://www.cse.yorku.ca/~amana/research/grid.pdf
 ///
-///         For all of these methods and the axis-aligned bounding-box (AABB) check, it is important that the VoxelGrid is
-///         aligned to the axis and that any provided points are transformed to the relevant coordinate system. Other code
-///         should handle this well before these functions are called. But it is important to know if you expand or edit these.
+/// Essentially, this treats the ray as a line parametrized by a variable for time. This time factor describes how
+/// long the distance we "walk" from the given start position. We then consider "walking" each cartesian direction
+/// and find the next voxel by selecting the direction that we have spent the least time "walking" along.
+///
+/// For all of these methods and the axis-aligned bounding-box (AABB) check, it is important that the VoxelGrid is
+/// aligned to the axis and that any provided points are transformed to the relevant coordinate system. Other code
+/// should handle this well before these functions are called. But it is important to know if you expand or edit these.
 
 
 /// @TODO: This method works quite well and is very fast. However it tends to miss the final few voxels. At lease how I've

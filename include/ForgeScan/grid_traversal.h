@@ -19,7 +19,7 @@ bool addRayExact(VoxelGrid& grid, const VoxelUpdate& update, const point& rs, co
 /// @param origin Origin for the ray.
 /// @param sensed Sensed point.
 /// @returns False if the ray did not intersect the voxel grid. True otherwise.
-bool addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed);
+bool addRayTSDF(VoxelGrid &grid, const point &origin, const point &sensed);
 
 
 #endif // FORGESCAN_GRID_TRAVERSAL

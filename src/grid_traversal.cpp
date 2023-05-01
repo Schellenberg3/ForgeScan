@@ -199,7 +199,7 @@ bool addRayExact(VoxelGrid& grid, const VoxelUpdate& update, const point& rs,  c
 
 /// @note: This method works quite well and is very fast. However it tends to miss the final 1 to 3 voxels. The exit condition
 ///        is a bit imperfect. Maybe some boolean flags rather than comparisons will correct this. But this is a minor error at the moment.
-bool addRayTSDFandView(VoxelGrid &grid, const point &origin, const point &sensed)
+bool addRayTSDF(VoxelGrid &grid, const point &origin, const point &sensed)
 {
     /// [Distance] Adjusted traversal distances that are inside the grid. Given a grid's truncation distance the adjusted values follow:
     ///  NEGATIVE TRUCATION DISTANCE <= t_neg_adj <= t_pos_adj <= POSITIVE TRUCATION DISTANCE,

@@ -139,7 +139,7 @@ public:
 
         /// The points variables is a 3xN matrix, add each one.
         for (int i = 0, n = points.cols(); i < n; ++i) {
-            addRayTSDFandView(*this, sensor_pose, points.col(i));
+            addRayTSDF(*this, sensor_pose, points.col(i));
         }
 
         /// Reset any element viewed flags.
@@ -192,7 +192,7 @@ public:
     friend class GridProcessor;
 
     /// @brief Accesses voxel elements for ray tracing.
-    friend bool addRayTSDFandView(VoxelGrid &, const point &, const point &);
+    friend bool addRayTSDF(VoxelGrid &, const point &, const point &);
 
     /// @brief Accesses voxel elements for ray tracing.
     friend bool addRayExact(VoxelGrid&, const VoxelUpdate&, const point&, const point&);

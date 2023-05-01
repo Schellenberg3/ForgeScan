@@ -71,8 +71,8 @@ add_executable(
 
     demos/test_voxel_grid.cpp
     src/voxel_grid.cpp
+    src/voxel_grid_traversal.cpp
     src/grid_processor.cpp
-    src/grid_traversal.cpp
 )
 target_link_libraries(
     test_grid
@@ -87,7 +87,7 @@ add_executable(
 
     demos/sim_sphere_scan.cpp
     src/voxel_grid.cpp
-    src/grid_traversal.cpp
+    src/voxel_grid_traversal.cpp
 )
 target_link_libraries(
     sim_sphere_scan
@@ -102,7 +102,7 @@ add_executable(
 
     demos/test_voxel_element.cpp
     src/voxel_grid.cpp
-    src/grid_traversal.cpp
+    src/voxel_grid_traversal.cpp
 )
 target_link_libraries(
     test_voxel_element
@@ -116,7 +116,7 @@ add_executable(
 
     demos/test_traversal.cpp
     src/voxel_grid.cpp
-    src/grid_traversal.cpp
+    src/voxel_grid_traversal.cpp
 )
 target_link_libraries(
     test_traversal

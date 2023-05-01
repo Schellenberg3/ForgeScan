@@ -13,23 +13,6 @@
 ///           https://stackoverflow.com/questions/5526461/
 
 
-/// @brief Checks if an axis-aligned box is intersected with the specified ray and returns be reference the adjusted start/end time for that
-///        ray's path through the box.
-/// @param lower Lower bound of the axis-aligned box.
-/// @param upper Upper bound of the axis-aligned box.
-/// @param ray_origin Origin of the ray.
-/// @param ray_direction Direction of the ray, a unit vector.
-/// @param ts The given start time for walking the ray
-/// @param te The given end time for walking the ray
-/// @param ts_adj The time when walking the ray will enter the box. Equals ts if the ray begins inside the box.
-/// @param te_adj The time when walking the ray will exit the box. Equals te if the ray ends inside the box.
-/// @return True if the ray intersects the box over the given start to end time. False if it does not.
-bool inline findRayAlignedBoxIntersection(const point& lower,      const point& upper, 
-                                          const point& ray_origin, const point& ray_direction,
-                                          const double& ts,        const double& te,
-                                          double& t_s_adj, double& t_end_adj);
-
-
 /// @brief Performs exact voxel traversal for the given ray over the specified time.
 /// @details Treats the ray as a line parametrized by a variable for time. This time factor describes how
 ///          long the distance we "walk" from the given start position.

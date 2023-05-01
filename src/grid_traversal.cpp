@@ -21,10 +21,10 @@
 /// @warning Does not verify if `ray_direction` is a unit vector.
 /// @warning Does not verify if the upper point is greater than the lower point.
 /// @warning Does not check that `te` is less than `ts`.
-bool findRayAlignedBoxIntersection(const point& lower,      const point& upper, 
-                                   const point& ray_origin, const point& ray_direction,
-                                   const double& ts,        const double& te,
-                                   double& ts_adj, double& te_adj)
+static bool findRayAlignedBoxIntersection(const point& lower,      const point& upper, 
+                                          const point& ray_origin, const point& ray_direction,
+                                          const double& ts,        const double& te,
+                                          double& ts_adj, double& te_adj)
 {
     /// @note This checks for several early exit conditions. These are cases where the vector is out of bounds in
     ///       at least one direction over the specified time. The main operation here is computing the time at which

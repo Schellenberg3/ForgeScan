@@ -1,10 +1,11 @@
-#include <ForgeScan/voxel_grid.h>
-#include <ForgeScan/sensor_reading.h>
-
 #include <iostream>
 #include <random>
 #include <cmath>
 
+#include <ForgeScan/voxel_grid.h>
+#include <ForgeScan/sensor_reading.h>
+
+#include <ForgeScanShapePrimatives/sphere.h>
 
 static const Eigen::Vector3d WORLD_ORIGIN(0, 0, 0);
 static const double GOLDEN_ANGLE_RADIANS = M_PI * (std::sqrt(5) - 1);
@@ -12,24 +13,6 @@ static const double GOLDEN_ANGLE_RADIANS = M_PI * (std::sqrt(5) - 1);
 static std::random_device RD;
 static std::mt19937 GEN(RD());
 static std::uniform_real_distribution<> UNIFORM_DIST(0, 1);
-
-/// @brief A simple analytical sphere object.
-struct Sphere
-{
-    /// @brief Sphere center in world space coordinates
-    Eigen::Vector3d center;
-
-    /// @brief Sphere radius in world units.
-    double radius;
-
-    /// @brief Constructs an analytical sphere with the given radius at the specified position
-    /// @param radius Radius value for the sphere. Default is 1 unit.
-    /// @param center Location of the sphere's center point in world coordinate.
-    ///               Default places the sphere at the origin
-    /// @note This takes the absolute value of the provided radius value.
-    Sphere(double radius = 1, Eigen::Vector3d center = Eigen::Vector3d::Zero()) :
-        radius(std::abs(radius)), center(center) { }
-};
 
 
 /// @brief Generates new camera pose view which faces the origin by randomly sampling points.
@@ -60,22 +43,6 @@ void getSensorPoseUniform(BaseDepthSensor<T>& sensor, const double& radius, cons
 /// @param sphere Sphere to check intersections against.
 template <typename T>
 void imageSphereLaserScanner(BaseDepthSensor<T>& sensor, const Sphere& sphere);
-
-
-/// @brief Determines if, and where, the line between the start and end points first intersects the provided sphere.
-/// @param sphere Sphere to check intersections against.
-/// @param start  Start point (position on the line when t = 0).
-/// @param end    End point (position on the line when t = 1).
-/// @param t      Intersection time (output variable). Values 0 <= t <= 1 are valid on the line segment.
-///                - If the line DOES NOT intersect we return false with t unchanged.
-///                - If it DOES intersect but NOT inside the bounds, then we return false with t set to the minimum (in magnitude)
-///                  intersection time, even if this is not on the segment.
-/// @return True if the line intersects and does so in a valid region of the line.
-/// @note Find the intersection point with: `intersection = start + (end - start) * t`.
-/// @note This preferences the first positive intersection: if the line intersects at both a positive and negative t the
-///       positive one is returned, ever if its magnitude is greater. If both intersection times are negative then the
-///       one closest to zero is returned. This covers cases where the camera is inside the sphere.
-bool lineIntersectsSphere(const Sphere& sphere, const Vector3d& start, const Vector3d& end, double& t);
 
 
 /// @brief Simulates the scanning of a sphere by a narrow FOV laser scanner.
@@ -206,67 +173,8 @@ void imageSphereLaserScanner(BaseDepthSensor<T>& sensor, const Sphere& sphere)
 
         /// Run intersection search. Both start and end are in the world frame. And the value t is just a proportion
         /// and is not attached to any frame. Thus, we scale the depth by this if we have a valid intersection.
-        if ( lineIntersectsSphere(sphere, start, end, t) ) {
+        if ( sphere.hit(start, end, t) ) {
             sensor.data(i).depth *= t;
         }
     }
-}
-
-
-bool lineIntersectsSphere(const Sphere& sphere, const Vector3d& start, const Vector3d& end, double& t)
-{
-    /// Adapted from https://stackoverflow.com/questions/6533856 with a partial quadratic solver for only the
-    /// real-valued solutions of the intersection. Also, see; http://paulbourke.net/geometry/circlesphere/
-
-    /// Quadratic equation for intersection:
-    ///     0 = A*(x*x) + B*x + C
-    double R2 = sphere.radius * sphere.radius;
-    double A = ((start - end).array().pow(2)).sum();
-    double C = ((start - sphere.center).array().pow(2)).sum() - R2;
-    double B = ((end - sphere.center).array().pow(2)).sum() - A - C - R2;
-
-    /// Find quadratic equation determinant. Early exit if negative (complex solutions mean no intersection).
-    double D = B*B - 4*A*C;
-    if (D < 0) return false;
-
-    /// Pre-calculations help us optimize the quadratic formula. And checking the sign of B lets
-    /// us utilize an numerically stable form in which only addition OR subtraction is  required.
-    ///     D = sqrt(B*B - 4*A*C)
-    ///     if B < 0 
-    ///         X_1 = (-B + D) / 2*A
-    ///         X_2 = 2*C / (-B + D)
-    ///         (Leads to adding two positives)
-    ///     if B >= 0
-    ///         X_1 = (-B - D) / 2*A
-    ///         X_2 = 2*C / (-B - D)
-    /// In short, the first case lets us add two positives and the second lets us subtract two negatives. This
-    /// is ideal as it avoids any case where we subtract quantities with the same sign. In cases where these values
-    /// are similar in magnitude (for this case, when 4*A*C is small) this leads to imprecision in rounding.
-    /// For details on the numeric stability see: https://people.csail.mit.edu/bkph/articles/Quadratics.pdf
-    
-    /// Both cases require the following values which we may pre-compute 
-    D = std::sqrt(D);
-    A *= 2;
-    C *= 2;
-    B *= -1;
-
-    if (B > 0) {
-        B += D;
-    } else {
-        B -= D;
-    }
-    t = C / B;
-    double x = B / A;
-
-    if (t >= 0) {
-        /// Find minimum if both are positive. Else, leave t unchanged as the other solution is non-positive.
-        if (x > 0) t = std::min(t, x);
-    } else if (t <= 0) {
-        /// Find maximum if both are negative. Else, set t to the other solution, which must be non-negative.
-        t = x < 0 ? std::max(t, x) : x;
-    }
-    /// For the case t == 0 the answers are the same so no comparison is needed.
-
-    /// In this, 0 <= t <= 1 indicates a point between the two values of interest.
-    return ( 0 <= t && t <= 1 );
 }

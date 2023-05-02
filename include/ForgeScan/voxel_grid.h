@@ -164,7 +164,7 @@ public:
 
         /// The points variables is a 3xN matrix, add each one.
         for (int i = 0, n = points.cols(); i < n; ++i) {
-            addRayTSDF(sensor_pose, points.col(i));
+            implementAddRayTSDF(sensor_pose, points.col(i));
         }
 
         /// Reset any element viewed flags.

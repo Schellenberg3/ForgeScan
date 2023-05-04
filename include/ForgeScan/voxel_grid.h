@@ -173,7 +173,7 @@ public:
             if (element.views >> 15)
             {   /// Checks if the MSB of the views is set to 1 and 
                 if (element.views != 0xFFFF) ++element.views;   /// Caps updates to prevent rollover after 0x7FFF (32767 views.)
-                resetViewUpdateFlag(element);
+                element.resetViewUpdateFlag();
             }
         }
     }

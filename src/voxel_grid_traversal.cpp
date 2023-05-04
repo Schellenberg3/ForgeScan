@@ -318,7 +318,7 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed)
     while (t_x <= t_far_adj || t_y <= t_far_adj || t_z <= t_far_adj)
     {
         try {
-            setViewUpdateFlag( at(current_gidx) );
+            at(current_gidx).setViewUpdateFlag();
         } catch (const std::out_of_range& e) {
             break; // Break if the next update tried to put us out of range.
         }

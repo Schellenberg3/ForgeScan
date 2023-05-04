@@ -7,28 +7,6 @@
 #define FLOAT_POSITIVE_MAX std::numeric_limits<float>::max()
 
 
-/// @brief Sets the most significant bit of an unsigned 16-bit integer to 1.
-void inline set_MSB_high(uint16_t &in) { in |= 0x8000; }
-
-
-/// @brief Sets the most significant bit of an unsigned 16-bit integer to 0.
-void inline set_MSB_low(uint16_t &in)  { in &= 0x7FFF; }
-
-
-/// @brief Marks a VoxelElement's `view_count` attribute. This signals that at least one ray from a new view
-///        has updated that VoxelElement.
-/// @param in The VoxelElement's `views` attribute.
-/// @warning When this flag is set, the `view_count` attribute is not accurate when viewed as an integer. It
-///          should only be incremented when the flag is high. Call `resetViewUpdateFlag` before using this number
-void inline setViewUpdateFlag(view_count &in)  { set_MSB_high(in); }
-
-
-/// @brief Resets the flag on a a VoxelElement's `view_count`. This should be called after the the VoxelElement's
-///        `view_count` has been incremented for the latest view so the element is ready to accept new views.
-/// @param in The VoxelElement's `views` attribute.
-void inline resetViewUpdateFlag(view_count &in) { set_MSB_low(in); }
-
-
 /// @brief Storage for data used in updating a Voxel inside a VoxelGrid.
 struct VoxelUpdate
 {
@@ -115,23 +93,27 @@ struct VoxelElement
         if (rho < update.rho)
             rho = update.rho;
 
-        setViewUpdateFlag(views);
+        setViewUpdateFlag();
     }
+
+    /// @brief Marks a VoxelElement's `view_count` attribute. This signals that at least one ray from a new view
+    ///        has updated that VoxelElement.
+    /// @warning When this flag is set, the `view_count` attribute is not accurate when viewed as an integer. It
+    ///          should only be incremented when the flag is high. Call `resetViewUpdateFlag` before using this number
+    void inline setViewUpdateFlag()  { set_MSB_high(views); }
+
+
+    /// @brief Resets the flag on a a VoxelElement's `view_count`. This should be called after the the VoxelElement's
+    ///        `view_count` has been incremented for the latest view so the element is ready to accept new views.
+    void inline resetViewUpdateFlag() { set_MSB_low(views); }
+
+    /// @brief Sets the most significant bit of an unsigned 16-bit integer to 1.
+    static void inline set_MSB_high(uint16_t &in) { in |= 0x8000; }
+
+
+    /// @brief Sets the most significant bit of an unsigned 16-bit integer to 0.
+    static void inline set_MSB_low(uint16_t &in)  { in &= 0x7FFF; }
 };
-
-
-/// @brief Marks a VoxelElement's `view_count` attribute. This signals that at least one ray from a new view
-///        has updated that VoxelElement.
-/// @param in The VoxelElement to flag.
-/// @warning When this flag is set, the `view_count` attribute is not accurate when viewed as an integer. It
-///          should only be incremented when the flag is high. Call `resetViewUpdateFlag` before using this number
-void inline setViewUpdateFlag(VoxelElement &in)  { set_MSB_high(in.views); }
-
-
-/// @brief Resets the flag on a a VoxelElement's `view_count`. This should be called after the the VoxelElement's
-///        `view_count` has been incremented for the latest view so the element is ready to accept new views.
-/// @param in The VoxelElement to un-flag.
-void inline resetViewUpdateFlag(VoxelElement &in) { set_MSB_low(in.views); }
 
 
 #endif // FORGESCAN_VOXEL_ELEMENT_H

@@ -39,7 +39,7 @@ private:
 
 private:
     /// @brief Resets the temporary vector to the provided value.
-    void inline resetTempVector() { for (auto& element : temp) resetVoxel(element); }
+    void inline resetTempVector() { for (auto& element : temp) element.reset(); }
 
     /// @brief Swaps the temporary and target voxel element vectors.
     inline void swap();

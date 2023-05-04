@@ -20,6 +20,21 @@ struct VoxelElement
     centrality cent = 0;
     normality  norm = 0;
     density    rho  = 0;
+
+    /// @brief Restores the information within a VoxelElement as if it has never been updated.
+    void reset()
+    {
+        views   = 0;
+        updates = 0;
+        
+        min = FLOAT_POSITIVE_MAX;
+        avg = 0;
+        var = 0;
+
+        cent = 0;
+        norm = 0;
+        rho  = 0;
+    }
 };
 
 
@@ -38,7 +53,11 @@ struct VoxelUpdate
     void inline set(const voxel_dist &dist, const centrality &cent = 0,
         const normality &norm = 0, const density &rho = 0)
     {
-        this->dist += 1; // = dist;
+        VoxelUpdate::dist = dist;
+        this->dist = dist;
+        this->cent = cent;
+        this->norm = norm;
+        this->rho  = rho;
     }
 };
 
@@ -114,22 +133,6 @@ void inline updateVoxel(VoxelElement& target, const VoxelUpdate &update)
         target.rho = update.rho;
 
     setViewUpdateFlag(target.views);
-}
-
-/// @brief Restores the information within a VoxelElement as if it has never been updated.
-/// @param target The VoxelElement to reset.
-void inline resetVoxel(VoxelElement& target)
-{
-    target.views   = 0;
-    target.updates = 0;
-    
-    target.min = FLOAT_POSITIVE_MAX;
-    target.avg = 0;
-    target.var = 0;
-
-    target.cent = 0;
-    target.norm = 0;
-    target.rho  = 0;
 }
 
 

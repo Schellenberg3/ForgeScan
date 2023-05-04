@@ -151,7 +151,7 @@ VoxelGrid::VoxelGrid(const VoxelGridProperties& properties, const rotation& orie
 void VoxelGrid::clear()
 {
     for (auto& element : voxel_element_vector)
-        resetVoxel(element);
+        element.reset();
 }
 
 /// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_element_vector`

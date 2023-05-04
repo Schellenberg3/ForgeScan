@@ -39,7 +39,7 @@ int main(int argc, char** argv)
         /// Transform xyz to the grid frame and then convert to grid indicies.
         grid.fromWorldToThis(xyz);
         grid_index = grid.pointToGrid(xyz);
-        updateVoxel(grid.at(grid.pointToGrid(xyz)), update);
+        grid.at(grid.pointToGrid(xyz)).update(update);
     } while (q == 0);
 
     Eigen::Vector3d start, end;

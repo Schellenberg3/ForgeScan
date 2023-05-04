@@ -175,7 +175,7 @@ bool VoxelGrid::implementAddRayExact(const VoxelUpdate& update, const point& rs,
     /// NOTE: The exact start/end voxels hit tend to be a bit off from what might be "exact".
     ///       I believe that there may be slight differences with rounding and from voxel resolution.
     ///       But I will return to this another time.
-    updateVoxel( at(current_gidx), update );  // update current element befor entering the loop.
+    at(current_gidx).update(update);  // update current element befor entering the loop.
     while (t_x <= te_adj || t_y <= te_adj || t_z <= te_adj)
     {
         if (t_x < t_y && t_x < t_z)
@@ -193,7 +193,7 @@ bool VoxelGrid::implementAddRayExact(const VoxelUpdate& update, const point& rs,
             current_gidx[2] += s_z;
             t_z += dt_z;
         }
-        updateVoxel (at(current_gidx), update );
+        at(current_gidx).update(update);
     }
     return true;
 }
@@ -288,7 +288,7 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed)
     while (t_x <= t_pos_adj || t_y <= t_pos_adj || t_z <= t_pos_adj)
     {
         try {
-            updateVoxel( at(current_gidx), update );
+            at(current_gidx).update(update);
         } catch (const std::out_of_range& e) {
             break; // Break if the next update tried to put us out of range.
                    // Technically, the next loop would not execute after this.

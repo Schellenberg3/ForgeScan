@@ -20,9 +20,9 @@ int main()
     VoxelUpdate u1(5);
     VoxelUpdate u2(-5);
 
-    updateVoxel(t, u0);
-    updateVoxel(t, u1);
-    updateVoxel(t, u2);
+    t.update(u0);
+    t.update(u1);
+    t.update(u2);
     ++t.views;
 
     std::cout << "Target:\n";    

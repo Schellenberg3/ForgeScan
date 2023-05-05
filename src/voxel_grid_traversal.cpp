@@ -201,7 +201,7 @@ bool VoxelGrid::implementAddRayExact(const VoxelUpdate& update, const point& rs,
 
 /// @note: This method works quite well and is very fast. However it tends to miss the final 1 to 3 voxels. The exit condition
 ///        is a bit imperfect. Maybe some boolean flags rather than comparisons will correct this. But this is a minor error at the moment.
-bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed)
+bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, RayRecord& ray_record)
 {
     /// [Distance] Adjusted traversal distances that are inside the grid. Given a grid's truncation distance the adjusted values follow:
     ///  NEGATIVE TRUCATION DISTANCE <= t_neg_adj <= t_pos_adj <= POSITIVE TRUCATION DISTANCE,
@@ -283,12 +283,17 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed)
     initTraversalInfo(s_y, t_y, dt_y, 1);
     initTraversalInfo(s_z, t_z, dt_z, 2);
 
+    VoxelElement *element_ref;
+
     // Perform updates withing the truncation distance. Moving from neg_dist to pos_dist.
     update.dist = t_neg_adj;
     while (t_x <= t_pos_adj || t_y <= t_pos_adj || t_z <= t_pos_adj)
     {
         try {
-            at(current_gidx).update(update);
+            element_ref = &at(current_gidx);
+            if (element_ref->views == 0) ++ray_record.first;
+            element_ref->update(update);
+            if (element_ref->var > ray_record.max_variance_update) ray_record.max_variance_update = element_ref->var;
         } catch (const std::out_of_range& e) {
             break; // Break if the next update tried to put us out of range.
                    // Technically, the next loop would not execute after this.
@@ -312,13 +317,17 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed)
             current_gidx[2] += s_z;
             t_z += dt_z;
         }
+        ++ray_record.views;
+        ++ray_record.updates;
     }
 
     // Mark voxels as viewed; no information updated. Moving from pos_dist to far_dist.
     while (t_x <= t_far_adj || t_y <= t_far_adj || t_z <= t_far_adj)
     {
         try {
-            at(current_gidx).setViewUpdateFlag();
+            element_ref = &at(current_gidx);
+            if (element_ref->views == 0) ++ray_record.first;
+            element_ref->setViewUpdateFlag();
         } catch (const std::out_of_range& e) {
             break; // Break if the next update tried to put us out of range.
         }
@@ -337,6 +346,7 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed)
             current_gidx[2] += s_z;
             t_z += dt_z;
         }
+        ++ray_record.views;
     }
     return true;
 }

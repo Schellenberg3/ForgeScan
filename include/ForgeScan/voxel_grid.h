@@ -8,6 +8,7 @@
 #include <ForgeScan/voxel_element.h>
 #include <ForgeScan/sensor_reading.h>
 #include <ForgeScan/grid_processor.h>
+#include <ForgeScan/view_tracker.h>
 
 
 /// @brief Storage for VoxelGrid properties.
@@ -58,6 +59,8 @@ class VoxelGrid : public ForgeScanEntity
 public:
     /// @brief Properties for the voxel grid: spatial properties and truncation distance.
     const VoxelGridProperties properties;
+
+    ViewTracker views;
 
 public:
     /// @brief Constructs grid 
@@ -143,7 +146,8 @@ public:
     bool addRayTSDF(const point &origin, const point &sensed) {
         point origin_this = fromWorldToThis(origin);
         point sensed_this = fromWorldToThis(sensed);
-        return implementAddRayTSDF(origin_this, sensed_this);
+        RayRecord ray_record; // Needed for implementation, but unused in this function.
+        return implementAddRayTSDF(origin_this, sensed_this, ray_record);
     }
 
     /// @brief Adds the measurements from the sensor to the VoxelGrid, performing required coordinate transformations.
@@ -162,10 +166,17 @@ public:
         point sensor_pose = sensor.extr.translation();
         fromWorldToThis(sensor_pose);
 
+        /// Set up tracking objects for the ViewTracker.
+        SensorRecord sensor_record( getTransformationTo(sensor), sensor.intr->size() );
+        RayRecord ray_record;
+
         /// The points variables is a 3xN matrix, add each one.
         for (int i = 0, n = points.cols(); i < n; ++i) {
-            implementAddRayTSDF(sensor_pose, points.col(i));
+            ray_record.reset();
+            implementAddRayTSDF(sensor_pose, points.col(i), ray_record);
+            sensor_record += ray_record;
         }
+        views.add(sensor_record);
 
         /// Reset any element viewed flags.
         for (auto& element : voxel_element_vector)
@@ -254,8 +265,9 @@ private:
     /// @details Actual implementation of ray tracing. Defined in `src/voxel_grid_traversal.cpp`.
     /// @param origin Origin for the ray, local coordinates.
     /// @param sensed Sensed point, local coordinates.
+    /// @param ray_record Output variable. Statistics about how this ray changed the VoxelGrid.
     /// @returns False if the ray did not intersect the voxel grid. True otherwise.
-    bool implementAddRayTSDF(const point &origin, const point &sensed);
+    bool implementAddRayTSDF(const point &origin, const point &sensed, RayRecord& ray_record);
 
     /// @brief Helper function to write the XDMF file.
     /// @param fname Name for the XDMF file.

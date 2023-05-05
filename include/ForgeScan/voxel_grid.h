@@ -177,16 +177,7 @@ public:
             sensor_record += ray_record;
         }
         views.add(sensor_record);
-
-        /// Reset any element viewed flags.
-        for (auto& element : voxel_element_vector)
-        {
-            if (element.views >> 15)
-            {   /// Checks if the MSB of the views is set to 1 and 
-                if (element.views != 0xFFFF) ++element.views;   /// Caps updates to prevent rollover after 0x7FFF (32767 views.)
-                element.resetViewUpdateFlag();
-            }
-        }
+        updateViewCount();
     }
 
 
@@ -268,6 +259,17 @@ private:
     /// @param ray_record Output variable. Statistics about how this ray changed the VoxelGrid.
     /// @returns False if the ray did not intersect the voxel grid. True otherwise.
     bool implementAddRayTSDF(const point &origin, const point &sensed, RayRecord& ray_record);
+
+    /// @brief Updates view count in the voxel grid and resets element viewed flags.
+    void updateViewCount() {
+        for (auto& element : voxel_element_vector) {
+            if (element.views >> 15) 
+            {   /// Checks if the MSB of the views is set to 1. 
+                if (element.views != 0xFFFF) ++element.views;   /// Caps updates to prevent rollover after 0x7FFF (32767 views).
+                element.resetViewUpdateFlag();
+            }
+        }
+    }
 
     /// @brief Helper function to write the XDMF file.
     /// @param fname Name for the XDMF file.

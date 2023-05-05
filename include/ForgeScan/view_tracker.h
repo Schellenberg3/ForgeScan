@@ -8,6 +8,9 @@
 #include <ForgeScan/forgescan_types.h>
 
 
+namespace ForgeScan {
+
+
 /// @brief Record for a specific view.
 struct RayRecord 
 {
@@ -97,5 +100,8 @@ public:
         record.push_back(sensor_record);
     }
 };
+
+
+} // ForgeScan
 
 #endif // FORGESCAN_VIEW_TRACKER_H

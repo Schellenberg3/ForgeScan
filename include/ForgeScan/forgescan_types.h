@@ -4,6 +4,9 @@
 #include <Eigen/Geometry>
 
 
+namespace ForgeScan {
+
+
 /// @brief Convenience typedef for Eigen
 typedef Eigen::Vector3d Vector3d;
 
@@ -214,5 +217,7 @@ struct ForgeScanEntity
         { return (this->extr.inverse() * other.extr) * p_list.colwise().homogeneous(); }
 };
 
+
+} // ForgeScan
 
 #endif // FORGESCAN_FORGESCAN_TYPES_H

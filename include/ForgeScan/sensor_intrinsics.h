@@ -5,6 +5,9 @@
 #include <cmath>
 
 
+namespace ForgeScan {
+
+
 /// NOTE: I would prefer a more generic BaseImageSensor class to make a CameraSensor then DepthCameraSensor class.
 ///       But what I have written will do for now.
 
@@ -129,5 +132,7 @@ struct DepthCameraIntrinsics : public BaseDepthSensorIntrinsics
         { }
 };
 
+
+} // ForgeScan
 
 #endif // FORGESCAN_SENSOR_INTRINSICS_H

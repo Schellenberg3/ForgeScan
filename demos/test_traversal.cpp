@@ -9,6 +9,9 @@
 #include <ForgeScanUtils/timing_utils.h>
 
 
+using namespace ForgeScan;
+
+
 /// @brief Simple script for manually adding points to a VoxelGrid within [-1,-1,-1] and [+1,+1,+1].
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
 int main(int argc, char** argv)
@@ -52,7 +55,7 @@ int main(int argc, char** argv)
     }
     std::cout << "Generated " << num << " random lines to add with each method." << std::endl;
 
-    SimpleTimer t_lin, t_apr, t_exa;
+    ForgeScan::Utils::SimpleTimer t_lin, t_apr, t_exa;
 
 
     t_exa.start();

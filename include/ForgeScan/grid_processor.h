@@ -9,6 +9,9 @@
 #include <ForgeScan/voxel_grid.h>
 
 
+namespace ForgeScan {
+
+
 class VoxelGrid;  // Promise to compiler that the VoxelGrid class will be defined later
 
 
@@ -55,5 +58,8 @@ private:
     /// @param n Number of sensed (non-zero) neighbors. If n or greater are sense, then the element is set to 1.
     void dilate(const grid_idx& element, const int& n);
 };
+
+
+} // ForgeScan
 
 #endif // FORGESCAN_GRID_PROCESSOR_H

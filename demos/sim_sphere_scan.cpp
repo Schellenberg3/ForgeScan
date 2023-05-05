@@ -7,6 +7,8 @@
 
 #include <ForgeScanShapePrimatives/sphere.h>
 
+using namespace ForgeScan;
+
 static const Eigen::Vector3d WORLD_ORIGIN(0, 0, 0);
 static const double GOLDEN_ANGLE_RADIANS = M_PI * (std::sqrt(5) - 1);
 
@@ -42,7 +44,7 @@ void getSensorPoseUniform(BaseDepthSensor<T>& sensor, const double& radius, cons
 /// @param sensor Depth sensor to store results in.
 /// @param sphere Sphere to check intersections against.
 template <typename T>
-void imageSphereLaserScanner(BaseDepthSensor<T>& sensor, const Sphere& sphere);
+void imageSphereLaserScanner(BaseDepthSensor<T>& sensor, const Primatives::Sphere& sphere);
 
 
 /// @brief Simulates the scanning of a sphere by a narrow FOV laser scanner.
@@ -62,15 +64,15 @@ int main(int argc, char* argv[])
     std::cout << "Running for " << num_view << " sensors with " << num_pts << " samples each." << std::endl;
 
     // Set up the VoxelGrid as a 2m x 2m x 2m cube with 0.02 m resolution
-    VoxelGridProperties props(0.2);
-    props.dimensions = Vector3d(2, 2, 2);
-    props.grid_size = Vector3ui(100, 100, 100);
+    ForgeScan::VoxelGridProperties props(0.2);
+    props.dimensions = ForgeScan::Vector3d(2, 2, 2);
+    props.grid_size = ForgeScan::Vector3ui(100, 100, 100);
     props.resolution = -1;  // Let the grid size and dimensions set the resolution.
-    translation move(-1, -1, -1);
+    ForgeScan::translation move(-1, -1, -1);
 
-    VoxelGrid grid(props, move);
+    ForgeScan::VoxelGrid grid(props, move);
 
-    Sphere sphere(0.5);
+    Primatives::Sphere sphere(0.5);
 
     RandomLaserScannerIntrinsics scanner_intr(100, num_pts, 0.5 * M_PI_4);
     RandomLaserScanner laser_scanner(scanner_intr);
@@ -155,7 +157,7 @@ void getSensorPoseUniform(BaseDepthSensor<T>& sensor, const double& radius, cons
 
 
 template <typename T>
-void imageSphereLaserScanner(BaseDepthSensor<T>& sensor, const Sphere& sphere)
+void imageSphereLaserScanner(BaseDepthSensor<T>& sensor, const Primatives::Sphere& sphere)
 {
     /// Star position is sensor position in the world frame.
     const Vector3d start = sensor.extr.translation();

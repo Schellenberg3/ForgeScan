@@ -6,6 +6,10 @@
 #include <ctime>
 #include <cmath>
 
+
+namespace ForgeScan {
+namespace Utils {
+
 class SimpleTimer
 {
 public:
@@ -47,5 +51,9 @@ private:
     std::chrono::time_point<std::chrono::system_clock> m_EndTime;
     bool                                               m_bRunning = false;
 };
+
+
+} // Utils
+} // ForgeScan
 
 #endif // FORGESCANUTILS_TIMING_UTILS_H

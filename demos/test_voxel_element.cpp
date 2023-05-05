@@ -4,6 +4,9 @@
 #include <ForgeScan/voxel_element.h>
 
 
+using namespace ForgeScan;
+
+
 /// @brief Displays memory size and numeric limits for VoxelElement class and its
 ///        (possible) constituents. 
 void display_voxel_element_memory_size_and_limits();

@@ -1,6 +1,9 @@
 #include <ForgeScan/voxel_grid.h>
 
 
+namespace ForgeScan {
+
+
 /// @details This implements the ray traversal methods declared in the VoxelGrid class.
 ///
 /// The methods in this file follow the the Amanatides-Woo algorithm for fast voxel traversal. See:
@@ -350,3 +353,6 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
     }
     return true;
 }
+
+
+} // ForgeScan

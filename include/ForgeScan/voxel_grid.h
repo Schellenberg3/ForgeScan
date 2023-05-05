@@ -11,6 +11,9 @@
 #include <ForgeScan/view_tracker.h>
 
 
+namespace ForgeScan {
+
+
 /// @brief Storage for VoxelGrid properties.
 /// @note When passed to a VoxelGrid constructor some spatial properties will be adjusted to ensure
 ///       that, in each direction, the dimension equals the product resolution and the grid size.
@@ -279,5 +282,8 @@ private:
     ///        printing to console if more than 100 MB are used.
     void setup();
 };
+
+
+} // ForgeScan
 
 #endif // FORGESCAN_VOXEL_GRID_H

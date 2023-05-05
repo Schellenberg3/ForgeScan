@@ -4,6 +4,11 @@
 #include <cstddef>
 #include <vector>
 
+
+namespace ForgeScan {
+namespace Utils {
+
+
 // Conversion utility for bits_to_megabytes. 1e-6
 #define MB_PER_BYTE 0.000001
 
@@ -36,5 +41,8 @@ double const inline byte_to_megabytes(const size_t& bytes)
     return bytes * MB_PER_BYTE;
 }
 
+
+} // Utils
+} // ForgeScan
 
 #endif // FORGESCANUTILS_MEMORY_UTILS_H

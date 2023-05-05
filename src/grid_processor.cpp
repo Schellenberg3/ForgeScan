@@ -1,6 +1,8 @@
 #include <ForgeScan/grid_processor.h>
 
 
+namespace ForgeScan {
+
 
 GridProcessor::GridProcessor(VoxelGrid& target)
 {
@@ -80,3 +82,5 @@ void GridProcessor::erode(const grid_idx& element, const int& n)
         this->temp->at(element_vidx).updates = this->voxel_grid->at(element_vidx).updates;
 }
 */
+
+} // ForgeScan

@@ -8,6 +8,9 @@
 #include <ForgeScan/sensor_intrinsics.h>
 
 
+namespace ForgeScan {
+
+
 static constexpr float FLOATING_POINT_INF = std::numeric_limits<float>::infinity();
 
 
@@ -257,5 +260,7 @@ private:
     }
 };
 
+
+} // ForgeScan
 
 #endif // FORGESCAN_SENSOR_READING_H

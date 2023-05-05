@@ -3,6 +3,10 @@
 
 #include <ForgeScan/forgescan_types.h>
 
+
+namespace ForgeScan {
+
+
 /// Gets the maximum positive value for a float.
 #define FLOAT_POSITIVE_MAX std::numeric_limits<float>::max()
 
@@ -115,5 +119,7 @@ struct VoxelElement
     static void inline set_MSB_low(uint16_t &in)  { in &= 0x7FFF; }
 };
 
+
+} // ForgeScan
 
 #endif // FORGESCAN_VOXEL_ELEMENT_H

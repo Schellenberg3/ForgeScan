@@ -12,6 +12,28 @@
 #include <ForgeScanUtils/memory_utils.h>
 
 
+/// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_element_vector`
+///        by the 
+static HighFive::CompoundType create_compound_VoxelElement() {
+    return {
+        {"views",  HighFive::AtomicType<ForgeScan::view_count>{}},
+        {"updates",  HighFive::AtomicType<ForgeScan::update_count>{}},
+        
+        {"min",  HighFive::AtomicType<ForgeScan::voxel_dist>{}},
+        {"avg",  HighFive::AtomicType<ForgeScan::voxel_dist>{}},
+        {"var",  HighFive::AtomicType<ForgeScan::voxel_dist>{}},
+
+        {"cent", HighFive::AtomicType<ForgeScan::centrality>{}},
+        {"norm", HighFive::AtomicType<ForgeScan::normality>{}},
+        {"rho", HighFive::AtomicType<ForgeScan::density>{}}
+    };
+}
+HIGHFIVE_REGISTER_TYPE(ForgeScan::VoxelElement, create_compound_VoxelElement)
+
+
+namespace ForgeScan {
+
+
 /// @note The methods for `VoxelGrid::implementAddRayExact` and `VoxelGrid::implementAddRayTSDF` are defined in `voxel_grid_traversal.cpp`.
 
 /// TODO: VoxelGrid::loadHDF5 cannot function as designed. See not in function. Move this to its own stand-alone function.
@@ -153,24 +175,6 @@ void VoxelGrid::clear()
     for (auto& element : voxel_element_vector)
         element.reset();
 }
-
-/// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_element_vector`
-///        by the 
-static HighFive::CompoundType create_compound_VoxelElement() {
-    return {
-        {"views",  HighFive::AtomicType<view_count>{}},
-        {"updates",  HighFive::AtomicType<update_count>{}},
-        
-        {"min",  HighFive::AtomicType<voxel_dist>{}},
-        {"avg",  HighFive::AtomicType<voxel_dist>{}},
-        {"var",  HighFive::AtomicType<voxel_dist>{}},
-
-        {"cent", HighFive::AtomicType<centrality>{}},
-        {"norm", HighFive::AtomicType<normality>{}},
-        {"rho", HighFive::AtomicType<density>{}}
-    };
-}
-HIGHFIVE_REGISTER_TYPE(VoxelElement, create_compound_VoxelElement)
 
 void VoxelGrid::saveHDF5(const std::string& fname) const
 {
@@ -394,8 +398,11 @@ void VoxelGrid::writeXDMF(const std::string &fname) const
 void VoxelGrid::setup()
 {
     voxel_element_vector.resize(properties.grid_size.prod());
-    double mem = byte_to_megabytes(vector_capacity(voxel_element_vector));
+    double mem = ForgeScan::Utils::byte_to_megabytes(ForgeScan::Utils::vector_capacity(voxel_element_vector));
     if (mem > 100.0)
         std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
 }
+
+
+} // ForgeScan
 

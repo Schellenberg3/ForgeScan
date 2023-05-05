@@ -4,6 +4,10 @@
 #include <ForgeScan/forgescan_types.h>
 
 
+namespace ForgeScan {
+namespace Primatives {
+
+
 /// @brief A simple analytical sphere object.
 struct Sphere
 {
@@ -92,5 +96,8 @@ struct Sphere
     }
 };
 
+
+} // Primatives
+} // ForgeScan
 
 #endif // FORGESCAN_SHAPE_PRIMATIVES_SPHERE_H

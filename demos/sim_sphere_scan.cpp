@@ -1,6 +1,4 @@
 #include <iostream>
-#include <random>
-#include <cmath>
 
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/depth_sensor.h>

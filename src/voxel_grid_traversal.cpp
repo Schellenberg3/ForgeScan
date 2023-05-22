@@ -297,7 +297,7 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
             if (element_ref->views == 0) ++ray_record.first;
             element_ref->update(update);
             if (element_ref->var > ray_record.max_variance_update) ray_record.max_variance_update = element_ref->var;
-        } catch (const std::out_of_range& e) {
+        } catch (const std::out_of_range&) {
             break; // Break if the next update tried to put us out of range.
                    // Technically, the next loop would not execute after this.
                    // Perhaps we could return rather than perform that check.
@@ -331,7 +331,7 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
             element_ref = &at(current_gidx);
             if (element_ref->views == 0) ++ray_record.first;
             element_ref->setViewUpdateFlag();
-        } catch (const std::out_of_range& e) {
+        } catch (const std::out_of_range&) {
             break; // Break if the next update tried to put us out of range.
         }
         if (t_x < t_y && t_x < t_z)

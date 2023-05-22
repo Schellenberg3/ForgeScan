@@ -172,7 +172,8 @@ public:
         RayRecord ray_record;
 
         /// The points variables is a 3xN matrix, add each one.
-        for (int i = 0, n = points.cols(); i < n; ++i) {
+        auto n = points.cols();
+        for (int i = 0; i < n; ++i) {
             ray_record.reset();
             implementAddRayTSDF(sensor_pose, points.col(i), ray_record);
             sensor_record += ray_record;

@@ -6,7 +6,7 @@
 
 #include <ForgeScan/forgescan_types.h>
 #include <ForgeScan/voxel_element.h>
-#include <ForgeScan/sensor_reading.h>
+#include <ForgeScan/depth_sensor.h>
 #include <ForgeScan/grid_processor.h>
 #include <ForgeScan/view_tracker.h>
 
@@ -154,10 +154,8 @@ public:
     }
 
     /// @brief Adds the measurements from the sensor to the VoxelGrid, performing required coordinate transformations.
-    /// @tparam T Templated on different DepthSensor types.
     /// @param sensor Sensor with measurements to add.
-    template <typename T>
-    void addSensor(const BaseDepthSensor<T> &sensor)
+    void addSensor(const DepthSensor::BaseDepthSensor&sensor)
     {
         /// Get the sensor's measured points, relative to the sensor frame, then transform 
         /// these points from the sensor frame to this VoxelGrid's frame.

@@ -6,133 +6,129 @@
 
 
 namespace ForgeScan {
+namespace Intrinsics {
 
-
-/// NOTE: I would prefer a more generic BaseImageSensor class to make a CameraSensor then DepthCameraSensor class.
-///       But what I have written will do for now.
-
-
-/// @brief Helper for LaserScannerIntrinsics to properly set the minimum bounds.
-/// @param angle_min Desired magnitude of the minimum angle.
-/// @param angle_max Magnitude of the maximum angle.
-/// @param symmetric If true the maximum angle is returned. If false the user-specified minimum is returned.
-/// @return The correct minimum angle based on the symmetry flag a provided values. 
-static float setLaserScannerAngleMin(const float& angle_min, const float& angle_max, const bool& symmetric)
+/// @brief Type identification for implementations of BaseDepthSensor.
+enum class DepthSensorType : int
 {
-    return symmetric ? angle_max : angle_min;
-}
+    Base,
+    DepthCamera,
+    LaserScanner,
+    ConicRandomLaserScanner
+};
 
-
-/// @brief Helper function for DepthCameraIntrinsics to properly set the principle point offset.
-/// @param od Provided principle point for the direction.
-/// @param n Number of pixels in the direction.
-/// @return If od is non-positive the principle point is centered in that direction at 0.5*n. If od is positive
-///         then the provided value is returned.
-static float setDepthCameraPrinciplePoint(const float& od, const int& n)
+class BaseDepthSensor
 {
-    return od < 0  ? (float)n/2 : od;
-}
+public:
+    /// @brief Identifications for the DepthSensor type the class is intended to represent.
+    DepthSensorType type = DepthSensorType::Base;
 
+    /// @brief Maximum depth for the sensor and minimum depth for a sensor 
+    /// @note For a laser scanner type this is the maximum length for each ray. 
+    /// @note For a camera this is the distance to a plane normal to the sensor's principle axis that is the maximum distance for each ray.
+    double d_max, d_min;
 
-/// @brief Generic base class for depth sensor intrinsics.
-struct BaseDepthSensorIntrinsics
-{
-    /// @brief Dimensions of the sensors data: U element in the X-direction and V elements in the Y-direction.
-    const uint32_t u, v;
+    /// @brief Upper and lower bounds for the DepthSensor's field of view. This is radial distance from the Z-axis in radians.
+    /// @note Theta is the angle on the YZ-plane. Describes how 'tall' an image is.
+    /// @note Phi is the angle on the XZ-plane. Describes how 'wide' an image ls.
+    /// @note For a depth camera implementation the min/max values for each angle are equal in magnitude -- i.e. the field of view is symmetric. 
+    ///       But this is not necessarily for other implementations of DepthSensorIntrinsics. 
+    double theta_min, theta_max, phi_min, phi_max ;
 
-    /// @brief Maximum depth for the sensor.
-    const float max_depth;
+    /// @brief Sensor size: (u, v). Number of X-pixels and number if Y-pixels.
+    size_t u, v;
 
-    /// @brief Creates generic sensor intrinsics for an N by M sensor.
-    /// @param max_depth Maximum depth value for the sensor.
-    /// @param u Size in the Y-dimension.
-    /// @param v Size in the X-dimension.
-    /// @param c Number of data channels, including depth (e.g., 1 for only depth or 4 for RGB and depth).
-    BaseDepthSensorIntrinsics(float max_depth, uint32_t u, uint32_t v) :
-        max_depth(std::fabs(max_depth)),
-        u(u),
-        v(v)
-        { }
+    /// @return Field of view in the X-direction in radians.
+    /// @note This is always symmetric about the principle axis for a DepthCamera object but necessarily for other implementations of DepthSensorIntrinsics.
+    double fov_x() const { return phi_max - phi_min; }
 
+    /// @return Field of view in the Y-direction in radians.
+    /// @note This is always symmetric about the principle axis for a DepthCamera object but necessarily for other implementations of DepthSensorIntrinsics. 
+    double fov_y() const { return theta_max - theta_min; }
 
     /// @brief Returns the total number of data elements in the sensor.
     /// @return Total number of data elements in the sensor.
     constexpr uint32_t size() const { return u * v; }
+
+protected:
+    /// @brief Constructor of the abstract intrinsics class.
+    /// @param sensor_type Enumerated type ID for the sensor's implemented class.
+    /// @param u Sensor dimension, number of of X-pixels.
+    /// @param v Sensor dimension, number of of Y-pixels.
+    /// @param d_min Minimum depth.
+    /// @param d_max Maximum depth.
+    /// @param theta_min Minimum FOV angle in the Sensor's YZ-plane.
+    /// @param theta_max Maximum FOV angle in the Sensor's YZ-plane.
+    /// @param phi_min Minimum FOV angle in the Sensor's XZ-plane.
+    /// @param phi_max Maximum FOV angle in the Sensor's XZ-plane.
+    BaseDepthSensor(const DepthSensorType& sensor_type, const int& u, const int& v, 
+                    const double& d_min, const double& d_max,
+                    const double& theta_min, const double& theta_max,
+                    const double& phi_min, const double& phi_max) :
+        type(sensor_type), u(u), v(v),
+        d_min(d_min), d_max(d_max),
+        theta_min(theta_min), theta_max(theta_max),
+        phi_min(phi_min), phi_max(phi_max)
+    { }
 };
 
 
-/// @brief Simplified intrinsics for a laser scanner measurement device.
-struct LaserScannerIntrinsics : public BaseDepthSensorIntrinsics
-    {
-    /// @brief Upper and lower bounds for the scanner's laser in radial distance from the Z-axis (radians).
-    ///        Theta describes rotation around the X-axis and phi describes rotation around the Y-axis.
-    const float theta_min, theta_max, phi_min, phi_max;
-
-
-    /// @brief Constructs sensor intrinsics for a laser depth scanner.
-    /// @param max_depth Maximum depth value for the laser scanner.
-    /// @param u Number of sensed points per-line for the laser scanner (divisions along phi).
-    /// @param v Number of scanned lines on the laser scanner (divisions along theta).
-    /// @param theta_max Magnitude for the maximum theta value.
-    /// @param phi_max   Magnitude for the maximum phi value.
-    /// @param theta_min Magnitude for the minimum theta value.
-    /// @param phi_min   Magnitude for the minimum phi value.
-    /// @param symmetric If true (default), the same magnitude is used for the min/max of theta and phi. If false, then the
-    ///                  user-specified values are used.
-    /// @note Input signs do not matter for the minimum/maximum for phi or theta. Absolute values are used to ensure that the
-    ///       member attributes for maximum are guaranteed to be positive and the minimums are guaranteed to be negative.
-    LaserScannerIntrinsics(float max_depth = 100, uint32_t u = 100, uint32_t v = 100,
-                           float theta_max = M_PI_4, float phi_max = M_PI_4,
-                           float theta_min = M_PI_4, float phi_min = M_PI_4,
-                           bool symmetric = true) :
-        BaseDepthSensorIntrinsics(max_depth, u, v),
-        theta_max(std::fabs(theta_max)),
-        phi_max(  std::fabs(phi_max)),
-        theta_min(-1 * std::fabs( setLaserScannerAngleMin(theta_min, theta_max, symmetric) ) ),
-        phi_min(  -1 * std::fabs( setLaserScannerAngleMin(phi_min, phi_max, symmetric) ) )
-        { }
-};
-
-
-/// @brief Simplified intrinsics for a random point laser scanner measurement device.
-struct RandomLaserScannerIntrinsics : public LaserScannerIntrinsics
+class DepthCamera : public BaseDepthSensor
 {
-    /// @brief Constructs sensor intrinsics for a random point laser depth scanner with a conic shape.
-    /// @param max_depth Maximum depth value for the laser scanner.
-    /// @param u Number of randomly sensed points for the laser scanner.
-    /// @param phi Size of the cone. Half-angle at the conic vertex.
-    RandomLaserScannerIntrinsics(float max_depth = 100, uint32_t u = 10000, float phi = M_PI_4) :
-        LaserScannerIntrinsics(max_depth, u, 1, M_PI, phi)
+public:
+    /// @brief Creates intrinsic matrix for a DepthCamera with the specified parameters.
+    /// @param u Sensor dimension, number of of X-pixels.
+    /// @param v Sensor dimension, number of of Y-pixels.
+    /// @param d_min Minimum depth.
+    /// @param d_max Maximum depth.
+    /// @param fov_x The field of view (FOV) in the X-direction. The 'width' of the image.
+    /// @param fov_y The field of view (FOV) in the X-direction. The 'height' of the image.
+    DepthCamera(const int& u, const int& v, const double& d_min, const double& d_max,
+                const double& fov_x, const double& fov_y) :
+        BaseDepthSensor(DepthSensorType::DepthCamera, u, v, d_min, d_max,
+                        -0.5 * fov_y, 0.5 * fov_y, -0.5 * fov_x, 0.5 * fov_x)
         { }
+
+    /// @brief Generates intrinsics for the Stereo-vision depth camera of an Intel RealSense D455.
+    /// @details see spec sheet here:
+    ///             https://www.intelrealsense.com/depth-camera-d455/
+    ///             https://www.intelrealsense.com/download/20289/?tmstv=1680149335
+    static DepthCamera IntelRealSenseD455() 
+        { return DepthCamera(1280, 800, 0.6, 6, 87 * M_PI / 180, 58 * M_PI / 180); }
+
+    /// @brief Generates intrinsics for the Time-of-Flight depth camera of an Microsoft Azure Kinect.
+    /// @param wide_fov If true, default, will return the wide-FOV (WFOV) intrinsics. Else will return the near-FOV (NFOV) intrinsics.
+    /// @note WFOV has greater resolution but shorter operating range than the NFOV.
+    /// @details see spec sheet here:
+    ///             https://learn.microsoft.com/en-us/azure/kinect-dk/hardware-specification#depth-camera-supported-operating-modes
+    static DepthCamera AzureKinect(const bool& wide_fov = true) {
+        if (wide_fov)
+            return DepthCamera(1024, 1024, 0.25, 2.21, 120 * M_PI / 180, 120 * M_PI / 180);
+        return DepthCamera(640, 576, 0.3, 3.86, 65 * M_PI / 180, 75 * M_PI / 180);
+    }
 };
 
 
-struct DepthCameraIntrinsics : public BaseDepthSensorIntrinsics
+class LaserScanner : public BaseDepthSensor
 {
-    const float fx, fy;
-    const float ox, oy;
-
-    /// @brief Constructs sensor intrinsics for a 
-    /// @param max_depth Maximum depth value for the laser scanner.
-    /// @param u Number of pixels in the Y-direction.
-    /// @param v Number of pixels in the X-direction.
-    /// @param fx Focal length in X.
-    /// @param fy Focal length in Y (typically equal to X).
-    /// @param ox Principle point offset in X.
-    /// @param oy Principle point offset in Y.
-    /// @note Non-positive values for the principle point offset will default to half the pixels in in that
-    ///       direction; essentially centering the principle point offset.
-    DepthCameraIntrinsics(float max_depth = 100, uint32_t u = 100,  uint32_t v = 100,
-                          float fx = 300, float fy = 300,
-                          float ox = -1, float oy = -1) :
-        BaseDepthSensorIntrinsics(100, u, v),
-        fx(fx), fy(fy),
-        ox(setDepthCameraPrinciplePoint(ox, v)),
-        oy(setDepthCameraPrinciplePoint(oy, u))
+public:
+    /// @brief Constructor of the abstract intrinsics class.
+    /// @param u Sensor dimension, number of of X-points.
+    /// @param v Sensor dimension, number of of Y-points.
+    /// @param d_min Minimum depth.
+    /// @param d_max Maximum depth.
+    /// @param theta_min Minimum FOV angle in the Laser Scanner's YZ-plane.
+    /// @param theta_max Maximum FOV angle in the Laser Scanner's YZ-plane.
+    /// @param phi_min Minimum FOV angle in the Laser Scanner's XZ-plane.
+    /// @param phi_max Maximum FOV angle in the Laser Scanner's XZ-plane.
+    LaserScanner(const int& u, const int& v, const double& d_min, const double& d_max,
+                 const double& theta_min, const double& theta_max, const double& phi_min, const double& phi_max) :
+        BaseDepthSensor(DepthSensorType::LaserScanner, u, v, d_min, d_max, theta_min, theta_max, phi_min, phi_max)
         { }
 };
 
 
+} // Intrinsics
 } // ForgeScan
 
 #endif // FORGESCAN_SENSOR_INTRINSICS_H

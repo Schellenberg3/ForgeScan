@@ -289,7 +289,7 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
     VoxelElement *element_ref;
 
     // Perform updates withing the truncation distance. Moving from neg_dist to pos_dist.
-    update.dist = t_neg_adj;
+    update.dist = static_cast<float>(t_neg_adj);
     while (t_x <= t_pos_adj || t_y <= t_pos_adj || t_z <= t_pos_adj)
     {
         try {
@@ -304,19 +304,19 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
         }
         if (t_x < t_y && t_x < t_z)
         {
-            update.dist = t_x;
+            update.dist = static_cast<float>(t_x);
             current_gidx[0] += s_x;
             t_x += dt_x;
         }
         else if (t_y < t_z) // Y is implicitly less than X 
         {
-            update.dist = t_y;
+            update.dist = static_cast<float>(t_y);
             current_gidx[1] += s_y;
             t_y += dt_y;
         }
         else // Z is implicitly less than both X and Y 
         {
-            update.dist = t_z;
+            update.dist = static_cast<float>(t_z);
             current_gidx[2] += s_z;
             t_z += dt_z;
         }

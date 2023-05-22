@@ -95,7 +95,7 @@ void imageSphereLaserScanner(DepthSensor::BaseDepthSensor& sensor, const Primati
     sensor.resetDepth();
 
     double t = 1;
-    for (int i = 0, num_pts = sensor.intr->size(); i < num_pts; ++i)
+    for (size_t i = 0, num_pts = sensor.intr->size(); i < num_pts; ++i)
     {
         end = sensor.toWorldFromThis( sensor.getPosition(i) );
 

@@ -234,7 +234,7 @@ void VoxelGrid::loadHDF5(const std::string& fname)
 
 void VoxelGrid::saveXDMF(const std::string &fname) const
 {
-    const int num_element = voxel_element_vector.size();
+    const size_t num_element = voxel_element_vector.size();
     try
     {
         HighFive::File file(fname + ".h5", HighFive::File::Truncate);
@@ -298,7 +298,7 @@ void VoxelGrid::writeXDMF(const std::string &fname) const
 {
     std::string hdf5_fname = fname + ".h5";
 
-    const int num_element = voxel_element_vector.size();
+    const size_t num_element = voxel_element_vector.size();
 
     point lower_zyx = Eigen::Vector3d::Zero();
 

@@ -1,7 +1,6 @@
 #ifndef FORGESCAN_SENSOR_INTRINSICS_H
 #define FORGESCAN_SENSOR_INTRINSICS_H
 
-#include <cstdint>
 #include <cmath>
 
 
@@ -48,7 +47,7 @@ public:
 
     /// @brief Returns the total number of data elements in the sensor.
     /// @return Total number of data elements in the sensor.
-    constexpr uint32_t size() const { return u * v; }
+    constexpr size_t size() const { return u * v; }
 
 protected:
     /// @brief Constructor of the abstract intrinsics class.
@@ -61,7 +60,7 @@ protected:
     /// @param theta_max Maximum FOV angle in the Sensor's YZ-plane.
     /// @param phi_min Minimum FOV angle in the Sensor's XZ-plane.
     /// @param phi_max Maximum FOV angle in the Sensor's XZ-plane.
-    BaseDepthSensor(const DepthSensorType& sensor_type, const int& u, const int& v, 
+    BaseDepthSensor(const DepthSensorType& sensor_type, const size_t& u, const size_t& v, 
                     const double& d_min, const double& d_max,
                     const double& theta_min, const double& theta_max,
                     const double& phi_min, const double& phi_max) :
@@ -83,7 +82,7 @@ public:
     /// @param d_max Maximum depth.
     /// @param fov_x The field of view (FOV) in the X-direction. The 'width' of the image.
     /// @param fov_y The field of view (FOV) in the X-direction. The 'height' of the image.
-    DepthCamera(const int& u, const int& v, const double& d_min, const double& d_max,
+    DepthCamera(const size_t& u, const size_t& v, const double& d_min, const double& d_max,
                 const double& fov_x, const double& fov_y) :
         BaseDepthSensor(DepthSensorType::DepthCamera, u, v, d_min, d_max,
                         -0.5 * fov_y, 0.5 * fov_y, -0.5 * fov_x, 0.5 * fov_x)
@@ -121,7 +120,7 @@ public:
     /// @param theta_max Maximum FOV angle in the Laser Scanner's YZ-plane.
     /// @param phi_min Minimum FOV angle in the Laser Scanner's XZ-plane.
     /// @param phi_max Maximum FOV angle in the Laser Scanner's XZ-plane.
-    LaserScanner(const int& u, const int& v, const double& d_min, const double& d_max,
+    LaserScanner(const size_t& u, const size_t& v, const double& d_min, const double& d_max,
                  const double& theta_min, const double& theta_max, const double& phi_min, const double& phi_max) :
         BaseDepthSensor(DepthSensorType::LaserScanner, u, v, d_min, d_max, theta_min, theta_max, phi_min, phi_max)
         { }

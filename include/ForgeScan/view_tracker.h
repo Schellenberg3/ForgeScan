@@ -41,7 +41,8 @@ struct SensorRecord
     size_t total_views   = 0;
     size_t total_first   = 0;
 
-    double size = 0;
+    size_t size = 0;
+
     double percent_hit    = 0;
     double percent_viewed = 0;
 
@@ -53,7 +54,7 @@ struct SensorRecord
     /// @brief Default constructor with pose information. 
     /// @param pose Pose of the sensor relative to the VoxelGrid.
     /// @param size Number of points in the depth sensor.
-    SensorRecord(const extrinsic& pose, const double& size) : pose(pose), size(size) { }
+    SensorRecord(const extrinsic& pose, const size_t& size) : pose(pose), size(size) { }
 
     /// @brief Convenience for updating with data from each ray.
     /// @param ray_data Data from the latest ray.

@@ -54,49 +54,49 @@ public:
     /// @param i Index in the storage vector to return.
     /// @return Read-only reference to the depth member at `i`.
     /// @throws `std::out_of_range` If `i` is an invalid index.
-    const double& at(const int& i) const { return depth_vector.at(i); }
+    const double& at(const size_t& i) const { return depth_vector.at(i);}
 
     /// @brief Returns the depth at the image sensor location `(x, y)`, checking validity.
     /// @param x X-index in the image sensor to return.
     /// @param y Y-index in the image sensor to return.
     /// @return Read-only reference to the depth member at `(x, y)`.
     /// @throws `std::out_of_range` If `(x, y)` is an invalid index.
-    const double& at(const int& x, const int& y) const { return at( throw_xy_to_i(x, y) ); }
+    const double& at(const size_t& x, const size_t& y) const { return at( throw_xy_to_i(x, y) ); }
 
     /// @brief Returns the depth at the sensed point, checking validity.
     /// @param i Index in the storage vector to return.
     /// @return Writable reference to the depth member at `i`.
     /// @throws `std::out_of_range` If `i` is an invalid index.
-    double& at(const int& i) { return depth_vector.at(i); }
+    double& at(const size_t& i) { return depth_vector.at(i); }
 
     /// @brief Returns the depth at the image sensor location `(x, y)`, checking validity.
     /// @param x X-index in the image sensor to return.
     /// @param y Y-index in the image sensor to return.
     /// @return Writable reference to the depth member at `(x, y)`.
     /// @throws `std::out_of_range` If `(x, y)` is an invalid index.
-    double& at(const int& x, const int& y) { return at( throw_xy_to_i(x, y) ); }
+    double& at(const size_t& x, const size_t& y) { return at( throw_xy_to_i(x, y) ); }
 
     /// @brief Returns the depth at the sensed point. Unchecked access.
     /// @param i Index in the storage vector to return.
     /// @return Read-only reference to the depth member at `i`.
-    const double& operator()(const int& i) const { return depth_vector[i]; }
+    const double& operator()(const size_t& i) const { return depth_vector[i]; }
 
     /// @brief Returns the depth at the image sensor location `(x, y)`. Unchecked access.
     /// @param x X-index in the image sensor to return.
     /// @param y Y-index in the image sensor to return.
     /// @return Read-only reference to the depth member at `(x, y)`.
-    const double& operator()(const int& x, const int& y) const { return operator()( xy_to_i(x, y) ); }
+    const double& operator()(const size_t& x, const size_t& y) const { return operator()( xy_to_i(x, y) ); }
 
     /// @brief Returns the depth at the sensed point. Unchecked access.
     /// @param i Index in the storage vector to return.
     /// @return Writable reference to the depth member at `i`.
-    double& operator()(const int& i) { return depth_vector[i]; }
+    double& operator()(const size_t& i) { return depth_vector[i]; }
 
     /// @brief Returns the depth at the image sensor location `(x, y)`. Unchecked access.
     /// @param x X-index in the image sensor to return.
     /// @param y Y-index in the image sensor to return.
     /// @return Writable reference to the depth member at `(x, y)`.
-    double& operator()(const int& x, const int& y) { return operator()( xy_to_i(x, y) ); }
+    double& operator()(const size_t& x, const size_t& y) { return operator()( xy_to_i(x, y) ); }
 
     /// @brief Gets a read-only reference to the depth.
     /// @return Read-only reference to the depth vector.
@@ -167,7 +167,7 @@ public:
     /// @param i Index in the storage vector to return.
     /// @return Cartesian position of point `i` in the DepthSensor's reference frame.
     /// @throws `std::out_of_range` If `i` is an invalid index.
-    virtual point getPosition(const int& i) const 
+    virtual point getPosition(const size_t& i) const 
     {
         throwIfInvalidSenorArray(i);
         return getPosition(i, i % intr->u, i / intr->u);
@@ -178,7 +178,7 @@ public:
     /// @param y Y-index in the image sensor to return.
     /// @return Cartesian position of point at `(x, y)` in the DepthSensor's reference frame.
     /// @throws `std::out_of_range` If `(x, y)` is an invalid index.
-    virtual point getPosition(const int& x, const int& y) const
+    virtual point getPosition(const size_t& x, const size_t& y) const
     {
         return getPosition(throw_xy_to_i(x, y), x, y);
     }
@@ -187,11 +187,10 @@ public:
     /// @return Eigen matrix of all depth positions for the sensor, relative to the DepthSensor's reference frame.
     virtual point_list getAllPositions() const
     {
-        const int n_pts = intr->size();
         const double d_theta = intr->fov_y() / (intr->v - 1);
         const double d_phi   = intr->fov_x() / (intr->u - 1);
 
-        point_list sensed_points(3, n_pts);
+        point_list sensed_points(3, intr->size());
 
         int i = 0;
         double theta = intr->theta_max, phi = intr->phi_max;
@@ -220,11 +219,11 @@ protected:
 
 protected:
     /// @brief Turns the 2D-coordinates into a vector index.
-    int xy_to_i(const int& x, const int& y) const { return intr->u * y + x; }
+    size_t xy_to_i(const size_t& x, const size_t& y) const { return intr->u * y + x; }
 
     /// @brief Turns the 2D-coordinates into a vector index. Checks validity of returned result.
     /// @throws `std::out_of_range` If `(x, y)` is an invalid index.
-    int throw_xy_to_i(const int& x, const int& y) const {
+    size_t throw_xy_to_i(const size_t& x, const size_t& y) const {
         throwIfInvalidSenorArray(x, y);
         return xy_to_i(x, y);
     }
@@ -233,18 +232,24 @@ protected:
     /// @param x X-index in the image sensor to check.
     /// @param y Y-index in the image sensor to check.
     /// @return True if valid, false else.
-    bool checkValidSenorArray(const int& x, const int& y) const { return (x >= 0 && y >= 0 && x < intr->u && y < intr->v); }
+    bool checkValidSenorArray(const size_t& x, const size_t& y) const {
+        /// Negative integers cast to size_t should necessarily be greater than any reasonable intrinsics dimensions.
+        return (x < intr->u && y < intr->v);
+    }
 
     /// @brief Checks if the provided coordinates are valid for the image sensor.
     /// @param i Index in the depth vector to check.
     /// @return True if valid, false else.
-    bool checkValidSenorArray(const int& i) const { return (i >= 0 && i < depth_vector.size()); }
+    bool checkValidSenorArray(const size_t& i) const { 
+        /// Negative integers cast to size_t should necessarily be greater than any reasonable intrinsics dimensions.
+        return (i < depth_vector.size());
+    }
 
     /// @brief Throws an out_of_range exception if the provided coordinates are not valid for the image sensor.
     /// @param x X-index in the image sensor to check.
     /// @param y Y-index in the image sensor to check.
     /// @throws `std::out_of_range` If `(x, y)` is an invalid index.
-    void throwIfInvalidSenorArray(const int& x, const int& y) const {
+    void throwIfInvalidSenorArray(const size_t& x, const size_t& y) const {
         if (!checkValidSenorArray(x, y))
             throw std::out_of_range("BaseDepthSensor::throwIfInvalidSenorArray Requested coordinates were out of range.");
     }
@@ -252,7 +257,7 @@ protected:
     /// @brief Throws an out_of_range exception if the provided coordinates are not valid for the image sensor.
     /// @param i Index in the depth vector to check.
     /// @throws `std::out_of_range` If `(x, y)` is an invalid index.
-    void throwIfInvalidSenorArray(const int& i) const {
+    void throwIfInvalidSenorArray(const size_t& i) const {
         if (!checkValidSenorArray(i))
             throw std::out_of_range("BaseDepthSensor::throwIfInvalidSenorArray Requested coordinates were out of range.");
     }
@@ -308,7 +313,7 @@ private:
     /// @param x X-index in the image sensor to return.
     /// @param y Y-index in the image sensor to return.
     /// @return Cartesian position of point at `(x, y)` in the DepthSensor's reference frame.
-    virtual point getPosition(const int& i, const int& x, const int& y) const
+    virtual point getPosition(const size_t& i, const size_t& x, const size_t& y) const
     {
         double theta = intr->theta_max - y * (intr->fov_y() / (intr->v - 1));
         double phi   = intr->phi_max   - x * (intr->fov_x() / (intr->u - 1));

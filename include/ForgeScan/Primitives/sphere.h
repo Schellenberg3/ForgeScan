@@ -1,53 +1,54 @@
-#ifndef FORGESCAN_SHAPE_PRIMATIVES_SPHERE_H
-#define FORGESCAN_SHAPE_PRIMATIVES_SPHERE_H
+#ifndef FORGESCAN_SHAPE_PRIMITIVES_SPHERE_H
+#define FORGESCAN_SHAPE_PRIMITIVES_SPHERE_H
 
 #include <ForgeScan/forgescan_types.h>
-
+#include <ForgeScan/Primitives/primative_geometry.h>
 
 namespace ForgeScan {
-namespace Primatives {
+namespace Primitives {
 
 
 /// @brief A simple analytical sphere object.
-struct Sphere
+struct Sphere : public PrimitiveGeometry
 {
-    /// @brief Sphere center in world space coordinates
-    point center;
-
+public:
     /// @brief Sphere radius in world units.
-    double radius;
+    const double radius;
 
+public:
     /// @brief Constructs an analytical sphere with the given radius at the specified position
     /// @param radius Radius value for the sphere. Default is 1 unit.
     /// @param center Location of the sphere's center point in world coordinate.
     ///               Default places the sphere at the origin
     /// @note This takes the absolute value of the provided radius value.
-    Sphere(double radius = 1, point center = Eigen::Vector3d::Zero()) :
-        radius(std::abs(radius)), center(center) { }
+    Sphere(const double& radius = 1, const point& center = Eigen::Vector3d::Zero()) :
+        PrimitiveGeometry(center, getAABBbound(std::abs(radius)), getAABBbound(-1 * std::abs(radius))),
+        radius(std::abs(radius))
+        { }
 
-    /// @brief Determines if, and where, the line between the start and end points first intersects the provided sphere.
+    /// @brief Determines if, and where, the line between the start and end points first intersects the geometry.
     /// @param start  Start point (position on the line when t = 0).
     /// @param end    End point (position on the line when t = 1).
     /// @param t      Intersection time (output variable). Values 0 <= t <= 1 are valid on the line segment.
     ///                - If the line DOES NOT intersect we return false with t unchanged.
-    ///                - If it DOES intersect but NOT inside the bounds, then we return false with t set to the minimum (in magnitude)
-    ///                  intersection time, even if this is not on the segment.
+    ///                - If it DOES intersect but NOT inside the bounds, then we return false with t set to the minimum
+    ///                  (in magnitude) intersection time, even if this is not on the segment.
     /// @return True if the line intersects and does so in a valid region of the line.
-    /// @note Find the intersection point with: `intersection = start + (end - start) * t`.
-    /// @note This preferences the first positive intersection: if the line intersects at both a positive and negative t the
-    ///       positive one is returned, ever if its magnitude is greater. If both intersection times are negative then the
-    ///       one closest to zero is returned. This covers cases where the camera is inside the sphere.
-    bool hit(const Vector3d& start, const Vector3d& end, double& t) const
+    bool hit(const Vector3d& start, const Vector3d& end, double& t) const override final
     {
+        double unused_intersection_time;
+        if ( !hitAABB(start, end, unused_intersection_time) ) return false;
+
         /// Adapted from https://stackoverflow.com/questions/6533856 with a partial quadratic solver for only the
         /// real-valued solutions of the intersection. Also, see; http://paulbourke.net/geometry/circlesphere/
 
         /// Quadratic equation for intersection:
         ///     0 = A*(x*x) + B*x + C
+        const point center = extr.translation();
         double R2 = radius * radius;
-        double A = ((start - end).array().pow(2)).sum();
+        double A = ((start - end   ).array().pow(2)).sum();
         double C = ((start - center).array().pow(2)).sum() - R2;
-        double B = ((end - center).array().pow(2)).sum() - A - C - R2;
+        double B = ((end   - center).array().pow(2)).sum() - A - C - R2;
 
         /// Find quadratic equation determinant. Early exit if negative (complex solutions mean no intersection).
         double D = B*B - 4*A*C;
@@ -94,10 +95,17 @@ struct Sphere
         /// In this, 0 <= t <= 1 indicates a point between the two values of interest.
         return ( 0 <= t && t <= 1 );
     }
+
+private:
+    /// @brief Constructor helper for generating a sphere's AABB bounds.
+    /// @param radius Radius of the sphere.
+    ///               Pass as positive for the upper bound. Pass as negative for the lower bound.
+    /// @return Axis-aligned bounding box point for the upper or lower, depending on the radius' sign. 
+    static point getAABBbound(const double& radius) { return point(radius, radius, radius); }
 };
 
 
-} // Primatives
+} // Primitives
 } // ForgeScan
 
-#endif // FORGESCAN_SHAPE_PRIMATIVES_SPHERE_H
+#endif // FORGESCAN_SHAPE_PRIMITIVES_SPHERE_H

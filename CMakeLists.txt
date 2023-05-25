@@ -83,14 +83,14 @@ target_link_libraries(
 
 # SIM_SPHERE_SCAN
 add_executable(
-    sim_sphere_scan 
+    sim_scan
 
-    demos/sim_sphere_scan.cpp
+    demos/sim_scan.cpp
     src/voxel_grid.cpp
     src/voxel_grid_traversal.cpp
 )
 target_link_libraries(
-    sim_sphere_scan
+    sim_scan
     
     HighFive
     Eigen3::Eigen

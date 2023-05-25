@@ -3,20 +3,14 @@
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/depth_sensor.h>
 
-#include <ForgeScanShapePrimatives/sphere.h>
+#include <ForgeScan/Primitives/sphere.h>
+#include <ForgeScan/Primitives/box.h>
 
 using namespace ForgeScan;
-
 static const Eigen::Vector3d WORLD_ORIGIN(0, 0, 0);
 
 
-/// @brief Images the provided sphere with the given depth sensor.
-/// @param sensor Depth sensor to store results in.
-/// @param sphere Sphere to check intersections against.
-void imageSphereLaserScanner(DepthSensor::BaseDepthSensor& sensor, const Primatives::Sphere& sphere);
-
-
-/// @brief Simulates the scanning of a sphere by a narrow FOV laser sensor.
+/// @brief Simulates the scanning of a scene by a depth sensor.
 /// @param nx Positive integer number of points to add to the sensor. Default 100.
 /// @param ny Positive integer number of points to add to the sensor. Default 100.
 /// @param num_view  Positive integer number of views to add. Default 10.
@@ -43,20 +37,22 @@ int main(int argc, char* argv[])
 
     ForgeScan::VoxelGrid grid(props, move);
 
-    Primatives::Sphere sphere(0.5);
+    ForgeScan::Primitives::Sphere shape(0.5);
+    // ForgeScan::Primitives::Box shape(0.5, 0.5, 0.5);
 
-    Intrinsics::DepthCamera sensor_intr(nx, ny, 0, 10, 0.4*M_PI, 0.1*M_PI);
-    // Intrinsics::LaserScanner sensor_intr(nx, ny, 0, 10, -0.1 * M_PI, 0.1 * M_PI, -0.1 * M_PI, 0.1 * M_PI);
 
-    DepthSensor::DepthCamera sensor(sensor_intr);
-    // DepthSensor::LaserScanner sensor(sensor_intr);
+    ForgeScan::Intrinsics::DepthCamera sensor_intr(nx, ny, 0, 10, 0.4*M_PI, 0.1*M_PI);
+    // ForgeScan::Intrinsics::LaserScanner sensor_intr(nx, ny, 0, 10, -0.1 * M_PI, 0.1 * M_PI, -0.1 * M_PI, 0.1 * M_PI);
+
+    ForgeScan::DepthSensor::DepthCamera sensor(sensor_intr);
+    // ForgeScan::DepthSensor::LaserScanner sensor(sensor_intr);
 
     if (first_pos)
     {
         sensor.translate(point(0, 0, camera_radius));
         sensor.orientPrincipleAxis(WORLD_ORIGIN);
 
-        imageSphereLaserScanner(sensor, sphere);
+        shape.image(sensor);
         grid.addSensor(sensor);
 
         std::cout << "Added deterministic first view." << std::endl;
@@ -72,37 +68,11 @@ int main(int argc, char* argv[])
         } else {
             sensor.setPoseUniform(WORLD_ORIGIN, camera_radius, i, num_view);
         }
-        imageSphereLaserScanner(sensor, sphere);
+        shape.image(sensor);
         grid.addSensor(sensor);
     }
     std::string fname = "sim_sphere_scan";
     grid.saveXDMF(fname);
     std::cout << "Complete! Saved file as: " + fname << std::endl;
     return 0;
-}
-
-
-
-void imageSphereLaserScanner(DepthSensor::BaseDepthSensor& sensor, const Primatives::Sphere& sphere)
-{
-    /// Star position is sensor position in the world frame.
-    const Vector3d start = sensor.extr.translation();
-    
-    /// End position is the sensed point at an index. Transformed to the world frame.
-    Eigen::Vector3d end(0, 0, 0);
-    
-    /// Set all points to max_depth before imaging.
-    sensor.resetDepth();
-
-    double t = 1;
-    for (size_t i = 0, num_pts = sensor.intr->size(); i < num_pts; ++i)
-    {
-        end = sensor.toWorldFromThis( sensor.getPosition(i) );
-
-        /// Run intersection search. Both start and end are in the world frame. And the value t is just a proportion
-        /// and is not attached to any frame. Thus, we scale the depth by this if we have a valid intersection.
-        if ( sphere.hit(start, end, t) ) {
-            sensor.at(i) *= t;
-        }
-    }
 }

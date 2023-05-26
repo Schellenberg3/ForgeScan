@@ -68,15 +68,13 @@ public:
         point_list end_points = getAllPositions();     // Sensor frame
         geometry.fromOtherToThis(*this, end_points);   // Primitive frame
 
-        int i = 0;
         double t = 1;
-        for (auto& depth : depth_vector)
+        for (size_t i = 0, n = intr->size(); i < n; ++i)
         {   /// Run intersection search; if there is a valid hit then we scale the depth value by t, the returned time.
             /// All we do is scale the depth value.
             if ( geometry.hit(start, end_points.col(i), t) ) {
-                depth *= t;
+                operator()(i) *= t;
             }
-            ++i;
         }
     }
 

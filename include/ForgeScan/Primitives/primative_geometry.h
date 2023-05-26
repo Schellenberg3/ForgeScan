@@ -80,7 +80,8 @@ protected:
     /// @brief Relatively quick check for bounding box intersection of a geometric primitive. Prevents needless checks for some rays.
     /// @param start Starting point of the ray, relative to the primitive's frame.
     /// @param end   Ending point of the ray, relative to the primitive's frame.
-    /// @param t     Intersection time (output variable). Values 0 <= t <= 1 are valid on the line segment.
+    /// @param t     Adjusted start intersection time (output variable). Describes when the line will first intersect the AABB.
+    ///              Values 0 <= t <= 1 are valid on the line segment.
     /// @return True if the ray has any intersection with the primitive's bounding box.
     /// @warning The output variable, `t`, is valid when this function returns true.
     ///          Otherwise it does not describe an intersection and should not be trusted.
@@ -134,7 +135,7 @@ protected:
         if (t_min_z > ts_adj) ts_adj = t_min_z;
         if (t_max_z < te_adj) te_adj = t_max_z;
 
-        t = te_adj;
+        t = ts_adj;
         return (ts_adj < 1 && 0 < te_adj);
     }
 };

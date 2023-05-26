@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     double cr = 2.5;
 
     /// File name for writing XDMF of results.
-    std::string fname = "sim_sphere_scan";
+    std::string fname = "sim_scan";
 
     /// Create reference to the share directory and verify it exists, creating it if needed.
     std::filesystem::path fpath(FORGESCAN_SHARE_PARAVIEW_DIR);

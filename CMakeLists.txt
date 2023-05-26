@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.7.2)
 
 project(ForgeScan)
 
+# Turn off meaningless boost versioning warning.
+set(Boost_NO_WARN_NEW_VERSIONS 1)
+
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 

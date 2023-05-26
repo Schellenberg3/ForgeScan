@@ -9,6 +9,11 @@
 namespace ForgeScan {
 namespace Primitives {
 
+struct PrimitiveGeometry; // Forward declaration for the typedef
+
+/// @brief A collection of PrimitiveGeometry objects which are imaged together in the same scene.
+typedef std::vector<PrimitiveGeometry*> Scene;
+
 /// @brief Base class for all primitive geometry types.
 struct PrimitiveGeometry : ForgeScanEntity
 {

@@ -91,12 +91,7 @@ add_executable(
     src/voxel_grid_traversal.cpp
     src/grid_processor.cpp
 )
-target_link_libraries(
-    test_grid
-    
-    HighFive
-    Eigen3::Eigen
-)
+
 
 # SIM_SPHERE_SCAN
 add_executable(
@@ -106,12 +101,7 @@ add_executable(
     src/voxel_grid.cpp
     src/voxel_grid_traversal.cpp
 )
-target_link_libraries(
-    sim_scan
-    
-    HighFive
-    Eigen3::Eigen
-)
+
 
 # TEST_VOXEL_ELEMENT
 add_executable(
@@ -121,11 +111,7 @@ add_executable(
     src/voxel_grid.cpp
     src/voxel_grid_traversal.cpp
 )
-target_link_libraries(
-    test_voxel_element
-    
-    Eigen3::Eigen
-)
+
 
 # TEST_TRAVERSAL
 add_executable(
@@ -135,8 +121,4 @@ add_executable(
     src/voxel_grid.cpp
     src/voxel_grid_traversal.cpp
 )
-target_link_libraries(
-    test_traversal
 
-    Eigen3::Eigen
-)

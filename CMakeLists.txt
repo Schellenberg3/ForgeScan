@@ -8,9 +8,16 @@ project(ForgeScan)
 set(Boost_NO_WARN_NEW_VERSIONS 1)
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    message ("[ForgeScan::Info] Using GNU/Clang compiler options")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    message ("[ForgeScan::Info] Using GNU/Clang compiler options")
+    message( "[ForgeScan::Info] Toolchain file: ${CMAKE_TOOLCHAIN_FILE}" )
+    message( "[ForgeScan::Info] target triplet: ${VCPKG_TARGET_TRIPLET}" )
+endif()
 
 # LOCAL DIRECTORY VARIABLES
 set(BASE_DIR ${CMAKE_SOURCE_DIR})

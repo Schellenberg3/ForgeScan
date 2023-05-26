@@ -8,6 +8,8 @@
 #include <ForgeScan/forgescan_types.h>
 #include <ForgeScan/sensor_intrinsics.h>
 
+#include <ForgeScan/Primitives/primative_geometry.h>
+
 
 namespace ForgeScan {
 namespace DepthSensor {
@@ -48,6 +50,45 @@ public:
         const static Vector3d principle_axis = Eigen::Vector3d::UnitZ();
         extrinsic Tws(Eigen::Quaterniond().setFromTwoVectors(principle_axis, target - this->extr.translation()));
         this->transformBodyFrame(Tws);
+    }
+
+    /// @brief Captures a depth image of the provided PrimitiveGeometry.
+    /// @param geometry The geometric primitive to image.
+    /// @param reset If true, the depth sensor's depth values will be reset before the new image is calculated.
+    void image(const Primitives::PrimitiveGeometry& geometry, const bool& reset = true)
+    {
+        /// If requested, reset all points to their maximum depth before imaging.
+        if (reset) { resetDepth(); }
+
+        /// Get the sensor's position and viewed points relative to the PrimitiveGeometry frame.
+        /// This is needed for the fast AABB checks performed on each ray.
+        point start = extr.translation();   // World frame
+        geometry.fromWorldToThis(start);    // Primitive frame
+
+        point_list end_points = getAllPositions();     // Sensor frame
+        geometry.fromOtherToThis(*this, end_points);   // Primitive frame
+
+        int i = 0;
+        double t = 1;
+        for (auto& depth : depth_vector)
+        {   /// Run intersection search; if there is a valid hit then we scale the depth value by t, the returned time.
+            /// All we do is scale the depth value.
+            if ( geometry.hit(start, end_points.col(i), t) ) {
+                depth *= t;
+            }
+            ++i;
+        }
+    }
+
+    /// @brief Captures a depth image of a scene consisting of multiple PrimitiveGeometry objects.
+    /// @param scene A collection of GeometricPrimitives to image.
+    /// @param reset If true, the depth sensor's depth values will be reset before the new image is calculated.
+    void image(const Primitives::Scene& scene, const bool& reset = true)
+    {
+        /// If requested, reset all points to their maximum depth before imaging.
+        if (reset) { resetDepth(); }
+        for (const auto& geometry : scene)
+            image(*geometry, false);
     }
 
     /// @brief Returns the depth at the sensed point, checking validity.

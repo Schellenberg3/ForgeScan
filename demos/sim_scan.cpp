@@ -37,11 +37,12 @@ int main(int argc, char* argv[])
 
     ForgeScan::VoxelGrid grid(props, move);
 
-    ForgeScan::Primitives::Sphere shape(0.5);
-    // ForgeScan::Primitives::Box shape(0.5, 0.5, 0.5);
+    ForgeScan::Primitives::Sphere sphere(0.45);
+    ForgeScan::Primitives::Box box(1.3, 0.5, 0.5);
 
+    ForgeScan::Primitives::Scene scene{&sphere, &box};
 
-    ForgeScan::Intrinsics::DepthCamera sensor_intr(nx, ny, 0, 10, 0.4*M_PI, 0.1*M_PI);
+    ForgeScan::Intrinsics::DepthCamera sensor_intr(nx, ny, 0, 10, 0.4*M_PI, 0.4*M_PI);
     // ForgeScan::Intrinsics::LaserScanner sensor_intr(nx, ny, 0, 10, -0.1 * M_PI, 0.1 * M_PI, -0.1 * M_PI, 0.1 * M_PI);
 
     ForgeScan::DepthSensor::DepthCamera sensor(sensor_intr);
@@ -52,7 +53,7 @@ int main(int argc, char* argv[])
         sensor.translate(point(0, 0, camera_radius));
         sensor.orientPrincipleAxis(WORLD_ORIGIN);
 
-        shape.image(sensor);
+        sensor.image(scene);
         grid.addSensor(sensor);
 
         std::cout << "Added deterministic first view." << std::endl;
@@ -68,7 +69,7 @@ int main(int argc, char* argv[])
         } else {
             sensor.setPoseUniform(WORLD_ORIGIN, camera_radius, i, num_view);
         }
-        shape.image(sensor);
+        sensor.image(scene);
         grid.addSensor(sensor);
     }
     std::string fname = "sim_sphere_scan";

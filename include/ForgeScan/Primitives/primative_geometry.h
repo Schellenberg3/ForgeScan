@@ -3,8 +3,6 @@
 
 
 #include <ForgeScan/forgescan_types.h>
-#include <ForgeScan/depth_sensor.h>
-
 
 namespace ForgeScan {
 namespace Primitives {
@@ -18,32 +16,6 @@ typedef std::vector<PrimitiveGeometry*> Scene;
 struct PrimitiveGeometry : ForgeScanEntity
 {
 public:
-    void image(DepthSensor::BaseDepthSensor& sensor, const bool& reset_first = true)
-    {
-        /// If requested, reset all points to their maximum depth before imaging.
-        if (reset_first) { sensor.resetDepth(); }
-
-        /// Get the sensor's position and viewed points relative to the geometric primitive.
-        /// The hit methods generally don't depend on this, they will work as long both the start point and end points are
-        /// in the same reference frame, but this is needed for the AABB checks.
-        point start = sensor.extr.translation();           // world frame
-        fromWorldToThis(start);
-
-        point_list end_points = sensor.getAllPositions();  // sensor frame
-        fromOtherToThis(sensor, end_points);
-
-        double t = 1;
-        for (size_t i = 0, num_pts = sensor.intr->size(); i < num_pts; ++i)
-        {
-            /// Run intersection search; if there is a valid hit then we scale the depth value by t, the returned time. 
-            /// All we do is scale the depth value.
-            if ( hit(start, end_points.col(i), t) ) {
-                sensor(i) *= t;
-            }
-        }
-    }
-
-
     /// @brief Determines if, and where, the line between the start and end points first intersects the geometry.
     /// @param start  Start point (position on the line when t = 0).
     /// @param end    End point (position on the line when t = 1).

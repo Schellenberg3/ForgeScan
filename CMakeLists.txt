@@ -54,6 +54,10 @@ find_package(PCL    REQUIRED COMPONENTS common io)
 find_package(HDF5   REQUIRED )
 find_package(Eigen3 REQUIRED NO_MODULE)
 
+add_compile_definitions(
+    FORGESCAN_SHARE_DIR="${BASE_DIR}/share"
+    FORGESCAN_SHARE_PARAVIEW_DIR="${BASE_DIR}/share/ParaView"
+)
 
 include_directories(
     ${FORGESCAN_INCLUDE_DIRS}

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/depth_sensor.h>
@@ -26,7 +27,12 @@ int main(int argc, char* argv[])
 
     /// File name for writing XDMF of results.
     std::string fname = "sim_sphere_scan";
-    
+
+    /// Create reference to the share directory and verify it exists, creating it if needed.
+    std::filesystem::path fpath(FORGESCAN_SHARE_PARAVIEW_DIR);
+    fpath.make_preferred();
+    std::filesystem::create_directories(fpath);
+
     /// If true will place the first view in a pre-determined position.
     bool first   = parser.cmdOptionExists("--first");
 
@@ -49,6 +55,9 @@ int main(int argc, char* argv[])
         const std::string &s_f = parser.getCmdOption("-f");
         if (!s_f.empty()) fname = s_f;
     }
+
+    /// Create the full file path.
+    fpath /= fname; 
 
     std::cout << "Running for " << nv << " sensors with (" << nx << ", " << ny << ") images." << std::endl;
     if (first) {
@@ -98,8 +107,8 @@ int main(int argc, char* argv[])
         grid.addSensor(sensor);
     }
 
-    grid.saveXDMF(fname);
-    std::cout << "Complete! Saved file as: " + fname << std::endl;
+    grid.saveXDMF(fpath.string());
+    std::cout << "Complete! Saved file in ./share/ParaView as: " + fname << std::endl;
 
     return 0;
 }

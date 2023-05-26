@@ -33,19 +33,25 @@ set(FORGESCAN_INCLUDE_DIRS         ${BASE_DIR}/include)
 # LOCATE HIGHFIVE AND SET ITS COMPILE OPTIONS
 # Set a number of HighFive options to off by default. Essentially prevents their examples and
 # unit tests from being compiled automatically when building all available targets.
-set(HIGHFIVE_UNIT_TESTS OFF CACHE BOOL "Enable unit tests(requires Catch2 to be present)")
-set(HIGHFIVE_BUILD_DOCS OFF CACHE BOOL "Enable documentation building")
-set(HIGHFIVE_EXAMPLES   OFF CACHE BOOL "Compile examples")
+if(EXISTS "${BASE_DIR}/deps/HighFive/CMakeLists.txt")
+    message( "[ForgeScan::Info] Using local sub-module for HighFive." )
 
-add_subdirectory(${BASE_DIR}/deps/HighFive)
-set(HIGHFIVE_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/deps/HighFive/include)
+    set(HIGHFIVE_UNIT_TESTS OFF CACHE BOOL "Enable unit tests(requires Catch2 to be present)")
+    set(HIGHFIVE_BUILD_DOCS OFF CACHE BOOL "Enable documentation building")
+    set(HIGHFIVE_EXAMPLES   OFF CACHE BOOL "Compile examples")
+
+    add_subdirectory(${BASE_DIR}/deps/HighFive)
+    set(HIGHFIVE_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/deps/HighFive/include)
+else()
+    message( "[ForgeScan::Info] Searching externally for HighFive." )
+    find_package(HighFive REQUIRED )
+endif()
 
 # LOCATE DEPENDENCIES INSTALLED WITH APT
 find_package(PCL    REQUIRED COMPONENTS common io)
-find_package(HDF5   REQUIRED COMPONENTS C CXX)
+find_package(HDF5   REQUIRED )
 find_package(Eigen3 REQUIRED NO_MODULE)
-### See Eigne CMake guide:
-###     https://eigen.tuxfamily.org/dox/TopicCMakeGuide.html
+
 
 include_directories(
     ${FORGESCAN_INCLUDE_DIRS}
@@ -64,6 +70,7 @@ link_directories(
 link_libraries(
     ${EIGEN3_LIBRARIES}
     ${HDF5_LIBRARIES}
+    ${HighFive_LIBRARIES}
 )
 
 add_definitions(

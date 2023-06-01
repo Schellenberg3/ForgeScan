@@ -12,8 +12,7 @@
 #include <ForgeScanUtils/memory_utils.h>
 
 
-/// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_element_vector`
-///        by the 
+/// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_element_vector`.
 static HighFive::CompoundType create_compound_VoxelElement() {
     return {
         {"views",  HighFive::AtomicType<ForgeScan::view_count>{}},

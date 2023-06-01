@@ -15,9 +15,9 @@
 /// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_element_vector`.
 static HighFive::CompoundType create_compound_VoxelElement() {
     return {
-        {"views",  HighFive::AtomicType<ForgeScan::view_count>{}},
+        {"views",    HighFive::AtomicType<ForgeScan::view_count>{}},
         {"updates",  HighFive::AtomicType<ForgeScan::update_count>{}},
-        
+
         {"min",  HighFive::AtomicType<ForgeScan::voxel_dist>{}},
         {"avg",  HighFive::AtomicType<ForgeScan::voxel_dist>{}},
         {"var",  HighFive::AtomicType<ForgeScan::voxel_dist>{}},

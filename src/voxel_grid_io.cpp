@@ -30,12 +30,6 @@ HIGHFIVE_REGISTER_TYPE(ForgeScan::VoxelElement, create_compound_VoxelElement)
 
 namespace ForgeScan {
 
-void VoxelGrid::clear()
-{
-    for (auto& element : voxel_element_vector)
-        element.reset();
-}
-
 void VoxelGrid::saveHDF5(const std::filesystem::path& fname) const
 {
     if ( !fname.has_filename() )

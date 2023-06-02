@@ -103,7 +103,6 @@ public:
         return implementAddRayExact(update, rs_this, re_this);
     }
 
-
     /// @brief Adds data to the grid, updating voxels near the sensed point with truncated distance and marking the voxels
     ///        between the origin and positive truncation as viewed. Points are assumed to be relative to the world frame.
     /// @param grid The VoxelGrid to add data to.
@@ -146,9 +145,8 @@ public:
         updateViewCount();
     }
 
-
     /// @brief Rests all data in the grid to zero or its respective defaults.
-    void clear();
+    void clear() { for (auto& element : voxel_element_vector) element.reset(); }
 
     /// @brief Saves in the XDMF format (XDMF file references to an HDF5 data file). 
     /// @param fname File name. Automatically adds ".h5" when writing the HDF5 file and ".xdmf"
@@ -158,7 +156,6 @@ public:
     /// @note    No read method is available for this format.
     /// @throws `std::invalid_argument` if there is an issue parsing the file name.
     void saveXDMF(const std::filesystem::path& fname) const;
-
 
     /// @brief Saves in the HDF5 format.
     /// @param fname File name. Automatically adds ".h5" when writing.
@@ -171,12 +168,11 @@ public:
     /// @brief Accesses voxel elements operations on the voxels.
     friend class GridProcessor;
 
-friend VoxelGrid loadVoxelGridHDF5(const std::filesystem::path&);
+    friend VoxelGrid loadVoxelGridHDF5(const std::filesystem::path&);
 
 private:
     /// @brief Container for VoxelElements. Users see a 3D grid, but this is really just a vector.
     std::vector<VoxelElement> voxel_element_vector;
-
 
 private:
     /// @brief Retrieves the vector index for the given X, Y, Z indicies in the voxel grid.

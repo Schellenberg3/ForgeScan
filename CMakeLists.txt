@@ -93,7 +93,7 @@ add_executable(
     test_grid 
 
     demos/test_voxel_grid.cpp
-    src/voxel_grid.cpp
+    src/voxel_grid_io.cpp
     src/voxel_grid_traversal.cpp
     src/grid_processor.cpp
 )
@@ -104,7 +104,7 @@ add_executable(
     sim_scan
 
     demos/sim_scan.cpp
-    src/voxel_grid.cpp
+    src/voxel_grid_io.cpp
     src/voxel_grid_traversal.cpp
 )
 
@@ -114,7 +114,7 @@ add_executable(
     test_voxel_element
 
     demos/test_voxel_element.cpp
-    src/voxel_grid.cpp
+    src/voxel_grid_io.cpp
     src/voxel_grid_traversal.cpp
 )
 
@@ -124,7 +124,7 @@ add_executable(
     test_traversal
 
     demos/test_traversal.cpp
-    src/voxel_grid.cpp
+    src/voxel_grid_io.cpp
     src/voxel_grid_traversal.cpp
 )
 

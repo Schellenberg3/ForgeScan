@@ -187,16 +187,6 @@ public:
     /// @brief Rests all data in the grid to zero or its respective defaults.
     void clear();
 
-    /// @brief Saves the grids points in a CSV format.
-    ///        The values are stored incrementing in fastest in  X, then Y, then Z and each line is a comma
-    ///        separate list of attributes. the first line is a header with what each attribute is
-    /// @param fname The name for the save file.  Automatically adds ".csv" when writing.
-    /// @details This format is available for ease of data introspection. It simply writes the voxel data
-    ///          out but provides little detail about the VoxelGrid's parameters.
-    /// @note    No read method is available for this format.
-    void saveCSV(const std::filesystem::path& fname) const;
-
-
     /// @brief Saves in the XDMF format (XDMF file references to an HDF5 data file). 
     /// @param fname File name. Automatically adds ".h5" when writing the HDF5 file and ".xdmf"
     ///              to the XDMF file of the same name.

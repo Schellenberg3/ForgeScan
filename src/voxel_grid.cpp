@@ -30,34 +30,6 @@ HIGHFIVE_REGISTER_TYPE(ForgeScan::VoxelElement, create_compound_VoxelElement)
 
 namespace ForgeScan {
 
-VoxelGrid::VoxelGrid(const VoxelGridProperties& properties) :
-    ForgeScanEntity(),
-    properties(setVoxelGridProperties(properties))
-{ 
-    setup();
-}
-
-VoxelGrid::VoxelGrid(const VoxelGridProperties& properties, const extrinsic& extr) :
-    ForgeScanEntity(extr),
-    properties(setVoxelGridProperties(properties))
-{
-    setup();
-}
-
-VoxelGrid::VoxelGrid(const VoxelGridProperties& properties, const translation& position) :
-    ForgeScanEntity(position),
-    properties(setVoxelGridProperties(properties))
-{
-    setup();
-}
-
-VoxelGrid::VoxelGrid(const VoxelGridProperties& properties, const rotation& orientation) :
-    ForgeScanEntity(orientation),
-    properties(setVoxelGridProperties(properties))
-{
-    setup();
-}
-
 void VoxelGrid::clear()
 {
     for (auto& element : voxel_element_vector)
@@ -167,8 +139,10 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
 
     point lower_zyx = Eigen::Vector3d::Zero();
 
-    Vector3ui size_1 = properties.grid_size.array() + 1;
-    size_1.reverseInPlace();
+    const double adj_resolution = properties.dimensions[0] / properties.grid_size[0];
+
+    Vector3ui adj_size = properties.grid_size.array() + 1;
+    adj_size.reverseInPlace();
 
     std::ofstream file;
     file.exceptions( std::ofstream::failbit | std::ofstream::badbit );
@@ -184,12 +158,12 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
         "  <!-- *************** START OF VOXELGRID *************** -->\n"
         "  <Grid Name=\"VOXELGRID\" GridType=\"Uniform\">\n"
         "    <Geometry Type=\"ORIGIN_DXDYDZ\">\n"
-        "      <Topology TopologyType=\"3DCoRectMesh\" Dimensions=\"" << size_1.transpose() << " \"></Topology>\n" <<
+        "      <Topology TopologyType=\"3DCoRectMesh\" Dimensions=\"" << adj_size.transpose() << " \"></Topology>\n" <<
         "      <!-- Origin  Z, Y, X -->\n"
         "      <DataItem Format=\"XML\" Dimensions=\"3\">" << lower_zyx.transpose() << "</DataItem>\n" <<
         "      <!-- DxDyDz (Spacing/Resolution) Z, Y, X -->\n"
         "      <DataItem Format=\"XML\" Dimensions=\"3\">" << 
-                   properties.resolution << " " << properties.resolution << " " << properties.resolution << "</DataItem>\n"
+                   adj_resolution << " " << adj_resolution << " " << adj_resolution << "</DataItem>\n"
         "    </Geometry>\n"
 
         //  Updates

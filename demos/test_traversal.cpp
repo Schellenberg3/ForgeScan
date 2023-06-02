@@ -16,14 +16,10 @@ using namespace ForgeScan;
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
 int main(int argc, char** argv)
 { 
-    // 2m x 2m x 2m cube with 0.02 m resolution
-    VoxelGridProperties props(0.2);
-    props.dimensions = Vector3d(2, 2, 2);
-    props.grid_size = Vector3ui(100, 100, 100);
-    props.resolution = -1;  // Let the grid size and dimensions set the resolution.
-    translation move(-1, -1, -1);
-
-    VoxelGrid grid_exact(props, move);
+    // Set up the VoxelGrid as a 2m x 2m x 2m cube with 0.02 m resolution
+    ForgeScan::VoxelGridProperties properties(0.02, ForgeScan::Vector3ui(101, 101, 101));
+    ForgeScan::VoxelGrid grid_exact(properties);
+    grid_exact.translate(ForgeScan::translation(-1, -1, -1));
 
     std::cout << "Initialized each VoxelGrid!" << std::endl;
 

@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include <ForgeScan/forgescan_types.h>
+#include <ForgeScan/voxel_grid_properties.h>
 #include <ForgeScan/voxel_element.h>
 #include <ForgeScan/depth_sensor.h>
 #include <ForgeScan/grid_processor.h>
@@ -13,48 +14,6 @@
 
 
 namespace ForgeScan {
-
-
-/// @brief Storage for VoxelGrid properties.
-/// @note When passed to a VoxelGrid constructor some spatial properties will be adjusted to ensure
-///       that, in each direction, the dimension equals the product resolution and the grid size.
-/// @note Not all spatial properties (`resolution`, `grid_size`, and `dimensions`) need to be set.
-///       The VoxelGrid constructor will use defaults or infer a best value. However, either the 
-///       resolution OR the dimensions must be set.
-struct VoxelGridProperties
-{
-    /// @brief Minimum and maximum truncation distances for rays added to the grid.
-    double min_dist = 0.05, max_dist = 0.05;
-
-    /// @brief Voxels per would units in each dimension.
-    double resolution = 0.01;
-
-    /// @brief Number of voxels in the X, Y, and Z dimension.
-    Vector3ui grid_size = Vector3ui(0, 0, 0);
-
-    /// @brief Size of the grid in world units in the X, Y and Z dimensions; this forms the upper bound.
-    Vector3d dimensions = Vector3d(1, 1, 1);
-
-    /// @brief Sets minimum and maximum distances to the same value.
-    /// @param dist Truncation for minimum and maximum distance from a sensed point.
-    VoxelGridProperties(const double& dist) :
-        min_dist(-1 * std::abs(dist)),
-        max_dist(std::abs(dist))
-        { }
-
-    /// @brief Sets minimum and maximum distances to different values.
-    /// @param min_dist Truncation for minimum distance from a sensed point.
-    /// @param max_dist Truncation for maximum distance from a sensed point.
-    VoxelGridProperties(const double& min_dist, const double& max_dist) :
-        min_dist(-1 * std::abs(min_dist)),
-        max_dist(std::abs(max_dist))
-        { }
-
-    bool isValid() {
-        return resolution >= 0 || (dimensions.array() > 0).all();
-    }
-};
-
 
 /// @brief Container for a 3 dimensional grid of VoxelElements with its own rigid body reference frame.
 /// @note  The transformation is between the world and the grid's lower bound, not the center.
@@ -67,24 +26,28 @@ public:
     ViewTracker views;
 
 public:
-    /// @brief Constructs grid 
-    /// @param properties 
-    VoxelGrid(const VoxelGridProperties& properties);
+    VoxelGrid(const VoxelGridProperties& properties) :
+        ForgeScanEntity(),
+        properties(properties)
+    {
+        setup();
+    }
 
-    /// @brief 
-    /// @param extr 
-    /// @param properties 
-    VoxelGrid(const VoxelGridProperties& properties, const extrinsic& extr);
+    VoxelGrid(const double& resolution, const Vector3ui& grid_size = Vector3ui(101, 101, 101),
+              const double& min_dist = 0.05, const double& max_dist = 0.05) :
+        ForgeScanEntity(),
+        properties(resolution, grid_size, min_dist, max_dist)
+    {
+        setup();
+    }
 
-    /// @brief 
-    /// @param position 
-    /// @param properties 
-    VoxelGrid(const VoxelGridProperties& properties, const translation& position);
-
-    /// @brief 
-    /// @param orientation 
-    /// @param properties 
-    VoxelGrid(const VoxelGridProperties& properties, const rotation& orientation);
+    VoxelGrid(const Vector3ui& grid_size = Vector3ui(101, 101, 101), const Vector3d& dimensions = Vector3d(1, 1, 1),
+              const double& min_dist = -0.05, const double& max_dist = 0.05) :
+        ForgeScanEntity(),
+        properties(grid_size, dimensions, min_dist, max_dist)
+    {
+        setup();
+    }
 
     /// @brief Checks that the voxel indicies are valid for the shape of the voxel grid.
     /// @param voxel Indicies for the desired voxel.

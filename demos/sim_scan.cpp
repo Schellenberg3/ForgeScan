@@ -68,12 +68,9 @@ int main(int argc, char* argv[])
     std::cout << "Adding " << nv << " views. Using a " + strategy + " strategy" << std::endl;
 
     // Set up the VoxelGrid as a 2m x 2m x 2m cube with 0.02 m resolution
-    ForgeScan::VoxelGridProperties props(0.2);
-    props.dimensions = ForgeScan::Vector3d(2, 2, 2);
-    props.grid_size  = ForgeScan::Vector3ui(100, 100, 100);
-    props.resolution = -1;  // Let the grid size and dimensions set the resolution.
-
-    ForgeScan::VoxelGrid grid(props, ForgeScan::translation(-1, -1, -1));
+    ForgeScan::VoxelGridProperties properties(0.02, ForgeScan::Vector3ui(101, 101, 101));
+    ForgeScan::VoxelGrid grid(properties);
+    grid.translate(ForgeScan::translation(-1, -1, -1));
 
     ForgeScan::Primitives::Sphere sphere(0.45);
     ForgeScan::Primitives::Box box(1.3, 0.5, 0.5);

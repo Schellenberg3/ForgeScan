@@ -175,11 +175,13 @@ void VoxelGrid::clear()
         element.reset();
 }
 
-void VoxelGrid::saveHDF5(const std::string& fname) const
+void VoxelGrid::saveHDF5(const std::filesystem::path& fname) const
 {
+    if ( !fname.has_filename() )
+        throw std::invalid_argument("[VoxelGrid::saveHDF5] Invalid file name! Could not identify filename.");
     try
     {
-        HighFive::File file(fname + ".h5", HighFive::File::Truncate);
+        HighFive::File file(fname.string() + ".h5", HighFive::File::Truncate);
 
         auto VoxelElementType = create_compound_VoxelElement();
         VoxelElementType.commit(file, "VoxelElement");
@@ -198,11 +200,13 @@ void VoxelGrid::saveHDF5(const std::string& fname) const
     } 
 }
 
-void VoxelGrid::loadHDF5(const std::string& fname)
+void VoxelGrid::loadHDF5(const std::filesystem::path& fname)
 {
+    if ( !fname.has_filename() )
+        throw std::invalid_argument("[VoxelGrid::loadHDF5] Invalid file name! Could not identify filename.");
     try
     {
-        HighFive::File file(fname + ".h5", HighFive::File::ReadOnly);
+        HighFive::File file(fname.string() + ".h5", HighFive::File::ReadOnly);
 
         auto g1 = file.getGroup("VoxelGrid");
 
@@ -231,12 +235,14 @@ void VoxelGrid::loadHDF5(const std::string& fname)
 
 }
 
-void VoxelGrid::saveXDMF(const std::string &fname) const
+void VoxelGrid::saveXDMF(const std::filesystem::path &fname) const
 {
+    if ( !fname.has_filename() )
+        throw std::invalid_argument("[VoxelGrid::saveXDMF] Invalid file name! Could not identify filename.");
     const size_t num_element = voxel_element_vector.size();
     try
     {
-        HighFive::File file(fname + ".h5", HighFive::File::Truncate);
+        HighFive::File file(fname.string() + ".h5", HighFive::File::Truncate);
 
         auto VoxelElementType = create_compound_VoxelElement();
         VoxelElementType.commit(file, "VoxelElement");
@@ -293,9 +299,10 @@ void VoxelGrid::saveXDMF(const std::string &fname) const
     } 
 }
 
-void VoxelGrid::writeXDMF(const std::string &fname) const
+
+void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
 {
-    std::string hdf5_fname = fname + ".h5";
+    std::string hdf5_fname = fname.filename().string() + ".h5";
 
     const size_t num_element = voxel_element_vector.size();
 
@@ -308,9 +315,9 @@ void VoxelGrid::writeXDMF(const std::string &fname) const
     file.exceptions( std::ofstream::failbit | std::ofstream::badbit );
     try
     {
-        file.open(fname + ".xdmf");
+        file.open(fname.string() + ".xdmf");
         file << std::fixed << std::setprecision(8);
-        file << 
+        file <<
         "<?xml version=\"1.0\"?>\n"
         "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\"[]>\n"
         "<Xdmf xmlns:xi=\"http://www.w3.org/2003/XInclude\" Version=\"2.2\">\n"

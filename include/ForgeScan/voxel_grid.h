@@ -1,6 +1,7 @@
 # ifndef FORGESCAN_VOXEL_GRID_H
 # define FORGESCAN_VOXEL_GRID_H
 
+#include <filesystem>
 #include <vector>
 #include <stdexcept>
 
@@ -193,7 +194,7 @@ public:
     /// @details This format is available for ease of data introspection. It simply writes the voxel data
     ///          out but provides little detail about the VoxelGrid's parameters.
     /// @note    No read method is available for this format.
-    void saveCSV(const std::string& fname) const;
+    void saveCSV(const std::filesystem::path& fname) const;
 
 
     /// @brief Saves in the XDMF format (XDMF file references to an HDF5 data file). 
@@ -202,19 +203,19 @@ public:
     /// @details This format makes it easier to visualize in tools like ParaView with the built-in
     ///          XDMF readers. But is slightly less efficient to save.
     /// @note    No read method is available for this format.
-    void saveXDMF(const std::string& fname) const;
+    void saveXDMF(const std::filesystem::path& fname) const;
 
 
     /// @brief Saves in the HDF5 format.
     /// @param fname File name. Automatically adds ".h5" when writing.
     /// @details This is the fastest save method and the recommended one if the grid is to be re-loaded
     ///          into a VoxelGrid object.
-    void saveHDF5(const std::string& fname) const;
+    void saveHDF5(const std::filesystem::path& fname) const;
 
 
     /// @brief Loads data from an HDF5 file.
     /// @param fname File name. Automatically adds ".h5" when searching.
-    void loadHDF5(const std::string& fname);
+    void loadHDF5(const std::filesystem::path& fname);
 
 public:
     /// @brief Accesses voxel elements operations on the voxels.
@@ -275,7 +276,7 @@ private:
 
     /// @brief Helper function to write the XDMF file.
     /// @param fname Name for the XDMF file.
-    void writeXDMF(const std::string &fname) const;
+    void writeXDMF(const std::filesystem::path &fname) const;
 
     /// @brief Helper that all constructors call. Populates the vector and checks memory usage,
     ///        printing to console if more than 100 MB are used.

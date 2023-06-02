@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <iostream>
 #include <string>
 
@@ -76,8 +77,35 @@ int main(int argc, char** argv)
         } while (q != 0);
     }
 
-    std::cout << "Saving to CSV..."  << std::endl;
-    grid.saveXDMF("test_points.csv");
+    /// Create paths to each share directory.
+    std::filesystem::path forgescan_share(FORGESCAN_SHARE_DIR);
+    std::filesystem::path paraview_share(FORGESCAN_SHARE_PARAVIEW_DIR);
+    std::filesystem::path dream3d_share(FORGESCAN_SHARE_DIR);
+    dream3d_share /= "Dream3D";
+
+    /// Ensure that each path matches the system preferred format. And create it if needed.
+    forgescan_share.make_preferred();
+
+    paraview_share.make_preferred();
+    std::filesystem::create_directories(paraview_share);
+
+    dream3d_share.make_preferred();
+    std::filesystem::create_directories(dream3d_share);
+
+    auto csv_path = dream3d_share /= "test_points_csv";
+    std::cout << "Saving to csv..."  << std::endl;
+    grid.saveCSV(csv_path.string());
+
+    auto hdf5_path = forgescan_share /= "test_points_hdf5";
+    std::cout << "Saving to HDF5..."  << std::endl;
+    grid.saveHDF5(hdf5_path.string());
+
+    // std::cout << "Loading from HDF5..."  << std::endl;
+    // grid.loadHDF5(hdf5_path.string());
+
+    auto xdmf_path = paraview_share /= "test_points";
+    std::cout << "Saving to XDMF..."  << std::endl;
+    grid.saveXDMF(xdmf_path.string());
 
     std::cout << "Exiting program."  << std::endl;
     return 0;

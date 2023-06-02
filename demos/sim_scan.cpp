@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
     }
 
     /// Create the full file path.
-    fpath /= fname; 
+    fpath /= fname;
 
     std::cout << "Running for " << nv << " sensors with (" << nx << ", " << ny << ") images." << std::endl;
     if (first) {
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
         grid.addSensor(sensor);
     }
 
-    grid.saveXDMF(fpath.string());
+    grid.saveXDMF(fpath);
     std::cout << "Complete! Saved file in ./share/ParaView as: " + fname << std::endl;
 
     return 0;

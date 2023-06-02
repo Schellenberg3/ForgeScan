@@ -92,7 +92,7 @@ add_definitions(
 add_executable(
     test_grid 
 
-    demos/test_voxel_grid.cpp
+    demos/test_grid.cpp
     src/voxel_grid_io.cpp
     src/voxel_grid_traversal.cpp
     src/grid_processor.cpp
@@ -111,9 +111,9 @@ add_executable(
 
 # TEST_VOXEL_ELEMENT
 add_executable(
-    test_voxel_element
+    test_element
 
-    demos/test_voxel_element.cpp
+    demos/test_element.cpp
     src/voxel_grid_io.cpp
     src/voxel_grid_traversal.cpp
 )

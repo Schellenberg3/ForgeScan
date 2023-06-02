@@ -193,6 +193,7 @@ public:
     /// @details This format makes it easier to visualize in tools like ParaView with the built-in
     ///          XDMF readers. But is slightly less efficient to save.
     /// @note    No read method is available for this format.
+    /// @throws `std::invalid_argument` if there is an issue parsing the file name.
     void saveXDMF(const std::filesystem::path& fname) const;
 
 
@@ -200,16 +201,14 @@ public:
     /// @param fname File name. Automatically adds ".h5" when writing.
     /// @details This is the fastest save method and the recommended one if the grid is to be re-loaded
     ///          into a VoxelGrid object.
+    /// @throws `std::invalid_argument` if there is an issue parsing the file name.
     void saveHDF5(const std::filesystem::path& fname) const;
-
-
-    /// @brief Loads data from an HDF5 file.
-    /// @param fname File name. Automatically adds ".h5" when searching.
-    void loadHDF5(const std::filesystem::path& fname);
 
 public:
     /// @brief Accesses voxel elements operations on the voxels.
     friend class GridProcessor;
+
+friend VoxelGrid loadVoxelGridHDF5(const std::filesystem::path&);
 
 private:
     /// @brief Container for VoxelElements. Users see a 3D grid, but this is really just a vector.
@@ -273,6 +272,11 @@ private:
     void setup();
 };
 
+/// @brief  Loads data from an HDF5 file.
+/// @param fname File name. Automatically adds ".h5" when searching.
+/// @throws `HighFive::Exception` if HighFive encounters an issue while reading the data.
+/// @throws `std::invalid_argument` if there is an issue parsing the file name.
+VoxelGrid loadVoxelGridHDF5(const std::filesystem::path& fname);
 
 } // ForgeScan
 

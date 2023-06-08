@@ -1,80 +1,86 @@
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <random>
+#include <cmath>
 
 #include <Eigen/Dense>
 
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/grid_processor.h>
 #include <ForgeScanUtils/timing_utils.h>
+#include <ForgeScanUtils/arg_parser.h>
 
 
-using namespace ForgeScan;
-
+/// @brief Adds random lines to the grid. Does so with a fixed-seed random number generator.
+/// @param grid Grid to add lines to.
+/// @param n    Number of lines to add.
+/// @param seed Seed for the RNG. Default is 1.
+void addPseudoRandomLines(ForgeScan::VoxelGrid& grid, const int& n, const int& seed);
 
 /// @brief Simple script for manually adding points to a VoxelGrid within [-1,-1,-1] and [+1,+1,+1].
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
 int main(int argc, char** argv)
 { 
-    // Set up the VoxelGrid as a 2m x 2m x 2m cube with 0.02 m resolution
+    ArgParser parser(argc, argv);
+
+    int n = 10;
+    std::string n_parse = parser.getCmdOption("-n");
+    if ( !n_parse.empty() ) n = std::abs( std::stoi( n_parse ) );
+
+    int seed = 1;
+    std::string seed_parse = parser.getCmdOption("-s");
+    if ( !seed_parse.empty() ) seed = std::abs( std::stoi( seed_parse ) );
+
+    /// Set up the VoxelGrid as a 2m x 2m x 2m cube with 0.02 m resolution, positioned at the world origin.
     ForgeScan::VoxelGridProperties properties(0.02, ForgeScan::Vector3ui(101, 101, 101));
-    ForgeScan::VoxelGrid grid_exact(properties);
-    grid_exact.translate(ForgeScan::translation(-1, -1, -1));
+    ForgeScan::VoxelGrid grid_random(properties);
 
-    std::cout << "Initialized each VoxelGrid!" << std::endl;
+    /// Add upper and lower boundary markers to the random grid.
+    grid_random.at(ForgeScan::grid_idx(0, 0, 0)).update(ForgeScan::VoxelUpdate(1, 0, 0, 0));
+    grid_random.at(ForgeScan::grid_idx(100, 100, 100)).update(ForgeScan::VoxelUpdate(1, 0, 0, 0));
 
-    VoxelUpdate update(1, 0, 0, 0);
+    addPseudoRandomLines(grid_random, n, seed);
 
-    int num = argc > 1 ? std::stoi(argv[1]) : (1280 * 720) ; // Default to RealSense D455 resolution
-    std::vector<Vector3d> start_vecs, end_vecs;
-    start_vecs.reserve(num);
-    end_vecs.reserve(num);
-    {
-        // std::random_device rd; // Call rd() for a random seed while initializing the generator.
-        std::mt19937 gen(1);
-        std::uniform_real_distribution<> dist(-1.9, 1.9);
-        
-        for (int i = 0; i < num; ++i)
-        {
-            start_vecs.push_back(Vector3d(dist(gen), dist(gen), dist(gen)));
-            end_vecs.push_back(Vector3d(dist(gen), dist(gen), dist(gen)));
-        }
-
-        // Set the first value to the case where the start/end point are the same.
-        end_vecs[0] = start_vecs[0];
-
-        // Display the first 10 (or all if the requested number is less than 10)
-        for (int i = 0, max_idx = num > 10 ? 10 : num; i < max_idx; ++i)
-        {
-            std::cout << "["<<i<<"] " << start_vecs[i].transpose() << " -> " << end_vecs[i].transpose() << std::endl; 
-        }
-    }
-    std::cout << "Generated " << num << " random lines to add with each method." << std::endl;
-
-    ForgeScan::Utils::SimpleTimer t_lin, t_apr, t_exa;
-
-
-    t_exa.start();
-    for (int i = 0; i < num; ++i)
-        {
-        grid_exact.addRayExact(update, start_vecs[i], end_vecs[i]);
-    }
-    t_exa.stop();
-    std::cout << "Added " << num << " with exact method" << std::endl;
-
-    std::cout << "Run time in ms was:\n\tLinear\n\t\t"
-              << "\n\tExact method:\n\t\t" << t_exa.elapsedMilliseconds() << std::endl;
-
-    
-    if (argc > 2)
-    {
-        std::cout << "Saving to disk in XDMF format..."  << std::endl;
-        grid_exact.saveXDMF("test_exact");
-    }
-    else {
-        std::cout << "Not saving data."  << std::endl;
-    }
-
-    std::cout << "Exiting program."  << std::endl;
     return 0;
+}
+
+void addPseudoRandomLines(ForgeScan::VoxelGrid& grid, const int& n, const int& seed)
+{
+    ForgeScan::VoxelUpdate update(1, 0, 0, 0);
+
+    std::vector<Eigen::Vector3d> s_points, e_points;
+    s_points.reserve(n);
+    e_points.reserve(n);
+    {   /// Technically an allocator lambda passed to the vector constructor might be better.
+        /// But this explicit method works too...
+        std::mt19937 gen(seed);
+
+        const double range = grid.properties.dimensions.maxCoeff();
+        const double extra = 0.1 * range;
+        std::uniform_real_distribution<> dist(- extra, range + extra);
+
+        for (int i = 0; i < n; ++i) {
+            s_points.push_back(Eigen::Vector3d(dist(gen), dist(gen), dist(gen)));
+            e_points.push_back(Eigen::Vector3d(dist(gen), dist(gen), dist(gen)));
+        }
+    }
+
+    std::cout << "Generated " << n << " random lines to add with each method." << std::endl;
+    for (int i = 0, max_idx = n > 10 ? 10 : n; i < max_idx; ++i) {
+        std::cout << "["<<i<<"] " << s_points[i].transpose() << " -> " << e_points[i].transpose() << std::endl;
+    }
+
+    ForgeScan::Utils::SimpleTimer timer;
+    timer.start();
+    for (int i = 0; i < n; ++i) {
+        grid.addRayExact(update, s_points[i], e_points[i]);
+    }
+    timer.stop();
+    std::cout << "Run time in ms was:\n\t" << timer.elapsedMilliseconds() << std::endl;
+
+    std::filesystem::path random_fpath(FORGESCAN_SHARE_PARAVIEW_DIR);
+    random_fpath /= "test_traversal_random";
+    std::cout << "Saving to disk in XDMF format..."  << std::endl;
+    grid.saveXDMF(random_fpath);
 }

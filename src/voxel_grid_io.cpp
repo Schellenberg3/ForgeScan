@@ -133,8 +133,6 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
 
     point lower_zyx = Eigen::Vector3d::Zero();
 
-    const double adj_resolution = properties.dimensions[0] / properties.grid_size[0];
-
     Vector3ui adj_size = properties.grid_size.array() + 1;
     adj_size.reverseInPlace();
 
@@ -157,7 +155,7 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
         "      <DataItem Format=\"XML\" Dimensions=\"3\">" << lower_zyx.transpose() << "</DataItem>\n" <<
         "      <!-- DxDyDz (Spacing/Resolution) Z, Y, X -->\n"
         "      <DataItem Format=\"XML\" Dimensions=\"3\">" << 
-                   adj_resolution << " " << adj_resolution << " " << adj_resolution << "</DataItem>\n"
+                   properties.resolution << " " << properties.resolution << " " << properties.resolution << "</DataItem>\n"
         "    </Geometry>\n"
 
         //  Updates

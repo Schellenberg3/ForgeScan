@@ -7,7 +7,6 @@
 #include <highfive/H5File.hpp>
 
 #include <ForgeScan/voxel_grid.h>
-#include <ForgeScanUtils/memory_utils.h>
 
 
 /// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_element_vector`.
@@ -224,14 +223,6 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
     {
         std::cerr << "Encountered error in VoxelGrid::writeXDMF. See message:\n" << e.what();
     }
-}
-
-void VoxelGrid::setup()
-{
-    voxel_element_vector.resize(properties.grid_size.prod());
-    double mem = ForgeScan::Utils::byte_to_megabytes(ForgeScan::Utils::vector_capacity(voxel_element_vector));
-    if (mem > 100.0)
-        std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
 }
 
 VoxelGrid loadVoxelGridHDF5(const std::filesystem::path& fname)

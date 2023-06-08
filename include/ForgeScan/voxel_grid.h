@@ -11,6 +11,7 @@
 #include <ForgeScan/depth_sensor.h>
 #include <ForgeScan/grid_processor.h>
 #include <ForgeScan/view_tracker.h>
+#include <ForgeScanUtils/memory_utils.h>
 
 
 namespace ForgeScan {
@@ -228,7 +229,12 @@ private:
 
     /// @brief Helper that all constructors call. Populates the vector and checks memory usage,
     ///        printing to console if more than 100 MB are used.
-    void setup();
+    void setup() {
+        voxel_element_vector.resize(properties.grid_size.prod());
+        double mem = ForgeScan::Utils::byte_to_megabytes(ForgeScan::Utils::vector_capacity(voxel_element_vector));
+        if (mem > 100.0)
+            std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
+    }
 };
 
 /// @brief  Loads data from an HDF5 file.

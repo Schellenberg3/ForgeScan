@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/voxel_grid_properties.h>
@@ -10,7 +11,12 @@
 
 using namespace ForgeScan;
 
+/// @brief Tests initializing, setting, validating, and copying the VoxelGridProperties class.
 void testVoxelGridProperties();
+
+/// @brief Tests adding specific locations around the boundaries of a voxel grid. Checks that points were placed in
+///        the expected voxels.
+void testVoxelGridLocations(ForgeScan::VoxelGrid& grid);
 
 /// @brief Simple script for manually adding points to a VoxelGrid within [-1,-1,-1] and [+1,+1,+1].
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
@@ -22,6 +28,8 @@ int main(int argc, char** argv)
     VoxelGridProperties properties(0.02, Vector3ui(101, 101, 101));
     VoxelGrid grid(properties);
     grid.translate( translation(-1, -1, -1) );
+
+    testVoxelGridLocations(grid);
 
     VoxelUpdate update(1);
 
@@ -170,5 +178,54 @@ void testVoxelGridProperties()
     p_invalid.resolution *= -1;
     try { p_copy = p_invalid; } catch (const std::invalid_argument& e) {
         std::cout << "\n[Copy::Resolution] Should error on resolution non-positive check:\n" << e.what() << std::endl;
+    }
+}
+
+
+void testVoxelGridLocations(ForgeScan::VoxelGrid& grid)
+{
+    /// Maximum distance the point should be moved when it is rounded to the nearest voxel.
+    const double max_expected_distance = (std::sqrt(3) * 0.5 * grid.properties.resolution) * 1.001;
+    double distance = 0;
+
+    std::vector<point> inputs {
+        point(0, 0, 0),                // [50, 50, 50]
+        point(-1, -1, -1),             // [0, 0, 0]
+        point(-1.009, -1.009, -1.009), // [0, 0, 0]
+        point(-0.991, -0.991, -0.991), // [0, 0, 0]
+        point(-0.990, -0.990, -0.990), // [0, 0, 0]
+        point(-0.989, -0.989, -0.989), // [1, 1, 1]
+        point(-0.980, -0.980, -0.980), // [1, 1, 1]
+        point(-0.979, -0.979, -0.979), // [1, 1, 1]
+        point(1, 1, 1),          // [100, 100, 100]
+        point(1.01, 1.01, 1.01), // [100, 100, 100]
+        point(0.99, 0.99, 0.99), // [100, 100, 100]
+    };
+    grid_idx c_idx(0, 0, 0);
+    point  c_point(0, 0, 0);
+
+    /// The point in the grid's reference frame.
+    point  p_grid(0, 0, 0);
+
+    int i = 0;
+    for (const auto& p : inputs)
+    {
+        p_grid = grid.fromWorldToThis(p);
+
+        c_idx = grid.pointToGrid(p_grid);
+        c_point = grid.gridToPoint(c_idx);
+
+        distance  = (p_grid - c_point).norm();
+
+        std::cout << "\n\nCHECKING " << i
+                  << "\n\tInput  = " << p.transpose()
+                  << "\n\tInput  = " << p_grid.transpose()
+                  << "\n"
+                  << "\n\tGrid   = " << c_idx.transpose()
+                  << "\n\tCheck  = " << c_point.transpose()\
+                  << "\n\tDist   = " << distance
+                  << "\n\t\tExpected: " << distance - max_expected_distance
+                  << std::endl;
+        ++i;
     }
 }

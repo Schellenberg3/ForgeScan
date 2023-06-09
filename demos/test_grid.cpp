@@ -5,7 +5,6 @@
 #include <vector>
 
 #include <ForgeScan/voxel_grid.h>
-#include <ForgeScan/voxel_grid_properties.h>
 #include <ForgeScan/grid_processor.h>
 
 
@@ -25,7 +24,7 @@ int main(int argc, char** argv)
     testVoxelGridProperties();
 
     /// Create our testing VoxelGrid object
-    VoxelGridProperties properties(0.02, Vector3ui(101, 101, 101));
+    VoxelGrid::Properties properties(0.02, Vector3ui(101, 101, 101));
     VoxelGrid grid(properties);
     grid.translate( translation(-1, -1, -1) );
 
@@ -116,24 +115,24 @@ int main(int argc, char** argv)
 void testVoxelGridProperties()
 {
     /// Default is ok.
-    VoxelGridProperties p0;
+    VoxelGrid::Properties p0;
     p0.isValid();
 
     /// Copy of an ok one is ok.
-    VoxelGridProperties p1(p0);
+    VoxelGrid::Properties p1(p0);
 
     /// resolution and grid_size is okay.
-    VoxelGridProperties p2(0.1, Vector3ui(18, 19, 20));
+    VoxelGrid::Properties p2(0.1, Vector3ui(18, 19, 20));
 
     /// grid_size and resolution is okay.
-    VoxelGridProperties p3(Vector3ui(18, 19, 20), Vector3d(1, 1.5, 2));
+    VoxelGrid::Properties p3(Vector3ui(18, 19, 20), Vector3d(1, 1.5, 2));
 
     /// The setups I typically use:
-    VoxelGridProperties p4(Vector3ui(101, 101, 101), Vector3d(2, 2, 2));
-    VoxelGridProperties p5(0.02, Vector3ui(101, 101, 101));
+    VoxelGrid::Properties p4(Vector3ui(101, 101, 101), Vector3d(2, 2, 2));
+    VoxelGrid::Properties p5(0.02, Vector3ui(101, 101, 101));
 
     /// Test failing on resolution
-    VoxelGridProperties p_res1, p_res2;
+    VoxelGrid::Properties p_res1, p_res2;
     p_res1.resolution = -1;
     try { p_res1.isValid(); } catch (const std::invalid_argument& e) {
         std::cout << "\n[Resolution] Should error on non-positive resolution:\n" << e.what() << std::endl;
@@ -144,7 +143,7 @@ void testVoxelGridProperties()
     }
 
     /// Test failing on min/max
-    VoxelGridProperties p_mm1, p_mm2;
+    VoxelGrid::Properties p_mm1, p_mm2;
     p_mm1.min_dist =  100;
     p_mm2.max_dist = -100;
     try { p_mm1.isValid(); } catch (const std::invalid_argument& e) {
@@ -155,26 +154,26 @@ void testVoxelGridProperties()
     }
 
     /// Test failing on dimensions less than or equal to zero
-    VoxelGridProperties p_dims;
+    VoxelGrid::Properties p_dims;
     p_dims.dimensions[0] = -10;
     try { p_dims.isValid(); } catch (const std::invalid_argument& e) {
         std::cout << "\n[Dimensions] Should error on dimension greater than zero check:\n" << e.what() << std::endl;
     }
 
     /// Test failing on grid_size less than or equal to zero
-    VoxelGridProperties p_gs;
+    VoxelGrid::Properties p_gs;
     p_gs.grid_size[0] = 0;
     try { p_gs.isValid(); } catch (const std::invalid_argument& e) {
         std::cout << "\n[GridSize] Should error on grid_size greater than zero check:\n" << e.what() << std::endl;
     }
 
-    /// Test failing on copy of an invalid VoxelGridProperties
-    VoxelGridProperties p_invalid;
+    /// Test failing on copy of an invalid VoxelGrid::Properties
+    VoxelGrid::Properties p_invalid;
     p_invalid.dimensions.array() *= -1;
-    try { VoxelGridProperties p_copy(p_invalid); } catch (const std::invalid_argument& e) {
+    try { VoxelGrid::Properties p_copy(p_invalid); } catch (const std::invalid_argument& e) {
         std::cout << "\n[Copy::Dimensions] Should error on dimensions greater than zero check:\n" << e.what() << std::endl;
     }
-    VoxelGridProperties p_copy;
+    VoxelGrid::Properties p_copy;
     p_invalid.resolution *= -1;
     try { p_copy = p_invalid; } catch (const std::invalid_argument& e) {
         std::cout << "\n[Copy::Resolution] Should error on resolution non-positive check:\n" << e.what() << std::endl;

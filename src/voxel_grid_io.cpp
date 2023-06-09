@@ -233,7 +233,7 @@ VoxelGrid loadVoxelGridHDF5(const std::filesystem::path& fname)
     try
     {
         HighFive::File file(fname.string() + ".h5", HighFive::File::ReadOnly);
-        VoxelGridProperties properties;
+        VoxelGrid::Properties properties;
         auto g1 = file.getGroup("VoxelGrid");
 
         auto res = g1.getAttribute("Resolution");

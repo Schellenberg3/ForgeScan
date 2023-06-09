@@ -36,7 +36,7 @@ int main(int argc, char** argv)
     bool exact = parser.cmdOptionExists("-e");
 
     /// Set up the VoxelGrid as a 2m x 2m x 2m cube with 0.02 m resolution, positioned at the world origin.
-    ForgeScan::VoxelGridProperties properties(0.02, ForgeScan::Vector3ui(101, 101, 101), -0.2, 0.2);
+    ForgeScan::VoxelGrid::Properties properties(0.02, ForgeScan::Vector3ui(101, 101, 101), -0.2, 0.2);
     ForgeScan::VoxelGrid grid_random(properties);
 
     /// Add upper and lower boundary markers to the random grid.

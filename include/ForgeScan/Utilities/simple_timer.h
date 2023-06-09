@@ -1,5 +1,5 @@
-#ifndef FORGESCANUTILS_TIMING_UTILS_H
-#define FORGESCANUTILS_TIMING_UTILS_H
+#ifndef FORGESCAN_UTILITIES_SIMPLE_TIMER_H
+#define FORGESCAN_UTILITIES_SIMPLE_TIMER_H
 
 #include <iostream>
 #include <chrono>
@@ -8,7 +8,7 @@
 
 
 namespace ForgeScan {
-namespace Utils {
+namespace Utilities {
 
 class SimpleTimer
 {
@@ -53,7 +53,7 @@ private:
 };
 
 
-} // Utils
+} // Utilities
 } // ForgeScan
 
-#endif // FORGESCANUTILS_TIMING_UTILS_H
+#endif // FORGESCAN_UTILITIES_SIMPLE_TIMER_H

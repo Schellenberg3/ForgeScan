@@ -1,6 +1,14 @@
+#ifndef FORGESCAN_UTILITIES_ARG_PARSER_H
+#define FORGESCAN_UTILITIES_ARG_PARSER_H
+
+
 #include <string>
 #include <vector>
 #include <algorithm>
+
+namespace ForgeScan {
+namespace Utilities {
+
 
 /// @brief   A simple argument parsing tool.
 /// @details Adapted from:
@@ -39,3 +47,10 @@ private:
     /// @brief Vector of each input string
     std::vector <std::string> tokens;
 };
+
+
+} // Utilities
+} // ForgeScan
+
+
+#endif // FORGESCAN_UTILITIES_ARG_PARSER_H

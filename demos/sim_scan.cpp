@@ -7,7 +7,7 @@
 #include <ForgeScan/Primitives/sphere.h>
 #include <ForgeScan/Primitives/box.h>
 
-#include <ForgeScanUtils/arg_parser.h>
+#include <ForgeScan/Utilities/arg_parser.h>
 
 
 static const Eigen::Vector3d WORLD_ORIGIN(0, 0, 0);
@@ -15,7 +15,7 @@ static const Eigen::Vector3d WORLD_ORIGIN(0, 0, 0);
 
 int main(int argc, char* argv[])
 {
-    ArgParser parser(argc, argv);
+    ForgeScan::Utilities::ArgParser parser(argc, argv);
     /// Number of pixel in the x and y directions for the depth sensor. 
     int nx = 100, ny = 100;
 

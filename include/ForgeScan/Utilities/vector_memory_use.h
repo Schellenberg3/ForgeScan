@@ -1,12 +1,12 @@
-#ifndef FORGESCANUTILS_MEMORY_UTILS_H
-#define FORGESCANUTILS_MEMORY_UTILS_H
+#ifndef FORGESCAN_UTILITIES_VECTOR_MEMORY_USE_H
+#define FORGESCAN_UTILITIES_VECTOR_MEMORY_USE_H
 
 #include <cstddef>
 #include <vector>
 
 
 namespace ForgeScan {
-namespace Utils {
+namespace Utilities {
 
 
 // Conversion utility for bits_to_megabytes. 1e-6
@@ -42,7 +42,7 @@ double const inline byte_to_megabytes(const size_t& bytes)
 }
 
 
-} // Utils
+} // Utilities
 } // ForgeScan
 
-#endif // FORGESCANUTILS_MEMORY_UTILS_H
+#endif // FORGESCAN_UTILITIES_VECTOR_MEMORY_USE_H

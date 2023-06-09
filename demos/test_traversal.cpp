@@ -8,8 +8,8 @@
 
 #include <ForgeScan/voxel_grid.h>
 #include <ForgeScan/grid_processor.h>
-#include <ForgeScanUtils/timing_utils.h>
-#include <ForgeScanUtils/arg_parser.h>
+#include <ForgeScan/Utilities/simple_timer.h>
+#include <ForgeScan/Utilities/arg_parser.h>
 
 
 /// @brief Adds random lines to the grid. Does so with a fixed-seed random number generator.
@@ -23,7 +23,7 @@ void addPseudoRandomLines(ForgeScan::VoxelGrid& grid, const int& n, const bool& 
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
 int main(int argc, char** argv)
 { 
-    ArgParser parser(argc, argv);
+    ForgeScan::Utilities::ArgParser parser(argc, argv);
 
     int n = 10;
     std::string n_parse = parser.getCmdOption("-n");
@@ -75,7 +75,7 @@ void addPseudoRandomLines(ForgeScan::VoxelGrid& grid, const int& n, const bool& 
         std::cout << "["<<i<<"] " << s_points[i].transpose() << " -> " << e_points[i].transpose() << std::endl;
     }
 
-    ForgeScan::Utils::SimpleTimer timer;
+    ForgeScan::Utilities::SimpleTimer timer;
     timer.start();
     for (int i = 0; i < n; ++i) {
         if (exact)

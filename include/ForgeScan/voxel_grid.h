@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <vector>
 #include <stdexcept>
+#include <iostream>
 
 #include <ForgeScan/forgescan_types.h>
 #include <ForgeScan/voxel_grid_properties.h>
@@ -29,26 +30,23 @@ public:
 public:
     VoxelGrid(const VoxelGridProperties& properties) :
         ForgeScanEntity(),
-        properties(properties)
-    {
-        setup();
-    }
+        properties(properties),
+        p2i_scale((properties.grid_size.cast<double>().array() - 1) / properties.dimensions.array())
+        { setup(); }
 
     VoxelGrid(const double& resolution, const Vector3ui& grid_size = Vector3ui(101, 101, 101),
               const double& min_dist = 0.05, const double& max_dist = 0.05) :
         ForgeScanEntity(),
-        properties(resolution, grid_size, min_dist, max_dist)
-    {
-        setup();
-    }
+        properties(resolution, grid_size, min_dist, max_dist),
+        p2i_scale((properties.grid_size.cast<double>().array() - 1) / properties.dimensions.array())
+        { setup(); }
 
     VoxelGrid(const Vector3ui& grid_size = Vector3ui(101, 101, 101), const Vector3d& dimensions = Vector3d(1, 1, 1),
               const double& min_dist = -0.05, const double& max_dist = 0.05) :
         ForgeScanEntity(),
-        properties(grid_size, dimensions, min_dist, max_dist)
-    {
-        setup();
-    }
+        properties(grid_size, dimensions, min_dist, max_dist),
+        p2i_scale((properties.grid_size.cast<double>().array() - 1) / properties.dimensions.array())
+        { setup(); }
 
     /// @brief Checks that the voxel indicies are valid for the shape of the voxel grid.
     /// @param voxel Indicies for the desired voxel.
@@ -86,35 +84,38 @@ public:
     /// @return Grid indicies that the point would be in.
     /// @note The input MUST be transformed to the VoxelGrid's coordinate system for valid results.
     /// @note This does not promise that the index is valid. Use `valid` of the returned input to verify the results.
-    grid_idx pointToGrid(const point& input) const {
-        Vector3d temp = input.array() * ( properties.grid_size.cast<double>().array() / properties.dimensions.array() );
-        temp.array().floor();
-        return temp.cast<size_t>();
-    }
+    grid_idx pointToGrid(const point& input) const { return (input.array() * p2i_scale).round().cast<size_t>(); }
+
+    /// @brief Calculates the center point location for the voxel at the input index.
+    /// @param input The (X, Y, Z) index in the grid to check.
+    /// @return Center point of the voxel, relative to the VoxelGrid.
+    point gridToPoint(const grid_idx& input) const { return input.cast<double>().array() * properties.resolution; }
 
     /// @brief Updates voxel on the line between the two specified points.
-    ///        Points are assumed to be relative to the world frame.
     /// @param update VoxelUpdate to apply to each voxel on the ray.
     /// @param rs Ray start position, world coordinates.
     /// @param re Ray end position, world coordinates.
     /// @returns False if the ray did not intersect the voxel grid. True otherwise.
+    /// @note If the start and end points are exactly equal then this function does nothing.
     bool addRayExact(const VoxelUpdate& update, const point& rs, const point& re) {
-        point rs_this = fromWorldToThis(rs);
-        point re_this = fromWorldToThis(re);
-        return implementAddRayExact(update, rs_this, re_this);
+        point rs_this = fromWorldToThis(rs), re_this = fromWorldToThis(re);
+        bool res = implementAddRayExact(update, rs_this, re_this);
+        updateViewCount();
+        return res;
     }
 
     /// @brief Adds data to the grid, updating voxels near the sensed point with truncated distance and marking the voxels
-    ///        between the origin and positive truncation as viewed. Points are assumed to be relative to the world frame.
-    /// @param grid The VoxelGrid to add data to.
+    ///        between the origin and positive truncation as viewed.
     /// @param origin Origin for the ray, world coordinates.
     /// @param sensed Sensed point, world coordinates.
     /// @returns False if the ray did not intersect the voxel grid. True otherwise.
+    /// @note If the start and end points are exactly equal then this function does nothing.
     bool addRayTSDF(const point &origin, const point &sensed) {
-        point origin_this = fromWorldToThis(origin);
-        point sensed_this = fromWorldToThis(sensed);
-        RayRecord ray_record; // Needed for implementation, but unused in this function.
-        return implementAddRayTSDF(origin_this, sensed_this, ray_record);
+        point origin_this = fromWorldToThis(origin), sensed_this = fromWorldToThis(sensed);
+        /// RayRecord is needed for implementation, but unused in this function.
+        bool res = implementAddRayTSDF(origin_this, sensed_this, RayRecord());
+        updateViewCount();
+        return res;
     }
 
     /// @brief Adds the measurements from the sensor to the VoxelGrid, performing required coordinate transformations.
@@ -175,6 +176,9 @@ private:
     /// @brief Container for VoxelElements. Users see a 3D grid, but this is really just a vector.
     std::vector<VoxelElement> voxel_element_vector;
 
+    /// @brief Precomputed voxels-per-dimension-length factor for point to index conversion.
+    const Eigen::Array3d p2i_scale;
+
 private:
     /// @brief Retrieves the vector index for the given X, Y, Z indicies in the voxel grid.
     /// @param voxel Indicies for the desired voxel.
@@ -201,6 +205,7 @@ private:
     /// @param rs Ray start position, local coordinates.
     /// @param re Ray end position, local coordinates.
     /// @returns False if the ray did not intersect the voxel grid. True otherwise.
+    /// @note If the start and end points are exactly equal then this function does nothing.
     bool implementAddRayExact(const VoxelUpdate& update, const point& rs, const point& re);
 
     /// @brief Adds data to the grid, updating voxels near the sensed point with truncated distance and marking
@@ -213,11 +218,12 @@ private:
     bool implementAddRayTSDF(const point &origin, const point &sensed, RayRecord& ray_record);
 
     /// @brief Updates view count in the voxel grid and resets element viewed flags.
+    /// @note  This function is slow! No matter what we must iterate the whole grid. Avoid calling it often.
     void updateViewCount() {
         for (auto& element : voxel_element_vector) {
-            if (element.views >> 15) 
-            {   /// Checks if the MSB of the views is set to 1. 
-                if (element.views != 0xFFFF) ++element.views;   /// Caps updates to prevent rollover after 0x7FFF (32767 views).
+            if (element.views > 0x7FFF && element.views != 0xFFFF)
+            {   /// Checks if the MSB of the views is set to 1 and prevents rollover after 0x7FFF (32767 views).
+                ++element.views;
                 element.resetViewUpdateFlag();
             }
         }

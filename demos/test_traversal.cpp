@@ -40,8 +40,8 @@ int main(int argc, char** argv)
     ForgeScan::VoxelGrid grid_random(properties);
 
     /// Add upper and lower boundary markers to the random grid.
-    grid_random.at(ForgeScan::grid_idx(0, 0, 0)).update(ForgeScan::VoxelUpdate(1, 0, 0, 0));
-    grid_random.at(ForgeScan::grid_idx(100, 100, 100)).update(ForgeScan::VoxelUpdate(1, 0, 0, 0));
+    grid_random.at(ForgeScan::grid_idx(0, 0, 0)).update(ForgeScan::Voxel::Update(1, 0, 0, 0));
+    grid_random.at(ForgeScan::grid_idx(100, 100, 100)).update(ForgeScan::Voxel::Update(1, 0, 0, 0));
 
     addPseudoRandomLines(grid_random, n, exact, seed);
 
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 
 void addPseudoRandomLines(ForgeScan::VoxelGrid& grid, const int& n, const bool& exact, const int& seed)
 {
-    ForgeScan::VoxelUpdate update(1, 0, 0, 0);
+    ForgeScan::Voxel::Update update(1, 0, 0, 0);
 
     std::vector<Eigen::Vector3d> s_points, e_points;
     s_points.reserve(n);

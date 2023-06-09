@@ -9,8 +9,8 @@
 #include <ForgeScan/voxel_grid.h>
 
 
-/// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_element_vector`.
-static HighFive::CompoundType create_compound_VoxelElement() {
+/// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_vector`.
+static HighFive::CompoundType create_compound_Voxel() {
     return {
         {"views",    HighFive::AtomicType<ForgeScan::view_count>{}},
         {"updates",  HighFive::AtomicType<ForgeScan::update_count>{}},
@@ -24,7 +24,7 @@ static HighFive::CompoundType create_compound_VoxelElement() {
         {"rho", HighFive::AtomicType<ForgeScan::density>{}}
     };
 }
-HIGHFIVE_REGISTER_TYPE(ForgeScan::VoxelElement, create_compound_VoxelElement)
+HIGHFIVE_REGISTER_TYPE(ForgeScan::Voxel, create_compound_Voxel)
 
 
 namespace ForgeScan {
@@ -37,12 +37,12 @@ void VoxelGrid::saveHDF5(const std::filesystem::path& fname) const
     {
         HighFive::File file(fname.string() + ".h5", HighFive::File::Truncate);
 
-        auto VoxelElementType = create_compound_VoxelElement();
-        VoxelElementType.commit(file, "VoxelElement");
+        auto VoxelType = create_compound_Voxel();
+        VoxelType.commit(file, "Voxel");
 
         auto g1 = file.createGroup("VoxelGrid");
 
-        g1.createDataSet("VoxelData", voxel_element_vector);
+        g1.createDataSet("VoxelData", voxel_vector);
 
         g1.createAttribute("MinDist",    properties.min_dist);
         g1.createAttribute("MaxDist",    properties.max_dist);
@@ -61,13 +61,13 @@ void VoxelGrid::saveXDMF(const std::filesystem::path &fname) const
 {
     if ( !fname.has_filename() )
         throw std::invalid_argument("[VoxelGrid::saveXDMF] Invalid file name! Could not identify filename.");
-    const size_t num_element = voxel_element_vector.size();
+    const size_t num_voxels = voxel_vector.size();
     try
     {
         HighFive::File file(fname.string() + ".h5", HighFive::File::Truncate);
 
-        auto VoxelElementType = create_compound_VoxelElement();
-        VoxelElementType.commit(file, "VoxelElement");
+        auto VoxelType = create_compound_Voxel();
+        VoxelType.commit(file, "Voxel");
 
         auto g1 = file.createGroup("VoxelGrid");
 
@@ -80,16 +80,16 @@ void VoxelGrid::saveXDMF(const std::filesystem::path &fname) const
         std::vector<normality>    vec_norm;
         std::vector<density>      vec_rho;
 
-        vec_updates.reserve(num_element);
-        vec_views.reserve(num_element);
-        vec_min.reserve(num_element);
-        vec_avg.reserve(num_element);
-        vec_var.reserve(num_element);
-        vec_cent.reserve(num_element);
-        vec_norm.reserve(num_element);
-        vec_rho.reserve(num_element);
+        vec_updates.reserve(num_voxels);
+        vec_views.reserve(num_voxels);
+        vec_min.reserve(num_voxels);
+        vec_avg.reserve(num_voxels);
+        vec_var.reserve(num_voxels);
+        vec_cent.reserve(num_voxels);
+        vec_norm.reserve(num_voxels);
+        vec_rho.reserve(num_voxels);
 
-        for (const auto& voxel_ref : voxel_element_vector)
+        for (const auto& voxel_ref : voxel_vector)
         {
             vec_updates.push_back(voxel_ref.updates);
             vec_views.push_back(voxel_ref.views);
@@ -128,7 +128,7 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
 {
     std::string hdf5_fname = fname.filename().string() + ".h5";
 
-    const size_t num_element = voxel_element_vector.size();
+    const size_t num_voxels = voxel_vector.size();
 
     point lower_zyx = Eigen::Vector3d::Zero();
     lower_zyx.array() -= 0.5 * properties.resolution;
@@ -160,56 +160,56 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
 
         //  Updates
         "    <Attribute Name=\"Updates\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
-        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_element << "\" NumberType=\"Int\" Precision=\"2\" >\n"
+        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Int\" Precision=\"2\" >\n"
         "        " << hdf5_fname << ":/VoxelGrid/Updates\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Views
         "    <Attribute Name=\"Views\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
-        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_element << "\" NumberType=\"Int\" Precision=\"2\" >\n"
+        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Int\" Precision=\"2\" >\n"
         "        " << hdf5_fname << ":/VoxelGrid/Views\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Minimum
         "    <Attribute Name=\"Minimum\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
-        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_element << "\" NumberType=\"Float\" Precision=\"8\" >\n"
+        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
         "        " << hdf5_fname << ":/VoxelGrid/Minimum\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Average
         "    <Attribute Name=\"Average\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
-        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_element << "\" NumberType=\"Float\" Precision=\"8\" >\n"
+        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
         "        " << hdf5_fname << ":/VoxelGrid/Average\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Variance
         "    <Attribute Name=\"Variance\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
-        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_element << "\" NumberType=\"Float\" Precision=\"8\" >\n"
+        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
         "        " << hdf5_fname << ":/VoxelGrid/Variance\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Centrality
         "    <Attribute Name=\"Centrality\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
-        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_element << "\" NumberType=\"Float\" Precision=\"8\" >\n"
+        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
         "        " << hdf5_fname << ":/VoxelGrid/Centrality\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Normality
         "    <Attribute Name=\"Normality\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
-        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_element << "\" NumberType=\"Float\" Precision=\"8\" >\n"
+        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
         "        " << hdf5_fname << ":/VoxelGrid/Normality\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Density
         "    <Attribute Name=\"Density\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
-        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_element << "\" NumberType=\"Float\" Precision=\"8\" >\n"
+        "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
         "        " << hdf5_fname << ":/VoxelGrid/Density\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
@@ -258,7 +258,7 @@ VoxelGrid loadVoxelGridHDF5(const std::filesystem::path& fname)
         VoxelGrid new_grid(properties);
 
         auto dset = g1.getDataSet("VoxelData");
-        dset.read(new_grid.voxel_element_vector);
+        dset.read(new_grid.voxel_vector);
 
         new_grid.transformWorldFrame(new_extr);
 

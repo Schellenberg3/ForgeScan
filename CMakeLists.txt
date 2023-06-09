@@ -109,11 +109,11 @@ add_executable(
 )
 
 
-# TEST_VOXEL_ELEMENT
+# TEST_VOXEL
 add_executable(
-    test_element
+    test_voxel
 
-    demos/test_element.cpp
+    demos/test_voxel.cpp
     src/voxel_grid_io.cpp
     src/voxel_grid_traversal.cpp
 )

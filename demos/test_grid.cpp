@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 
     testVoxelGridLocations(grid);
 
-    VoxelUpdate update(1);
+    Voxel::Update update(1);
 
     std::cout << "Initialized the VoxelGrid!" << std::endl;
 

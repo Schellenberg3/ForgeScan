@@ -160,7 +160,7 @@ static inline void correctTraversalInfo(int step[3], double delta[3], double tim
 }
 
 
-bool VoxelGrid::implementAddRayExact(const VoxelUpdate& update, const point& rs, const point& re)
+bool VoxelGrid::implementAddRayExact(const Voxel::Update& update, const point& rs, const point& re)
 {    
     /// Start time and end time (also length) for the user's ray.
     double ts = 0, te = 0;
@@ -272,17 +272,17 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
     correctTraversalInfo(step, delta, time, properties.resolution, c_idx, sensed_adj, normal, inverse_normal);
 
     // Perform updates withing the truncation distance. Moving from neg_dist to pos_dist.
-    VoxelUpdate update(static_cast<float>(tn_adj));
+    Voxel::Update update(static_cast<float>(tn_adj));
 
-    VoxelElement *element_ref;
+    Voxel *voxel_ref;
 
     try {
         /// First walk is from the adjusted negative location to the adjusted positive location.
         while (time[X] <= tp_adj || time[Y] <= tp_adj || time[Z] <= tp_adj) {
-            element_ref = &at(c_idx);
-            if (element_ref->views == 0) ++ray_record.first;
-            element_ref->update(update);
-            if (element_ref->var > ray_record.max_variance_update) ray_record.max_variance_update = element_ref->var;
+            voxel_ref = &at(c_idx);
+            if (voxel_ref->views == 0) ++ray_record.first;
+            voxel_ref->update(update);
+            if (voxel_ref->var > ray_record.max_variance_update) ray_record.max_variance_update = voxel_ref->var;
 
             if (time[X] < time[Y] && time[X] < time[Z]) {
                 time[X]  += delta[X];
@@ -303,9 +303,9 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
 
         /// Second walk is from the adjusted positive location to the adjusted far location.
         while (time[X] <= tf_adj || time[Y] <= tf_adj || time[Z] <= tf_adj) {
-            element_ref = &at(c_idx);
-            if (element_ref->views == 0) ++ray_record.first;
-            element_ref->setViewUpdateFlag();
+            voxel_ref = &at(c_idx);
+            if (voxel_ref->views == 0) ++ray_record.first;
+            voxel_ref->setViewUpdateFlag();
             
             if (time[X] < time[Y] && time[X] < time[Z]) {
                 time[X]  += delta[X];

@@ -12,12 +12,12 @@ GridProcessor::GridProcessor(VoxelGrid& target)
 inline void GridProcessor::setTarget(VoxelGrid& new_target)
 {
     target = &new_target;
-    temp.resize(target->voxel_element_vector.size());
+    temp.resize(target->voxel_vector.size());
 }
 
 void inline GridProcessor::swap()
 {
-    target->voxel_element_vector.swap(temp);
+    target->voxel_vector.swap(temp);
 }
 
 
@@ -25,7 +25,7 @@ void GridProcessor::operation(const std::function<void(const grid_idx&)>& operat
 {
     resetTempVector();
     grid_idx index(0, 0, 0);
-    // Iterate fastest in X, then Y, and then Z and call the operation function on the element at that index.
+    // Iterate fastest in X, then Y, and then Z and call the operation function on the voxel at that index.
     for (size_t z = 0, z_max = target->properties.grid_size[2]; z < z_max; ++z) {
         index[2] = z;
         for (size_t y = 0, y_max = target->properties.grid_size[1]; y < y_max; ++y) {

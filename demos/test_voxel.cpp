@@ -1,15 +1,15 @@
 #include <iostream>
 #include <bitset>
 
-#include <ForgeScan/voxel_element.h>
+#include <ForgeScan/voxel.h>
 
 
 using namespace ForgeScan;
 
 
-/// @brief Displays memory size and numeric limits for VoxelElement class and its
+/// @brief Displays memory size and numeric limits for Voxel class and its
 ///        (possible) constituents. 
-void display_voxel_element_memory_size_and_limits();
+void display_voxel_memory_size_and_limits();
 
 /// @brief Displays memory size for the Eigen3 Vector3 types.
 void display_vector_memory_size_and_limits();
@@ -17,11 +17,11 @@ void display_vector_memory_size_and_limits();
 
 int main()
 {
-    VoxelElement t;
+    Voxel t;
     
-    VoxelUpdate u0(10);
-    VoxelUpdate u1(5);
-    VoxelUpdate u2(-5);
+    Voxel::Update u0(10);
+    Voxel::Update u1(5);
+    Voxel::Update u2(-5);
 
     t.update(u0);
     t.update(u1);
@@ -42,9 +42,9 @@ int main()
 }
 
 
-void display_voxel_element_memory_size_and_limits()
+void display_voxel_memory_size_and_limits()
 {
-    std::cout << "\nSize of VoxelElement:\t" << sizeof(VoxelElement);
+    std::cout << "\nSize of Voxel:\t" << sizeof(Voxel);
     std::cout << "\nSize of float:\t" << sizeof(float);
     std::cout << "\nSize of uint:\t" << sizeof(unsigned int);
     std::cout << "\nSize of ushort:\t" << sizeof(unsigned short);

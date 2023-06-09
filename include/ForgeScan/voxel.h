@@ -3,12 +3,12 @@
 
 #include <ForgeScan/forgescan_types.h>
 
+/// Gets the maximum positive value for a float.
+#define FLOAT_POSITIVE_MAX std::numeric_limits<float>::max()
+
 
 namespace ForgeScan {
 
-
-/// Gets the maximum positive value for a float.
-#define FLOAT_POSITIVE_MAX std::numeric_limits<float>::max()
 
 /// @brief Storage for data within a Voxel inside of a VoxelGrid.
 struct Voxel

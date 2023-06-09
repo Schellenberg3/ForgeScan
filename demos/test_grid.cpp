@@ -20,7 +20,7 @@ void testVoxelGridLocations(ForgeScan::VoxelGrid& grid);
 /// @brief Simple script for manually adding points to a VoxelGrid within [-1,-1,-1] and [+1,+1,+1].
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
 int main(int argc, char** argv)
-{ 
+{
     testVoxelGridProperties();
 
     /// Create our testing VoxelGrid object
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
                 std::cout << "Performing soft erosion n=5...";
                 // processor.erode(5);
             }
-            
+
             if (q != 0)
             {
                 ++n_ops;

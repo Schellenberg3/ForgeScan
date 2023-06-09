@@ -29,7 +29,7 @@ size_t const inline vector_size(const typename std::vector<T>& vec)
 template<typename T>
 size_t const inline vector_capacity(const typename std::vector<T>& vec)
 {
-    return sizeof(T) * vec.capacity();  // Note 
+    return sizeof(T) * vec.capacity();
 }
 
 

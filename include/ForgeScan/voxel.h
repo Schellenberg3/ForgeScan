@@ -34,7 +34,7 @@ struct Voxel
 
     view_count   views   = 0;
     update_count updates = 0;
-    
+
     voxel_dist min = FLOAT_POSITIVE_MAX;
     voxel_dist avg = 0;
     voxel_dist var = 0;
@@ -48,7 +48,7 @@ struct Voxel
     {
         views   = 0;
         updates = 0;
-        
+
         min = FLOAT_POSITIVE_MAX;
         avg = 0;
         var = 0;

@@ -43,7 +43,7 @@ public:
         /// @param min_dist Truncation for minimum distance from a sensed point. Default -0.20.
         /// @param max_dist Truncation for maximum distance from a sensed point. Default +0.20.
         /// @throws `std::invalid_argument` If the parameters do not make a valid collection of VoxelGrid Properties. See `isValid` for details.
-        Properties(const double& resolution = 0.02, const Vector3ui& grid_size = Vector3ui(101, 101, 101), 
+        Properties(const double& resolution = 0.02, const Vector3ui& grid_size = Vector3ui(101, 101, 101),
                    const double& min_dist = - 0.20, const double& max_dist = 0.20) :
             min_dist(-1 * std::abs(min_dist)), max_dist(std::abs(max_dist)), resolution(std::abs(resolution)), grid_size(grid_size)
             {
@@ -61,7 +61,7 @@ public:
         /// @param max_dist Truncation for maximum distance from a sensed point. Default +0.20.
         /// @note This constructor may change the final values of `grid_size` and `dimensions` to a be valid pairing with the deduced resolution.
         /// @throws `std::invalid_argument` If the parameters do not make a valid collection of VoxelGrid Properties. See `isValid` for details.
-        Properties(const Vector3ui& grid_size, const Vector3d& dimensions = Vector3d(2, 2, 2), 
+        Properties(const Vector3ui& grid_size, const Vector3d& dimensions = Vector3d(2, 2, 2),
                    const double& min_dist = 0.05, const double& max_dist = 0.05) :
             min_dist(-1 * std::abs(min_dist)), max_dist(std::abs(max_dist)), grid_size(grid_size), dimensions(dimensions)
             {
@@ -74,9 +74,9 @@ public:
                 /// between the voxels and the dimensions.
                 this->grid_size = (dimensions.array() / resolution).ceil().cast<size_t>();
                 this->grid_size.array() += 1;
-                
+
                 /// Since we rounded up when recalculating the grid size the dimensions may be off, so we update this now.
-                /// Typically this should only increase the dimension by 
+                /// Typically this should only increase the dimension by
                 setDimensions();
                 isValid();
             }
@@ -97,7 +97,7 @@ public:
             return *this;
         }
 
-        /// @brief Update the dimensions to fit the grid_size and resolution. 
+        /// @brief Update the dimensions to fit the grid_size and resolution.
         void setDimensions() { this->dimensions = (grid_size.cast<double>().array() - 1) * this->resolution;}
 
         /// @brief  Verifies that several conditions are met for the parameters to be valid:
@@ -123,7 +123,7 @@ public:
             }
             Vector3d dimensions_check = ((grid_size.cast<double>().array() - 1) * resolution);
             if ( !dimensions.isApprox(dimensions_check) ) {
-                throw std::invalid_argument("[VoxelGrid::Properties::isValid] The grid size and resolution do not match the dimensions. " 
+                throw std::invalid_argument("[VoxelGrid::Properties::isValid] The grid size and resolution do not match the dimensions. "
                                             "Dimensions should measure from the center of the first voxel (at the origin) to the center of "
                                             "the final voxel (at the dimensions). Is your dimension off by one by one voxel unit?"
                                             "Try calling the setDimensions method.");
@@ -177,13 +177,13 @@ public:
     /// @brief Accesses the voxels with bounds checking.
     /// @param voxel Indicies for the desired voxel.
     /// @return Writable access to the specified voxel.
-    /// @throw `std::out_of_range` if the requested voxel indicies exceed the VoxelGrid's size in any dimension. 
+    /// @throw `std::out_of_range` if the requested voxel indicies exceed the VoxelGrid's size in any dimension.
     Voxel& at(const grid_idx& voxel) { return voxel_vector.at(indiciesToVectorThrowOutOfRange(voxel)); }
 
     /// @brief Accesses the voxels with bounds checking.
     /// @param voxel Indicies for the desired voxel.
     /// @return Read-only access to the specified voxel.
-    /// @throw `std::out_of_range` if the requested voxel indicies exceed the VoxelGrid's size in any dimension. 
+    /// @throw `std::out_of_range` if the requested voxel indicies exceed the VoxelGrid's size in any dimension.
     const Voxel& at(const grid_idx& voxel) const { return voxel_vector.at(indiciesToVectorThrowOutOfRange(voxel)); }
 
     /// @brief Calculates to grid indicies that the point falls into.
@@ -229,7 +229,7 @@ public:
     /// @param sensor Sensor with measurements to add.
     void addSensor(const DepthSensor::BaseDepthSensor&sensor)
     {
-        /// Get the sensor's measured points, relative to the sensor frame, then transform 
+        /// Get the sensor's measured points, relative to the sensor frame, then transform
         /// these points from the sensor frame to this VoxelGrid's frame.
         point_list points = sensor.getAllPositions();
         fromOtherToThis(sensor, points);
@@ -257,7 +257,7 @@ public:
     /// @brief Rests all data in the grid to zero or its respective defaults.
     void clear() { for (auto& voxel : voxel_vector) voxel.reset(); }
 
-    /// @brief Saves in the XDMF format (XDMF file references to an HDF5 data file). 
+    /// @brief Saves in the XDMF format (XDMF file references to an HDF5 data file).
     /// @param fname File name. Automatically adds ".h5" when writing the HDF5 file and ".xdmf"
     ///              to the XDMF file of the same name.
     /// @details This format makes it easier to visualize in tools like ParaView with the built-in
@@ -299,7 +299,7 @@ private:
     /// @brief Retrieves the vector index for the given X, Y, Z indicies in the voxel grid.
     /// @param voxel Indicies for the desired voxel.
     /// @return Vector position for the desired voxel.
-    /// @throw `std::out_of_range` if the requested voxel indicies exceed the VoxelGrid's size in any dimension. 
+    /// @throw `std::out_of_range` if the requested voxel indicies exceed the VoxelGrid's size in any dimension.
     size_t indiciesToVectorThrowOutOfRange(const grid_idx voxel) const {
         if (!valid(voxel))
             throw std::out_of_range("Requested voxel was not within the bounds of the 3D grid.");

@@ -22,7 +22,7 @@ void addPseudoRandomLines(ForgeScan::VoxelGrid& grid, const int& n, const bool& 
 /// @brief Simple script for manually adding points to a VoxelGrid within [-1,-1,-1] and [+1,+1,+1].
 /// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
 int main(int argc, char** argv)
-{ 
+{
     ForgeScan::Utilities::ArgParser parser(argc, argv);
 
     int n = 10;

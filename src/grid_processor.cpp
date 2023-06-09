@@ -44,7 +44,7 @@ void GridProcessor::dilate(const grid_idx& element, const int& n)
 {
     std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
     vector_idx element_vidx = 0;
-    
+
     this->voxel_grid->toVector(element, element_vidx);
     int known_neighbor_count = this->voxel_grid->at(element_vidx).updates != 0 ? 1 : 0;
 
@@ -63,7 +63,7 @@ void GridProcessor::erode(const grid_idx& element, const int& n)
 {
     std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
     vector_idx element_vidx = 0;
-    
+
     this->voxel_grid->toVector(element, element_vidx);
     // int known_neighbor_count = this->voxel_grid->at(element_vidx) == 0 ? 1 : 0;
     int known_neighbor_count = 1;

@@ -20,7 +20,7 @@ public:
     /// @param l The box's total dimension in the X-direction.
     /// @param w The box's total dimension in the Y-direction.
     /// @param h The box's total dimension in the Z-direction.
-    /// @param position Translation from the origin to the center point of the box. 
+    /// @param position Translation from the origin to the center point of the box.
     Box(const double& l, const double& w, const double& h, const translation& position = Eigen::Vector3d::Zero()) :
         PrimitiveGeometry(position, getAABBbound(   std::abs(w),    std::abs(l),    std::abs(h)),
                                     getAABBbound(-1*std::abs(w), -1*std::abs(l), -1*std::abs(h))  ),
@@ -66,7 +66,7 @@ private:
     /// @param l The box's total dimension in the X-direction.
     /// @param w The box's total dimension in the Y-direction.
     /// @param h The box's total dimension in the Z-direction.
-    /// @return Axis-aligned bounding box point for the upper or lower, depending on the sign of the dimension. 
+    /// @return Axis-aligned bounding box point for the upper or lower, depending on the sign of the dimension.
     static point getAABBbound(const double& l, const double& w, const double& h) {
         return point(l, w, h).operator*=(0.5);
     }

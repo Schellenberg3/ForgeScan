@@ -23,7 +23,7 @@ namespace ForgeScan {
 /// Index constants for functions in this file.
 static constexpr int X = 0, Y = 1, Z = 2;
 
-/// Constant reference to double infinity. 
+/// Constant reference to double infinity.
 static constexpr double DOUBLE_INFINITY = std::numeric_limits<double>::infinity();
 
 
@@ -41,7 +41,7 @@ static inline void getRayNormalAndLength(const point& rs, const point& re, Vecto
 
 
 /// @brief Checks if, and then where, the ray intersects the Axis-Aligned Bounding Box (AABB).
-///        Optimized for lower bounds at the origin and pre-computed inverse of the ray's normal. 
+///        Optimized for lower bounds at the origin and pre-computed inverse of the ray's normal.
 /// @param bound  Upper bound of the box. Since it is zero-bounded this is equivelent to the box's dimensions.
 /// @param origin Origin of the ray to check.
 /// @param inverse_direction The element-wise inverse of unit vector direction for the ray.
@@ -103,7 +103,7 @@ static bool inline zeroBoundedAABBintersection(const Vector3d& bound, const poin
     if (t_max_z < te_adj) te_adj = t_max_z;
 
     return (ts_adj < te && ts < te_adj);
-} 
+}
 
 
 /// @brief Takes voxel traversal parameters and updates them in case initial assumptions were off.
@@ -117,7 +117,7 @@ static bool inline zeroBoundedAABBintersection(const Vector3d& bound, const poin
 /// @param start_point Starting position of the vector.
 /// @param normal         Normal vector for the ray.
 /// @param inverse_normal Pre-computed inverse of the normal vector.
-static inline void correctTraversalInfo(int step[3], double delta[3], double time[3], const double& resolution, const grid_idx& start_voxel, 
+static inline void correctTraversalInfo(int step[3], double delta[3], double time[3], const double& resolution, const grid_idx& start_voxel,
                                         const Vector3d& start_point, const Vector3d& normal, const Vector3d& inverse_normal)
 {
     /// Explicitly running this for X, Y, and Z indicies is noticeably faster than a for loop.
@@ -140,7 +140,7 @@ static inline void correctTraversalInfo(int step[3], double delta[3], double tim
         /// In the rare case where the normal is EXACTLY zero then set the time to infinity so we never step in this direction.
         time[X]  = DOUBLE_INFINITY;
     }
-    
+
     /// Repeat above for Y...
     if (normal[Y] > 0) {
         time[Y]  += ((start_voxel[Y] + 1) * resolution - start_point_shift[Y]) * inverse_normal[Y];
@@ -161,12 +161,12 @@ static inline void correctTraversalInfo(int step[3], double delta[3], double tim
 
 
 bool VoxelGrid::implementAddRayExact(const Voxel::Update& update, const point& rs, const point& re)
-{    
+{
     /// Start time and end time (also length) for the user's ray.
     double ts = 0, te = 0;
 
     /// Adjusted start and end time for when the user's ray intersects the grid.
-    double ts_adj = 0, te_adj = 0; 
+    double ts_adj = 0, te_adj = 0;
 
     /// Normalized direction for the ray (with pre-computed inverse values for AABB intersection and traversal info).
     Vector3d normal(0, 0, 0), inverse_normal(0, 0, 0);
@@ -306,7 +306,7 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
             voxel_ref = &at(c_idx);
             if (voxel_ref->views == 0) ++ray_record.first;
             voxel_ref->setViewUpdateFlag();
-            
+
             if (time[X] < time[Y] && time[X] < time[Z]) {
                 time[X]  += delta[X];
                 c_idx[X] +=  step[X];

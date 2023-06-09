@@ -8,7 +8,7 @@ using namespace ForgeScan;
 
 
 /// @brief Displays memory size and numeric limits for Voxel class and its
-///        (possible) constituents. 
+///        (possible) constituents.
 void display_voxel_memory_size_and_limits();
 
 /// @brief Displays memory size for the Eigen3 Vector3 types.
@@ -18,7 +18,7 @@ void display_vector_memory_size_and_limits();
 int main()
 {
     Voxel t;
-    
+
     Voxel::Update u0(10);
     Voxel::Update u1(5);
     Voxel::Update u2(-5);
@@ -28,7 +28,7 @@ int main()
     t.update(u2);
     ++t.views;
 
-    std::cout << "Target:\n";    
+    std::cout << "Target:\n";
     std::cout << t.min << " min" << std::endl;
     std::cout << t.avg << " avg" << std::endl;
     std::cout << t.var << " var" << std::endl;

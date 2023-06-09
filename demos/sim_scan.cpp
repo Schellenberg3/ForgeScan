@@ -16,7 +16,7 @@ static const Eigen::Vector3d WORLD_ORIGIN(0, 0, 0);
 int main(int argc, char* argv[])
 {
     ForgeScan::Utilities::ArgParser parser(argc, argv);
-    /// Number of pixel in the x and y directions for the depth sensor. 
+    /// Number of pixel in the x and y directions for the depth sensor.
     int nx = 100, ny = 100;
 
     /// Number of views collected.
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     /// If true will place the first view in a pre-determined position.
     bool first   = parser.cmdOptionExists("--first");
 
-    /// If true will user randomly selected poses for each view . 
+    /// If true will user randomly selected poses for each view .
     bool random = parser.cmdOptionExists("--random");
 
     {   /// Command line parsing for reading specific arguments

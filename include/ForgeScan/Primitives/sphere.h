@@ -57,7 +57,7 @@ public:
         /// Pre-calculations help us optimize the quadratic formula. And checking the sign of B lets
         /// us utilize an numerically stable form in which only addition OR subtraction is  required.
         ///     D = sqrt(B*B - 4*A*C)
-        ///     if B < 0 
+        ///     if B < 0
         ///         X_1 = (-B + D) / 2*A
         ///         X_2 = 2*C / (-B + D)
         ///         (Leads to adding two positives)
@@ -68,8 +68,8 @@ public:
         /// is ideal as it avoids any case where we subtract quantities with the same sign. In cases where these values
         /// are similar in magnitude (for this case, when 4*A*C is small) this leads to imprecision in rounding.
         /// For details on the numeric stability see: https://people.csail.mit.edu/bkph/articles/Quadratics.pdf
-        
-        /// Both cases require the following values which we may pre-compute 
+
+        /// Both cases require the following values which we may pre-compute
         D = std::sqrt(D);
         A *= 2;
         C *= 2;
@@ -100,7 +100,7 @@ private:
     /// @brief Constructor helper for generating a sphere's AABB bounds.
     /// @param radius Radius of the sphere.
     ///               Pass as positive for the upper bound. Pass as negative for the lower bound.
-    /// @return Axis-aligned bounding box point for the upper or lower, depending on the radius' sign. 
+    /// @return Axis-aligned bounding box point for the upper or lower, depending on the radius' sign.
     static point getAABBbound(const double& radius) { return point(radius, radius, radius); }
 };
 

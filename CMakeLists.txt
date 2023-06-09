@@ -90,7 +90,7 @@ add_definitions(
 
 # TEST_GRID
 add_executable(
-    test_grid 
+    test_grid
 
     demos/test_grid.cpp
     src/voxel_grid_io.cpp

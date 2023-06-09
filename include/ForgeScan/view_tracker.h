@@ -12,7 +12,7 @@ namespace ForgeScan {
 
 
 /// @brief Record for a specific view.
-struct RayRecord 
+struct RayRecord
 {
     size_t updates = 0;
     size_t views = 0;
@@ -31,7 +31,7 @@ struct RayRecord
 };
 
 /// @brief Record of information about a sensor.
-///        Each ray contributes its own information to this from a RayRecord object.    
+///        Each ray contributes its own information to this from a RayRecord object.
 struct SensorRecord
 {
     /// @brief Transformation, relative to the VoxelGrid.
@@ -51,7 +51,7 @@ struct SensorRecord
     /// @brief Default constructor. No pose information provided, assumed to be identity. No size, assumed to be 0.
     SensorRecord() { pose.setIdentity(); }
 
-    /// @brief Default constructor with pose information. 
+    /// @brief Default constructor with pose information.
     /// @param pose Pose of the sensor relative to the VoxelGrid.
     /// @param size Number of points in the depth sensor.
     SensorRecord(const extrinsic& pose, const size_t& size) : pose(pose), size(size) { }
@@ -63,7 +63,7 @@ struct SensorRecord
         // throw std::logic_error("Function not fully implemented.");
         if (ray_data.views == 0) // Ray missed.
             return *this;
-        
+
         // Increase the count of total viewed voxels and the count of individual rays that viewed at least one voxel.
         total_views += ray_data.views;
         ++percent_viewed;

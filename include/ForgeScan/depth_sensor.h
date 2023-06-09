@@ -188,8 +188,8 @@ public:
         /// Calculate the proper angles. Phi moves from 0 to 180 as y decrements.
         double phi = std::acos(y);
         double theta = GOLDEN_ANGLE_RADIANS * view_number;
-        
-        /// Solve the last two distances. 
+
+        /// Solve the last two distances.
         double x = std::cos(theta) * r_y;
         double z = std::sin(theta) * r_y;
 
@@ -206,7 +206,7 @@ public:
     /// @param i Index in the storage vector to return.
     /// @return Cartesian position of point `i` in the DepthSensor's reference frame.
     /// @throws `std::out_of_range` If `i` is an invalid index.
-    virtual point getPosition(const size_t& i) const 
+    virtual point getPosition(const size_t& i) const
     {
         throwIfInvalidSenorArray(i);
         return getPosition(i, i % intr->u, i / intr->u);
@@ -279,7 +279,7 @@ protected:
     /// @brief Checks if the provided coordinates are valid for the image sensor.
     /// @param i Index in the depth vector to check.
     /// @return True if valid, false else.
-    bool checkValidSenorArray(const size_t& i) const { 
+    bool checkValidSenorArray(const size_t& i) const {
         /// Negative integers cast to size_t should necessarily be greater than any reasonable intrinsics dimensions.
         return (i < depth_vector.size());
     }
@@ -330,7 +330,7 @@ protected:
 private:
     /// @brief Random number engine for performing sampling on the uniform real distribution.
     std::mt19937 gen;
-    
+
     /// @brief Uniform distribution over [0, 1).
     std::uniform_real_distribution<double> uniform_dist;
 
@@ -347,7 +347,7 @@ private:
 
     /// @brief Returns the cartesian position of the sensed point at `(x, y)`, relative to the DepthSensor's frame.
     /// @details This private implementation is called by either public one. It trusts that the `(x, y)` or `i` index
-    ///          are both valid. This prevents either public function from re-calculating the index or array coordinates. 
+    ///          are both valid. This prevents either public function from re-calculating the index or array coordinates.
     /// @param i Index in the depth vector for the position (x, y).
     /// @param x X-index in the image sensor to return.
     /// @param y Y-index in the image sensor to return.
@@ -361,7 +361,7 @@ private:
     }
 
     /// @brief  Calculates cartesian position when theta and phi represent rotations about the X-axis then the Y-axis.
-    /// @return Cartesian position relative to the sensor's reference frame. 
+    /// @return Cartesian position relative to the sensor's reference frame.
     static point rotationToCartesian(const double& depth, const double& theta, const double& phi)
     {
         /// Rx(theta) * Ry(phi) -- This rotation prevents mirroring which occurs if we rotate in the other order.

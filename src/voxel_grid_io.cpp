@@ -54,7 +54,7 @@ void VoxelGrid::saveHDF5(const std::filesystem::path& fname) const
     catch (const HighFive::Exception& err)
     {
         std::cerr << err.what() << std::endl;
-    } 
+    }
 }
 
 void VoxelGrid::saveXDMF(const std::filesystem::path &fname) const
@@ -120,7 +120,7 @@ void VoxelGrid::saveXDMF(const std::filesystem::path &fname) const
     }
     catch (const HighFive::Exception& err) {
         std::cerr << err.what() << std::endl;
-    } 
+    }
 }
 
 
@@ -154,7 +154,7 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
         "      <!-- Origin  Z, Y, X -->\n"
         "      <DataItem Format=\"XML\" Dimensions=\"3\">" << lower_zyx.transpose() << "</DataItem>\n" <<
         "      <!-- DxDyDz (Spacing/Resolution) Z, Y, X -->\n"
-        "      <DataItem Format=\"XML\" Dimensions=\"3\">" << 
+        "      <DataItem Format=\"XML\" Dimensions=\"3\">" <<
                    properties.resolution << " " << properties.resolution << " " << properties.resolution << "</DataItem>\n"
         "    </Geometry>\n"
 

@@ -131,6 +131,7 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
     const size_t num_element = voxel_element_vector.size();
 
     point lower_zyx = Eigen::Vector3d::Zero();
+    lower_zyx.array() -= 0.5 * properties.resolution;
 
     Vector3ui adj_size = properties.grid_size.array() + 1;
     adj_size.reverseInPlace();

@@ -179,8 +179,14 @@ public:
         if (total_views < view_number || view_number < 0)
             throw std::invalid_argument("For a valid result view number must be in the range: 0 <= view_number < total_views");
 
+        /// Cast to double for later.
+        double total_views_d = (double)total_views;
+
+        /// Slight bump to prevent divide by zero errors.
+        if (total_views == 1) total_views_d += 0.000000001;
+
         /// Y walks from 1 to -1
-        double y = 1 - (view_number / (float)(total_views - 1)) * 2;
+        double y = 1 - (view_number / (total_views_d - 1)) * 2;
 
         /// Radius of the sphere at that location of y.
         double r_y = std::sqrt(1 - y*y);

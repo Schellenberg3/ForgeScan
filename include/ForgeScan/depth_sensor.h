@@ -63,10 +63,10 @@ public:
         /// Get the sensor's position and viewed points relative to the PrimitiveGeometry frame.
         /// This is needed for the fast AABB checks performed on each ray.
         point start = extr.translation();   // World frame
-        geometry.fromWorldToThis(start);    // Primitive frame
+        geometry.toThisFromWorld(start);    // Primitive frame
 
         point_list end_points = getAllPositions();     // Sensor frame
-        geometry.fromOtherToThis(*this, end_points);   // Primitive frame
+        geometry.toThisFromOther(*this, end_points);   // Primitive frame
 
         double t = 1;
         for (size_t i = 0, n = intr->size(); i < n; ++i)

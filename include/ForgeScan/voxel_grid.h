@@ -205,7 +205,7 @@ public:
     /// @returns False if the ray did not intersect the voxel grid. True otherwise.
     /// @note If the start and end points are exactly equal then this function does nothing.
     bool addRayExact(const Voxel::Update& update, const point& rs, const point& re) {
-        point rs_this = fromWorldToThis(rs), re_this = fromWorldToThis(re);
+        point rs_this = toThisFromWorld(rs), re_this = toThisFromWorld(re);
         bool res = implementAddRayExact(update, rs_this, re_this);
         updateViewCount();
         return res;
@@ -218,7 +218,7 @@ public:
     /// @returns False if the ray did not intersect the voxel grid. True otherwise.
     /// @note If the start and end points are exactly equal then this function does nothing.
     bool addRayTSDF(const point &origin, const point &sensed) {
-        point origin_this = fromWorldToThis(origin), sensed_this = fromWorldToThis(sensed);
+        point origin_this = toThisFromWorld(origin), sensed_this = toThisFromWorld(sensed);
         /// RayRecord is needed for implementation, but unused in this function.
         bool res = implementAddRayTSDF(origin_this, sensed_this, RayRecord());
         updateViewCount();
@@ -232,12 +232,12 @@ public:
         /// Get the sensor's measured points, relative to the sensor frame, then transform
         /// these points from the sensor frame to this VoxelGrid's frame.
         point_list points = sensor.getAllPositions();
-        fromOtherToThis(sensor, points);
+        toThisFromOther(sensor, points);
 
         /// Get the sensor's position (for the start of each ray) relative to the world frame, then
         /// transform this to the VoxelGrid's frame.
         point sensor_pose = sensor.extr.translation();
-        fromWorldToThis(sensor_pose);
+        toThisFromWorld(sensor_pose);
 
         /// Set up tracking objects for the ViewTracker.
         SensorRecord sensor_record( getTransformationTo(sensor), sensor.intr->size() );

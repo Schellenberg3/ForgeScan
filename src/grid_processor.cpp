@@ -21,10 +21,10 @@ void inline GridProcessor::swap()
 }
 
 
-void GridProcessor::operation(const std::function<void(const grid_idx&)>& operation)
+void GridProcessor::operation(const std::function<void(const index&)>& operation)
 {
     resetTempVector();
-    grid_idx index(0, 0, 0);
+    index index(0, 0, 0);
     // Iterate fastest in X, then Y, and then Z and call the operation function on the voxel at that index.
     for (size_t z = 0, z_max = target->properties.grid_size[2]; z < z_max; ++z) {
         index[2] = z;

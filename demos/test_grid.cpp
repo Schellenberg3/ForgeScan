@@ -49,7 +49,7 @@ int main(int argc, char** argv)
             xyz[1] = y;
             xyz[2] = z;
 
-            /// Transform xyz to the grid frame and then convert to grid indicies.
+            /// Transform xyz to the grid frame and then convert to a grid index.
             grid.toThisFromWorld(xyz);
             grid_index = grid.pointToGrid(xyz);
             grid.at(grid.pointToGrid(xyz)).update(update);
@@ -200,7 +200,7 @@ void testVoxelGridLocations(ForgeScan::VoxelGrid& grid)
         point(1.01, 1.01, 1.01), // [100, 100, 100]
         point(0.99, 0.99, 0.99), // [100, 100, 100]
     };
-    grid_idx c_idx(0, 0, 0);
+    index c_idx(0, 0, 0);
     point  c_point(0, 0, 0);
 
     /// The point in the grid's reference frame.

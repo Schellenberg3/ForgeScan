@@ -117,7 +117,7 @@ static bool inline zeroBoundedAABBintersection(const Vector3d& bound, const poin
 /// @param start_point Starting position of the vector.
 /// @param normal         Normal vector for the ray.
 /// @param inverse_normal Pre-computed inverse of the normal vector.
-static inline void correctTraversalInfo(int step[3], double delta[3], double time[3], const double& resolution, const grid_idx& start_voxel,
+static inline void correctTraversalInfo(int step[3], double delta[3], double time[3], const double& resolution, const index& start_voxel,
                                         const Vector3d& start_point, const Vector3d& normal, const Vector3d& inverse_normal)
 {
     /// Explicitly running this for X, Y, and Z indicies is noticeably faster than a for loop.
@@ -187,7 +187,7 @@ bool VoxelGrid::implementAddRayExact(const Voxel::Update& update, const point& r
     const point rs_adj = rs + normal * ts_adj;
 
     /// Current index within the grid.
-    grid_idx c_idx = pointToGrid(rs_adj);
+    index c_idx = pointToGrid(rs_adj);
 
     /// Direction of travel (increment or decrement) along the respective axis. Assume we increment.
     int step[3] = {1, 1, 1};
@@ -257,7 +257,7 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
     const point sensed_adj = sensed + normal * tn_adj;
 
     /// Current index within the grid.
-    grid_idx c_idx = pointToGrid(sensed_adj);
+    index c_idx = pointToGrid(sensed_adj);
 
     /// Direction of travel (increment or decrement) along the respective axis. Assume we increment.
     int step[3] = {1, 1, 1};

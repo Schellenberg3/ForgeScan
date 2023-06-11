@@ -30,7 +30,7 @@ public:
 
     /// @brief Performs an elementwise operation, like erosion or dilation.
     /// @param operation Function to perform. Function must take a constant reference to an voxel.
-    void operation(const std::function<void(const grid_idx&)>& operation);
+    void operation(const std::function<void(const index&)>& operation);
 
     /// @brief Changes what VoxelGrid the processor targets for element-wise processes.
     /// @param target VoxelGrid on which perform operations.
@@ -50,13 +50,13 @@ private:
     /// @brief Erodes the voxel in the temporary vector at the provided location.
     /// @param voxel Location to erode.
     /// @param n Number of un-sensed (zero) neighbors. If n or greater are un-sensed, then the voxel is set to 0.
-    void erode(const grid_idx& voxel, const int& n);
+    void erode(const index& voxel, const int& n);
 
 
     /// @brief Dilates the voxel in the temporary vector at the provided location.
     /// @param voxel Location to dilate.
     /// @param n Number of sensed (non-zero) neighbors. If n or greater are sense, then the voxel is set to 1.
-    void dilate(const grid_idx& voxel, const int& n);
+    void dilate(const index& voxel, const int& n);
 };
 
 

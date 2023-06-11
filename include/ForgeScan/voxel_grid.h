@@ -155,48 +155,48 @@ public:
         p2i_scale((properties.grid_size.cast<double>().array() - 1) / properties.dimensions.array())
         { setup(); }
 
-    /// @brief Checks that the voxel indicies are valid for the shape of the voxel grid.
-    /// @param voxel Indicies for the desired voxel.
+    /// @brief Checks that the voxel index is valid for the shape of the voxel grid.
+    /// @param voxel Index for the desired voxel.
     /// @return True if valid. False otherwise.
-    bool valid(const grid_idx& voxel) const { return (voxel.array() < properties.grid_size.array()).all(); }
+    bool valid(const index& voxel) const { return (voxel.array() < properties.grid_size.array()).all(); }
 
     /// @brief Accesses the voxels with no bounds checking.
-    /// @param voxel Indicies for the desired voxel.
+    /// @param voxel Index for the desired voxel.
     /// @return Writable access to the specified voxel.
     /// @note Without checking out of bounds lookups may result in undefined behaviour. Use the `at` method
     ///       to access voxels with bounds checking.
-    Voxel& operator[](const grid_idx& voxel) { return voxel_vector[indiciesToVector(voxel)]; }
+    Voxel& operator[](const index& voxel) { return voxel_vector[indexToVector(voxel)]; }
 
     /// @brief Accesses the voxels with no bounds checking.
-    /// @param voxel Indicies for the desired voxel.
+    /// @param voxel Index for the desired voxel.
     /// @return Read-only access to the specified voxel.
     /// @note Without checking out of bounds lookups may result in undefined behaviour. Use the `at` method
     ///       to access voxels with bounds checking.
-    const Voxel& operator[](const grid_idx& voxel) const { return voxel_vector[indiciesToVector(voxel)]; }
+    const Voxel& operator[](const index& voxel) const { return voxel_vector[indexToVector(voxel)]; }
 
     /// @brief Accesses the voxels with bounds checking.
-    /// @param voxel Indicies for the desired voxel.
+    /// @param voxel Index for the desired voxel.
     /// @return Writable access to the specified voxel.
-    /// @throw `std::out_of_range` if the requested voxel indicies exceed the VoxelGrid's size in any dimension.
-    Voxel& at(const grid_idx& voxel) { return voxel_vector.at(indiciesToVectorThrowOutOfRange(voxel)); }
+    /// @throw `std::out_of_range` if the requested index exceeds the VoxelGrid's size in any dimension.
+    Voxel& at(const index& voxel) { return voxel_vector.at(indexToVectorThrowOutOfRange(voxel)); }
 
     /// @brief Accesses the voxels with bounds checking.
-    /// @param voxel Indicies for the desired voxel.
+    /// @param voxel Index for the desired voxel.
     /// @return Read-only access to the specified voxel.
-    /// @throw `std::out_of_range` if the requested voxel indicies exceed the VoxelGrid's size in any dimension.
-    const Voxel& at(const grid_idx& voxel) const { return voxel_vector.at(indiciesToVectorThrowOutOfRange(voxel)); }
+    /// @throw `std::out_of_range` if the requested index exceeds the VoxelGrid's size in any dimension.
+    const Voxel& at(const index& voxel) const { return voxel_vector.at(indexToVectorThrowOutOfRange(voxel)); }
 
-    /// @brief Calculates to grid indicies that the point falls into.
+    /// @brief Calculates to index that the point falls into within the grid.
     /// @param input Cartesian position of the point, relative to the voxel grid origin.
-    /// @return Grid indicies that the point would be in.
+    /// @return Grid index that the point would be in.
     /// @note The input MUST be transformed to the VoxelGrid's coordinate system for valid results.
     /// @note This does not promise that the index is valid. Use `valid` of the returned input to verify the results.
-    grid_idx pointToGrid(const point& input) const { return (input.array() * p2i_scale).round().cast<size_t>(); }
+    index pointToGrid(const point& input) const { return (input.array() * p2i_scale).round().cast<size_t>(); }
 
     /// @brief Calculates the center point location for the voxel at the input index.
     /// @param input The (X, Y, Z) index in the grid to check.
     /// @return Center point of the voxel, relative to the VoxelGrid.
-    point gridToPoint(const grid_idx& input) const { return input.cast<double>().array() * properties.resolution; }
+    point gridToPoint(const index& input) const { return input.cast<double>().array() * properties.resolution; }
 
     /// @brief Updates voxel on the line between the two specified points.
     /// @param update Update to apply to each voxel on the ray.
@@ -287,23 +287,23 @@ private:
     const Eigen::Array3d p2i_scale;
 
 private:
-    /// @brief Retrieves the vector index for the given X, Y, Z indicies in the voxel grid.
-    /// @param voxel Indicies for the desired voxel.
+    /// @brief Retrieves the vector index for the given X, Y, Z index in the grid.
+    /// @param voxel Index for the desired voxel.
     /// @return Vector position for the desired voxel.
     /// @note This does not check that the provided pose is valid. Either that the vector position is within
     ///       the bounds of the vector OR that the provided voxel index is valid for the grid size.
-    size_t indiciesToVector(const grid_idx voxel) const {
+    size_t indexToVector(const index voxel) const {
         return voxel[0] + (voxel[1] * properties.grid_size[0]) + (voxel[2] * properties.grid_size[0] * properties.grid_size[1]);
     }
 
-    /// @brief Retrieves the vector index for the given X, Y, Z indicies in the voxel grid.
-    /// @param voxel Indicies for the desired voxel.
+    /// @brief Retrieves the vector index for the given X, Y, Z index in the grid.
+    /// @param voxel Index for the desired voxel.
     /// @return Vector position for the desired voxel.
-    /// @throw `std::out_of_range` if the requested voxel indicies exceed the VoxelGrid's size in any dimension.
-    size_t indiciesToVectorThrowOutOfRange(const grid_idx voxel) const {
+    /// @throw `std::out_of_range` if the requested voxel index exceed the VoxelGrid's size in any dimension.
+    size_t indexToVectorThrowOutOfRange(const index voxel) const {
         if (!valid(voxel))
             throw std::out_of_range("Requested voxel was not within the bounds of the 3D grid.");
-        return indiciesToVector(voxel);
+        return indexToVector(voxel);
     }
 
     /// @brief Updates voxel on the line between the two specified points. Points are in the VoxelGrid's frame.

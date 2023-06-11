@@ -153,99 +153,99 @@ struct ForgeScanEntity
     point_list toWorldFromThis(const point_list& p_list) const { return extr * p_list.colwise().homogeneous(); }
 
     /// @brief Coordinate transformation, in-place, on the provided point to shift it into the other entity's frame.
-    /// @param other Other ForgeScan entity.
     /// @param p Point in this entity's frame.
-    void toOtherFromThis(const ForgeScanEntity& other, point& p) const
-        { return toOtherFromThis(other.extr, p); }
+    /// @param other Other ForgeScan entity.
+    void toOtherFromThis(point& p, const ForgeScanEntity& other) const
+        { return toOtherFromThis(p, other.extr); }
 
     /// @brief Coordinate transformation, in-place, on the provided set of points to shift them into the other entity's frame.
-    /// @param other Other ForgeScan entity.
     /// @param p_list List (a 3xN matrix) of points in this entity's frame.
-    void toOtherFromThis(const ForgeScanEntity& other, point_list& p_list) const
-        { return toOtherFromThis(other.extr, p_list); }
+    /// @param other Other ForgeScan entity.
+    void toOtherFromThis(point_list& p_list, const ForgeScanEntity& other) const
+        { return toOtherFromThis(p_list, other.extr); }
 
     /// @brief Coordinate transformation on the provided point to shift it into the other entity's frame.
-    /// @param other Other ForgeScan entity.
     /// @param p Point in this entity's frame.
-    point toOtherFromThis(const ForgeScanEntity& other, const point& p) const
-        { return toOtherFromThis(other.extr, p); }
+    /// @param other Other ForgeScan entity.
+    point toOtherFromThis(const point& p, const ForgeScanEntity& other) const
+        { return toOtherFromThis(p, other.extr); }
 
     /// @brief Coordinate transformation on the provided set of points to shift them into the other entity's frame.
-    /// @param other Other ForgeScan entity.
     /// @param p_list List (a 3xN matrix) of points in this entity's frame.
-    point_list toOtherFromThis(const ForgeScanEntity& other, const point_list& p_list) const
-        { return toOtherFromThis(other.extr, p_list); }
+    /// @param other Other ForgeScan entity.
+    point_list toOtherFromThis(const point_list& p_list, const ForgeScanEntity& other) const
+        { return toOtherFromThis(p_list, other.extr); }
 
     /// @brief Coordinate transformation, in-place, on the provided point to shift it into the other entity's frame.
-    /// @param extr Other reference frame.
     /// @param p Point in this entity's frame.
-    void toOtherFromThis(const extrinsic& extr, point& p) const
+    /// @param extr Other reference frame.
+    void toOtherFromThis(point& p, const extrinsic& extr) const
         { p = (extr.inverse() * this->extr) * p.homogeneous(); }
 
     /// @brief Coordinate transformation, in-place, on the provided set of points to shift them into the other entity's frame.
-    /// @param extr Other reference frame.
     /// @param p_list List (a 3xN matrix) of points in this entity's frame.
-    void toOtherFromThis(const extrinsic& extr, point_list& p_list) const
+    /// @param extr Other reference frame.
+    void toOtherFromThis(point_list& p_list, const extrinsic& extr) const
         { p_list = (extr.inverse() * this->extr) * p_list.colwise().homogeneous(); }
 
     /// @brief Coordinate transformation on the provided point to shift it into the other entity's frame.
-    /// @param extr Other reference frame.
     /// @param p Point in this entity's frame.
-    point toOtherFromThis(const extrinsic& extr, const point& p) const
+    /// @param extr Other reference frame.
+    point toOtherFromThis(const point& p, const extrinsic& extr) const
         { return (extr.inverse() * this->extr) * p.homogeneous(); }
 
     /// @brief Coordinate transformation on the provided set of points to shift them into the other entity's frame.
-    /// @param extr Other reference frame.
     /// @param p_list List (a 3xN matrix) of points in this entity's frame.
-    point_list toOtherFromThis(const extrinsic& extr, const point_list& p_list) const
+    /// @param extr Other reference frame.
+    point_list toOtherFromThis(const point_list& p_list, const extrinsic& extr) const
         { return (extr.inverse() * this->extr) * p_list.colwise().homogeneous(); }
 
     /// @brief Coordinate transformation, in-place, on the provided point to shift it into the other entity's frame.
-    /// @param other Other ForgeScan entity.
     /// @param p Point in this entity's frame.
-    void toThisFromOther(const ForgeScanEntity& other, point& p) const
-        { return toThisFromOther(other.extr, p); }
+    /// @param other Other ForgeScan entity.
+    void toThisFromOther(point& p, const ForgeScanEntity& other) const
+        { return toThisFromOther(p, other.extr); }
 
     /// @brief Coordinate transformation, in-place, on the provided set of points to shift them into the other entity's frame.
-    /// @param other Other ForgeScan entity.
     /// @param p_list List (a 3xN matrix) of points in this entity's frame.
-    void toThisFromOther(const ForgeScanEntity& other, point_list& p_list) const
-        { return toThisFromOther(other.extr, p_list); }
+    /// @param other Other ForgeScan entity.
+    void toThisFromOther(point_list& p_list, const ForgeScanEntity& other) const
+        { return toThisFromOther(p_list, other.extr); }
 
     /// @brief Coordinate transformation on the provided point to shift it into the other entity's frame.
-    /// @param other Other ForgeScan entity.
     /// @param p Point in this entity's frame.
-    point toThisFromOther(const ForgeScanEntity& other, const point& p) const
-        { return toThisFromOther(other.extr, p); }
+    /// @param other Other ForgeScan entity.
+    point toThisFromOther(const point& p, const ForgeScanEntity& other) const
+        { return toThisFromOther(p, other.extr); }
 
     /// @brief Coordinate transformation on the provided set of points to shift them into the other entity's frame.
-    /// @param other Other ForgeScan entity.
     /// @param p_list List (a 3xN matrix) of points in this entity's frame.
-    point_list toThisFromOther(const ForgeScanEntity& other, const point_list& p_list) const
-        { return toThisFromOther(other.extr, p_list); }
+    /// @param other Other ForgeScan entity.
+    point_list toThisFromOther(const point_list& p_list, const ForgeScanEntity& other) const
+        { return toThisFromOther(p_list, other.extr); }
 
         /// @brief Coordinate transformation, in-place, on the provided point to shift it to the provided reference frame.
-    /// @param extr Other reference frame.
     /// @param p Point in this entity's frame.
-    void toThisFromOther(const extrinsic& extr, point& p) const
+    /// @param extr Other reference frame.
+    void toThisFromOther(point& p, const extrinsic& extr) const
         { p = (this->extr.inverse() * extr) * p.homogeneous(); }
 
     /// @brief Coordinate transformation, in-place, on the provided set of points to shift them to the provided reference frame.
-    /// @param extr Other reference frame.
     /// @param p_list List (a 3xN matrix) of points in this entity's frame.
-    void toThisFromOther(const extrinsic& extr, point_list& p_list) const
+    /// @param extr Other reference frame.
+    void toThisFromOther(point_list& p_list, const extrinsic& extr) const
         { p_list = (this->extr.inverse() * extr) * p_list.colwise().homogeneous(); }
 
     /// @brief Coordinate transformation on the provided point to shift it to the provided reference frame.
-    /// @param extr Other reference frame.
     /// @param p Point in this entity's frame.
-    point toThisFromOther(const extrinsic& extr, const point& p) const
+    /// @param extr Other reference frame.
+    point toThisFromOther(const point& p, const extrinsic& extr) const
         { return (this->extr.inverse() * extr) * p.homogeneous(); }
 
     /// @brief Coordinate transformation on the provided set of points to shift them to the provided reference frame.
-    /// @param extr Other reference frame.
     /// @param p_list List (a 3xN matrix) of points in this entity's frame.
-    point_list toThisFromOther(const extrinsic& extr, const point_list& p_list) const
+    /// @param extr Other reference frame.
+    point_list toThisFromOther(const point_list& p_list, const extrinsic& extr) const
         { return (this->extr.inverse() * extr) * p_list.colwise().homogeneous(); }
 };
 

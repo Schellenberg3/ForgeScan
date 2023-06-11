@@ -66,7 +66,7 @@ public:
         geometry.toThisFromWorld(start);    // Primitive frame
 
         point_list end_points = getAllPositions();     // Sensor frame
-        geometry.toThisFromOther(*this, end_points);   // Primitive frame
+        geometry.toThisFromOther(end_points, *this);   // Primitive frame
 
         double t = 1;
         for (size_t i = 0, n = intr->size(); i < n; ++i)

@@ -232,7 +232,7 @@ public:
         /// Get the sensor's measured points, relative to the sensor frame, then transform
         /// these points from the sensor frame to this VoxelGrid's frame.
         point_list points = sensor.getAllPositions();
-        toThisFromOther(sensor, points);
+        toThisFromOther(points, sensor);
 
         /// Get the sensor's position (for the start of each ray) relative to the world frame, then
         /// transform this to the VoxelGrid's frame.

@@ -38,7 +38,7 @@ int main()
     t.resetViewUpdateFlag();
 
     std::cout << std::bitset<16>(t.views) << std::endl;
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

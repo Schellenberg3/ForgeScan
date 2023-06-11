@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     grid.saveXDMF(xdmf_path);
 
     std::cout << "Exiting program."  << std::endl;
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void testVoxelGridProperties()

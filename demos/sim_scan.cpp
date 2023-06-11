@@ -107,5 +107,5 @@ int main(int argc, char* argv[])
     grid.saveXDMF(fpath);
     std::cout << "Complete! Saved file in ./share/ParaView as: " + fname << std::endl;
 
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
     addPseudoRandomLines(grid_random, n, exact, seed);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void addPseudoRandomLines(ForgeScan::VoxelGrid& grid, const int& n, const bool& exact, const int& seed)

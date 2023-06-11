@@ -191,15 +191,15 @@ public:
     /// @return Grid index that the point would be in.
     /// @note The input MUST be transformed to the VoxelGrid's coordinate system for valid results.
     /// @note This does not promise that the index is valid. Use `valid` of the returned input to verify the results.
-    index pointToGrid(const point& input) const { return (input.array() * p2i_scale).round().cast<size_t>(); }
+    index pointToIndex(const point& input) const { return (input.array() * p2i_scale).round().cast<size_t>(); }
 
     /// @brief Calculates to index that the point falls into within the grid.
     /// @param input Cartesian position of the point.
     /// @param extr  Frame which the point is in.
     /// @return Grid index that the point would be in.
     /// @note This does not promise that the index is valid. Use `valid` of the returned input to verify the results.
-    index pointToGrid(const point& input, const extrinsic& extr) const 
-        { return pointToGrid( toThisFromOther(input, extr) ); }
+    index pointToIndex(const point& input, const extrinsic& extr) const 
+        { return pointToIndex( toThisFromOther(input, extr) ); }
 
     /// @brief Calculates to index that the point falls into within the grid.
     /// @param input Cartesian position of the point.
@@ -207,27 +207,27 @@ public:
     /// @param other Frame which the point is in.
     /// @return Grid index that the point would be in.
     /// @note This does not promise that the index is valid. Use `valid` of the returned input to verify the results.
-    index pointToGrid(const point& input, const ForgeScanEntity& other) const
-        { return pointToGrid( toThisFromOther(input, other.extr) ); }
+    index pointToIndex(const point& input, const ForgeScanEntity& other) const
+        { return pointToIndex( toThisFromOther(input, other.extr) ); }
 
     /// @brief Calculates the center point location for the voxel at the input index.
     /// @param input The (X, Y, Z) index in the grid to check.
     /// @return Center point of the voxel, relative to the VoxelGrid.
-    point gridToPoint(const index& input) const { return input.cast<double>().array() * properties.resolution; }
+    point indexToPoint(const index& input) const { return input.cast<double>().array() * properties.resolution; }
 
     /// @brief Calculates the center point location for the voxel at the input index.
     /// @param input The (X, Y, Z) index in the grid to check.
     /// @param extr  Frame to transform the resulting point to.
     /// @return Center point of the voxel, relative to the provided frame.
-    point gridToPoint(const index& input, const extrinsic& extr) const
-        { return toOtherFromThis(gridToPoint(input) , extr); }
+    point indexToPoint(const index& input, const extrinsic& extr) const
+        { return toOtherFromThis(indexToPoint(input) , extr); }
 
     /// @brief Calculates the center point location for the voxel at the input index.
     /// @param input The (X, Y, Z) index in the grid to check.
     /// @param extr  ForgeScanEntity to transform the resulting point to.
     /// @return Center point of the voxel, relative to the provided ForgeScanEntity.
-    point gridToPoint(const index& input, const ForgeScanEntity& other) const
-        { gridToPoint(input, other.extr); }
+    point indexToPoint(const index& input, const ForgeScanEntity& other) const
+        { indexToPoint(input, other.extr); }
 
     /// @brief Updates voxel on the line between the two specified points.
     /// @param update Update to apply to each voxel on the ray.

@@ -187,7 +187,7 @@ bool VoxelGrid::implementAddRayExact(const Voxel::Update& update, const point& r
     const point rs_adj = rs + normal * ts_adj;
 
     /// Current index within the grid.
-    index c_idx = pointToGrid(rs_adj);
+    index c_idx = pointToIndex(rs_adj);
 
     /// Direction of travel (increment or decrement) along the respective axis. Assume we increment.
     int step[3] = {1, 1, 1};
@@ -257,7 +257,7 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
     const point sensed_adj = sensed + normal * tn_adj;
 
     /// Current index within the grid.
-    index c_idx = pointToGrid(sensed_adj);
+    index c_idx = pointToIndex(sensed_adj);
 
     /// Direction of travel (increment or decrement) along the respective axis. Assume we increment.
     int step[3] = {1, 1, 1};

@@ -51,8 +51,8 @@ int main(int argc, char** argv)
 
             /// Transform xyz to the grid frame and then convert to a grid index.
             grid.toThisFromWorld(xyz);
-            grid_index = grid.pointToGrid(xyz);
-            grid.at(grid.pointToGrid(xyz)).update(update);
+            grid_index = grid.pointToIndex(xyz);
+            grid.at(grid.pointToIndex(xyz)).update(update);
         } while (q == 0);
     }
 
@@ -211,8 +211,8 @@ void testVoxelGridLocations(ForgeScan::VoxelGrid& grid)
     {
         p_grid = grid.toThisFromWorld(p);
 
-        c_idx = grid.pointToGrid(p_grid);
-        c_point = grid.gridToPoint(c_idx);
+        c_idx = grid.pointToIndex(p_grid);
+        c_point = grid.indexToPoint(c_idx);
 
         distance  = (p_grid - c_point).norm();
 

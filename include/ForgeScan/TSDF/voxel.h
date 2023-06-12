@@ -8,7 +8,7 @@
 
 
 namespace ForgeScan {
-namespace TSDF {
+namespace TSDF      {
 
 
 /// @brief Storage for data within a Voxel inside of a Grid.

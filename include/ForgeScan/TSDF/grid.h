@@ -15,7 +15,7 @@
 
 
 namespace ForgeScan {
-namespace TSDF {
+namespace TSDF      {
 
 
 /// @brief Container for a 3 dimensional grid of Voxels with its own rigid body reference frame.

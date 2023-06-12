@@ -10,7 +10,7 @@
 #include <ForgeScan/Primitives/primative_geometry.h>
 
 
-namespace ForgeScan {
+namespace ForgeScan   {
 namespace DepthSensor {
 
 

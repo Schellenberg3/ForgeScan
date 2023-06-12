@@ -10,7 +10,7 @@
 
 
 namespace ForgeScan {
-namespace TSDF {
+namespace TSDF      {
 
 
 class Grid;  // Promise to compiler that the Grid class will be defined later

@@ -4,7 +4,7 @@
 
 #include <ForgeScan/forgescan_types.h>
 
-namespace ForgeScan {
+namespace ForgeScan  {
 namespace Primitives {
 
 struct PrimitiveGeometry; // Forward declaration for the typedef

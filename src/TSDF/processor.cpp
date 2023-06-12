@@ -5,24 +5,24 @@ namespace ForgeScan {
 namespace TSDF {
 
 
-GridProcessor::GridProcessor(Grid& target)
+Processor::Processor(Grid& target)
 {
     setTarget(target);
 }
 
-inline void GridProcessor::setTarget(Grid& new_target)
+inline void Processor::setTarget(Grid& new_target)
 {
     target = &new_target;
     temp.resize(target->voxel_vector.size());
 }
 
-void inline GridProcessor::swap()
+void inline Processor::swap()
 {
     target->voxel_vector.swap(temp);
 }
 
 
-void GridProcessor::operation(const std::function<void(const index&)>& operation)
+void Processor::operation(const std::function<void(const index&)>& operation)
 {
     resetTempVector();
     index index(0, 0, 0);
@@ -41,7 +41,7 @@ void GridProcessor::operation(const std::function<void(const index&)>& operation
 }
 
 /*
-void GridProcessor::dilate(const grid_idx& element, const int& n)
+void Processor::dilate(const grid_idx& element, const int& n)
 {
     std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
     vector_idx element_vidx = 0;
@@ -60,7 +60,7 @@ void GridProcessor::dilate(const grid_idx& element, const int& n)
 }
 
 
-void GridProcessor::erode(const grid_idx& element, const int& n)
+void Processor::erode(const grid_idx& element, const int& n)
 {
     std::vector<grid_idx> neighbors(6, grid_idx(0, 0, 0));
     vector_idx element_vidx = 0;

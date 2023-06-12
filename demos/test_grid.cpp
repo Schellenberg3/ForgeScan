@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 
     std::cout << "Initialized the Grid!" << std::endl;
 
-    ForgeScan::TSDF::GridProcessor processor(grid);
+    ForgeScan::TSDF::Processor processor(grid);
 
     double x, y, z, q = 0;
     ForgeScan::point xyz;

@@ -16,18 +16,18 @@ namespace TSDF {
 class Grid;  // Promise to compiler that the Grid class will be defined later
 
 
-class GridProcessor {
+class Processor {
 public:
     /// @brief Pointer to a Grid to perform element-wise processes on.
     Grid *target = nullptr;
 
 public:
-    /// @brief Creates a GridProcessor without a target.
-    GridProcessor();
+    /// @brief Creates a Processor without a target.
+    Processor();
 
-    /// @brief Creates a GridProcessor to act of the provided target.
+    /// @brief Creates a Processor to act of the provided target.
     /// @param target Grid on which perform operations.
-    GridProcessor(Grid& target);
+    Processor(Grid& target);
 
     /// @brief Performs an elementwise operation, like erosion or dilation.
     /// @param operation Function to perform. Function must take a constant reference to an voxel.

@@ -264,7 +264,7 @@ public:
 
 public:
     /// @brief Accesses voxel operations on the voxels.
-    friend class GridProcessor;
+    friend class Processor;
 
     friend Grid loadGridHDF5(const std::filesystem::path&);
 

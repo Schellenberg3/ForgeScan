@@ -229,7 +229,7 @@ bool Grid::implementAddRayExact(const Voxel::Update& update, const point& rs, co
 }
 
 
-bool Grid::implementAddRayTSDF(const point &origin, const point &sensed, RayRecord& ray_record)
+bool Grid::implementAddRayTSDF(const point &origin, const point &sensed, Metrics::Ray& ray_metrics)
 {
     /// Far time for the TSDF ray, also the length from sensed to origin.
     double tf = 0;
@@ -281,9 +281,9 @@ bool Grid::implementAddRayTSDF(const point &origin, const point &sensed, RayReco
         /// First walk is from the adjusted negative location to the adjusted positive location.
         while (time[X] <= tp_adj || time[Y] <= tp_adj || time[Z] <= tp_adj) {
             voxel_ref = &at(c_idx);
-            if (voxel_ref->views == 0) ++ray_record.first;
+            if (voxel_ref->views == 0) ++ray_metrics.first;
             voxel_ref->update(update);
-            if (voxel_ref->var > ray_record.max_variance_update) ray_record.max_variance_update = voxel_ref->var;
+            if (voxel_ref->var > ray_metrics.max_variance_update) ray_metrics.max_variance_update = voxel_ref->var;
 
             if (time[X] < time[Y] && time[X] < time[Z]) {
                 time[X]  += delta[X];
@@ -298,14 +298,14 @@ bool Grid::implementAddRayTSDF(const point &origin, const point &sensed, RayReco
                 c_idx[Z] +=  step[Z];
                 update.dist = static_cast<float>(time[Z]);
             }
-            ++ray_record.updates;
-            ++ray_record.views;
+            ++ray_metrics.updates;
+            ++ray_metrics.views;
         }
 
         /// Second walk is from the adjusted positive location to the adjusted far location.
         while (time[X] <= tf_adj || time[Y] <= tf_adj || time[Z] <= tf_adj) {
             voxel_ref = &at(c_idx);
-            if (voxel_ref->views == 0) ++ray_record.first;
+            if (voxel_ref->views == 0) ++ray_metrics.first;
             voxel_ref->setViewUpdateFlag();
 
             if (time[X] < time[Y] && time[X] < time[Z]) {
@@ -318,7 +318,7 @@ bool Grid::implementAddRayTSDF(const point &origin, const point &sensed, RayReco
                 time[Z]  += delta[Z];
                 c_idx[Z] +=  step[Z];
             }
-            ++ray_record.views;
+            ++ray_metrics.views;
         }
     } catch (const std::out_of_range& e) {
         std::cerr << "[Grid::implementAddRayTSDF] " << e.what() << "\n";

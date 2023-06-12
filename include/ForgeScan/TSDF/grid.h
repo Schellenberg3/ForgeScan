@@ -9,7 +9,7 @@
 #include <ForgeScan/forgescan_types.h>
 #include <ForgeScan/TSDF/voxel.h>
 #include <ForgeScan/TSDF/processor.h>
-#include <ForgeScan/view_tracker.h>
+#include <ForgeScan/Metrics/sensor_record.h>
 #include <ForgeScan/DepthSensor/depth_sensor.h>
 #include <ForgeScan/Utilities/vector_memory_use.h>
 
@@ -137,7 +137,7 @@ public:
     /// @brief Properties for the voxel grid: spatial properties and truncation distance.
     const Properties properties;
 
-    ViewTracker views;
+    Metrics::SensorRecord views;
 
 public:
     Grid(const Properties& properties) :
@@ -252,8 +252,8 @@ public:
     /// @note If the start and end points are exactly equal then this function does nothing.
     bool addRayTSDF(const point &origin, const point &sensed) {
         point origin_this = toThisFromWorld(origin), sensed_this = toThisFromWorld(sensed);
-        /// RayRecord is needed for implementation, but unused in this function.
-        bool res = implementAddRayTSDF(origin_this, sensed_this, RayRecord());
+        /// Ray metrics are needed for implementation, but are unused in this function.
+        bool res = implementAddRayTSDF(origin_this, sensed_this, Metrics::Ray());
         updateViewCount();
         return res;
     }
@@ -272,18 +272,18 @@ public:
         point sensor_pose = sensor.extr.translation();
         toThisFromWorld(sensor_pose);
 
-        /// Set up tracking objects for the ViewTracker.
-        SensorRecord sensor_record( getTransformationTo(sensor), sensor.intr->size() );
-        RayRecord ray_record;
+        /// Set up tracking objects for the SensorRecord.
+        Metrics::Sensor sensor_metrics( getTransformationTo(sensor), sensor.intr->size() );
+        Metrics::Ray ray_metrics;
 
         /// The points variables is a 3xN matrix, add each one.
         auto n = points.cols();
         for (int i = 0; i < n; ++i) {
-            ray_record.reset();
-            implementAddRayTSDF(sensor_pose, points.col(i), ray_record);
-            sensor_record += ray_record;
+            ray_metrics.reset();
+            implementAddRayTSDF(sensor_pose, points.col(i), ray_metrics);
+            sensor_metrics += ray_metrics;
         }
-        views.add(sensor_record);
+        views.add(sensor_metrics);
         updateViewCount();
     }
 
@@ -353,9 +353,9 @@ private:
     /// @details Actual implementation of ray tracing. Defined in `src/voxel_grid_traversal.cpp`.
     /// @param origin Origin for the ray, local coordinates.
     /// @param sensed Sensed point, local coordinates.
-    /// @param ray_record Output variable. Statistics about how this ray changed the Grid.
+    /// @param ray_metrics Output variable. Statistics about how this ray changed the Grid.
     /// @returns False if the ray did not intersect the voxel grid. True otherwise.
-    bool implementAddRayTSDF(const point &origin, const point &sensed, RayRecord& ray_record);
+    bool implementAddRayTSDF(const point &origin, const point &sensed, Metrics::Ray& ray_metrics);
 
     /// @brief Updates view count in the voxel grid and resets voxels' viewed flags.
     /// @note  This function is slow! No matter what we must iterate the whole grid. Avoid calling it often.

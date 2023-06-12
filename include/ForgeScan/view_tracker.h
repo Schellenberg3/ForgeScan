@@ -34,7 +34,7 @@ struct RayRecord
 ///        Each ray contributes its own information to this from a RayRecord object.
 struct SensorRecord
 {
-    /// @brief Transformation, relative to the VoxelGrid.
+    /// @brief Transformation, relative to the Grid.
     extrinsic pose;
 
     size_t total_updates = 0;
@@ -52,7 +52,7 @@ struct SensorRecord
     SensorRecord() { pose.setIdentity(); }
 
     /// @brief Default constructor with pose information.
-    /// @param pose Pose of the sensor relative to the VoxelGrid.
+    /// @param pose Pose of the sensor relative to the Grid.
     /// @param size Number of points in the depth sensor.
     SensorRecord(const extrinsic& pose, const size_t& size) : pose(pose), size(size) { }
 
@@ -81,11 +81,11 @@ struct SensorRecord
     }
 };
 
-/// @brief Records pose of each view and statistics about about how it changed the VoxelGrid.
+/// @brief Records pose of each view and statistics about about how it changed the Grid.
 class ViewTracker
 {
 public:
-    /// @brief Ordered list of each View's pose and metrics about the information it added to the VoxelGrid.
+    /// @brief Ordered list of each View's pose and metrics about the information it added to the Grid.
     std::vector<SensorRecord> record;
 
     /// @brief Constructor. Pre-allocates space for 20 views.

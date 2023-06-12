@@ -1,40 +1,41 @@
-#ifndef FORGESCAN_GRID_PROCESSOR_H
-#define FORGESCAN_GRID_PROCESSOR_H
+#ifndef FORGESCAN_TSDF_PROCESSOR_H
+#define FORGESCAN_TSDF_PROCESSOR_H
 
 #include <vector>
 #include <functional>
 
 #include <ForgeScan/forgescan_types.h>
-#include <ForgeScan/voxel.h>
-#include <ForgeScan/voxel_grid.h>
+#include <ForgeScan/TSDF/voxel.h>
+#include <ForgeScan/TSDF/grid.h>
 
 
 namespace ForgeScan {
+namespace TSDF {
 
 
-class VoxelGrid;  // Promise to compiler that the VoxelGrid class will be defined later
+class Grid;  // Promise to compiler that the Grid class will be defined later
 
 
 class GridProcessor {
 public:
-    /// @brief Pointer to a VoxelGrid to perform element-wise processes on.
-    VoxelGrid *target = nullptr;
+    /// @brief Pointer to a Grid to perform element-wise processes on.
+    Grid *target = nullptr;
 
 public:
     /// @brief Creates a GridProcessor without a target.
     GridProcessor();
 
     /// @brief Creates a GridProcessor to act of the provided target.
-    /// @param target VoxelGrid on which perform operations.
-    GridProcessor(VoxelGrid& target);
+    /// @param target Grid on which perform operations.
+    GridProcessor(Grid& target);
 
     /// @brief Performs an elementwise operation, like erosion or dilation.
     /// @param operation Function to perform. Function must take a constant reference to an voxel.
     void operation(const std::function<void(const index&)>& operation);
 
-    /// @brief Changes what VoxelGrid the processor targets for element-wise processes.
-    /// @param target VoxelGrid on which perform operations.
-    inline void setTarget(VoxelGrid& new_target);
+    /// @brief Changes what Grid the processor targets for element-wise processes.
+    /// @param target Grid on which perform operations.
+    inline void setTarget(Grid& new_target);
 
 private:
     /// @brief Temporary vector that is the destination for changes when running an element-wise process.
@@ -60,6 +61,7 @@ private:
 };
 
 
+} // TSDF
 } // ForgeScan
 
-#endif // FORGESCAN_GRID_PROCESSOR_H
+#endif // FORGESCAN_TSDF_PROCESSOR_H

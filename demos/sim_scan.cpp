@@ -1,7 +1,7 @@
 #include <iostream>
 #include <filesystem>
 
-#include <ForgeScan/voxel_grid.h>
+#include <ForgeScan/TSDF/grid.h>
 #include <ForgeScan/DepthSensor/depth_sensor.h>
 
 #include <ForgeScan/Primitives/sphere.h>
@@ -67,9 +67,9 @@ int main(int argc, char* argv[])
     std::string strategy = random ? "random" : "uniform";
     std::cout << "Adding " << nv << " views. Using a " + strategy + " strategy" << std::endl;
 
-    // Set up the VoxelGrid as a 2m x 2m x 2m cube with 0.02 m resolution
-    ForgeScan::VoxelGrid::Properties properties(0.02, ForgeScan::Vector3ui(101, 101, 101));
-    ForgeScan::VoxelGrid grid(properties);
+    // Set up the Grid as a 2m x 2m x 2m cube with 0.02 m resolution
+    ForgeScan::TSDF::Grid::Properties properties(0.02, ForgeScan::Vector3ui(101, 101, 101));
+    ForgeScan::TSDF::Grid grid(properties);
     grid.translate(ForgeScan::translation(-1, -1, -1));
 
     ForgeScan::Primitives::Sphere sphere(0.45);

@@ -1,5 +1,5 @@
-# ifndef FORGESCAN_VOXEL_GRID_H
-# define FORGESCAN_VOXEL_GRID_H
+# ifndef FORGESCAN_TSDF_GRID_H
+# define FORGESCAN_TSDF_GRID_H
 
 #include <filesystem>
 #include <vector>
@@ -7,22 +7,24 @@
 #include <iostream>
 
 #include <ForgeScan/forgescan_types.h>
-#include <ForgeScan/voxel.h>
-#include <ForgeScan/grid_processor.h>
+#include <ForgeScan/TSDF/voxel.h>
+#include <ForgeScan/TSDF/processor.h>
 #include <ForgeScan/view_tracker.h>
 #include <ForgeScan/DepthSensor/depth_sensor.h>
 #include <ForgeScan/Utilities/vector_memory_use.h>
 
 
 namespace ForgeScan {
+namespace TSDF {
+
 
 /// @brief Container for a 3 dimensional grid of Voxels with its own rigid body reference frame.
 /// @note  The transformation is between the world and the grid's lower bound, not the center.
-class VoxelGrid : public ForgeScanEntity
+class Grid : public ForgeScanEntity
 {
 public:
 
-    /// @brief Storage for VoxelGrid properties.
+    /// @brief Storage for Grid properties.
     struct Properties
     {
         /// @brief Minimum and maximum truncation distances for rays added to the grid.
@@ -42,7 +44,7 @@ public:
         /// @param grid_size  Number of voxels in the grid in each direction. Default (101, 101, 101)
         /// @param min_dist Truncation for minimum distance from a sensed point. Default -0.20.
         /// @param max_dist Truncation for maximum distance from a sensed point. Default +0.20.
-        /// @throws `std::invalid_argument` If the parameters do not make a valid collection of VoxelGrid Properties. See `isValid` for details.
+        /// @throws `std::invalid_argument` If the parameters do not make a valid collection of Grid Properties. See `isValid` for details.
         Properties(const double& resolution = 0.02, const Vector3ui& grid_size = Vector3ui(101, 101, 101),
                    const double& min_dist = - 0.20, const double& max_dist = 0.20) :
             min_dist(-1 * std::abs(min_dist)), max_dist(std::abs(max_dist)), resolution(std::abs(resolution)), grid_size(grid_size)
@@ -60,7 +62,7 @@ public:
         /// @param min_dist Truncation for minimum distance from a sensed point. Default -0.20.
         /// @param max_dist Truncation for maximum distance from a sensed point. Default +0.20.
         /// @note This constructor may change the final values of `grid_size` and `dimensions` to a be valid pairing with the deduced resolution.
-        /// @throws `std::invalid_argument` If the parameters do not make a valid collection of VoxelGrid Properties. See `isValid` for details.
+        /// @throws `std::invalid_argument` If the parameters do not make a valid collection of Grid Properties. See `isValid` for details.
         Properties(const Vector3ui& grid_size, const Vector3d& dimensions = Vector3d(2, 2, 2),
                    const double& min_dist = 0.05, const double& max_dist = 0.05) :
             min_dist(-1 * std::abs(min_dist)), max_dist(std::abs(max_dist)), grid_size(grid_size), dimensions(dimensions)
@@ -110,20 +112,20 @@ public:
         /// @throws `std::invalid_argument` If any condition is not met.
         bool isValid() {
             if (resolution <= 0 || std::isnan(resolution)) {
-                throw std::invalid_argument("[VoxelGrid::Properties::isValid] Cannot have non-positive resolution.");
+                throw std::invalid_argument("[Grid::Properties::isValid] Cannot have non-positive resolution.");
             }
             if (std::isnan(max_dist) || std::isnan(min_dist) || max_dist < 0 || min_dist > 0) {
-                throw std::invalid_argument("[VoxelGrid::Properties::isValid] Minimum and maximum distance must both be positive numbers.");
+                throw std::invalid_argument("[Grid::Properties::isValid] Minimum and maximum distance must both be positive numbers.");
             }
             if ( (dimensions.array() <= 0).any() || dimensions.hasNaN() ) {
-                throw std::invalid_argument("[VoxelGrid::Properties::isValid] Each dimension must be greater than zero.");
+                throw std::invalid_argument("[Grid::Properties::isValid] Each dimension must be greater than zero.");
             }
             if ( (grid_size.array()  <= 0).any() ) {
-                throw std::invalid_argument("[VoxelGrid::Properties::isValid] The grid size in each direction must be greater than zero.");
+                throw std::invalid_argument("[Grid::Properties::isValid] The grid size in each direction must be greater than zero.");
             }
             Vector3d dimensions_check = ((grid_size.cast<double>().array() - 1) * resolution);
             if ( !dimensions.isApprox(dimensions_check) ) {
-                throw std::invalid_argument("[VoxelGrid::Properties::isValid] The grid size and resolution do not match the dimensions. "
+                throw std::invalid_argument("[Grid::Properties::isValid] The grid size and resolution do not match the dimensions. "
                                             "Dimensions should measure from the center of the first voxel (at the origin) to the center of "
                                             "the final voxel (at the dimensions). Is your dimension off by one by one voxel unit?"
                                             "Try calling the setDimensions method.");
@@ -138,18 +140,18 @@ public:
     ViewTracker views;
 
 public:
-    VoxelGrid(const Properties& properties) :
+    Grid(const Properties& properties) :
         ForgeScanEntity(), properties(properties),
         p2i_scale((properties.grid_size.cast<double>().array() - 1) / properties.dimensions.array())
         { setup(); }
 
-    VoxelGrid(const double& resolution, const Vector3ui& grid_size = Vector3ui(101, 101, 101),
+    Grid(const double& resolution, const Vector3ui& grid_size = Vector3ui(101, 101, 101),
               const double& min_dist = 0.05, const double& max_dist = 0.05) :
         ForgeScanEntity(), properties(resolution, grid_size, min_dist, max_dist),
         p2i_scale((properties.grid_size.cast<double>().array() - 1) / properties.dimensions.array())
         { setup(); }
 
-    VoxelGrid(const Vector3ui& grid_size = Vector3ui(101, 101, 101), const Vector3d& dimensions = Vector3d(1, 1, 1),
+    Grid(const Vector3ui& grid_size = Vector3ui(101, 101, 101), const Vector3d& dimensions = Vector3d(1, 1, 1),
               const double& min_dist = -0.05, const double& max_dist = 0.05) :
         ForgeScanEntity(),  properties(grid_size, dimensions, min_dist, max_dist),
         p2i_scale((properties.grid_size.cast<double>().array() - 1) / properties.dimensions.array())
@@ -177,19 +179,19 @@ public:
     /// @brief Accesses the voxels with bounds checking.
     /// @param voxel Index for the desired voxel.
     /// @return Writable access to the specified voxel.
-    /// @throw `std::out_of_range` if the requested index exceeds the VoxelGrid's size in any dimension.
+    /// @throw `std::out_of_range` if the requested index exceeds the Grid's size in any dimension.
     Voxel& at(const index& voxel) { return voxel_vector.at(indexToVectorThrowOutOfRange(voxel)); }
 
     /// @brief Accesses the voxels with bounds checking.
     /// @param voxel Index for the desired voxel.
     /// @return Read-only access to the specified voxel.
-    /// @throw `std::out_of_range` if the requested index exceeds the VoxelGrid's size in any dimension.
+    /// @throw `std::out_of_range` if the requested index exceeds the Grid's size in any dimension.
     const Voxel& at(const index& voxel) const { return voxel_vector.at(indexToVectorThrowOutOfRange(voxel)); }
 
     /// @brief Calculates to index that the point falls into within the grid.
     /// @param input Cartesian position of the point, relative to the voxel grid origin.
     /// @return Grid index that the point would be in.
-    /// @note The input MUST be transformed to the VoxelGrid's coordinate system for valid results.
+    /// @note The input MUST be transformed to the Grid's coordinate system for valid results.
     /// @note This does not promise that the index is valid. Use `valid` of the returned input to verify the results.
     index pointToIndex(const point& input) const { return (input.array() * p2i_scale).round().cast<size_t>(); }
 
@@ -212,7 +214,7 @@ public:
 
     /// @brief Calculates the center point location for the voxel at the input index.
     /// @param input The (X, Y, Z) index in the grid to check.
-    /// @return Center point of the voxel, relative to the VoxelGrid.
+    /// @return Center point of the voxel, relative to the Grid.
     point indexToPoint(const index& input) const { return input.cast<double>().array() * properties.resolution; }
 
     /// @brief Calculates the center point location for the voxel at the input index.
@@ -256,17 +258,17 @@ public:
         return res;
     }
 
-    /// @brief Adds the measurements from the sensor to the VoxelGrid, performing required coordinate transformations.
+    /// @brief Adds the measurements from the sensor to the Grid, performing required coordinate transformations.
     /// @param sensor Sensor with measurements to add.
     void addSensor(const DepthSensor::BaseDepthSensor&sensor)
     {
         /// Get the sensor's measured points, relative to the sensor frame, then transform
-        /// these points from the sensor frame to this VoxelGrid's frame.
+        /// these points from the sensor frame to this Grid's frame.
         point_list points = sensor.getAllPositions();
         toThisFromOther(points, sensor);
 
         /// Get the sensor's position (for the start of each ray) relative to the world frame, then
-        /// transform this to the VoxelGrid's frame.
+        /// transform this to the Grid's frame.
         point sensor_pose = sensor.extr.translation();
         toThisFromWorld(sensor_pose);
 
@@ -300,7 +302,7 @@ public:
     /// @brief Saves in the HDF5 format.
     /// @param fname File name. Automatically adds ".h5" when writing.
     /// @details This is the fastest save method and the recommended one if the grid is to be re-loaded
-    ///          into a VoxelGrid object.
+    ///          into a Grid object.
     /// @throws `std::invalid_argument` if there is an issue parsing the file name.
     void saveHDF5(const std::filesystem::path& fname) const;
 
@@ -308,7 +310,7 @@ public:
     /// @brief Accesses voxel operations on the voxels.
     friend class GridProcessor;
 
-    friend VoxelGrid loadVoxelGridHDF5(const std::filesystem::path&);
+    friend Grid loadGridHDF5(const std::filesystem::path&);
 
 private:
     /// @brief Container for Voxels. Users see a 3D grid, but this is really just a vector.
@@ -330,14 +332,14 @@ private:
     /// @brief Retrieves the vector index for the given X, Y, Z index in the grid.
     /// @param voxel Index for the desired voxel.
     /// @return Vector position for the desired voxel.
-    /// @throw `std::out_of_range` if the requested voxel index exceed the VoxelGrid's size in any dimension.
+    /// @throw `std::out_of_range` if the requested voxel index exceed the Grid's size in any dimension.
     size_t indexToVectorThrowOutOfRange(const index voxel) const {
         if (!valid(voxel))
             throw std::out_of_range("Requested voxel was not within the bounds of the 3D grid.");
         return indexToVector(voxel);
     }
 
-    /// @brief Updates voxel on the line between the two specified points. Points are in the VoxelGrid's frame.
+    /// @brief Updates voxel on the line between the two specified points. Points are in the Grid's frame.
     /// @details Actual implementation of ray tracing. Defined in `src/voxel_grid_traversal.cpp`.
     /// @param update Update to apply to each voxel on the ray.
     /// @param rs Ray start position, local coordinates.
@@ -351,7 +353,7 @@ private:
     /// @details Actual implementation of ray tracing. Defined in `src/voxel_grid_traversal.cpp`.
     /// @param origin Origin for the ray, local coordinates.
     /// @param sensed Sensed point, local coordinates.
-    /// @param ray_record Output variable. Statistics about how this ray changed the VoxelGrid.
+    /// @param ray_record Output variable. Statistics about how this ray changed the Grid.
     /// @returns False if the ray did not intersect the voxel grid. True otherwise.
     bool implementAddRayTSDF(const point &origin, const point &sensed, RayRecord& ray_record);
 
@@ -385,8 +387,10 @@ private:
 /// @param fname File name. Automatically adds ".h5" when searching.
 /// @throws `HighFive::Exception` if HighFive encounters an issue while reading the data.
 /// @throws `std::invalid_argument` if there is an issue parsing the file name.
-VoxelGrid loadVoxelGridHDF5(const std::filesystem::path& fname);
+Grid loadGridHDF5(const std::filesystem::path& fname);
 
+
+} // TSDF
 } // ForgeScan
 
-#endif // FORGESCAN_VOXEL_GRID_H
+#endif // FORGESCAN_TSDF_GRID_H

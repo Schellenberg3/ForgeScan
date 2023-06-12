@@ -1,15 +1,16 @@
-#include <ForgeScan/grid_processor.h>
+#include <ForgeScan/TSDF/processor.h>
 
 
 namespace ForgeScan {
+namespace TSDF {
 
 
-GridProcessor::GridProcessor(VoxelGrid& target)
+GridProcessor::GridProcessor(Grid& target)
 {
     setTarget(target);
 }
 
-inline void GridProcessor::setTarget(VoxelGrid& new_target)
+inline void GridProcessor::setTarget(Grid& new_target)
 {
     target = &new_target;
     temp.resize(target->voxel_vector.size());
@@ -83,4 +84,6 @@ void GridProcessor::erode(const grid_idx& element, const int& n)
 }
 */
 
+
+} // TSDF
 } // ForgeScan

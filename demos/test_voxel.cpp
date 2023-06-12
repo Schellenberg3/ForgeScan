@@ -1,7 +1,7 @@
 #include <iostream>
 #include <bitset>
 
-#include <ForgeScan/voxel.h>
+#include <ForgeScan/TSDF/voxel.h>
 
 
 using namespace ForgeScan;
@@ -17,11 +17,11 @@ void display_vector_memory_size_and_limits();
 
 int main()
 {
-    Voxel t;
+    TSDF::Voxel t;
 
-    Voxel::Update u0(10);
-    Voxel::Update u1(5);
-    Voxel::Update u2(-5);
+    TSDF::Voxel::Update u0(10);
+    TSDF::Voxel::Update u1(5);
+    TSDF::Voxel::Update u2(-5);
 
     t.update(u0);
     t.update(u1);
@@ -44,7 +44,7 @@ int main()
 
 void display_voxel_memory_size_and_limits()
 {
-    std::cout << "\nSize of Voxel:\t" << sizeof(Voxel);
+    std::cout << "\nSize of Voxel:\t" << sizeof(TSDF::Voxel);
     std::cout << "\nSize of float:\t" << sizeof(float);
     std::cout << "\nSize of uint:\t" << sizeof(unsigned int);
     std::cout << "\nSize of ushort:\t" << sizeof(unsigned short);

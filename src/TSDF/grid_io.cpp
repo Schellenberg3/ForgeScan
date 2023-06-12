@@ -6,10 +6,10 @@
 #define H5_USE_EIGEN 1
 #include <highfive/H5File.hpp>
 
-#include <ForgeScan/voxel_grid.h>
+#include <ForgeScan/TSDF/grid.h>
 
 
-/// @brief Helper for VoxelGrid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_vector`.
+/// @brief Helper for Grid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_vector`.
 static HighFive::CompoundType create_compound_Voxel() {
     return {
         {"views",    HighFive::AtomicType<ForgeScan::view_count>{}},
@@ -24,15 +24,17 @@ static HighFive::CompoundType create_compound_Voxel() {
         {"rho", HighFive::AtomicType<ForgeScan::density>{}}
     };
 }
-HIGHFIVE_REGISTER_TYPE(ForgeScan::Voxel, create_compound_Voxel)
+HIGHFIVE_REGISTER_TYPE(ForgeScan::TSDF::Voxel, create_compound_Voxel)
 
 
 namespace ForgeScan {
+namespace TSDF {
 
-void VoxelGrid::saveHDF5(const std::filesystem::path& fname) const
+
+void Grid::saveHDF5(const std::filesystem::path& fname) const
 {
     if ( !fname.has_filename() )
-        throw std::invalid_argument("[VoxelGrid::saveHDF5] Invalid file name! Could not identify filename.");
+        throw std::invalid_argument("[Grid::saveHDF5] Invalid file name! Could not identify filename.");
     try
     {
         HighFive::File file(fname.string() + ".h5", HighFive::File::Truncate);
@@ -40,7 +42,7 @@ void VoxelGrid::saveHDF5(const std::filesystem::path& fname) const
         auto VoxelType = create_compound_Voxel();
         VoxelType.commit(file, "Voxel");
 
-        auto g1 = file.createGroup("VoxelGrid");
+        auto g1 = file.createGroup("Grid");
 
         g1.createDataSet("VoxelData", voxel_vector);
 
@@ -57,10 +59,10 @@ void VoxelGrid::saveHDF5(const std::filesystem::path& fname) const
     }
 }
 
-void VoxelGrid::saveXDMF(const std::filesystem::path &fname) const
+void Grid::saveXDMF(const std::filesystem::path &fname) const
 {
     if ( !fname.has_filename() )
-        throw std::invalid_argument("[VoxelGrid::saveXDMF] Invalid file name! Could not identify filename.");
+        throw std::invalid_argument("[Grid::saveXDMF] Invalid file name! Could not identify filename.");
     const size_t num_voxels = voxel_vector.size();
     try
     {
@@ -69,7 +71,7 @@ void VoxelGrid::saveXDMF(const std::filesystem::path &fname) const
         auto VoxelType = create_compound_Voxel();
         VoxelType.commit(file, "Voxel");
 
-        auto g1 = file.createGroup("VoxelGrid");
+        auto g1 = file.createGroup("Grid");
 
         std::vector<update_count> vec_updates;
         std::vector<view_count>   vec_views;
@@ -124,7 +126,7 @@ void VoxelGrid::saveXDMF(const std::filesystem::path &fname) const
 }
 
 
-void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
+void Grid::writeXDMF(const std::filesystem::path &fname) const
 {
     std::string hdf5_fname = fname.filename().string() + ".h5";
 
@@ -147,8 +149,8 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
         "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\"[]>\n"
         "<Xdmf xmlns:xi=\"http://www.w3.org/2003/XInclude\" Version=\"2.2\">\n"
         " <Domain>\n"
-        "  <!-- *************** START OF VOXELGRID *************** -->\n"
-        "  <Grid Name=\"VOXELGRID\" GridType=\"Uniform\">\n"
+        "  <!-- *************** START OF GRID *************** -->\n"
+        "  <Grid Name=\"GRID\" GridType=\"Uniform\">\n"
         "    <Geometry Type=\"ORIGIN_DXDYDZ\">\n"
         "      <Topology TopologyType=\"3DCoRectMesh\" Dimensions=\"" << adj_size.transpose() << " \"></Topology>\n" <<
         "      <!-- Origin  Z, Y, X -->\n"
@@ -161,80 +163,80 @@ void VoxelGrid::writeXDMF(const std::filesystem::path &fname) const
         //  Updates
         "    <Attribute Name=\"Updates\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
         "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Int\" Precision=\"2\" >\n"
-        "        " << hdf5_fname << ":/VoxelGrid/Updates\n"
+        "        " << hdf5_fname << ":/Grid/Updates\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Views
         "    <Attribute Name=\"Views\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
         "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Int\" Precision=\"2\" >\n"
-        "        " << hdf5_fname << ":/VoxelGrid/Views\n"
+        "        " << hdf5_fname << ":/Grid/Views\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Minimum
         "    <Attribute Name=\"Minimum\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
         "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
-        "        " << hdf5_fname << ":/VoxelGrid/Minimum\n"
+        "        " << hdf5_fname << ":/Grid/Minimum\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Average
         "    <Attribute Name=\"Average\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
         "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
-        "        " << hdf5_fname << ":/VoxelGrid/Average\n"
+        "        " << hdf5_fname << ":/Grid/Average\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Variance
         "    <Attribute Name=\"Variance\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
         "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
-        "        " << hdf5_fname << ":/VoxelGrid/Variance\n"
+        "        " << hdf5_fname << ":/Grid/Variance\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Centrality
         "    <Attribute Name=\"Centrality\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
         "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
-        "        " << hdf5_fname << ":/VoxelGrid/Centrality\n"
+        "        " << hdf5_fname << ":/Grid/Centrality\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Normality
         "    <Attribute Name=\"Normality\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
         "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
-        "        " << hdf5_fname << ":/VoxelGrid/Normality\n"
+        "        " << hdf5_fname << ":/Grid/Normality\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         //  Density
         "    <Attribute Name=\"Density\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
         "      <DataItem Format=\"HDF\" Dimensions=\"" << num_voxels << "\" NumberType=\"Float\" Precision=\"8\" >\n"
-        "        " << hdf5_fname << ":/VoxelGrid/Density\n"
+        "        " << hdf5_fname << ":/Grid/Density\n"
         "      </DataItem>\n"
         "    </Attribute>\n"
 
         " </Grid>\n"
-        " <!-- *************** END OF VOXELGRID *************** -->\n"
+        " <!-- *************** END OF GRID *************** -->\n"
         " </Domain>\n"
         "</Xdmf>\n"
         << std::endl;
     }
     catch (std::ofstream::failure e)
     {
-        std::cerr << "Encountered error in VoxelGrid::writeXDMF. See message:\n" << e.what();
+        std::cerr << "Encountered error in Grid::writeXDMF. See message:\n" << e.what();
     }
 }
 
-VoxelGrid loadVoxelGridHDF5(const std::filesystem::path& fname)
+Grid loadGridHDF5(const std::filesystem::path& fname)
 {
     if ( !fname.has_filename() )
-        throw std::invalid_argument("[VoxelGrid::loadHDF5] Invalid file name! Could not identify filename.");
+        throw std::invalid_argument("[Grid::loadHDF5] Invalid file name! Could not identify filename.");
     try
     {
         HighFive::File file(fname.string() + ".h5", HighFive::File::ReadOnly);
-        VoxelGrid::Properties properties;
-        auto g1 = file.getGroup("VoxelGrid");
+        Grid::Properties properties;
+        auto g1 = file.getGroup("Grid");
 
         auto res = g1.getAttribute("Resolution");
         res.read(properties.resolution);
@@ -255,7 +257,7 @@ VoxelGrid loadVoxelGridHDF5(const std::filesystem::path& fname)
         auto extr = g1.getAttribute("Extrinsic");
         extr.read(new_extr.matrix());
 
-        VoxelGrid new_grid(properties);
+        Grid new_grid(properties);
 
         auto dset = g1.getDataSet("VoxelData");
         dset.read(new_grid.voxel_vector);
@@ -272,5 +274,5 @@ VoxelGrid loadVoxelGridHDF5(const std::filesystem::path& fname)
 }
 
 
+} // TSDF
 } // ForgeScan
-

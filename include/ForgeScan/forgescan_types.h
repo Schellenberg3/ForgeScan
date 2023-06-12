@@ -34,7 +34,7 @@ typedef uint16_t view_count;
 
 /// @brief A distance value stored in a Voxel. Negative values indicate the voxel is behind the
 ///        surface while positive ones indicate it is in from of the surface; the surface is implicitly
-///        represented by the zero-level of the VoxelGrid.
+///        represented by the zero-level of the Grid.
 typedef float voxel_dist;
 
 /// @brief Centrality score for a Voxel. Score decreases to zero at the edge of the sensor's FOV and is

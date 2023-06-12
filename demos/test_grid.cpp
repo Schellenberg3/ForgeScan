@@ -4,41 +4,39 @@
 #include <string>
 #include <vector>
 
-#include <ForgeScan/voxel_grid.h>
-#include <ForgeScan/grid_processor.h>
+#include <ForgeScan/TSDF/grid.h>
+#include <ForgeScan/TSDF/processor.h>
 
 
-using namespace ForgeScan;
-
-/// @brief Tests initializing, setting, validating, and copying the VoxelGridProperties class.
-void testVoxelGridProperties();
+/// @brief Tests initializing, setting, validating, and copying the Grid::Properties class.
+void testGridProperties();
 
 /// @brief Tests adding specific locations around the boundaries of a voxel grid. Checks that points were placed in
 ///        the expected voxels.
-void testVoxelGridLocations(ForgeScan::VoxelGrid& grid);
+void testGridLocations(ForgeScan::TSDF::Grid& grid);
 
-/// @brief Simple script for manually adding points to a VoxelGrid within [-1,-1,-1] and [+1,+1,+1].
-/// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
+/// @brief Simple script for manually adding points to a Grid within [-1,-1,-1] and [+1,+1,+1].
+/// @details  Demonstrates the Grid `*.HDF5` format and ability to add linearly spaced points.
 int main(int argc, char** argv)
 {
-    testVoxelGridProperties();
+    testGridProperties();
 
-    /// Create our testing VoxelGrid object
-    VoxelGrid::Properties properties(0.02, Vector3ui(101, 101, 101));
-    VoxelGrid grid(properties);
-    grid.translate( translation(-1, -1, -1) );
+    /// Create our testing Grid object
+    ForgeScan::TSDF::Grid::Properties properties(0.02, ForgeScan::index(101, 101, 101));
+    ForgeScan::TSDF::Grid grid(properties);
+    grid.translate( ForgeScan::translation(-1, -1, -1) );
 
-    testVoxelGridLocations(grid);
+    testGridLocations(grid);
 
-    Voxel::Update update(1);
+    ForgeScan::TSDF::Voxel::Update update(1);
 
-    std::cout << "Initialized the VoxelGrid!" << std::endl;
+    std::cout << "Initialized the Grid!" << std::endl;
 
-    GridProcessor processor(grid);
+    ForgeScan::TSDF::GridProcessor processor(grid);
 
     double x, y, z, q = 0;
-    Vector3d xyz;
-    Vector3ui grid_index;
+    ForgeScan::point xyz;
+    ForgeScan::index grid_index;
     if (false) {
         do
         {
@@ -102,7 +100,7 @@ int main(int argc, char** argv)
     grid.saveHDF5(hdf5_path);
 
     std::cout << "Loading from HDF5..."  << std::endl;
-    VoxelGrid new_grid = loadVoxelGridHDF5(hdf5_path);
+    ForgeScan::TSDF::Grid new_grid = ForgeScan::TSDF::loadGridHDF5(hdf5_path);
 
     auto xdmf_path = paraview_share /= "test_points";
     std::cout << "Saving to XDMF..."  << std::endl;
@@ -112,27 +110,27 @@ int main(int argc, char** argv)
     return EXIT_SUCCESS;
 }
 
-void testVoxelGridProperties()
+void testGridProperties()
 {
     /// Default is ok.
-    VoxelGrid::Properties p0;
+    ForgeScan::TSDF::Grid::Properties p0;
     p0.isValid();
 
     /// Copy of an ok one is ok.
-    VoxelGrid::Properties p1(p0);
+    ForgeScan::TSDF::Grid::Properties p1(p0);
 
     /// resolution and grid_size is okay.
-    VoxelGrid::Properties p2(0.1, Vector3ui(18, 19, 20));
+    ForgeScan::TSDF::Grid::Properties p2(0.1, ForgeScan::index(18, 19, 20));
 
     /// grid_size and resolution is okay.
-    VoxelGrid::Properties p3(Vector3ui(18, 19, 20), Vector3d(1, 1.5, 2));
+    ForgeScan::TSDF::Grid::Properties p3(ForgeScan::index(18, 19, 20), Eigen::Vector3d(1, 1.5, 2));
 
     /// The setups I typically use:
-    VoxelGrid::Properties p4(Vector3ui(101, 101, 101), Vector3d(2, 2, 2));
-    VoxelGrid::Properties p5(0.02, Vector3ui(101, 101, 101));
+    ForgeScan::TSDF::Grid::Properties p4(ForgeScan::index(101, 101, 101), Eigen::Vector3d(2, 2, 2));
+    ForgeScan::TSDF::Grid::Properties p5(0.02, ForgeScan::index(101, 101, 101));
 
     /// Test failing on resolution
-    VoxelGrid::Properties p_res1, p_res2;
+    ForgeScan::TSDF::Grid::Properties p_res1, p_res2;
     p_res1.resolution = -1;
     try { p_res1.isValid(); } catch (const std::invalid_argument& e) {
         std::cout << "\n[Resolution] Should error on non-positive resolution:\n" << e.what() << std::endl;
@@ -143,7 +141,7 @@ void testVoxelGridProperties()
     }
 
     /// Test failing on min/max
-    VoxelGrid::Properties p_mm1, p_mm2;
+    ForgeScan::TSDF::Grid::Properties p_mm1, p_mm2;
     p_mm1.min_dist =  100;
     p_mm2.max_dist = -100;
     try { p_mm1.isValid(); } catch (const std::invalid_argument& e) {
@@ -154,26 +152,26 @@ void testVoxelGridProperties()
     }
 
     /// Test failing on dimensions less than or equal to zero
-    VoxelGrid::Properties p_dims;
+    ForgeScan::TSDF::Grid::Properties p_dims;
     p_dims.dimensions[0] = -10;
     try { p_dims.isValid(); } catch (const std::invalid_argument& e) {
         std::cout << "\n[Dimensions] Should error on dimension greater than zero check:\n" << e.what() << std::endl;
     }
 
     /// Test failing on grid_size less than or equal to zero
-    VoxelGrid::Properties p_gs;
+    ForgeScan::TSDF::Grid::Properties p_gs;
     p_gs.grid_size[0] = 0;
     try { p_gs.isValid(); } catch (const std::invalid_argument& e) {
         std::cout << "\n[GridSize] Should error on grid_size greater than zero check:\n" << e.what() << std::endl;
     }
 
-    /// Test failing on copy of an invalid VoxelGrid::Properties
-    VoxelGrid::Properties p_invalid;
+    /// Test failing on copy of an invalid Grid::Properties
+    ForgeScan::TSDF::Grid::Properties p_invalid;
     p_invalid.dimensions.array() *= -1;
-    try { VoxelGrid::Properties p_copy(p_invalid); } catch (const std::invalid_argument& e) {
+    try { ForgeScan::TSDF::Grid::Properties p_copy(p_invalid); } catch (const std::invalid_argument& e) {
         std::cout << "\n[Copy::Dimensions] Should error on dimensions greater than zero check:\n" << e.what() << std::endl;
     }
-    VoxelGrid::Properties p_copy;
+    ForgeScan::TSDF::Grid::Properties p_copy;
     p_invalid.resolution *= -1;
     try { p_copy = p_invalid; } catch (const std::invalid_argument& e) {
         std::cout << "\n[Copy::Resolution] Should error on resolution non-positive check:\n" << e.what() << std::endl;
@@ -181,30 +179,30 @@ void testVoxelGridProperties()
 }
 
 
-void testVoxelGridLocations(ForgeScan::VoxelGrid& grid)
+void testGridLocations(ForgeScan::TSDF::Grid& grid)
 {
     /// Maximum distance the point should be moved when it is rounded to the nearest voxel.
     const double max_expected_distance = (std::sqrt(3) * 0.5 * grid.properties.resolution) * 1.001;
     double distance = 0;
 
-    std::vector<point> inputs {
-        point(0, 0, 0),                // [50, 50, 50]
-        point(-1, -1, -1),             // [0, 0, 0]
-        point(-1.009, -1.009, -1.009), // [0, 0, 0]
-        point(-0.991, -0.991, -0.991), // [0, 0, 0]
-        point(-0.990, -0.990, -0.990), // [0, 0, 0]
-        point(-0.989, -0.989, -0.989), // [1, 1, 1]
-        point(-0.980, -0.980, -0.980), // [1, 1, 1]
-        point(-0.979, -0.979, -0.979), // [1, 1, 1]
-        point(1, 1, 1),          // [100, 100, 100]
-        point(1.01, 1.01, 1.01), // [100, 100, 100]
-        point(0.99, 0.99, 0.99), // [100, 100, 100]
+    std::vector<ForgeScan::point> inputs {
+        ForgeScan::point(0, 0, 0),                // [50, 50, 50]
+        ForgeScan::point(-1, -1, -1),             // [0, 0, 0]
+        ForgeScan::point(-1.009, -1.009, -1.009), // [0, 0, 0]
+        ForgeScan::point(-0.991, -0.991, -0.991), // [0, 0, 0]
+        ForgeScan::point(-0.990, -0.990, -0.990), // [0, 0, 0]
+        ForgeScan::point(-0.989, -0.989, -0.989), // [1, 1, 1]
+        ForgeScan::point(-0.980, -0.980, -0.980), // [1, 1, 1]
+        ForgeScan::point(-0.979, -0.979, -0.979), // [1, 1, 1]
+        ForgeScan::point(1, 1, 1),          // [100, 100, 100]
+        ForgeScan::point(1.01, 1.01, 1.01), // [100, 100, 100]
+        ForgeScan::point(0.99, 0.99, 0.99), // [100, 100, 100]
     };
-    index c_idx(0, 0, 0);
-    point  c_point(0, 0, 0);
+    ForgeScan::index c_idx(0, 0, 0);
+    ForgeScan::point  c_point(0, 0, 0);
 
     /// The point in the grid's reference frame.
-    point  p_grid(0, 0, 0);
+    ForgeScan::point  p_grid(0, 0, 0);
 
     int i = 0;
     for (const auto& p : inputs)

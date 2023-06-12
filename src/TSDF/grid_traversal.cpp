@@ -1,12 +1,13 @@
-#include <ForgeScan/voxel_grid.h>
+#include <ForgeScan/TSDF/grid.h>
 #include <iostream>
 #include <numeric>
 
 
 namespace ForgeScan {
+namespace TSDF {
 
 
-/// @details This implements the ray traversal methods declared in the VoxelGrid class.
+/// @details This implements the ray traversal methods declared in the Grid class.
 ///
 /// The methods in this file follow the the Amanatides-Woo algorithm for fast voxel traversal. See:
 ///     http://www.cse.yorku.ca/~amana/research/grid.pdf
@@ -15,7 +16,7 @@ namespace ForgeScan {
 /// long the distance we "walk" from the given start position. We then consider "walking" each cartesian direction
 /// and find the next voxel by selecting the direction that we have spent the least time "walking" along.
 ///
-/// For all of these methods and the axis-aligned bounding-box (AABB) check, it is important that the VoxelGrid is
+/// For all of these methods and the axis-aligned bounding-box (AABB) check, it is important that the Grid is
 /// aligned to the axis and that any provided points are transformed to the relevant coordinate system. Other code
 /// should handle this well before these functions are called. But it is important to know if you expand or edit these.
 
@@ -160,7 +161,7 @@ static inline void correctTraversalInfo(int step[3], double delta[3], double tim
 }
 
 
-bool VoxelGrid::implementAddRayExact(const Voxel::Update& update, const point& rs, const point& re)
+bool Grid::implementAddRayExact(const Voxel::Update& update, const point& rs, const point& re)
 {
     /// Start time and end time (also length) for the user's ray.
     double ts = 0, te = 0;
@@ -222,13 +223,13 @@ bool VoxelGrid::implementAddRayExact(const Voxel::Update& update, const point& r
             }
         }
     } catch (const std::out_of_range& e) {
-        std::cerr << "[VoxelGrid::implementAddRayExact] " << e.what() << "\n";
+        std::cerr << "[Grid::implementAddRayExact] " << e.what() << "\n";
     }
     return true;
 }
 
 
-bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, RayRecord& ray_record)
+bool Grid::implementAddRayTSDF(const point &origin, const point &sensed, RayRecord& ray_record)
 {
     /// Far time for the TSDF ray, also the length from sensed to origin.
     double tf = 0;
@@ -320,10 +321,11 @@ bool VoxelGrid::implementAddRayTSDF(const point &origin, const point &sensed, Ra
             ++ray_record.views;
         }
     } catch (const std::out_of_range& e) {
-        std::cerr << "[VoxelGrid::implementAddRayTSDF] " << e.what() << "\n";
+        std::cerr << "[Grid::implementAddRayTSDF] " << e.what() << "\n";
     }
     return true;
 }
 
 
+} // TSDF
 } // ForgeScan

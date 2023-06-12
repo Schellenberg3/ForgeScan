@@ -6,8 +6,8 @@
 
 #include <Eigen/Dense>
 
-#include <ForgeScan/voxel_grid.h>
-#include <ForgeScan/grid_processor.h>
+#include <ForgeScan/TSDF/grid.h>
+#include <ForgeScan/TSDF/processor.h>
 #include <ForgeScan/Utilities/simple_timer.h>
 #include <ForgeScan/Utilities/arg_parser.h>
 
@@ -17,10 +17,10 @@
 /// @param n    Number of lines to add.
 /// @param exact Boolean flag, if true will to use exact line else the TSDF line is plotted. Default false.
 /// @param seed  Seed for the RNG. Default is 1.
-void addPseudoRandomLines(ForgeScan::VoxelGrid& grid, const int& n, const bool& exact = false, const int& seed = 1);
+void addPseudoRandomLines(ForgeScan::TSDF::Grid& grid, const int& n, const bool& exact = false, const int& seed = 1);
 
-/// @brief Simple script for manually adding points to a VoxelGrid within [-1,-1,-1] and [+1,+1,+1].
-/// @details  Demonstrates the VoxelGrid `*.HDF5` format and ability to add linearly spaced points.
+/// @brief Simple script for manually adding points to a Grid within [-1,-1,-1] and [+1,+1,+1].
+/// @details  Demonstrates the Grid `*.HDF5` format and ability to add linearly spaced points.
 int main(int argc, char** argv)
 {
     ForgeScan::Utilities::ArgParser parser(argc, argv);
@@ -35,22 +35,22 @@ int main(int argc, char** argv)
 
     bool exact = parser.cmdOptionExists("-e");
 
-    /// Set up the VoxelGrid as a 2m x 2m x 2m cube with 0.02 m resolution, positioned at the world origin.
-    ForgeScan::VoxelGrid::Properties properties(0.02, ForgeScan::Vector3ui(101, 101, 101), -0.2, 0.2);
-    ForgeScan::VoxelGrid grid_random(properties);
+    /// Set up the Grid as a 2m x 2m x 2m cube with 0.02 m resolution, positioned at the world origin.
+    ForgeScan::TSDF::Grid::Properties properties(0.02, ForgeScan::Vector3ui(101, 101, 101), -0.2, 0.2);
+    ForgeScan::TSDF::Grid grid_random(properties);
 
     /// Add upper and lower boundary markers to the random grid.
-    grid_random.at(ForgeScan::index(0, 0, 0)).update(ForgeScan::Voxel::Update(1, 0, 0, 0));
-    grid_random.at(ForgeScan::index(100, 100, 100)).update(ForgeScan::Voxel::Update(1, 0, 0, 0));
+    grid_random.at(ForgeScan::index(0, 0, 0)).update(ForgeScan::TSDF::Voxel::Update(1, 0, 0, 0));
+    grid_random.at(ForgeScan::index(100, 100, 100)).update(ForgeScan::TSDF::Voxel::Update(1, 0, 0, 0));
 
     addPseudoRandomLines(grid_random, n, exact, seed);
 
     return EXIT_SUCCESS;
 }
 
-void addPseudoRandomLines(ForgeScan::VoxelGrid& grid, const int& n, const bool& exact, const int& seed)
+void addPseudoRandomLines(ForgeScan::TSDF::Grid& grid, const int& n, const bool& exact, const int& seed)
 {
-    ForgeScan::Voxel::Update update(1, 0, 0, 0);
+    ForgeScan::TSDF::Voxel::Update update(1, 0, 0, 0);
 
     std::vector<Eigen::Vector3d> s_points, e_points;
     s_points.reserve(n);

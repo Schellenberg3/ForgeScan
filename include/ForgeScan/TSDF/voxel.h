@@ -1,5 +1,5 @@
-#ifndef FORGESCAN_VOXEL_H
-#define FORGESCAN_VOXEL_H
+#ifndef FORGESCAN_TSDF_VOXEL_H
+#define FORGESCAN_TSDF_VOXEL_H
 
 #include <ForgeScan/forgescan_types.h>
 
@@ -8,12 +8,13 @@
 
 
 namespace ForgeScan {
+namespace TSDF {
 
 
-/// @brief Storage for data within a Voxel inside of a VoxelGrid.
+/// @brief Storage for data within a Voxel inside of a Grid.
 struct Voxel
 {
-    /// @brief Storage for data used in updating a Voxel inside a VoxelGrid.
+    /// @brief Storage for data used in updating a Voxel inside a Grid.
     struct Update
     {
         voxel_dist dist;
@@ -112,6 +113,7 @@ struct Voxel
 };
 
 
+} // TSDF
 } // ForgeScan
 
-#endif // FORGESCAN_VOXEL_H
+#endif // FORGESCAN_TSDF_VOXEL_H

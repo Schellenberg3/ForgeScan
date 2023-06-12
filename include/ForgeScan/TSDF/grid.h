@@ -200,7 +200,7 @@ public:
     /// @param extr  Frame which the point is in.
     /// @return Grid index that the point would be in.
     /// @note This does not promise that the index is valid. Use `valid` of the returned input to verify the results.
-    index pointToIndex(const point& input, const extrinsic& extr) const 
+    index pointToIndex(const point& input, const extrinsic& extr) const
         { return pointToIndex( toThisFromOther(input, extr) ); }
 
     /// @brief Calculates to index that the point falls into within the grid.
@@ -231,64 +231,20 @@ public:
     point indexToPoint(const index& input, const ForgeScanEntity& other) const
         { indexToPoint(input, other.extr); }
 
-    /// @brief Updates voxel on the line between the two specified points.
-    /// @param update Update to apply to each voxel on the ray.
-    /// @param rs Ray start position, world coordinates.
-    /// @param re Ray end position, world coordinates.
-    /// @returns False if the ray did not intersect the voxel grid. True otherwise.
-    /// @note If the start and end points are exactly equal then this function does nothing.
-    bool addRayExact(const Voxel::Update& update, const point& rs, const point& re) {
-        point rs_this = toThisFromWorld(rs), re_this = toThisFromWorld(re);
-        bool res = implementAddRayExact(update, rs_this, re_this);
-        updateViewCount();
-        return res;
-    }
-
-    /// @brief Adds data to the grid, updating voxels near the sensed point with truncated distance and marking the voxels
-    ///        between the origin and positive truncation as viewed.
-    /// @param origin Origin for the ray, world coordinates.
-    /// @param sensed Sensed point, world coordinates.
-    /// @returns False if the ray did not intersect the voxel grid. True otherwise.
-    /// @note If the start and end points are exactly equal then this function does nothing.
-    bool addRayTSDF(const point &origin, const point &sensed) {
-        point origin_this = toThisFromWorld(origin), sensed_this = toThisFromWorld(sensed);
-        /// Ray metrics are needed for implementation, but are unused in this function.
-        bool res = implementAddRayTSDF(origin_this, sensed_this, Metrics::Ray());
-        updateViewCount();
-        return res;
-    }
-
-    /// @brief Adds the measurements from the sensor to the Grid, performing required coordinate transformations.
-    /// @param sensor Sensor with measurements to add.
-    void addSensor(const DepthSensor::BaseDepthSensor&sensor)
-    {
-        /// Get the sensor's measured points, relative to the sensor frame, then transform
-        /// these points from the sensor frame to this Grid's frame.
-        point_list points = sensor.getAllPositions();
-        toThisFromOther(points, sensor);
-
-        /// Get the sensor's position (for the start of each ray) relative to the world frame, then
-        /// transform this to the Grid's frame.
-        point sensor_pose = sensor.extr.translation();
-        toThisFromWorld(sensor_pose);
-
-        /// Set up tracking objects for the SensorRecord.
-        Metrics::Sensor sensor_metrics( getTransformationTo(sensor), sensor.intr->size() );
-        Metrics::Ray ray_metrics;
-
-        /// The points variables is a 3xN matrix, add each one.
-        auto n = points.cols();
-        for (int i = 0; i < n; ++i) {
-            ray_metrics.reset();
-            implementAddRayTSDF(sensor_pose, points.col(i), ray_metrics);
-            sensor_metrics += ray_metrics;
-        }
-        views.add(sensor_metrics);
-        updateViewCount();
-    }
-
     /// @brief Rests all data in the grid to zero or its respective defaults.
     void clear() { for (auto& voxel : voxel_vector) voxel.reset(); }
+
+    /// @brief Updates view count in the voxel grid and resets voxels' viewed flags.
+    /// @note  This function is slow! No matter what we must iterate the whole grid. Avoid calling it often.
+    void updateViewCount() {
+        for (auto& voxel : voxel_vector) {
+            if (voxel.views > 0x7FFF && voxel.views != 0xFFFF)
+            {   /// Checks if the MSB of the views is set to 1 and prevents rollover after 0x7FFF (32767 views).
+                ++voxel.views;
+                voxel.resetViewUpdateFlag();
+            }
+        }
+    }
 
     /// @brief Saves in the XDMF format (XDMF file references to an HDF5 data file).
     /// @param fname File name. Automatically adds ".h5" when writing the HDF5 file and ".xdmf"
@@ -337,36 +293,6 @@ private:
         if (!valid(voxel))
             throw std::out_of_range("Requested voxel was not within the bounds of the 3D grid.");
         return indexToVector(voxel);
-    }
-
-    /// @brief Updates voxel on the line between the two specified points. Points are in the Grid's frame.
-    /// @details Actual implementation of ray tracing. Defined in `src/voxel_grid_traversal.cpp`.
-    /// @param update Update to apply to each voxel on the ray.
-    /// @param rs Ray start position, local coordinates.
-    /// @param re Ray end position, local coordinates.
-    /// @returns False if the ray did not intersect the voxel grid. True otherwise.
-    /// @note If the start and end points are exactly equal then this function does nothing.
-    bool implementAddRayExact(const Voxel::Update& update, const point& rs, const point& re);
-
-    /// @brief Adds data to the grid, updating voxels near the sensed point with truncated distance and marking
-    ///        the voxels between the origin and positive truncation as viewed.
-    /// @details Actual implementation of ray tracing. Defined in `src/voxel_grid_traversal.cpp`.
-    /// @param origin Origin for the ray, local coordinates.
-    /// @param sensed Sensed point, local coordinates.
-    /// @param ray_metrics Output variable. Statistics about how this ray changed the Grid.
-    /// @returns False if the ray did not intersect the voxel grid. True otherwise.
-    bool implementAddRayTSDF(const point &origin, const point &sensed, Metrics::Ray& ray_metrics);
-
-    /// @brief Updates view count in the voxel grid and resets voxels' viewed flags.
-    /// @note  This function is slow! No matter what we must iterate the whole grid. Avoid calling it often.
-    void updateViewCount() {
-        for (auto& voxel : voxel_vector) {
-            if (voxel.views > 0x7FFF && voxel.views != 0xFFFF)
-            {   /// Checks if the MSB of the views is set to 1 and prevents rollover after 0x7FFF (32767 views).
-                ++voxel.views;
-                voxel.resetViewUpdateFlag();
-            }
-        }
     }
 
     /// @brief Helper function to write the XDMF file.

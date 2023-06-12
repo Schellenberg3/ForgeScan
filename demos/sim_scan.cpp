@@ -2,6 +2,7 @@
 #include <filesystem>
 
 #include <ForgeScan/TSDF/grid.h>
+#include <ForgeScan/TSDF/traversal.h>
 #include <ForgeScan/DepthSensor/depth_sensor.h>
 
 #include <ForgeScan/Primitives/sphere.h>
@@ -89,7 +90,7 @@ int main(int argc, char* argv[])
         sensor.orientPrincipleAxis(WORLD_ORIGIN);
 
         sensor.image(scene);
-        grid.addSensor(sensor);
+        ForgeScan::TSDF::addSensorTSDF(grid, sensor);
     }
 
 
@@ -101,7 +102,7 @@ int main(int argc, char* argv[])
             sensor.setPoseUniform(WORLD_ORIGIN, cr, i, nv);
         }
         sensor.image(scene);
-        grid.addSensor(sensor);
+        ForgeScan::TSDF::addSensorTSDF(grid, sensor);
     }
 
     grid.saveXDMF(fpath);

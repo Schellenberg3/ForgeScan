@@ -161,7 +161,7 @@ static inline void correctTraversalInfo(int step[3], double delta[3], double tim
 }
 
 
-bool Grid::implementAddRayExact(const Voxel::Update& update, const point& rs, const point& re)
+bool implementAddRayUpdate(Grid& grid, const point& rs, const point& re, const Voxel::Update& update)
 {
     /// Start time and end time (also length) for the user's ray.
     double ts = 0, te = 0;
@@ -176,7 +176,7 @@ bool Grid::implementAddRayExact(const Voxel::Update& update, const point& rs, co
     inverse_normal = normal.cwiseInverse();
 
     /// Query when the line segment intersects the AABB. We can either exit early or narrow our trace to only valid voxels.
-    bool valid_intersection = zeroBoundedAABBintersection(properties.dimensions, rs, inverse_normal,
+    bool valid_intersection = zeroBoundedAABBintersection(grid.properties.dimensions, rs, inverse_normal,
                                                           ts, te, ts_adj, te_adj);
     if (!valid_intersection) return false;
 
@@ -188,26 +188,28 @@ bool Grid::implementAddRayExact(const Voxel::Update& update, const point& rs, co
     const point rs_adj = rs + normal * ts_adj;
 
     /// Current index within the grid.
-    index c_idx = pointToIndex(rs_adj);
+    index c_idx = grid.pointToIndex(rs_adj);
 
     /// Direction of travel (increment or decrement) along the respective axis. Assume we increment.
     int step[3] = {1, 1, 1};
 
     /// The amount of time to move one voxel length along each axis based on the ray's direction. Assume inverse normal is positive.
-    double delta[3] = {properties.resolution*inverse_normal[X], properties.resolution*inverse_normal[Y], properties.resolution*inverse_normal[Z]};
+    double delta[3] = { grid.properties.resolution*inverse_normal[X],
+                        grid.properties.resolution*inverse_normal[Y],
+                        grid.properties.resolution*inverse_normal[Z] };
 
     /// Cumulative time traveled along the respective axis. Assume we have no adjustment from the start time.
     double time[3] = {ts_adj, ts_adj, ts_adj};
 
     /// Update step and time, and delta in case our assumptions were wrong.
-    correctTraversalInfo(step, delta, time, properties.resolution, c_idx, rs_adj, normal, inverse_normal);
+    correctTraversalInfo(step, delta, time, grid.properties.resolution, c_idx, rs_adj, normal, inverse_normal);
 
     try {
         /// Loop runs until each direction has just passed the adjusted end time.
         /// By checking, and breaking, in the if statements we make sure that when we exit the loop c_idx is the last voxel we added.
         while (true) {
             /// Update the current element. Starting with the initial voxel.
-            at(c_idx).update(update);
+            grid.at(c_idx).update(update);
             if (time[X] < time[Y] && time[X] < time[Z]) {
                 time[X]  += delta[X];
                 if (time[X] > te_adj && time[Y] > te_adj && time[Z] > te_adj) break;
@@ -223,13 +225,13 @@ bool Grid::implementAddRayExact(const Voxel::Update& update, const point& rs, co
             }
         }
     } catch (const std::out_of_range& e) {
-        std::cerr << "[Grid::implementAddRayExact] " << e.what() << "\n";
+        std::cerr << "[Grid::implementAddRayUpdate] " << e.what() << "\n";
     }
     return true;
 }
 
 
-bool Grid::implementAddRayTSDF(const point &origin, const point &sensed, Metrics::Ray& ray_metrics)
+bool implementAddRayTSDF(Grid& grid, const point &origin, const point &sensed, Metrics::Ray& ray_metrics)
 {
     /// Far time for the TSDF ray, also the length from sensed to origin.
     double tf = 0;
@@ -245,32 +247,34 @@ bool Grid::implementAddRayTSDF(const point &origin, const point &sensed, Metrics
     inverse_normal = normal.cwiseInverse();
 
     /// Query when the line segment intersects the AABB. We can either exit early or narrow our trace to only valid voxels.
-    bool valid_intersection = zeroBoundedAABBintersection(properties.dimensions, sensed, inverse_normal,
-                                                          properties.min_dist, tf, tn_adj, tf_adj);
+    bool valid_intersection = zeroBoundedAABBintersection(grid.properties.dimensions, sensed, inverse_normal,
+                                                          grid.properties.min_dist, tf, tn_adj, tf_adj);
     if (!valid_intersection) return false;
 
     /// Update the end times to either the users bounds or the valid intersecting bounds.
     tf_adj = std::min(tf_adj, tf);
-    tp_adj = std::min(tf_adj, properties.max_dist);
-    tn_adj = std::max(tn_adj, properties.min_dist);
+    tp_adj = std::min(tf_adj, grid.properties.max_dist);
+    tn_adj = std::max(tn_adj, grid.properties.min_dist);
 
     /// Shift the sensed point back by the adjusted negative time.
     const point sensed_adj = sensed + normal * tn_adj;
 
     /// Current index within the grid.
-    index c_idx = pointToIndex(sensed_adj);
+    index c_idx = grid.pointToIndex(sensed_adj);
 
     /// Direction of travel (increment or decrement) along the respective axis. Assume we increment.
     int step[3] = {1, 1, 1};
 
     /// The amount of time to move one voxel length along each axis based on the ray's direction. Assume inverse normal is positive.
-    double delta[3] = {properties.resolution*inverse_normal[X], properties.resolution*inverse_normal[Y], properties.resolution*inverse_normal[Z]};
+    double delta[3] = { grid.properties.resolution*inverse_normal[X],
+                        grid.properties.resolution*inverse_normal[Y],
+                        grid.properties.resolution*inverse_normal[Z] };
 
     /// Cumulative time traveled along the respective axis. Assume we have no adjustment from the negative time.
     double time[3] = {tn_adj, tn_adj, tn_adj};
 
     /// Update step and time, and delta in case our assumptions were wrong.
-    correctTraversalInfo(step, delta, time, properties.resolution, c_idx, sensed_adj, normal, inverse_normal);
+    correctTraversalInfo(step, delta, time, grid.properties.resolution, c_idx, sensed_adj, normal, inverse_normal);
 
     // Perform updates withing the truncation distance. Moving from neg_dist to pos_dist.
     Voxel::Update update(static_cast<float>(tn_adj));
@@ -280,7 +284,7 @@ bool Grid::implementAddRayTSDF(const point &origin, const point &sensed, Metrics
     try {
         /// First walk is from the adjusted negative location to the adjusted positive location.
         while (time[X] <= tp_adj || time[Y] <= tp_adj || time[Z] <= tp_adj) {
-            voxel_ref = &at(c_idx);
+            voxel_ref = &grid.at(c_idx);
             if (voxel_ref->views == 0) ++ray_metrics.first;
             voxel_ref->update(update);
             if (voxel_ref->var > ray_metrics.max_variance_update) ray_metrics.max_variance_update = voxel_ref->var;
@@ -304,7 +308,7 @@ bool Grid::implementAddRayTSDF(const point &origin, const point &sensed, Metrics
 
         /// Second walk is from the adjusted positive location to the adjusted far location.
         while (time[X] <= tf_adj || time[Y] <= tf_adj || time[Z] <= tf_adj) {
-            voxel_ref = &at(c_idx);
+            voxel_ref = &grid.at(c_idx);
             if (voxel_ref->views == 0) ++ray_metrics.first;
             voxel_ref->setViewUpdateFlag();
 

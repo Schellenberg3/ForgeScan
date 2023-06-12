@@ -94,7 +94,7 @@ add_executable(
 
     demos/test_grid.cpp
     src/TSDF/grid_io.cpp
-    src/TSDF/grid_traversal.cpp
+    src/TSDF/traversal.cpp
     src/TSDF/processor.cpp
 )
 
@@ -105,7 +105,7 @@ add_executable(
 
     demos/sim_scan.cpp
     src/TSDF/grid_io.cpp
-    src/TSDF/grid_traversal.cpp
+    src/TSDF/traversal.cpp
 )
 
 
@@ -115,7 +115,7 @@ add_executable(
 
     demos/test_voxel.cpp
     src/TSDF/grid_io.cpp
-    src/TSDF/grid_traversal.cpp
+    src/TSDF/traversal.cpp
 )
 
 
@@ -125,6 +125,6 @@ add_executable(
 
     demos/test_traversal.cpp
     src/TSDF/grid_io.cpp
-    src/TSDF/grid_traversal.cpp
+    src/TSDF/traversal.cpp
 )
 

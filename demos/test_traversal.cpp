@@ -8,6 +8,7 @@
 
 #include <ForgeScan/TSDF/grid.h>
 #include <ForgeScan/TSDF/processor.h>
+#include <ForgeScan/TSDF/traversal.h>
 #include <ForgeScan/Utilities/simple_timer.h>
 #include <ForgeScan/Utilities/arg_parser.h>
 
@@ -79,9 +80,9 @@ void addPseudoRandomLines(ForgeScan::TSDF::Grid& grid, const int& n, const bool&
     timer.start();
     for (int i = 0; i < n; ++i) {
         if (exact)
-            grid.addRayExact(update, s_points[i], e_points[i]);
+            ForgeScan::TSDF::addRayUpdate(grid, s_points[i], e_points[i], update);
         else
-            grid.addRayTSDF(s_points[i], e_points[i]);
+            ForgeScan::TSDF::addRayTSDF(grid, s_points[i], e_points[i]);
     }
     timer.stop();
     std::cout << "Run time in ms was:\n\t" << timer.elapsedMilliseconds() << std::endl;

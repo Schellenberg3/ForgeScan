@@ -1,26 +1,28 @@
-#ifndef FORGESCAN_SENSOR_INTRINSICS_H
-#define FORGESCAN_SENSOR_INTRINSICS_H
+#ifndef FORGESCAN_DEPTH_SENSOR_SENSOR_INTRINSICS_H
+#define FORGESCAN_DEPTH_SENSOR_SENSOR_INTRINSICS_H
 
 #include <cmath>
 
 
-namespace ForgeScan {
-namespace Intrinsics {
+namespace ForgeScan   {
+namespace DepthSensor {
+namespace Intrinsics  {
 
-/// @brief Type identification for implementations of BaseDepthSensor.
-enum class DepthSensorType : int
+
+/// @brief Identification for implementations types of DepthSensor's Intrinsics.
+enum class Type : int
 {
     Base,
-    DepthCamera,
-    LaserScanner,
-    ConicRandomLaserScanner
+    Camera,
+    Laser
 };
 
-class BaseDepthSensor
+/// @brief Abstract DepthSensor intrinsics class.
+class BaseIntrinsics
 {
 public:
     /// @brief Identifications for the DepthSensor type the class is intended to represent.
-    DepthSensorType type = DepthSensorType::Base;
+    Type type = Type::Base;
 
     /// @brief Maximum depth for the sensor and minimum depth for a sensor
     /// @note For a laser scanner type this is the maximum length for each ray.
@@ -31,18 +33,20 @@ public:
     /// @note Theta is the angle on the YZ-plane. Describes how 'tall' an image is.
     /// @note Phi is the angle on the XZ-plane. Describes how 'wide' an image ls.
     /// @note For a depth camera implementation the min/max values for each angle are equal in magnitude -- i.e. the field of view is symmetric.
-    ///       But this is not necessarily for other implementations of DepthSensorIntrinsics.
+    ///       But this is not necessarily for other implementations of DepthSensor BaseIntrinsics.
     double theta_min, theta_max, phi_min, phi_max ;
 
     /// @brief Sensor size: (u, v). Number of X-pixels and number if Y-pixels.
     size_t u, v;
 
     /// @return Field of view in the X-direction in radians.
-    /// @note This is always symmetric about the principle axis for a DepthCamera object but necessarily for other implementations of DepthSensorIntrinsics.
+    /// @note This is always symmetric about the principle axis for a Camera object but is not
+    ///       necessarily symmetric for other implementations of DepthSensor BaseIntrinsics.
     double fov_x() const { return phi_max - phi_min; }
 
     /// @return Field of view in the Y-direction in radians.
-    /// @note This is always symmetric about the principle axis for a DepthCamera object but necessarily for other implementations of DepthSensorIntrinsics.
+    /// @note This is always symmetric about the principle axis for a Camera object but is not
+    ///       necessarily symmetric for other implementations of DepthSensor BaseIntrinsics.
     double fov_y() const { return theta_max - theta_min; }
 
     /// @brief Returns the total number of data elements in the sensor.
@@ -60,58 +64,53 @@ protected:
     /// @param theta_max Maximum FOV angle in the Sensor's YZ-plane.
     /// @param phi_min Minimum FOV angle in the Sensor's XZ-plane.
     /// @param phi_max Maximum FOV angle in the Sensor's XZ-plane.
-    BaseDepthSensor(const DepthSensorType& sensor_type, const size_t& u, const size_t& v,
-                    const double& d_min, const double& d_max,
-                    const double& theta_min, const double& theta_max,
-                    const double& phi_min, const double& phi_max) :
-        type(sensor_type), u(u), v(v),
-        d_min(d_min), d_max(d_max),
-        theta_min(theta_min), theta_max(theta_max),
-        phi_min(phi_min), phi_max(phi_max)
-    { }
+    BaseIntrinsics(const Type& sensor_type, const size_t& u, const size_t& v, const double& d_min, const double& d_max,
+               const double& theta_min, const double& theta_max, const double& phi_min, const double& phi_max) :
+        type(sensor_type), u(u), v(v), d_min(d_min), d_max(d_max),
+        theta_min(theta_min), theta_max(theta_max), phi_min(phi_min), phi_max(phi_max)
+        { }
 };
 
 
-class DepthCamera : public BaseDepthSensor
+class Camera : public BaseIntrinsics
 {
 public:
-    /// @brief Creates intrinsic matrix for a DepthCamera with the specified parameters.
+    /// @brief Creates intrinsic for a Depth Camera type DepthSensor with the specified parameters.
     /// @param u Sensor dimension, number of of X-pixels.
     /// @param v Sensor dimension, number of of Y-pixels.
     /// @param d_min Minimum depth.
     /// @param d_max Maximum depth.
     /// @param fov_x The field of view (FOV) in the X-direction. The 'width' of the image.
     /// @param fov_y The field of view (FOV) in the X-direction. The 'height' of the image.
-    DepthCamera(const size_t& u, const size_t& v, const double& d_min, const double& d_max,
+    Camera(const size_t& u, const size_t& v, const double& d_min, const double& d_max,
                 const double& fov_x, const double& fov_y) :
-        BaseDepthSensor(DepthSensorType::DepthCamera, u, v, d_min, d_max,
-                        -0.5 * fov_y, 0.5 * fov_y, -0.5 * fov_x, 0.5 * fov_x)
+        BaseIntrinsics(Type::Camera, u, v, d_min, d_max, -0.5 * fov_y, 0.5 * fov_y, -0.5 * fov_x, 0.5 * fov_x)
         { }
 
     /// @brief Generates intrinsics for the Stereo-vision depth camera of an Intel RealSense D455.
     /// @details see spec sheet here:
     ///             https://www.intelrealsense.com/depth-camera-d455/
     ///             https://www.intelrealsense.com/download/20289/?tmstv=1680149335
-    static DepthCamera IntelRealSenseD455()
-        { return DepthCamera(1280, 800, 0.6, 6, 87 * M_PI / 180, 58 * M_PI / 180); }
+    static Camera IntelRealSenseD455()
+        { return Camera(1280, 800, 0.6, 6, 87 * M_PI / 180, 58 * M_PI / 180); }
 
     /// @brief Generates intrinsics for the Time-of-Flight depth camera of an Microsoft Azure Kinect.
     /// @param wide_fov If true, default, will return the wide-FOV (WFOV) intrinsics. Else will return the near-FOV (NFOV) intrinsics.
     /// @note WFOV has greater resolution but shorter operating range than the NFOV.
     /// @details see spec sheet here:
     ///             https://learn.microsoft.com/en-us/azure/kinect-dk/hardware-specification#depth-camera-supported-operating-modes
-    static DepthCamera AzureKinect(const bool& wide_fov = true) {
+    static Camera AzureKinect(const bool& wide_fov = true) {
         if (wide_fov)
-            return DepthCamera(1024, 1024, 0.25, 2.21, 120 * M_PI / 180, 120 * M_PI / 180);
-        return DepthCamera(640, 576, 0.3, 3.86, 65 * M_PI / 180, 75 * M_PI / 180);
+            return Camera(1024, 1024, 0.25, 2.21, 120 * M_PI / 180, 120 * M_PI / 180);
+        return Camera(640, 576, 0.3, 3.86, 65 * M_PI / 180, 75 * M_PI / 180);
     }
 };
 
 
-class LaserScanner : public BaseDepthSensor
+class Laser : public BaseIntrinsics
 {
 public:
-    /// @brief Constructor of the abstract intrinsics class.
+    /// @brief Creates intrinsic for a Laser Scanner type DepthSensor with the specified parameters.
     /// @param u Sensor dimension, number of of X-points.
     /// @param v Sensor dimension, number of of Y-points.
     /// @param d_min Minimum depth.
@@ -120,14 +119,15 @@ public:
     /// @param theta_max Maximum FOV angle in the Laser Scanner's YZ-plane.
     /// @param phi_min Minimum FOV angle in the Laser Scanner's XZ-plane.
     /// @param phi_max Maximum FOV angle in the Laser Scanner's XZ-plane.
-    LaserScanner(const size_t& u, const size_t& v, const double& d_min, const double& d_max,
-                 const double& theta_min, const double& theta_max, const double& phi_min, const double& phi_max) :
-        BaseDepthSensor(DepthSensorType::LaserScanner, u, v, d_min, d_max, theta_min, theta_max, phi_min, phi_max)
+    Laser(const size_t& u, const size_t& v, const double& d_min, const double& d_max,
+                           const double& theta_min, const double& theta_max, const double& phi_min, const double& phi_max) :
+        BaseIntrinsics(Type::Laser, u, v, d_min, d_max, theta_min, theta_max, phi_min, phi_max)
         { }
 };
 
 
 } // Intrinsics
+} // DepthSensor
 } // ForgeScan
 
-#endif // FORGESCAN_SENSOR_INTRINSICS_H
+#endif // FORGESCAN_DEPTH_SENSOR_SENSOR_INTRINSICS_H

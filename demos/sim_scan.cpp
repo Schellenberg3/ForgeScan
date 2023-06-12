@@ -2,7 +2,7 @@
 #include <filesystem>
 
 #include <ForgeScan/voxel_grid.h>
-#include <ForgeScan/depth_sensor.h>
+#include <ForgeScan/DepthSensor/depth_sensor.h>
 
 #include <ForgeScan/Primitives/sphere.h>
 #include <ForgeScan/Primitives/box.h>
@@ -77,11 +77,11 @@ int main(int argc, char* argv[])
 
     ForgeScan::Primitives::Scene scene{&sphere, &box};
 
-    ForgeScan::Intrinsics::DepthCamera sensor_intr(nx, ny, 0, 10, 0.4*M_PI, 0.4*M_PI);
-    // ForgeScan::Intrinsics::LaserScanner sensor_intr(nx, ny, 0, 10, -0.1 * M_PI, 0.1 * M_PI, -0.1 * M_PI, 0.1 * M_PI);
+    ForgeScan::DepthSensor::Intrinsics::Camera sensor_intr(nx, ny, 0, 10, 0.4*M_PI, 0.4*M_PI);
+    // ForgeScan::DepthSensor::Intrinsics::Laser sensor_intr(nx, ny, 0, 10, -0.1 * M_PI, 0.1 * M_PI, -0.1 * M_PI, 0.1 * M_PI);
 
-    ForgeScan::DepthSensor::DepthCamera sensor(sensor_intr);
-    // ForgeScan::DepthSensor::LaserScanner sensor(sensor_intr);
+    ForgeScan::DepthSensor::Camera sensor(sensor_intr);
+    // ForgeScan::DepthSensor::Laser sensor(sensor_intr);
 
     if (first)
     {

@@ -1,13 +1,12 @@
-#ifndef FORGESCAN_DEPTH_SENSOR_H
-#define FORGESCAN_DEPTH_SENSOR_H
+#ifndef FORGESCAN_DEPTH_SENSOR_DEPTH_SENSOR_H
+#define FORGESCAN_DEPTH_SENSOR_DEPTH_SENSOR_H
 
 #include <cmath>
 #include <random>
 #include <stdexcept>
 
 #include <ForgeScan/forgescan_types.h>
-#include <ForgeScan/sensor_intrinsics.h>
-
+#include <ForgeScan/DepthSensor/sensor_intrinsics.h>
 #include <ForgeScan/Primitives/primative_geometry.h>
 
 
@@ -20,25 +19,25 @@ class BaseDepthSensor : public ForgeScanEntity
 {
 public:
     /// @brief Pointer to the derived class's intrinsic parameters.
-    const Intrinsics::BaseDepthSensor *intr;
+    const Intrinsics::BaseIntrinsics *intr;
 
 public:
-    BaseDepthSensor(const Intrinsics::BaseDepthSensor& intr) :
+    BaseDepthSensor(const Intrinsics::BaseIntrinsics& intr) :
         ForgeScanEntity(),
         intr(&intr)
         { setupBaseDepthSensor(); }
 
-    BaseDepthSensor(const Intrinsics::BaseDepthSensor& intr, const extrinsic& extr) :
+    BaseDepthSensor(const Intrinsics::BaseIntrinsics& intr, const extrinsic& extr) :
         ForgeScanEntity(extr),
         intr(&intr)
         { setupBaseDepthSensor(); }
 
-    BaseDepthSensor(const Intrinsics::BaseDepthSensor& intr, const translation& position) :
+    BaseDepthSensor(const Intrinsics::BaseIntrinsics& intr, const translation& position) :
         ForgeScanEntity(position),
         intr(&intr)
         { setupBaseDepthSensor(); }
 
-    BaseDepthSensor(const Intrinsics::BaseDepthSensor& intr, const rotation& orientation) :
+    BaseDepthSensor(const Intrinsics::BaseIntrinsics& intr, const rotation& orientation) :
         ForgeScanEntity(orientation),
         intr(&intr)
         { setupBaseDepthSensor(); }
@@ -307,9 +306,9 @@ protected:
             throw std::out_of_range("BaseDepthSensor::throwIfInvalidSenorArray Requested coordinates were out of range.");
     }
 
-    void resetDepthLaserScanner() { std::fill(depth_vector.begin(), depth_vector.end(), intr->d_max); }
+    void resetDepthLaser() { std::fill(depth_vector.begin(), depth_vector.end(), intr->d_max); }
 
-    void resetDepthDepthCamera()
+    void resetDepthCamera()
     {
         const double d_theta = intr->fov_y() / (intr->v - 1);
         const double d_phi   = intr->fov_x() / (intr->u - 1);
@@ -378,59 +377,59 @@ private:
 };
 
 
-class DepthCamera : public BaseDepthSensor
+class Camera : public BaseDepthSensor
 {
 public:
-    DepthCamera(const Intrinsics::DepthCamera& intr) :
+    Camera(const Intrinsics::Camera& intr) :
         BaseDepthSensor(intr)
         { setup(); }
 
-    DepthCamera(const Intrinsics::DepthCamera& intr, const extrinsic& extr) :
+    Camera(const Intrinsics::Camera& intr, const extrinsic& extr) :
         BaseDepthSensor(intr, extr)
         { setup(); }
 
-    DepthCamera(const Intrinsics::DepthCamera& intr, const translation& position) :
+    Camera(const Intrinsics::Camera& intr, const translation& position) :
         BaseDepthSensor(intr, position)
         { setup(); }
 
-    DepthCamera(const Intrinsics::DepthCamera& intr, const rotation& orientation) :
+    Camera(const Intrinsics::Camera& intr, const rotation& orientation) :
         BaseDepthSensor(intr, orientation)
         { setup(); }
 
-    void resetDepth() override final { resetDepthDepthCamera(); }
+    void resetDepth() override final { resetDepthCamera(); }
 
 private:
-    void setup() { resetDepthDepthCamera(); }
+    void setup() { resetDepthCamera(); }
 };
 
 
-class LaserScanner : public BaseDepthSensor
+class Laser : public BaseDepthSensor
 {
 public:
-    LaserScanner(const Intrinsics::LaserScanner& intr) :
+    Laser(const Intrinsics::Laser& intr) :
         BaseDepthSensor(intr)
         { setup(); }
 
-    LaserScanner(const Intrinsics::LaserScanner& intr, const extrinsic& extr) :
+    Laser(const Intrinsics::Laser& intr, const extrinsic& extr) :
         BaseDepthSensor(intr, extr)
         { setup(); }
 
-    LaserScanner(const Intrinsics::LaserScanner& intr, const translation& position) :
+    Laser(const Intrinsics::Laser& intr, const translation& position) :
         BaseDepthSensor(intr, position)
         { setup(); }
 
-    LaserScanner(const Intrinsics::LaserScanner& intr, const rotation& orientation) :
+    Laser(const Intrinsics::Laser& intr, const rotation& orientation) :
         BaseDepthSensor(intr, orientation)
         { setup(); }
 
-    void resetDepth() override final { resetDepthLaserScanner(); }
+    void resetDepth() override final { resetDepthLaser(); }
 
 private:
-    void setup() { resetDepthLaserScanner(); }
+    void setup() { resetDepthLaser(); }
 };
 
 
 } // DepthSensor
 } // ForgeScan
 
-#endif // FORGESCAN_DEPTH_SENSOR_H
+#endif // FORGESCAN_DEPTH_SENSOR_DEPTH_SENSOR_H

@@ -8,9 +8,9 @@
 
 #include <ForgeScan/forgescan_types.h>
 #include <ForgeScan/voxel.h>
-#include <ForgeScan/depth_sensor.h>
 #include <ForgeScan/grid_processor.h>
 #include <ForgeScan/view_tracker.h>
+#include <ForgeScan/DepthSensor/depth_sensor.h>
 #include <ForgeScan/Utilities/vector_memory_use.h>
 
 

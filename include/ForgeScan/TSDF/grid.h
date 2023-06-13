@@ -221,14 +221,29 @@ public:
     /// @param extr  Frame to transform the resulting point to.
     /// @return Center point of the voxel, relative to the provided frame.
     point indexToPoint(const index& input, const extrinsic& extr) const
-        { return toOtherFromThis(indexToPoint(input) , extr); }
+        { return toOtherFromThis(indexToPoint(input), extr); }
 
     /// @brief Calculates the center point location for the voxel at the input index.
     /// @param input The (X, Y, Z) index in the grid to check.
-    /// @param extr  ForgeScanEntity to transform the resulting point to.
+    /// @param other ForgeScanEntity to transform the resulting point to.
     /// @return Center point of the voxel, relative to the provided ForgeScanEntity.
     point indexToPoint(const index& input, const ForgeScanEntity& other) const
         { indexToPoint(input, other.extr); }
+
+    /// @brief Finds the center of the Grid relative to the provided coordinate frame.
+    /// @param extr  Frame to transform the resulting point to. Default is the world frame.
+    /// @return Center point location in the provided reference frame.
+    point getCenter(const extrinsic& extr = extrinsic::Identity()) {
+        /// Fixed grid size means we only need to calculate this once, thus make it static.
+        static const point local_center = properties.dimensions * 0.5;
+        return toOtherFromThis(local_center, extr);
+    }
+
+    /// @brief Finds the center of the Grid relative to the provided coordinate frame.
+    /// @param other ForgeScanEntity to transform the resulting point to.
+    /// @return Center point location in the provided ForgeScanEntity's reference frame.
+    point getCenter(const ForgeScanEntity& other)
+        { return getCenter(other.extr);}
 
     /// @brief Rests all data in the grid to zero or its respective defaults.
     void clear() { for (auto& voxel : voxel_vector) voxel.reset(); }

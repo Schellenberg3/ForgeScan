@@ -11,9 +11,6 @@
 #include "ForgeScan/Utilities/arg_parser.h"
 
 
-static const Eigen::Vector3d WORLD_ORIGIN(0, 0, 0);
-
-
 int main(int argc, char* argv[])
 {
     ForgeScan::Utilities::ArgParser parser(argc, argv);
@@ -94,7 +91,7 @@ int main(int argc, char* argv[])
     if (first)
     {
         sensor->translate(ForgeScan::point(0, 0, cr));
-        sensor->orientPrincipleAxis(WORLD_ORIGIN);
+        sensor->orientPrincipleAxis(grid.getCenter());
 
         sensor->image(scene);
         ForgeScan::TSDF::addSensorTSDF(grid, *sensor);
@@ -104,9 +101,9 @@ int main(int argc, char* argv[])
     for (int i = 0; i < nv; ++i)
     {
         if (random) {
-            sensor->setPoseRandom(WORLD_ORIGIN, cr);
+            sensor->setPoseRandom(grid.getCenter(), cr);
         } else {
-            sensor->setPoseUniform(WORLD_ORIGIN, cr, i, nv);
+            sensor->setPoseUniform(grid.getCenter(), cr, i, nv);
         }
         sensor->image(scene);
         ForgeScan::TSDF::addSensorTSDF(grid, *sensor);

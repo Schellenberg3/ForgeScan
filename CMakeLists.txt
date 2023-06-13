@@ -49,8 +49,8 @@ else()
     find_package(HighFive REQUIRED )
 endif()
 
-# LOCATE DEPENDENCIES INSTALLED WITH APT
-find_package(PCL    REQUIRED COMPONENTS common io)
+# LOCATE DEPENDENCIES INSTALLED WITH APT OR VCPKG
+# find_package(PCL    REQUIRED COMPONENTS common io)
 find_package(HDF5   REQUIRED )
 find_package(Eigen3 REQUIRED NO_MODULE)
 
@@ -61,7 +61,7 @@ add_compile_definitions(
 
 include_directories(
     ${FORGESCAN_INCLUDE_DIRS}
-    ${PCL_INCLUDE_DIRS}
+    # ${PCL_INCLUDE_DIRS}
     ${HDF5_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIRS}
     ${HIGHFIVE_INCLUDE_DIRS}
@@ -69,7 +69,7 @@ include_directories(
 
 link_directories(
     ${EIGEN3_LIBRARY_DIRS}
-    ${PCL_LIBRARY_DIRS}
+    # ${PCL_LIBRARY_DIRS}
     ${HDF5_LIBRARY_DIRS}
 )
 
@@ -80,7 +80,7 @@ link_libraries(
 )
 
 add_definitions(
-    ${PCL_DEFINITIONS}
+    # ${PCL_DEFINITIONS}
     ${HDF5_DEFINITIONS}
 )
 
@@ -99,7 +99,7 @@ add_executable(
 )
 
 
-# SIM_SPHERE_SCAN
+# SIM_SCAN
 add_executable(
     sim_scan
 

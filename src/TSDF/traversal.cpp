@@ -1,7 +1,8 @@
-#include <ForgeScan/TSDF/grid.h>
 #include <iostream>
 #include <numeric>
 
+#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/TSDF/grid.h"
 
 namespace ForgeScan {
 namespace TSDF {

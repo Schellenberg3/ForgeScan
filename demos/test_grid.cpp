@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include <ForgeScan/TSDF/grid.h>
-#include <ForgeScan/TSDF/processor.h>
+#include "ForgeScan/TSDF/grid.h"
+#include "ForgeScan/TSDF/processor.h"
 
 
 /// @brief Tests initializing, setting, validating, and copying the Grid::Properties class.

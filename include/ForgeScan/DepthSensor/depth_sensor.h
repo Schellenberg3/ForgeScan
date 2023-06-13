@@ -5,9 +5,9 @@
 #include <random>
 #include <stdexcept>
 
-#include <ForgeScan/forgescan_types.h>
-#include <ForgeScan/DepthSensor/sensor_intrinsics.h>
-#include <ForgeScan/Primitives/primative_geometry.h>
+#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/DepthSensor/sensor_intrinsics.h"
+#include "ForgeScan/Primitives/primative_geometry.h"
 
 
 namespace ForgeScan   {

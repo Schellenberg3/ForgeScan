@@ -1,14 +1,12 @@
 #include <iostream>
 #include <filesystem>
 
-#include <ForgeScan/TSDF/grid.h>
-#include <ForgeScan/TSDF/traversal.h>
-#include <ForgeScan/DepthSensor/depth_sensor.h>
-
-#include <ForgeScan/Primitives/sphere.h>
-#include <ForgeScan/Primitives/box.h>
-
-#include <ForgeScan/Utilities/arg_parser.h>
+#include "ForgeScan/TSDF/grid.h"
+#include "ForgeScan/TSDF/traversal.h"
+#include "ForgeScan/DepthSensor/depth_sensor.h"
+#include "ForgeScan/Primitives/sphere.h"
+#include "ForgeScan/Primitives/box.h"
+#include "ForgeScan/Utilities/arg_parser.h"
 
 
 static const Eigen::Vector3d WORLD_ORIGIN(0, 0, 0);

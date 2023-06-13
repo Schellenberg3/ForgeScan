@@ -6,11 +6,11 @@
 
 #include <Eigen/Dense>
 
-#include <ForgeScan/TSDF/grid.h>
-#include <ForgeScan/TSDF/processor.h>
-#include <ForgeScan/TSDF/traversal.h>
-#include <ForgeScan/Utilities/simple_timer.h>
-#include <ForgeScan/Utilities/arg_parser.h>
+#include "ForgeScan/TSDF/grid.h"
+#include "ForgeScan/TSDF/processor.h"
+#include "ForgeScan/TSDF/traversal.h"
+#include "ForgeScan/Utilities/simple_timer.h"
+#include "ForgeScan/Utilities/arg_parser.h"
 
 
 /// @brief Adds random lines to the grid. Does so with a fixed-seed random number generator.

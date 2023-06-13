@@ -1,7 +1,7 @@
 #include <iostream>
 #include <bitset>
 
-#include <ForgeScan/TSDF/voxel.h>
+#include "ForgeScan/TSDF/voxel.h"
 
 
 using namespace ForgeScan;

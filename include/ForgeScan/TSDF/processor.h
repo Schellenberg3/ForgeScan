@@ -4,9 +4,9 @@
 #include <vector>
 #include <functional>
 
-#include <ForgeScan/forgescan_types.h>
-#include <ForgeScan/TSDF/voxel.h>
-#include <ForgeScan/TSDF/grid.h>
+#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/TSDF/voxel.h"
+#include "ForgeScan/TSDF/grid.h"
 
 
 namespace ForgeScan {

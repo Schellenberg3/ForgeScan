@@ -6,7 +6,8 @@
 #define H5_USE_EIGEN 1
 #include <highfive/H5File.hpp>
 
-#include <ForgeScan/TSDF/grid.h>
+#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/TSDF/grid.h"
 
 
 /// @brief Helper for Grid::saveHDF5 to inform HighFive of the datatypes represented in the `voxel_vector`.

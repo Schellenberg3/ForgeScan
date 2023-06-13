@@ -1,8 +1,8 @@
 #ifndef FORGESCAN_SHAPE_PRIMITIVES_SPHERE_H
 #define FORGESCAN_SHAPE_PRIMITIVES_SPHERE_H
 
-#include <ForgeScan/forgescan_types.h>
-#include <ForgeScan/Primitives/primative_geometry.h>
+#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/Primitives/primative_geometry.h"
 
 namespace ForgeScan  {
 namespace Primitives {

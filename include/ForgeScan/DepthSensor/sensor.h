@@ -7,7 +7,8 @@
 
 #include "ForgeScan/forgescan_types.h"
 #include "ForgeScan/DepthSensor/intrinsics.h"
-#include "ForgeScan/Primitives/primative_geometry.h"
+#include "ForgeScan/Primitives/primative.h"
+#include "ForgeScan/Primitives/scene.h"
 
 
 namespace ForgeScan   {
@@ -51,15 +52,15 @@ public:
         this->transformBodyFrame(Tws);
     }
 
-    /// @brief Captures a depth image of the provided PrimitiveGeometry.
+    /// @brief Captures a depth image of the provided Primitive.
     /// @param geometry The geometric primitive to image.
     /// @param reset If true, the depth sensor's depth values will be reset before the new image is calculated.
-    void image(const Primitives::PrimitiveGeometry& geometry, const bool& reset = true)
+    void image(const Primitives::Primitive& geometry, const bool& reset = true)
     {
         /// If requested, reset all points to their maximum depth before imaging.
         if (reset) { resetDepth(); }
 
-        /// Get the sensor's position and viewed points relative to the PrimitiveGeometry frame.
+        /// Get the sensor's position and viewed points relative to the Primitive frame.
         /// This is needed for the fast AABB checks performed on each ray.
         point start = extr.translation();   // World frame
         geometry.toThisFromWorld(start);    // Primitive frame
@@ -77,7 +78,7 @@ public:
         }
     }
 
-    /// @brief Captures a depth image of a scene consisting of multiple PrimitiveGeometry objects.
+    /// @brief Captures a depth image of a scene consisting of multiple Primitive objects.
     /// @param scene A collection of GeometricPrimitives to image.
     /// @param reset If true, the depth sensor's depth values will be reset before the new image is calculated.
     void image(const Primitives::Scene& scene, const bool& reset = true)

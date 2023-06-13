@@ -2,14 +2,14 @@
 #define FORGESCAN_SHAPE_PRIMITIVES_BOX_H
 
 #include "ForgeScan/forgescan_types.h"
-#include "ForgeScan/Primitives/primative_geometry.h"
+#include "ForgeScan/Primitives/primative.h"
 
 namespace ForgeScan  {
 namespace Primitives {
 
 
 /// @brief A simple analytical sphere object.
-struct Box : public PrimitiveGeometry
+struct Box : public Primitive
 {
 public:
     /// @brief Dimensions ()
@@ -22,7 +22,7 @@ public:
     /// @param h The box's total dimension in the Z-direction.
     /// @param position Translation from the origin to the center point of the box.
     Box(const double& l, const double& w, const double& h, const translation& position = Eigen::Vector3d::Zero()) :
-        PrimitiveGeometry(position, getAABBbound(   std::abs(w),    std::abs(l),    std::abs(h)),
+        Primitive(position, getAABBbound(   std::abs(w),    std::abs(l),    std::abs(h)),
                                     getAABBbound(-1*std::abs(w), -1*std::abs(l), -1*std::abs(h))  ),
         length(l), width(w), height(h)
         { }
@@ -33,7 +33,7 @@ public:
     /// @param h The box's total dimension in the Z-direction.
     /// @param extr Extrinsic transformation from the origin to the center point of the box.
     Box(const double& l, const double& w, const double& h, const extrinsic& extr) :
-        PrimitiveGeometry(extr, getAABBbound(   std::abs(w),    std::abs(l),    std::abs(h)),
+        Primitive(extr, getAABBbound(   std::abs(w),    std::abs(l),    std::abs(h)),
                                 getAABBbound(-1*std::abs(w), -1*std::abs(l), -1*std::abs(h))  ),
         length(l), width(w), height(h)
         { }
@@ -44,7 +44,7 @@ public:
     /// @param h The box's total dimension in the Z-direction.
     /// @param orientation Rotation, about the world frame, for the box's coordinate system.
     Box(const double& l, const double& w, const double& h, const rotation& orientation) :
-        PrimitiveGeometry(orientation, getAABBbound(   std::abs(w),    std::abs(l),    std::abs(h)),
+        Primitive(orientation, getAABBbound(   std::abs(w),    std::abs(l),    std::abs(h)),
                                        getAABBbound(-1*std::abs(w), -1*std::abs(l), -1*std::abs(h))  ),
         length(l), width(w), height(h)
         { }

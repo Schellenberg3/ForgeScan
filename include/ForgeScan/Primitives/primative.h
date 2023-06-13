@@ -1,5 +1,5 @@
-#ifndef FORGESCAN_SHAPE_PRIMITIVES_PRIMITIVE_GEOMETRY_H
-#define FORGESCAN_SHAPE_PRIMITIVES_PRIMITIVE_GEOMETRY_H
+#ifndef FORGESCAN_SHAPE_PRIMITIVES_PRIMITIVE_H
+#define FORGESCAN_SHAPE_PRIMITIVES_PRIMITIVE_H
 
 
 #include "ForgeScan/forgescan_types.h"
@@ -7,13 +7,9 @@
 namespace ForgeScan  {
 namespace Primitives {
 
-struct PrimitiveGeometry; // Forward declaration for the typedef
-
-/// @brief A collection of PrimitiveGeometry objects which are imaged together in the same scene.
-typedef std::vector<PrimitiveGeometry*> Scene;
 
 /// @brief Base class for all primitive geometry types.
-struct PrimitiveGeometry : ForgeScanEntity
+struct Primitive : ForgeScanEntity
 {
 public:
     /// @brief Determines if, and where, the line between the start and end points first intersects the geometry.
@@ -32,25 +28,25 @@ protected:
 
 protected:
     /// @brief Constructs the generic geometric primitive at the world origin.
-    PrimitiveGeometry(const point& upperAABBbound, const point& lowerAABBbound) :
+    Primitive(const point& upperAABBbound, const point& lowerAABBbound) :
         ForgeScanEntity(), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
         { }
 
     /// @brief Constructs the generic geometric primitive.
     /// @param extr Initial pose for the entity.
-    PrimitiveGeometry(const extrinsic& extr, const point& upperAABBbound, const point& lowerAABBbound) :
+    Primitive(const extrinsic& extr, const point& upperAABBbound, const point& lowerAABBbound) :
         ForgeScanEntity(extr), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
         { }
 
     /// @brief Constructs the generic geometric primitive at the position, no rotation.
     /// @param position Initial position for the entity.
-    PrimitiveGeometry(const translation& position, const point& upperAABBbound, const point& lowerAABBbound) :
+    Primitive(const translation& position, const point& upperAABBbound, const point& lowerAABBbound) :
         ForgeScanEntity(position), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
         { }
 
     /// @brief Constructs the generic geometric primitive at the world origin with the given rotation.
     /// @param orientation Initial rotation for the entity.
-    PrimitiveGeometry(const rotation& orientation, const point& upperAABBbound, const point& lowerAABBbound) :
+    Primitive(const rotation& orientation, const point& upperAABBbound, const point& lowerAABBbound) :
         ForgeScanEntity(orientation), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
         { }
 
@@ -120,4 +116,4 @@ protected:
 } // Primitives
 } // ForgeScan
 
-#endif // FORGESCAN_SHAPE_PRIMITIVES_PRIMITIVE_GEOMETRY_H
+#endif // FORGESCAN_SHAPE_PRIMITIVES_PRIMITIVE_H

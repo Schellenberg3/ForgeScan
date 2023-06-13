@@ -2,14 +2,14 @@
 #define FORGESCAN_SHAPE_PRIMITIVES_SPHERE_H
 
 #include "ForgeScan/forgescan_types.h"
-#include "ForgeScan/Primitives/primative_geometry.h"
+#include "ForgeScan/Primitives/primative.h"
 
 namespace ForgeScan  {
 namespace Primitives {
 
 
 /// @brief A simple analytical sphere object.
-struct Sphere : public PrimitiveGeometry
+struct Sphere : public Primitive
 {
 public:
     /// @brief Sphere radius in world units.
@@ -22,7 +22,7 @@ public:
     ///               Default places the sphere at the origin
     /// @note This takes the absolute value of the provided radius value.
     Sphere(const double& radius = 1, const point& center = Eigen::Vector3d::Zero()) :
-        PrimitiveGeometry(center, getAABBbound(std::abs(radius)), getAABBbound(-1 * std::abs(radius))),
+        Primitive(center, getAABBbound(std::abs(radius)), getAABBbound(-1 * std::abs(radius))),
         radius(std::abs(radius))
         { }
 

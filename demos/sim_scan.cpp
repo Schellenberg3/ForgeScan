@@ -7,6 +7,7 @@
 #include "ForgeScan/DepthSensor/laser.h"
 #include "ForgeScan/Primitives/sphere.h"
 #include "ForgeScan/Primitives/box.h"
+#include "ForgeScan/Primitives/scene.h"
 #include "ForgeScan/Utilities/arg_parser.h"
 
 

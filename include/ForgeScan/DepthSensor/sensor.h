@@ -5,7 +5,8 @@
 #include <random>
 #include <stdexcept>
 
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
+#include "ForgeScan/entity.h"
 #include "ForgeScan/DepthSensor/intrinsics.h"
 #include "ForgeScan/Primitives/primative.h"
 #include "ForgeScan/Primitives/scene.h"
@@ -16,7 +17,7 @@ namespace DepthSensor {
 
 
 /// @brief Generic base class for laser depth scanner, depth cameras, and RGB-depth cameras.
-class Sensor : public ForgeScanEntity
+class Sensor : public Entity
 {
 public:
     /// @brief Pointer to the derived class's intrinsic parameters.
@@ -24,22 +25,22 @@ public:
 
 public:
     Sensor(const Intrinsics::Intrinsics& intr) :
-        ForgeScanEntity(),
+        Entity(),
         intr(&intr)
         { setupBaseDepthSensor(); }
 
     Sensor(const Intrinsics::Intrinsics& intr, const extrinsic& extr) :
-        ForgeScanEntity(extr),
+        Entity(extr),
         intr(&intr)
         { setupBaseDepthSensor(); }
 
     Sensor(const Intrinsics::Intrinsics& intr, const translation& position) :
-        ForgeScanEntity(position),
+        Entity(position),
         intr(&intr)
         { setupBaseDepthSensor(); }
 
     Sensor(const Intrinsics::Intrinsics& intr, const rotation& orientation) :
-        ForgeScanEntity(orientation),
+        Entity(orientation),
         intr(&intr)
         { setupBaseDepthSensor(); }
 

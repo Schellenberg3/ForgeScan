@@ -1,4 +1,4 @@
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
 #include "ForgeScan/TSDF/processor.h"
 
 

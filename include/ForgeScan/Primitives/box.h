@@ -1,7 +1,7 @@
 #ifndef FORGESCAN_SHAPE_PRIMITIVES_BOX_H
 #define FORGESCAN_SHAPE_PRIMITIVES_BOX_H
 
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
 #include "ForgeScan/Primitives/primative.h"
 
 namespace ForgeScan  {

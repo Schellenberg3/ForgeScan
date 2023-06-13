@@ -2,14 +2,14 @@
 #define FORGESCAN_SHAPE_PRIMITIVES_PRIMITIVE_H
 
 
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
 
 namespace ForgeScan  {
 namespace Primitives {
 
 
 /// @brief Base class for all primitive geometry types.
-struct Primitive : ForgeScanEntity
+struct Primitive : Entity
 {
 public:
     /// @brief Determines if, and where, the line between the start and end points first intersects the geometry.
@@ -29,25 +29,25 @@ protected:
 protected:
     /// @brief Constructs the generic geometric primitive at the world origin.
     Primitive(const point& upperAABBbound, const point& lowerAABBbound) :
-        ForgeScanEntity(), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
+        Entity(), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
         { }
 
     /// @brief Constructs the generic geometric primitive.
     /// @param extr Initial pose for the entity.
     Primitive(const extrinsic& extr, const point& upperAABBbound, const point& lowerAABBbound) :
-        ForgeScanEntity(extr), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
+        Entity(extr), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
         { }
 
     /// @brief Constructs the generic geometric primitive at the position, no rotation.
     /// @param position Initial position for the entity.
     Primitive(const translation& position, const point& upperAABBbound, const point& lowerAABBbound) :
-        ForgeScanEntity(position), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
+        Entity(position), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
         { }
 
     /// @brief Constructs the generic geometric primitive at the world origin with the given rotation.
     /// @param orientation Initial rotation for the entity.
     Primitive(const rotation& orientation, const point& upperAABBbound, const point& lowerAABBbound) :
-        ForgeScanEntity(orientation), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
+        Entity(orientation), upperAABBbound(upperAABBbound), lowerAABBbound(lowerAABBbound)
         { }
 
     /// @brief Relatively quick check for bounding box intersection of a geometric primitive. Prevents needless checks for some rays.

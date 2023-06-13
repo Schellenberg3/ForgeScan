@@ -1,7 +1,7 @@
 #ifndef FORGESCAN_TSDF_VOXEL_H
 #define FORGESCAN_TSDF_VOXEL_H
 
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
 
 /// Gets the maximum positive value for a float.
 #define FLOAT_POSITIVE_MAX std::numeric_limits<float>::max()

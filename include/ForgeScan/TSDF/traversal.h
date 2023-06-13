@@ -1,7 +1,7 @@
 #ifndef FORGESCAN_TSDF_TRAVERSAL_H
 #define FORGESCAN_TSDF_TRAVERSAL_H
 
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
 #include "ForgeScan/TSDF/grid.h"
 
 namespace ForgeScan {

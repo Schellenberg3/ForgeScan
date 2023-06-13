@@ -6,7 +6,7 @@
 #define H5_USE_EIGEN 1
 #include <highfive/H5File.hpp>
 
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
 #include "ForgeScan/TSDF/grid.h"
 
 

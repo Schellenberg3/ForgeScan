@@ -5,7 +5,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
 
 
 namespace ForgeScan {

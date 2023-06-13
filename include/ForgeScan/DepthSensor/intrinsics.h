@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
 
 namespace ForgeScan   {
 namespace DepthSensor {

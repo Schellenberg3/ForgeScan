@@ -6,7 +6,8 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
+#include "ForgeScan/entity.h"
 #include "ForgeScan/TSDF/voxel.h"
 #include "ForgeScan/TSDF/processor.h"
 #include "ForgeScan/Metrics/sensor_record.h"
@@ -19,7 +20,7 @@ namespace TSDF      {
 
 /// @brief Container for a 3 dimensional grid of Voxels with its own rigid body reference frame.
 /// @note  The transformation is between the world and the grid's lower bound, not the center.
-class Grid : public ForgeScanEntity
+class Grid : public Entity
 {
 public:
 
@@ -140,19 +141,19 @@ public:
 
 public:
     Grid(const Properties& properties) :
-        ForgeScanEntity(), properties(properties),
+        Entity(), properties(properties),
         p2i_scale((properties.grid_size.cast<double>().array() - 1) / properties.dimensions.array())
         { setup(); }
 
     Grid(const double& resolution, const Vector3ui& grid_size = Vector3ui(101, 101, 101),
               const double& min_dist = 0.05, const double& max_dist = 0.05) :
-        ForgeScanEntity(), properties(resolution, grid_size, min_dist, max_dist),
+        Entity(), properties(resolution, grid_size, min_dist, max_dist),
         p2i_scale((properties.grid_size.cast<double>().array() - 1) / properties.dimensions.array())
         { setup(); }
 
     Grid(const Vector3ui& grid_size = Vector3ui(101, 101, 101), const Vector3d& dimensions = Vector3d(1, 1, 1),
               const double& min_dist = -0.05, const double& max_dist = 0.05) :
-        ForgeScanEntity(),  properties(grid_size, dimensions, min_dist, max_dist),
+        Entity(),  properties(grid_size, dimensions, min_dist, max_dist),
         p2i_scale((properties.grid_size.cast<double>().array() - 1) / properties.dimensions.array())
         { setup(); }
 
@@ -208,7 +209,7 @@ public:
     /// @param other Frame which the point is in.
     /// @return Grid index that the point would be in.
     /// @note This does not promise that the index is valid. Use `valid` of the returned input to verify the results.
-    index pointToIndex(const point& input, const ForgeScanEntity& other) const
+    index pointToIndex(const point& input, const Entity& other) const
         { return pointToIndex( toThisFromOther(input, other.extr) ); }
 
     /// @brief Calculates the center point location for the voxel at the input index.
@@ -225,9 +226,9 @@ public:
 
     /// @brief Calculates the center point location for the voxel at the input index.
     /// @param input The (X, Y, Z) index in the grid to check.
-    /// @param other ForgeScanEntity to transform the resulting point to.
-    /// @return Center point of the voxel, relative to the provided ForgeScanEntity.
-    point indexToPoint(const index& input, const ForgeScanEntity& other) const
+    /// @param other Entity to transform the resulting point to.
+    /// @return Center point of the voxel, relative to the provided Entity.
+    point indexToPoint(const index& input, const Entity& other) const
         { indexToPoint(input, other.extr); }
 
     /// @brief Finds the center of the Grid relative to the provided coordinate frame.
@@ -240,9 +241,9 @@ public:
     }
 
     /// @brief Finds the center of the Grid relative to the provided coordinate frame.
-    /// @param other ForgeScanEntity to transform the resulting point to.
-    /// @return Center point location in the provided ForgeScanEntity's reference frame.
-    point getCenter(const ForgeScanEntity& other)
+    /// @param other Entity to transform the resulting point to.
+    /// @return Center point location in the provided Entity's reference frame.
+    point getCenter(const Entity& other)
         { return getCenter(other.extr);}
 
     /// @brief Rests all data in the grid to zero or its respective defaults.

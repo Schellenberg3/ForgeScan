@@ -2,7 +2,7 @@
 #define FORGESCAN_SHAPE_PRIMITIVES_SCENE_H
 
 
-#include "ForgeScan/forgescan_types.h"
+#include "ForgeScan/types.h"
 #include "ForgeScan/Primitives/primative.h"
 
 namespace ForgeScan  {

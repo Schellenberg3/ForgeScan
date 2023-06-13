@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include "ForgeScan/forgescan_types.h"
-#include "ForgeScan/DepthSensor/sensor_intrinsics.h"
+#include "ForgeScan/DepthSensor/intrinsics.h"
 #include "ForgeScan/Primitives/primative_geometry.h"
 
 
@@ -15,29 +15,29 @@ namespace DepthSensor {
 
 
 /// @brief Generic base class for laser depth scanner, depth cameras, and RGB-depth cameras.
-class BaseDepthSensor : public ForgeScanEntity
+class Sensor : public ForgeScanEntity
 {
 public:
     /// @brief Pointer to the derived class's intrinsic parameters.
-    const Intrinsics::BaseIntrinsics *intr;
+    const Intrinsics::Intrinsics *intr;
 
 public:
-    BaseDepthSensor(const Intrinsics::BaseIntrinsics& intr) :
+    Sensor(const Intrinsics::Intrinsics& intr) :
         ForgeScanEntity(),
         intr(&intr)
         { setupBaseDepthSensor(); }
 
-    BaseDepthSensor(const Intrinsics::BaseIntrinsics& intr, const extrinsic& extr) :
+    Sensor(const Intrinsics::Intrinsics& intr, const extrinsic& extr) :
         ForgeScanEntity(extr),
         intr(&intr)
         { setupBaseDepthSensor(); }
 
-    BaseDepthSensor(const Intrinsics::BaseIntrinsics& intr, const translation& position) :
+    Sensor(const Intrinsics::Intrinsics& intr, const translation& position) :
         ForgeScanEntity(position),
         intr(&intr)
         { setupBaseDepthSensor(); }
 
-    BaseDepthSensor(const Intrinsics::BaseIntrinsics& intr, const rotation& orientation) :
+    Sensor(const Intrinsics::Intrinsics& intr, const rotation& orientation) :
         ForgeScanEntity(orientation),
         intr(&intr)
         { setupBaseDepthSensor(); }
@@ -295,7 +295,7 @@ protected:
     /// @throws `std::out_of_range` If `(x, y)` is an invalid index.
     void throwIfInvalidSenorArray(const size_t& x, const size_t& y) const {
         if (!checkValidSenorArray(x, y))
-            throw std::out_of_range("BaseDepthSensor::throwIfInvalidSenorArray Requested coordinates were out of range.");
+            throw std::out_of_range("Sensor::throwIfInvalidSenorArray Requested coordinates were out of range.");
     }
 
     /// @brief Throws an out_of_range exception if the provided coordinates are not valid for the image sensor.
@@ -303,7 +303,7 @@ protected:
     /// @throws `std::out_of_range` If `(x, y)` is an invalid index.
     void throwIfInvalidSenorArray(const size_t& i) const {
         if (!checkValidSenorArray(i))
-            throw std::out_of_range("BaseDepthSensor::throwIfInvalidSenorArray Requested coordinates were out of range.");
+            throw std::out_of_range("Sensor::throwIfInvalidSenorArray Requested coordinates were out of range.");
     }
 
     void resetDepthLaser() { std::fill(depth_vector.begin(), depth_vector.end(), intr->d_max); }
@@ -374,58 +374,6 @@ private:
         p *= depth;
         return p;
     }
-};
-
-
-class Camera : public BaseDepthSensor
-{
-public:
-    Camera(const Intrinsics::Camera& intr) :
-        BaseDepthSensor(intr)
-        { setup(); }
-
-    Camera(const Intrinsics::Camera& intr, const extrinsic& extr) :
-        BaseDepthSensor(intr, extr)
-        { setup(); }
-
-    Camera(const Intrinsics::Camera& intr, const translation& position) :
-        BaseDepthSensor(intr, position)
-        { setup(); }
-
-    Camera(const Intrinsics::Camera& intr, const rotation& orientation) :
-        BaseDepthSensor(intr, orientation)
-        { setup(); }
-
-    void resetDepth() override final { resetDepthCamera(); }
-
-private:
-    void setup() { resetDepthCamera(); }
-};
-
-
-class Laser : public BaseDepthSensor
-{
-public:
-    Laser(const Intrinsics::Laser& intr) :
-        BaseDepthSensor(intr)
-        { setup(); }
-
-    Laser(const Intrinsics::Laser& intr, const extrinsic& extr) :
-        BaseDepthSensor(intr, extr)
-        { setup(); }
-
-    Laser(const Intrinsics::Laser& intr, const translation& position) :
-        BaseDepthSensor(intr, position)
-        { setup(); }
-
-    Laser(const Intrinsics::Laser& intr, const rotation& orientation) :
-        BaseDepthSensor(intr, orientation)
-        { setup(); }
-
-    void resetDepth() override final { resetDepthLaser(); }
-
-private:
-    void setup() { resetDepthLaser(); }
 };
 
 

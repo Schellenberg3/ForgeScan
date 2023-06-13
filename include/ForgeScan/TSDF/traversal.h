@@ -96,7 +96,7 @@ bool addRayUpdate(Grid& grid, const point_list& rs, const point_list& re,
 /// @param sensor Sensor to add.
 /// @param update Update to apply, default value has distance set to 1 and all other values set to 0.
 /// @return True if at least one voxel was updated by a ray from the sensor.
-bool addSensorUpdate(Grid& grid, const DepthSensor::BaseDepthSensor&sensor, const Voxel::Update& update = Voxel::Update(1, 0, 0, 0))
+bool addSensorUpdate(Grid& grid, const DepthSensor::Sensor&sensor, const Voxel::Update& update = Voxel::Update(1, 0, 0, 0))
 {
     /// Get the sensor's measured points, relative to the sensor frame, then transform
     /// these points from the sensor frame to this Grid's frame.
@@ -194,7 +194,7 @@ bool addRayTSDF(Grid& grid, const point_list &origin, const point_list &sensed,
 /// @param sensor Sensor to add.
 /// @param sensor_record[out] Output variable to record metrics about the TSDF updates from this sensor.
 /// @return True if at least one voxel was traversed by a ray from the sensor.
-bool addSensorTSDF(Grid& grid, const DepthSensor::BaseDepthSensor&sensor,
+bool addSensorTSDF(Grid& grid, const DepthSensor::Sensor&sensor,
                    Metrics::SensorRecord& sensor_record = Metrics::SensorRecord())
 {
     /// Get the sensor's measured points, relative to the sensor frame, then transform

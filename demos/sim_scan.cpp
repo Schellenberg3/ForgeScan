@@ -3,7 +3,8 @@
 
 #include "ForgeScan/TSDF/grid.h"
 #include "ForgeScan/TSDF/traversal.h"
-#include "ForgeScan/DepthSensor/depth_sensor.h"
+#include "ForgeScan/DepthSensor/camera.h"
+#include "ForgeScan/DepthSensor/laser.h"
 #include "ForgeScan/Primitives/sphere.h"
 #include "ForgeScan/Primitives/box.h"
 #include "ForgeScan/Utilities/arg_parser.h"
@@ -15,7 +16,7 @@ static const Eigen::Vector3d WORLD_ORIGIN(0, 0, 0);
 int main(int argc, char* argv[])
 {
     ForgeScan::Utilities::ArgParser parser(argc, argv);
-    /// Number of pixel in the x and y directions for the depth sensor.
+    /// Number of pixel in the x and y directions for the depth sensor->
     int nx = 100, ny = 100;
 
     /// Number of views collected.
@@ -38,6 +39,8 @@ int main(int argc, char* argv[])
     /// If true will user randomly selected poses for each view .
     bool random = parser.cmdOptionExists("--random");
 
+    bool laser = parser.cmdOptionExists("--laser");
+
     {   /// Command line parsing for reading specific arguments
         const std::string &s_nx = parser.getCmdOption("-nx");
         if (!s_nx.empty()) nx = std::stoi(s_nx);
@@ -58,7 +61,8 @@ int main(int argc, char* argv[])
     /// Create the full file path.
     fpath /= fname;
 
-    std::cout << "Running for " << nv << " sensors with (" << nx << ", " << ny << ") images." << std::endl;
+    std::string sensor_type = laser ? "laser" : "camera";
+    std::cout << "Running for " << nv << " " << sensor_type << " sensors with (" << nx << ", " << ny << ") images." << std::endl;
     if (first) {
         std::cout << "Added deterministic first view." << std::endl;
         --nv;  // Decrement the number of requested views for the rest of the program
@@ -76,35 +80,40 @@ int main(int argc, char* argv[])
 
     ForgeScan::Primitives::Scene scene{&sphere, &box};
 
-    ForgeScan::DepthSensor::Intrinsics::Camera sensor_intr(nx, ny, 0, 10, 0.4*M_PI, 0.4*M_PI);
-    // ForgeScan::DepthSensor::Intrinsics::Laser sensor_intr(nx, ny, 0, 10, -0.1 * M_PI, 0.1 * M_PI, -0.1 * M_PI, 0.1 * M_PI);
+    ForgeScan::DepthSensor::Sensor* sensor = NULL;
+    if (laser) {
+        ForgeScan::DepthSensor::Intrinsics::Laser sensor_intr(nx, ny, 0, 10, -0.4 * M_PI, 0.4 * M_PI, -0.4 * M_PI, 0.4 * M_PI);
+        sensor = new ForgeScan::DepthSensor::Laser(sensor_intr);
+    } else {
+        ForgeScan::DepthSensor::Intrinsics::Camera sensor_intr(nx, ny, 0, 10, 0.4*M_PI, 0.4*M_PI);
+        sensor = new ForgeScan::DepthSensor::Camera(sensor_intr);
+    }
 
-    ForgeScan::DepthSensor::Camera sensor(sensor_intr);
-    // ForgeScan::DepthSensor::Laser sensor(sensor_intr);
 
     if (first)
     {
-        sensor.translate(ForgeScan::point(0, 0, cr));
-        sensor.orientPrincipleAxis(WORLD_ORIGIN);
+        sensor->translate(ForgeScan::point(0, 0, cr));
+        sensor->orientPrincipleAxis(WORLD_ORIGIN);
 
-        sensor.image(scene);
-        ForgeScan::TSDF::addSensorTSDF(grid, sensor);
+        sensor->image(scene);
+        ForgeScan::TSDF::addSensorTSDF(grid, *sensor);
     }
 
 
     for (int i = 0; i < nv; ++i)
     {
         if (random) {
-            sensor.setPoseRandom(WORLD_ORIGIN, cr);
+            sensor->setPoseRandom(WORLD_ORIGIN, cr);
         } else {
-            sensor.setPoseUniform(WORLD_ORIGIN, cr, i, nv);
+            sensor->setPoseUniform(WORLD_ORIGIN, cr, i, nv);
         }
-        sensor.image(scene);
-        ForgeScan::TSDF::addSensorTSDF(grid, sensor);
+        sensor->image(scene);
+        ForgeScan::TSDF::addSensorTSDF(grid, *sensor);
     }
 
     grid.saveXDMF(fpath);
     std::cout << "Complete! Saved file in ./share/ParaView as: " + fname << std::endl;
 
+    delete sensor;
     return EXIT_SUCCESS;
 }

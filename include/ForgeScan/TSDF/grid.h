@@ -10,7 +10,7 @@
 #include "ForgeScan/TSDF/voxel.h"
 #include "ForgeScan/TSDF/processor.h"
 #include "ForgeScan/Metrics/sensor_record.h"
-#include "ForgeScan/DepthSensor/depth_sensor.h"
+#include "ForgeScan/DepthSensor/sensor.h"
 #include "ForgeScan/Utilities/vector_memory_use.h"
 
 namespace ForgeScan {

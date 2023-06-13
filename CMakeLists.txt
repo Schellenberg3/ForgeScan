@@ -88,43 +88,45 @@ add_definitions(
 ## DEFINE PROJECT'S COMPILATION TARGETS ##
 ##########################################
 
-# TEST_GRID
-add_executable(
-    test_grid
-
-    demos/test_grid.cpp
+set(FORGESCAN_LIBRARY_NAME ${PROJECT_NAME})
+add_library(
+    ${FORGESCAN_LIBRARY_NAME}
+    
+    STATIC
     src/TSDF/grid_io.cpp
     src/TSDF/traversal.cpp
     src/TSDF/processor.cpp
 )
 
 
+# TEST_GRID
+add_executable(
+    test_grid
+    demos/test_grid.cpp
+)
+target_link_libraries(test_grid ${FORGESCAN_LIBRARY_NAME})
+
+
 # SIM_SCAN
 add_executable(
     sim_scan
-
     demos/sim_scan.cpp
-    src/TSDF/grid_io.cpp
-    src/TSDF/traversal.cpp
 )
+target_link_libraries(sim_scan ${FORGESCAN_LIBRARY_NAME})
 
 
 # TEST_VOXEL
 add_executable(
     test_voxel
-
     demos/test_voxel.cpp
-    src/TSDF/grid_io.cpp
-    src/TSDF/traversal.cpp
 )
+target_link_libraries(test_voxel ${FORGESCAN_LIBRARY_NAME})
 
 
 # TEST_TRAVERSAL
 add_executable(
     test_traversal
-
     demos/test_traversal.cpp
-    src/TSDF/grid_io.cpp
-    src/TSDF/traversal.cpp
 )
+target_link_libraries(test_traversal ${FORGESCAN_LIBRARY_NAME})
 

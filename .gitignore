@@ -1,5 +1,6 @@
 ## Project Specific Folders
 bin/*
+lib/*
 build/*
 share/*
 archive/*

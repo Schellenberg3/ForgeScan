@@ -91,7 +91,7 @@ add_definitions(
 set(FORGESCAN_LIBRARY_NAME ${PROJECT_NAME})
 add_library(
     ${FORGESCAN_LIBRARY_NAME}
-    
+
     STATIC
     src/TSDF/grid_io.cpp
     src/TSDF/traversal.cpp
@@ -130,3 +130,10 @@ add_executable(
 )
 target_link_libraries(test_traversal ${FORGESCAN_LIBRARY_NAME})
 
+
+# DEMO_POLICY
+add_executable(
+    demo_policy
+    demos/demo_policy.cpp
+)
+target_link_libraries(demo_policy ${FORGESCAN_LIBRARY_NAME})

@@ -235,8 +235,7 @@ public:
     /// @param extr  Frame to transform the resulting point to. Default is the world frame.
     /// @return Center point location in the provided reference frame.
     point getCenter(const extrinsic& extr = extrinsic::Identity()) {
-        /// Fixed grid size means we only need to calculate this once, thus make it static.
-        static const point local_center = properties.dimensions * 0.5;
+        const point local_center = properties.dimensions * 0.5;
         return toOtherFromThis(local_center, extr);
     }
 

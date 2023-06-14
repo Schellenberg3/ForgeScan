@@ -167,7 +167,7 @@ public:
 
     /// @brief Moves the sensor to a new pose with uniform spacing around the specified center point.
     /// @param center Where to point the sensor's principle axis.
-    /// @param radius Radius from world origin to place the sensor at.
+    /// @param radius Distance between the center and the sensor.
     /// @param view_number Which uniformly sampled view to return. Range is from 0 to (N - 1).
     /// @param total_views Number of uniform samples to select the view from.
     /// @note Base on Fibonacci sphere sequence, see: https://stackoverflow.com/questions/9600801/

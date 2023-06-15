@@ -23,7 +23,7 @@ public:
     /// @param position Translation from the origin to the center point of the box.
     Box(const double& l, const double& w, const double& h, const translation& position = Eigen::Vector3d::Zero()) :
         Primitive(position, getAABBbound(   std::abs(w),    std::abs(l),    std::abs(h)),
-                                    getAABBbound(-1*std::abs(w), -1*std::abs(l), -1*std::abs(h))  ),
+                            getAABBbound(-1*std::abs(w), -1*std::abs(l), -1*std::abs(h))),
         length(l), width(w), height(h)
         { }
 
@@ -34,7 +34,7 @@ public:
     /// @param extr Extrinsic transformation from the origin to the center point of the box.
     Box(const double& l, const double& w, const double& h, const extrinsic& extr) :
         Primitive(extr, getAABBbound(   std::abs(w),    std::abs(l),    std::abs(h)),
-                                getAABBbound(-1*std::abs(w), -1*std::abs(l), -1*std::abs(h))  ),
+                        getAABBbound(-1*std::abs(w), -1*std::abs(l), -1*std::abs(h))),
         length(l), width(w), height(h)
         { }
 
@@ -45,7 +45,7 @@ public:
     /// @param orientation Rotation, about the world frame, for the box's coordinate system.
     Box(const double& l, const double& w, const double& h, const rotation& orientation) :
         Primitive(orientation, getAABBbound(   std::abs(w),    std::abs(l),    std::abs(h)),
-                                       getAABBbound(-1*std::abs(w), -1*std::abs(l), -1*std::abs(h))  ),
+                               getAABBbound(-1*std::abs(w), -1*std::abs(l), -1*std::abs(h))),
         length(l), width(w), height(h)
         { }
 

@@ -1,55 +1,47 @@
 #ifndef FORGESCAN_UTILITIES_SIMPLE_TIMER_H
 #define FORGESCAN_UTILITIES_SIMPLE_TIMER_H
 
-#include <iostream>
 #include <chrono>
-#include <ctime>
-#include <cmath>
+
+#define MILISECONDS_TO_SECONDS 0.001
 
 
 namespace ForgeScan {
 namespace Utilities {
 
-class SimpleTimer
-{
+
+/// @brief Minimal implementation for a timer using std::chrono.
+class SimpleTimer {
 public:
-    void start()
-    {
-        m_StartTime = std::chrono::system_clock::now();
-        m_bRunning = true;
+    /// @brief Starts the SimpleTimer.
+    void start() {
+        start_time = std::chrono::system_clock::now();
+        running = true;
     }
 
-    void stop()
-    {
-        m_EndTime = std::chrono::system_clock::now();
-        m_bRunning = false;
+    /// @brief Ends the SimpleTimer.
+    void stop() {
+        end_time = std::chrono::system_clock::now();
+        running = false;
     }
 
-    long long elapsedMilliseconds()
-    {
-        std::chrono::time_point<std::chrono::system_clock> endTime;
-
-        if(m_bRunning)
-        {
-            endTime = std::chrono::system_clock::now();
+    /// @brief  Calculates the elapsed time in miliseconds, even if the timer is running. 
+    /// @return Elapsed time in miliseconds.
+    long long elapsedMilliseconds() {
+        if (running) {
+            return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start_time).count();
         }
-        else
-        {
-            endTime = m_EndTime;
-        }
-
-        return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - m_StartTime).count();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
     }
 
-    double elapsedSeconds()
-    {
-        return elapsedMilliseconds() / 1000.0;
-    }
+    /// @brief  Calculates the elapsed time in seconds, even if the timer is running. 
+    /// @return Elapsed time in seconds.
+    double elapsedSeconds() { return elapsedMilliseconds() * MILISECONDS_TO_SECONDS; }
 
 private:
-    std::chrono::time_point<std::chrono::system_clock> m_StartTime;
-    std::chrono::time_point<std::chrono::system_clock> m_EndTime;
-    bool                                               m_bRunning = false;
+    std::chrono::time_point<std::chrono::system_clock> start_time;
+    std::chrono::time_point<std::chrono::system_clock> end_time;
+    bool running = false;
 };
 
 

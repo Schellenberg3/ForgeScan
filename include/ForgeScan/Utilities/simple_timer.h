@@ -3,6 +3,7 @@
 
 #include <chrono>
 
+// Conversion utility for elapsedSeconds. 1e-3
 #define MILISECONDS_TO_SECONDS 0.001
 
 
@@ -25,7 +26,7 @@ public:
         running = false;
     }
 
-    /// @brief  Calculates the elapsed time in miliseconds, even if the timer is running. 
+    /// @brief  Calculates the elapsed time in miliseconds, even if the timer is running.
     /// @return Elapsed time in miliseconds.
     long long elapsedMilliseconds() {
         if (running) {
@@ -34,7 +35,7 @@ public:
         return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
     }
 
-    /// @brief  Calculates the elapsed time in seconds, even if the timer is running. 
+    /// @brief  Calculates the elapsed time in seconds, even if the timer is running.
     /// @return Elapsed time in seconds.
     double elapsedSeconds() { return elapsedMilliseconds() * MILISECONDS_TO_SECONDS; }
 
@@ -45,7 +46,7 @@ private:
 };
 
 
-} // Utilities
-} // ForgeScan
+} // namespace Utilities
+} // namespace ForgeScan
 
 #endif // FORGESCAN_UTILITIES_SIMPLE_TIMER_H

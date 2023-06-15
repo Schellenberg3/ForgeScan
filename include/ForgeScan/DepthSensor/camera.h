@@ -4,9 +4,9 @@
 #include "ForgeScan/DepthSensor/sensor.h"
 #include "ForgeScan/DepthSensor/intrinsics.h"
 
+
 namespace ForgeScan   {
 namespace DepthSensor {
-
 namespace Intrinsics  {
 
 
@@ -45,7 +45,7 @@ public:
 };
 
 
-} // Intrinsics
+} // namespace Intrinsics
 
 
 class Camera : public Sensor
@@ -74,7 +74,7 @@ private:
 };
 
 
-} // DepthSensor
-} // ForgeScan
+} // namespace DepthSensor
+} // namespace ForgeScan
 
 #endif // FORGESCAN_DEPTH_SENSOR_CAMERA_H

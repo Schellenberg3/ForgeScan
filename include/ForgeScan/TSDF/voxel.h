@@ -113,7 +113,7 @@ struct Voxel
 };
 
 
-} // TSDF
-} // ForgeScan
+} // namespace TSDF
+} // namespace ForgeScan
 
 #endif // FORGESCAN_TSDF_VOXEL_H

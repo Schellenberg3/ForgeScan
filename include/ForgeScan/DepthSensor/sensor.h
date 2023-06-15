@@ -379,7 +379,7 @@ private:
 };
 
 
-} // DepthSensor
-} // ForgeScan
+} // namespace DepthSensor
+} // namespace ForgeScan
 
 #endif // FORGESCAN_DEPTH_SENSOR_DEPTH_SENSOR_H

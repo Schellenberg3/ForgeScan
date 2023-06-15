@@ -1,8 +1,9 @@
 #ifndef FORGESCAN_SHAPE_PRIMITIVES_PRIMITIVE_H
 #define FORGESCAN_SHAPE_PRIMITIVES_PRIMITIVE_H
 
-
 #include "ForgeScan/types.h"
+#include "ForgeScan/entity.h"
+
 
 namespace ForgeScan  {
 namespace Primitives {
@@ -26,15 +27,15 @@ public:
     /// @return True if the line intersects and does so in a valid region of the line.
     virtual bool hit(const point& start, const point& end, double& t) const = 0;
 
-    /// @brief Calculates the shortest signed distance between the point and the Primitive's surface.  
+    /// @brief Calculates the shortest signed distance between the point and the Primitive's surface.
     /// @param input Point in space.
     /// @param extr  Frame which the point is in.
-    /// @return The shortest distance between the point and the surface with negative distances being inside the Primitive. 
+    /// @return The shortest distance between the point and the surface with negative distances being inside the Primitive.
     virtual double getSignedDistance(const point& input, const extrinsic& extr) const = 0;
 
     /// @brief Checks if a point is within the axis-aligned bounding box (AABB) for the Primitive.
     /// @param input Point to check.
-    /// @return True if the point is between the upper and lower AABB bound (or on one of them). False else. 
+    /// @return True if the point is between the upper and lower AABB bound (or on one of them). False else.
     bool insideBounds(const point& input) const
         { return (input.array() >= lowerAABBbound.array()).all() && (input.array() <= upperAABBbound.array()).all(); }
 
@@ -125,7 +126,8 @@ protected:
     }
 };
 
-} // Primitives
-} // ForgeScan
+
+} // namespace Primitives
+} // namespace ForgeScan
 
 #endif // FORGESCAN_SHAPE_PRIMITIVES_PRIMITIVE_H

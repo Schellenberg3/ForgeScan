@@ -1,10 +1,10 @@
 #ifndef FORGESCAN_UTILITIES_ARG_PARSER_H
 #define FORGESCAN_UTILITIES_ARG_PARSER_H
 
-
 #include <string>
 #include <vector>
 #include <algorithm>
+
 
 namespace ForgeScan {
 namespace Utilities {
@@ -13,7 +13,7 @@ namespace Utilities {
 /// @brief   A simple argument parsing tool.
 /// @details Adapted from:
 ///              https://stackoverflow.com/questions/865668/#868894
-class ArgParser{
+class ArgParser {
 public:
     /// @brief Constructs the argument parser from the argument count and argument array.
     /// @param argc Count of arguments in the argument vector
@@ -49,8 +49,7 @@ private:
 };
 
 
-} // Utilities
-} // ForgeScan
-
+} // namespace Utilities
+} // namespace ForgeScan
 
 #endif // FORGESCAN_UTILITIES_ARG_PARSER_H

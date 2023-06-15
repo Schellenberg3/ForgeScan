@@ -4,13 +4,12 @@
 #include <cstddef>
 #include <vector>
 
+// Conversion utility for bits_to_megabytes. 1e-6
+#define MB_PER_BYTE 0.000001
+
 
 namespace ForgeScan {
 namespace Utilities {
-
-
-// Conversion utility for bits_to_megabytes. 1e-6
-#define MB_PER_BYTE 0.000001
 
 
 /// @brief Templated function to find the size of a vector in bytes
@@ -42,7 +41,7 @@ double const inline byte_to_megabytes(const size_t& bytes)
 }
 
 
-} // Utilities
-} // ForgeScan
+} // namespace Utilities
+} // namespace ForgeScan
 
 #endif // FORGESCAN_UTILITIES_VECTOR_MEMORY_USE_H

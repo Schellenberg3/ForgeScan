@@ -1,8 +1,8 @@
 #ifndef FORGESCAN_SHAPE_PRIMITIVES_BOX_H
 #define FORGESCAN_SHAPE_PRIMITIVES_BOX_H
 
-#include "ForgeScan/types.h"
 #include "ForgeScan/Primitives/primative.h"
+
 
 namespace ForgeScan  {
 namespace Primitives {
@@ -106,7 +106,8 @@ private:
     }
 };
 
-} // Primitives
-} // ForgeScan
+
+} // namespace Primitives
+} // namespace ForgeScan
 
 #endif // FORGESCAN_SHAPE_PRIMITIVES_BOX_H

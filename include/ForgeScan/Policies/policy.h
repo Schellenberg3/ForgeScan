@@ -67,7 +67,7 @@ protected:
 };
 
 
-} // Policies
-} // ForgeScan
+} // namespace Policies
+} // namespace ForgeScan
 
 #endif // FORGESCAN_POLICIES_BASE_POLICY_H

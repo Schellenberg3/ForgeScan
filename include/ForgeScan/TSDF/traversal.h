@@ -4,6 +4,7 @@
 #include "ForgeScan/types.h"
 #include "ForgeScan/TSDF/grid.h"
 
+
 namespace ForgeScan {
 namespace TSDF      {
 
@@ -226,7 +227,7 @@ bool addSensorTSDF(Grid& grid, const DepthSensor::Sensor&sensor,
 }
 
 
-} // TSDF
-} // ForgeScan
+} // namespace TSDF
+} // namespace ForgeScan
 
 #endif // FORGESCAN_TSDF_TRAVERSAL_H

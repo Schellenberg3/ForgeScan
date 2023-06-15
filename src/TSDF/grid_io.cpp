@@ -29,7 +29,7 @@ HIGHFIVE_REGISTER_TYPE(ForgeScan::TSDF::Voxel, create_compound_Voxel)
 
 
 namespace ForgeScan {
-namespace TSDF {
+namespace TSDF      {
 
 
 void Grid::saveHDF5(const std::filesystem::path& fname) const
@@ -275,5 +275,5 @@ Grid loadGridHDF5(const std::filesystem::path& fname)
 }
 
 
-} // TSDF
-} // ForgeScan
+} // namespace TSDF
+} // namespace ForgeScan

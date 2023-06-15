@@ -198,6 +198,6 @@ struct Entity
 };
 
 
-} // ForgeScan
+} // namespace ForgeScan
 
 #endif // FORGESCAN_ENTITY_H

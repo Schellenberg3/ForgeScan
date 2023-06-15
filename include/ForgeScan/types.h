@@ -7,7 +7,9 @@
     #define M_PI 3.14159265358979323846
 #endif
 
+
 namespace ForgeScan {
+
 
 /// @brief Convenience typedef for Eigen; 32 bit unsigned vector.
 typedef Eigen::Matrix<size_t, 3, 1> Vector3ui;
@@ -60,6 +62,6 @@ typedef Vector3d translation;
 typedef Eigen::Matrix3d rotation;
 
 
-} // ForgeScan
+} // namespace ForgeScan
 
 #endif // FORGESCAN_TYPES_H

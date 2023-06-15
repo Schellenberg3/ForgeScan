@@ -73,8 +73,8 @@ protected:
 };
 
 
-} // Intrinsics
-} // DepthSensor
-} // ForgeScan
+} // namespace Intrinsics
+} // namespace DepthSensor
+} // namespace ForgeScan
 
 #endif // FORGESCAN_DEPTH_SENSOR_SENSOR_INTRINSICS_H

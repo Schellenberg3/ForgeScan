@@ -4,8 +4,9 @@
 #include "ForgeScan/types.h"
 #include "ForgeScan/TSDF/grid.h"
 
+
 namespace ForgeScan {
-namespace TSDF {
+namespace TSDF      {
 
 
 /// @details This implements the ray traversal methods declared in the Grid class.
@@ -332,5 +333,5 @@ bool implementAddRayTSDF(Grid& grid, const point &origin, const point &sensed, M
 }
 
 
-} // TSDF
-} // ForgeScan
+} // namespace TSDF
+} // namespace ForgeScan

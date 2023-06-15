@@ -1,9 +1,9 @@
-#include "ForgeScan/types.h"
+#include "ForgeScan/TSDF/grid.h"
 #include "ForgeScan/TSDF/processor.h"
 
 
 namespace ForgeScan {
-namespace TSDF {
+namespace TSDF      {
 
 
 Processor::Processor(Grid& target)
@@ -86,5 +86,5 @@ void Processor::erode(const grid_idx& element, const int& n)
 */
 
 
-} // TSDF
-} // ForgeScan
+} // namespace TSDF
+} // namespace ForgeScan

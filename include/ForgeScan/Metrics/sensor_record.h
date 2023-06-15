@@ -11,6 +11,7 @@
 namespace ForgeScan {
 namespace Metrics   {
 
+
 /// @brief Record for a specific view.
 struct Ray
 {
@@ -102,7 +103,8 @@ public:
     }
 };
 
-} // Metrics
-} // ForgeScan
+
+} // namespace Metrics
+} // namespace ForgeScan
 
 #endif // FORGESCAN_METRICS_SENSOR_RECORD_H

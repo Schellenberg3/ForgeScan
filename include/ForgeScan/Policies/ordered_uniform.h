@@ -70,8 +70,7 @@ private:
 };
 
 
-} // Policies
-} // ForgeScan
-
+} // namespace Policies
+} // namespace ForgeScan
 
 #endif // FORGESCAN_POLICIES_ORDERED_UNIFORM_H

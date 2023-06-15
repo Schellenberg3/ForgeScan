@@ -59,8 +59,7 @@ private:
 };
 
 
-} // Policies
-} // ForgeScan
-
+} // namespace Policies
+} // namespace ForgeScan
 
 #endif // FORGESCAN_POLICIES_RANDOM_SPHERE_H

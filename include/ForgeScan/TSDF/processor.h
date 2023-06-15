@@ -6,14 +6,14 @@
 
 #include "ForgeScan/types.h"
 #include "ForgeScan/TSDF/voxel.h"
-#include "ForgeScan/TSDF/grid.h"
 
 
 namespace ForgeScan {
 namespace TSDF      {
 
 
-class Grid;  // Promise to compiler that the Grid class will be defined later
+// Forward definition for the compiler; the Grid class is included in the implementation file.
+class Grid;
 
 
 class Processor {
@@ -61,7 +61,7 @@ private:
 };
 
 
-} // TSDF
-} // ForgeScan
+} // namespace TSDF
+} // namespace ForgeScan
 
 #endif // FORGESCAN_TSDF_PROCESSOR_H

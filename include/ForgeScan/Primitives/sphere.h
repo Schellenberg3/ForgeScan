@@ -1,8 +1,8 @@
 #ifndef FORGESCAN_SHAPE_PRIMITIVES_SPHERE_H
 #define FORGESCAN_SHAPE_PRIMITIVES_SPHERE_H
 
-#include "ForgeScan/types.h"
 #include "ForgeScan/Primitives/primative.h"
+
 
 namespace ForgeScan  {
 namespace Primitives {
@@ -96,10 +96,10 @@ public:
         return ( 0 <= t && t <= 1 );
     }
 
-    /// @brief Calculates the shortest signed distance between the point and the Sphere's surface.  
+    /// @brief Calculates the shortest signed distance between the point and the Sphere's surface.
     /// @param input Point in space.
     /// @param extr  Frame which the point is in.
-    /// @return The shortest distance between the point and the surface with negative distances being inside the Sphere. 
+    /// @return The shortest distance between the point and the surface with negative distances being inside the Sphere.
     double getSignedDistance(const point& input, const extrinsic& extr) const override final {
         const point input_this = toThisFromOther(input, extr);
         return input_this.norm() - radius;
@@ -114,7 +114,7 @@ private:
 };
 
 
-} // Primitives
-} // ForgeScan
+} // namespace Primitives
+} // namespace ForgeScan
 
 #endif // FORGESCAN_SHAPE_PRIMITIVES_SPHERE_H

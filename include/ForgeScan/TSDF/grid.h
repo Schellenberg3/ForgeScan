@@ -2,18 +2,18 @@
 # define FORGESCAN_TSDF_GRID_H
 
 #include <filesystem>
-#include <vector>
 #include <stdexcept>
 #include <iostream>
+#include <vector>
 
 #include "ForgeScan/types.h"
 #include "ForgeScan/entity.h"
 #include "ForgeScan/TSDF/voxel.h"
-#include "ForgeScan/TSDF/processor.h"
-#include "ForgeScan/Primitives/primative.h"
 #include "ForgeScan/Metrics/sensor_record.h"
+#include "ForgeScan/Primitives/primative.h"
 #include "ForgeScan/DepthSensor/sensor.h"
 #include "ForgeScan/Utilities/vector_memory_use.h"
+
 
 namespace ForgeScan {
 namespace TSDF      {
@@ -217,7 +217,7 @@ public:
     /// @param input The (X, Y, Z) index in the grid to check.
     /// @return Center point of the voxel, relative to the Grid.
     point indexToPoint(const index& input) const {
-        point input_double = input.cast<double>(); 
+        point input_double = input.cast<double>();
         return input_double.array() * properties.resolution;
     }
 
@@ -358,7 +358,7 @@ private:
 Grid loadGridHDF5(const std::filesystem::path& fname);
 
 
-} // TSDF
-} // ForgeScan
+} // namespace TSDF
+} // namespace ForgeScan
 
 #endif // FORGESCAN_TSDF_GRID_H

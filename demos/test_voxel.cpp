@@ -4,9 +4,6 @@
 #include "ForgeScan/TSDF/voxel.h"
 
 
-using namespace ForgeScan;
-
-
 /// @brief Displays memory size and numeric limits for Voxel class and its
 ///        (possible) constituents.
 void display_voxel_memory_size_and_limits();
@@ -17,11 +14,11 @@ void display_vector_memory_size_and_limits();
 
 int main()
 {
-    TSDF::Voxel t;
+    ForgeScan::TSDF::Voxel t;
 
-    TSDF::Voxel::Update u0(10);
-    TSDF::Voxel::Update u1(5);
-    TSDF::Voxel::Update u2(-5);
+    ForgeScan::TSDF::Voxel::Update u0(10);
+    ForgeScan::TSDF::Voxel::Update u1(5);
+    ForgeScan::TSDF::Voxel::Update u2(-5);
 
     t.update(u0);
     t.update(u1);
@@ -44,7 +41,7 @@ int main()
 
 void display_voxel_memory_size_and_limits()
 {
-    std::cout << "\nSize of Voxel:\t" << sizeof(TSDF::Voxel);
+    std::cout << "\nSize of Voxel:\t" << sizeof(ForgeScan::TSDF::Voxel);
     std::cout << "\nSize of float:\t" << sizeof(float);
     std::cout << "\nSize of uint:\t" << sizeof(unsigned int);
     std::cout << "\nSize of ushort:\t" << sizeof(unsigned short);
@@ -66,8 +63,8 @@ void display_voxel_memory_size_and_limits()
 void display_vector_memory_size_and_limits()
 {
     std::cout << "\nSize of Eigen Vectors:";
-    std::cout << "\n\tSize of Vector3d:\t"  << sizeof(Vector3d);
-    std::cout << "\n\tSize of Vector3ui:\t" << sizeof(Vector3ui);
+    std::cout << "\n\tSize of Vector3d:\t"  << sizeof(ForgeScan::Vector3d);
+    std::cout << "\n\tSize of Vector3ui:\t" << sizeof(ForgeScan::Vector3ui);
     std::cout << "\n\tSize of Vector3i:\t"  << sizeof(Eigen::Vector3i);
     // Proves to me that we do not need a custom class to minimize the size of our
     // vectors. But do we need something better to reduce function call overhead?

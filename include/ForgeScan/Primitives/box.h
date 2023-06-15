@@ -61,6 +61,18 @@ public:
         return hitAABB(start, end, t);
     }
 
+    /// @brief Calculates the shortest signed distance between the point and the Box's surface.
+    /// @param input Point in space.
+    /// @param extr  Frame which the point is in.
+    /// @return The shortest distance between the point and the surface with negative distances being inside the Box.
+    double getSignedDistance(const point& input, const extrinsic& extr) const override final {
+        const point input_this = toThisFromOther(input, extr);
+        if (insideBounds(input_this)) {
+            return getSignedDistanceInside(input_this);
+        }
+        return getSignedDistanceOutside(input_this);
+    }
+
 private:
     /// @brief Constructor helper for generating a box's AABB bounds.
     /// @param l The box's total dimension in the X-direction.
@@ -69,6 +81,28 @@ private:
     /// @return Axis-aligned bounding box point for the upper or lower, depending on the sign of the dimension.
     static point getAABBbound(const double& l, const double& w, const double& h) {
         return point(l, w, h).operator*=(0.5);
+    }
+
+    /// @brief Calculates the signed distance for the case where a point is outside of the Box.
+    /// @param input_this Point, relative to the Box's reference frame.
+    /// @return Shortest distance from the box to that point. Always non-negative.
+    double getSignedDistanceOutside(const point& input_this) const {
+        double dx = 0, dy = 0, dz = 0;
+        dx = std::max(std::max(lowerAABBbound[0] - input_this[0], 0.0), input_this[0] - upperAABBbound[0]);
+        dy = std::max(std::max(lowerAABBbound[1] - input_this[1], 0.0), input_this[1] - upperAABBbound[1]);
+        dz = std::max(std::max(lowerAABBbound[2] - input_this[2], 0.0), input_this[2] - upperAABBbound[2]);
+        return std::hypot(dx, dy, dz);
+    }
+
+    /// @brief Calculates the signed distance for the case where a point is inside of the Box.
+    /// @param input_this Point, relative to the Box's reference frame.
+    /// @return Shortest distance from the box to that point. Always non-positive.
+    double getSignedDistanceInside(const point& input_this) const {
+        double minx = 0, miny = 0, minz = 0;
+        minx = std::min(input_this[0] - lowerAABBbound[0], upperAABBbound[0] - input_this[0]);
+        miny = std::min(input_this[1] - lowerAABBbound[1], upperAABBbound[1] - input_this[1]);
+        minz = std::min(input_this[2] - lowerAABBbound[2], upperAABBbound[2] - input_this[2]);
+        return -1 * std::min(std::min(minx, miny), minz);
     }
 };
 

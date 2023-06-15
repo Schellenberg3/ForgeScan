@@ -12,6 +12,10 @@ namespace Primitives {
 struct Primitive : Entity
 {
 public:
+    /// @brief Bounding box limits for the geometric primitive.
+    const point upperAABBbound, lowerAABBbound;
+
+public:
     /// @brief Determines if, and where, the line between the start and end points first intersects the geometry.
     /// @param start  Start point (position on the line when t = 0).
     /// @param end    End point (position on the line when t = 1).
@@ -22,9 +26,17 @@ public:
     /// @return True if the line intersects and does so in a valid region of the line.
     virtual bool hit(const point& start, const point& end, double& t) const = 0;
 
-protected:
-    /// @brief Bounding box limits for the geometric primitive.
-    const point upperAABBbound, lowerAABBbound;
+    /// @brief Calculates the shortest signed distance between the point and the Primitive's surface.  
+    /// @param input Point in space.
+    /// @param extr  Frame which the point is in.
+    /// @return The shortest distance between the point and the surface with negative distances being inside the Primitive. 
+    virtual double getSignedDistance(const point& input, const extrinsic& extr) const = 0;
+
+    /// @brief Checks if a point is within the axis-aligned bounding box (AABB) for the Primitive.
+    /// @param input Point to check.
+    /// @return True if the point is between the upper and lower AABB bound (or on one of them). False else. 
+    bool insideBounds(const point& input) const
+        { return (input.array() >= lowerAABBbound.array()).all() && (input.array() <= upperAABBbound.array()).all(); }
 
 protected:
     /// @brief Constructs the generic geometric primitive at the world origin.

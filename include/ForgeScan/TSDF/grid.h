@@ -10,6 +10,7 @@
 #include "ForgeScan/entity.h"
 #include "ForgeScan/TSDF/voxel.h"
 #include "ForgeScan/TSDF/processor.h"
+#include "ForgeScan/Primitives/primative.h"
 #include "ForgeScan/Metrics/sensor_record.h"
 #include "ForgeScan/DepthSensor/sensor.h"
 #include "ForgeScan/Utilities/vector_memory_use.h"
@@ -215,7 +216,10 @@ public:
     /// @brief Calculates the center point location for the voxel at the input index.
     /// @param input The (X, Y, Z) index in the grid to check.
     /// @return Center point of the voxel, relative to the Grid.
-    point indexToPoint(const index& input) const { return input.cast<double>().array() * properties.resolution; }
+    point indexToPoint(const index& input) const {
+        point input_double = input.cast<double>(); 
+        return input_double.array() * properties.resolution;
+    }
 
     /// @brief Calculates the center point location for the voxel at the input index.
     /// @param input The (X, Y, Z) index in the grid to check.
@@ -258,6 +262,30 @@ public:
                 voxel.resetViewUpdateFlag();
             }
         }
+    }
+
+    /// @brief Adds the primitive's ground truth distance to the grid.
+    /// @param primitive primitive geometry to add.
+    void addGroundTruth(const Primitives::Primitive& primitive) {
+        index idx(0, 0, 0);
+        point voxel_center(0, 0, 0);
+        double signed_dist = 0;
+        for (size_t z = 0; z < properties.grid_size[2]; ++z) {
+        for (size_t y = 0; y < properties.grid_size[1]; ++y) {
+        for (size_t x = 0; x < properties.grid_size[0]; ++x) {
+            point voxel_center = indexToPoint(idx);
+            signed_dist = primitive.getSignedDistance(voxel_center, extr);
+            operator[](idx).min = static_cast<float>(signed_dist);
+            ++idx[0];
+        } // ^ for x
+            idx[0] = 0;
+            ++idx[1];
+        } // ^ for y
+            idx[0] = 0;
+            idx[1] = 0;
+            ++idx[2];
+        } // ^ for z
+
     }
 
     /// @brief Saves in the XDMF format (XDMF file references to an HDF5 data file).

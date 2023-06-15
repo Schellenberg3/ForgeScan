@@ -96,6 +96,15 @@ public:
         return ( 0 <= t && t <= 1 );
     }
 
+    /// @brief Calculates the shortest signed distance between the point and the Sphere's surface.  
+    /// @param input Point in space.
+    /// @param extr  Frame which the point is in.
+    /// @return The shortest distance between the point and the surface with negative distances being inside the Sphere. 
+    double getSignedDistance(const point& input, const extrinsic& extr) const override final {
+        const point input_this = toThisFromOther(input, extr);
+        return input_this.norm() - radius;
+    }
+
 private:
     /// @brief Constructor helper for generating a sphere's AABB bounds.
     /// @param radius Radius of the sphere.

@@ -18,8 +18,8 @@ public:
 
 public:
     /// @brief Determines if, and where, the line between the start and end points first intersects the geometry.
-    /// @param start  Start point (position on the line when t = 0).
-    /// @param end    End point (position on the line when t = 1).
+    /// @param start  Start point (position on the line when t = 0), relative to the Primitive's frame..
+    /// @param end    End point (position on the line when t = 1), relative to the Primitive's frame..
     /// @param t      Intersection time (output variable). Values 0 <= t <= 1 are valid on the line segment.
     ///                - If the line DOES NOT intersect we return false with t unchanged.
     ///                - If it DOES intersect but NOT inside the bounds, then we return false with t set to the minimum
@@ -64,8 +64,8 @@ protected:
         { }
 
     /// @brief Relatively quick check for bounding box intersection of a geometric primitive. Prevents needless checks for some rays.
-    /// @param start Starting point of the ray, relative to the primitive's frame.
-    /// @param end   Ending point of the ray, relative to the primitive's frame.
+    /// @param start Starting point of the ray, relative to the Primitive's frame.
+    /// @param end   Ending point of the ray, relative to the Primitive's frame.
     /// @param t     Adjusted start intersection time (output variable). Describes when the line will first intersect the AABB.
     ///              Values 0 <= t <= 1 are valid on the line segment.
     /// @return True if the ray has any intersection with the primitive's bounding box.

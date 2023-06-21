@@ -23,12 +23,12 @@ public:
     /// @note This takes the absolute value of the provided radius value.
     Sphere(const double& radius = 1, const point& center = Eigen::Vector3d::Zero()) :
         Primitive(center, getAABBbound(std::abs(radius)), getAABBbound(-1 * std::abs(radius))),
-        radius(std::abs(radius))
+        radius(std::abs(radius)), radius_squared(radius * radius)
         { }
 
     /// @brief Determines if, and where, the line between the start and end points first intersects the geometry.
-    /// @param start  Start point (position on the line when t = 0).
-    /// @param end    End point (position on the line when t = 1).
+    /// @param start  Start point (position on the line when t = 0), relative to the Sphere's frame.
+    /// @param end    End point (position on the line when t = 1), relative to the Sphere's frame.
     /// @param t      Intersection time (output variable). Values 0 <= t <= 1 are valid on the line segment.
     ///                - If the line DOES NOT intersect we return false with t unchanged.
     ///                - If it DOES intersect but NOT inside the bounds, then we return false with t set to the minimum
@@ -40,15 +40,15 @@ public:
         if ( !hitAABB(start, end, unused_intersection_time) ) return false;
 
         /// Adapted from https://stackoverflow.com/questions/6533856 with a partial quadratic solver for only the
-        /// real-valued solutions of the intersection. Also, see; http://paulbourke.net/geometry/circlesphere/
+        /// real-valued solutions of the intersection. Also, see; http://paulbourke.net/geometry/circlesphere/.
+        /// Note that we require the start/end point to be relative to the Sphere's reference frame thus the
+        /// value of `center` used in the references above is always equal to zero here.
 
         /// Quadratic equation for intersection:
         ///     0 = A*(x*x) + B*x + C
-        const point center = extr.translation();
-        double R2 = radius * radius;
-        double A = ((start - end   ).array().pow(2)).sum();
-        double C = ((start - center).array().pow(2)).sum() - R2;
-        double B = ((end   - center).array().pow(2)).sum() - A - C - R2;
+        double A = (start - end).array().pow(2).sum();
+        double C = start.array().pow(2).sum() - radius_squared;
+        double B = end.array().pow(2).sum() - A - C - radius_squared;
 
         /// Find quadratic equation determinant. Early exit if negative (complex solutions mean no intersection).
         double D = B*B - 4*A*C;
@@ -106,6 +106,9 @@ public:
     }
 
 private:
+    /// @brief Helper constant for the ray hit calculation.
+    const double radius_squared;
+
     /// @brief Constructor helper for generating a sphere's AABB bounds.
     /// @param radius Radius of the sphere.
     ///               Pass as positive for the upper bound. Pass as negative for the lower bound.

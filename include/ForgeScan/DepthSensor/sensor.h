@@ -66,8 +66,8 @@ public:
         point start = extr.translation();   // World frame
         geometry.toThisFromWorld(start);    // Primitive frame
 
-        point_list end_points = getAllPositions();     // Sensor frame
-        geometry.toThisFromOther(end_points, *this);   // Primitive frame
+        point_list end_points = getAllPositions();          // Sensor frame
+        geometry.toThisFromOther(end_points, this->extr);   // Primitive frame
 
         double t = 1;
         for (size_t i = 0, n = intr->size(); i < n; ++i)

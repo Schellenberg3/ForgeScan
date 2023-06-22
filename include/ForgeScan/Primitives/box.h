@@ -50,7 +50,7 @@ public:
         { }
 
     /// @brief Determines if, and where, the line between the start and end points first intersects the geometry.
-    /// @param start  Start point (position on the line when t = 0), relative to the Box's frame. 
+    /// @param start  Start point (position on the line when t = 0), relative to the Box's frame.
     /// @param end    End point (position on the line when t = 1), relative to the Box's frame.
     /// @param t      Intersection time (output variable). Values 0 <= t <= 1 are valid on the line segment.
     ///                - If the line DOES NOT intersect we return false with t unchanged.

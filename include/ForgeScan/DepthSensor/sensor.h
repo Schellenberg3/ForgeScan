@@ -233,25 +233,32 @@ public:
     /// @return Eigen matrix of all depth positions for the sensor, relative to the DepthSensor's reference frame.
     point_list getAllPositions() const
     {
-        const double d_theta = intr->fov_y() / (intr->v - 1);
-        const double d_phi   = intr->fov_x() / (intr->u - 1);
-
+        const double d_theta = intr->fov_y() / (intr->v - 1),
+                     d_phi   = intr->fov_x() / (intr->u - 1);
+        double theta = intr->theta_max,
+               phi   = intr->phi_min;
+        double n_sin_theta = 0, cos_theta = 0;
         point_list sensed_points(3, intr->size());
-
         int i = 0;
-        double theta = intr->theta_max, phi = intr->phi_max;
-        for (int y = 0; y < intr->v; ++y)
-        {
-            phi = intr->phi_max;
-            for (int x = 0; x < intr->u; ++x)
-            {
-                /// TODO: Improve by re-implementing rotationToCartesian to minimize trig function calls on theta
-                ///       when we are iterating in this loop and not arbitrarily calling points.
-                sensed_points.col(i) << rotationToCartesian(depth_vector[i], theta, phi);
-                phi -= d_phi;
-                ++i;
+
+        std::vector<double> sin_phi(intr->u, 0), cos_phi(intr->u, 0);
+        for (int x = 0; x < intr->u; ++x) {
+            sin_phi[x] = std::sin(phi);
+            cos_phi[x] = std::cos(phi);
+            phi += d_phi;  // Increment up from the minimum value.
+        }
+
+        for (int y = 0; y < intr->v; ++y) {
+            n_sin_theta = -1 * std::sin(theta);
+            cos_theta   =      std::cos(theta);
+            for (int x = 0; x < intr->u; ++x) {
+                sensed_points(0, i)   =   sin_phi[x];
+                sensed_points(1, i)   = n_sin_theta * cos_phi[x];
+                sensed_points(2, i)   =   cos_theta * cos_phi[x];
+                sensed_points.col(i) *= depth_vector[i];
+                ++i;  // Increment overall index for the sensed_point and depth_vector access.
             }
-            theta -= d_theta;
+            theta -= d_theta;  // Decrement down from the maximum value.
         }
         return sensed_points;
     }

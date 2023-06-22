@@ -319,22 +319,18 @@ protected:
 
     void resetDepthCamera()
     {
-        const double d_theta = intr->fov_y() / (intr->v - 1);
-        const double d_phi   = intr->fov_x() / (intr->u - 1);
-
+        const double d_theta = intr->fov_y() / (intr->v - 1),
+                     d_phi   = intr->fov_x() / (intr->u - 1);
+        double theta = intr->theta_max,
+               phi   = intr->phi_min,
+               cos_theta = 0;
         int i = 0;
-        double theta = intr->theta_max, phi = intr->phi_max;
-        double cos_theta = 0;
-
-        /// TODO: Exploit symmetry.
-        for (int y = 0; y < intr->v; ++y)
-        {
+        for (int y = 0; y < intr->v; ++y) {
             phi = intr->phi_max;
             cos_theta = std::cos(theta);
-            for (int x = 0; x < intr->u; ++x)
-            {
+            for (int x = 0; x < intr->u; ++x) {
                 depth_vector[i] = intr->d_max / (cos_theta * std::cos(phi));
-                phi -= d_phi;
+                phi += d_phi;
                 ++i;
             }
             theta -= d_theta;

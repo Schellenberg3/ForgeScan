@@ -213,7 +213,7 @@ public:
     /// @param i Index in the storage vector to return.
     /// @return Cartesian position of point `i` in the DepthSensor's reference frame.
     /// @throws `std::out_of_range` If `i` is an invalid index.
-    virtual point getPosition(const size_t& i) const
+    point getPosition(const size_t& i) const
     {
         throwIfInvalidSenorArray(i);
         return getPosition(i, i % intr->u, i / intr->u);
@@ -224,14 +224,14 @@ public:
     /// @param y Y-index in the image sensor to return.
     /// @return Cartesian position of point at `(x, y)` in the DepthSensor's reference frame.
     /// @throws `std::out_of_range` If `(x, y)` is an invalid index.
-    virtual point getPosition(const size_t& x, const size_t& y) const
+    point getPosition(const size_t& x, const size_t& y) const
     {
         return getPosition(throw_xy_to_i(x, y), x, y);
     }
 
     /// @brief Returns the cartesian position of all sensed points, relative to the DepthSensor's frame.
     /// @return Eigen matrix of all depth positions for the sensor, relative to the DepthSensor's reference frame.
-    virtual point_list getAllPositions() const
+    point_list getAllPositions() const
     {
         const double d_theta = intr->fov_y() / (intr->v - 1);
         const double d_phi   = intr->fov_x() / (intr->u - 1);
@@ -359,7 +359,7 @@ private:
     /// @param x X-index in the image sensor to return.
     /// @param y Y-index in the image sensor to return.
     /// @return Cartesian position of point at `(x, y)` in the DepthSensor's reference frame.
-    virtual point getPosition(const size_t& i, const size_t& x, const size_t& y) const
+    point getPosition(const size_t& i, const size_t& x, const size_t& y) const
     {
         double theta = intr->theta_max - y * (intr->fov_y() / (intr->v - 1));
         double phi   = intr->phi_max   - x * (intr->fov_x() / (intr->u - 1));

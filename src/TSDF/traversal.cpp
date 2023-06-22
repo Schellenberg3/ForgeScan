@@ -1,7 +1,6 @@
 #include <iostream>
 #include <numeric>
 
-#include "ForgeScan/types.h"
 #include "ForgeScan/TSDF/grid.h"
 
 

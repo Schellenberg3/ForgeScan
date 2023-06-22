@@ -1,6 +1,8 @@
 #ifndef FORGESCAN_POLICIES_RANDOM_SPHERE_H
 #define FORGESCAN_POLICIES_RANDOM_SPHERE_H
 
+#include <highfive/H5File.hpp>
+
 #include "ForgeScan/Policies/policy.h"
 
 
@@ -16,13 +18,16 @@ public:
     /// @brief Radius of the camera from the center of the Grid.
     double const radius;
 
+    /// @brief Seed for the random number generator.
+    const int seed;
+
     RandomSphere(TSDF::Grid& grid, DepthSensor::Sensor& sensor, const Primitives::Scene& scene,
                  const int& n = 15, const double& radius = 2.5, const int& seed = 0) :
-        Policy(grid, sensor, scene), n_req(n), radius(radius)
+        Policy(grid, sensor, scene), n_req(n), radius(radius), seed(seed)
     {
         n_cap = 0;
         uniform_dist = std::uniform_real_distribution<double>(0.0, 1.0);
-        gen = std::mt19937(seed);
+        gen = std::mt19937(this->seed);
     }
 
     /// @brief Checks if the policies stopping criteria are met.
@@ -56,6 +61,17 @@ private:
     std::uniform_real_distribution<double> uniform_dist;
 
     void postRunLoopCall() override final { ++n_cap; };
+
+    void derivedClassSavePolicyInfo(const std::filesystem::path& fname) const override final {
+        auto file = HighFive::File(fname.string() + ".h5", HighFive::File::ReadWrite);
+        auto policy_group = file.createGroup("Policy");
+        auto random_sphere = policy_group.createGroup("RandomSphere");
+        random_sphere.createAttribute("requested",    n_req);
+        random_sphere.createAttribute("captured",     n_cap);
+        random_sphere.createAttribute("seed",         seed);
+        random_sphere.createAttribute("radius",       radius);
+        random_sphere.createAttribute("criteria_met", (int)criteriaMet());
+    }
 };
 
 

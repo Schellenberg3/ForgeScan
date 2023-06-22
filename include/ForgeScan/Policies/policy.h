@@ -48,9 +48,8 @@ public:
         }
     }
 
-    /// @brief Saves current state of the policy.
-    /// @details The grid is saved in an XDMF format, inside the related HDF5 file the SensorRecord and details
-    ///          about the policy are also saved.
+    /// @brief Saves current state of the policy. The TSDF::Grid is saved in an XDMF format and to its HDF5 file
+    ///        the SensorRecord and policy details are also saved.
     /// @param fname File name. Automatically adds ".h5" when writing.
     /// @throws `std::invalid_argument` if there is an issue parsing the file name.
     void save(const std::filesystem::path& fname) const {
@@ -63,6 +62,7 @@ public:
 
         grid->saveXDMF(fname);
         sensor_record.save(fname, true);
+        derivedClassSavePolicyInfo(fname);
     }
 
 protected:
@@ -83,6 +83,9 @@ protected:
     /// @brief Runs before the end of each loop of the run method.
     virtual void postRunLoopCall() { };
 
+    /// @brief Implemented by the derived class to store its parameters with the TSDF::Grid's HDF5 file.
+    /// @param fname File name. Automatically adds ".h5" when writing.
+    virtual void derivedClassSavePolicyInfo(const std::filesystem::path& fname) const = 0;
 };
 
 

@@ -1,6 +1,8 @@
 #ifndef FORGESCAN_POLICIES_ORDERED_UNIFORM_H
 #define FORGESCAN_POLICIES_ORDERED_UNIFORM_H
 
+#include <highfive/H5File.hpp>
+
 #include "ForgeScan/Policies/policy.h"
 
 
@@ -66,6 +68,16 @@ private:
     int n_cap;
 
     void postRunLoopCall() override final { ++n_cap; };
+
+    void derivedClassSavePolicyInfo(const std::filesystem::path& fname) const override final {
+        auto file = HighFive::File(fname.string() + ".h5", HighFive::File::ReadWrite);
+        auto policy_group = file.createGroup("Policy");
+        auto ordered_uniform_group = policy_group.createGroup("OrderedUniform");
+        ordered_uniform_group.createAttribute("requested", n_req);
+        ordered_uniform_group.createAttribute("captured",  n_cap);
+        ordered_uniform_group.createAttribute("radius",    radius);
+        ordered_uniform_group.createAttribute("criteria_met", (int)criteriaMet());
+    }
 };
 
 

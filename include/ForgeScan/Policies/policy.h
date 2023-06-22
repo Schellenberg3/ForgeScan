@@ -1,6 +1,8 @@
 #ifndef FORGESCAN_POLICIES_BASE_POLICY_H
 #define FORGESCAN_POLICIES_BASE_POLICY_H
 
+#include <filesystem>
+
 #include "ForgeScan/types.h"
 #include "ForgeScan/TSDF/grid.h"
 #include "ForgeScan/TSDF/traversal.h"
@@ -44,6 +46,23 @@ public:
             TSDF::addSensorTSDF(*grid, *sensor, sensor_record);
             postRunLoopCall();
         }
+    }
+
+    /// @brief Saves current state of the policy.
+    /// @details The grid is saved in an XDMF format, inside the related HDF5 file the SensorRecord and details
+    ///          about the policy are also saved.
+    /// @param fname File name. Automatically adds ".h5" when writing.
+    /// @throws `std::invalid_argument` if there is an issue parsing the file name.
+    void save(const std::filesystem::path& fname) const {
+        if ( !fname.has_filename() )
+            throw std::invalid_argument("[SensorRecord::save] Invalid file name! Could not identify filename.");
+
+        /// Grid::saveXDMF will create the HDF5 file in truncation mode (overwriting any existing contents) such that
+        /// SensorRecord::save will write to too truncation mode. Both functions resolve fname into the same file path,
+        /// name, and extension.
+
+        grid->saveXDMF(fname);
+        sensor_record.save(fname, true);
     }
 
 protected:

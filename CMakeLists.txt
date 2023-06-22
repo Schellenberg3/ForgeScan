@@ -96,6 +96,7 @@ add_library(
     src/TSDF/grid_io.cpp
     src/TSDF/traversal.cpp
     src/TSDF/processor.cpp
+    src/Metrics/sensor_record_io.cpp
 )
 
 

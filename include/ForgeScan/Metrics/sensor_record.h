@@ -4,6 +4,7 @@
 #include <cmath>
 #include <vector>
 #include <stdexcept>
+#include <filesystem>
 
 #include "ForgeScan/types.h"
 
@@ -101,6 +102,14 @@ public:
 
         record.push_back(sensor_record);
     }
+
+    /// @brief Saves the SensorRecord in the HDF5 format.
+    /// @param fname File name. Automatically adds ".h5" when writing.
+    /// @param add_to_grid If false, the default, it will open the file in truncation mode: zeroing out all existing information.
+    ///                    If true will open the file in read/write mode to add information to an existing HDF5 file.
+    ///                    For example, this is set to `true` when this data is saved by a Policy class.
+    /// @throws `std::invalid_argument` if there is an issue parsing the file name.
+    void save(const std::filesystem::path& fname, const bool add_to_grid = false) const;
 };
 
 

@@ -27,7 +27,7 @@ public:
 
     /// @brief Checks if the policies stopping criteria are met.
     /// @return True if the criteria are met. False else.
-    bool criteriaMet() override final { return n_cap >= n_req; };
+    bool criteriaMet() const override final { return n_cap >= n_req; };
 
     /// @brief Sets the camera at the next position random position.
     void nextPosition() override final {

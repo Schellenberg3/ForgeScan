@@ -30,7 +30,7 @@ public:
 
     /// @brief Checks if the policies stopping criteria are met.
     /// @return True if the criteria are met. False else.
-    virtual bool criteriaMet()  = 0;
+    virtual bool criteriaMet() const = 0;
 
     /// @brief Sets the camera at the next position for the sensor based on the policies decision making strategy.
     virtual void nextPosition() = 0;

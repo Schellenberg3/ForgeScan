@@ -175,19 +175,19 @@ public:
     /// @throws `std::invalid_argument` if view_number is not in the range: 0 <= view_number < total_views
     void setPoseUniform(const Vector3d& center, const double& radius, const int& view_number, const int& total_views)
     {
+        /// Golden angle in radians; see https://en.wikipedia.org/wiki/Golden_angle
         static const double GOLDEN_ANGLE_RADIANS = M_PI * (std::sqrt(5) - 1);
+
+        /// Just less than one; avoids divide by zero errors when just one total view is requested without impacting
+        /// the accuracy for the calculation when more total views are requested. 
+        static const double NEARLY_ONE = 1 - std::numeric_limits<double>::epsilon();
+
         if (total_views < 1) throw std::invalid_argument("Cannot have less than 1 total view.");
         if (total_views < view_number || view_number < 0)
             throw std::invalid_argument("For a valid result view number must be in the range: 0 <= view_number < total_views");
 
-        /// Cast to double for later.
-        double total_views_d = (double)total_views;
-
-        /// Slight bump to prevent divide by zero errors.
-        if (total_views == 1) total_views_d += 0.000000001;
-
         /// Y walks from 1 to -1
-        double y = 1 - (view_number / (total_views_d - 1)) * 2;
+        double y = 1 - (view_number / ((double)total_views - NEARLY_ONE)) * 2;
 
         /// Radius of the sphere at that location of y.
         double r_y = std::sqrt(1 - y*y);

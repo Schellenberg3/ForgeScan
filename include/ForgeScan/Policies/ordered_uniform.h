@@ -30,16 +30,15 @@ public:
 
     /// @brief Sets the camera at the next position random position.
     void nextPosition() override final {
+        /// Golden angle in radians; see https://en.wikipedia.org/wiki/Golden_angle
         static const double GOLDEN_ANGLE_RADIANS = M_PI * (std::sqrt(5) - 1);
 
-        /// Cast to double for later.
-        double n_req_d = (double)n_req;
-
-        /// Slight bump to prevent divide by zero errors.
-        if (n_req == 1) n_req_d += 0.000000001;
+        /// Just less than one; avoids divide by zero errors when just one total view is requested without impacting
+        /// the accuracy for the calculation when more total views are requested. 
+        static const double NEARLY_ONE = 1 - std::numeric_limits<double>::epsilon();
 
         /// Y walks from 1 to -1
-        double y = 1 - (n_cap / (n_req_d - 1)) * 2;
+        double y = 1 - (n_cap / ((double)n_req - NEARLY_ONE)) * 2;
 
         /// Radius of the sphere at that location of y.
         double r_y = std::sqrt(1 - y*y);

@@ -27,22 +27,22 @@ public:
     Sensor(const Intrinsics::Intrinsics& intr) :
         Entity(),
         intr(&intr)
-        { setupBaseDepthSensor(); }
+        { setupSensor(); }
 
     Sensor(const Intrinsics::Intrinsics& intr, const extrinsic& extr) :
         Entity(extr),
         intr(&intr)
-        { setupBaseDepthSensor(); }
+        { setupSensor(); }
 
     Sensor(const Intrinsics::Intrinsics& intr, const translation& position) :
         Entity(position),
         intr(&intr)
-        { setupBaseDepthSensor(); }
+        { setupSensor(); }
 
     Sensor(const Intrinsics::Intrinsics& intr, const rotation& orientation) :
         Entity(orientation),
         intr(&intr)
-        { setupBaseDepthSensor(); }
+        { setupSensor(); }
 
     /// @brief Orients the sensor to point at the specified point.
     /// @param target Point to image. The sensor will point it's principle axis (positive Z-axis) at this point.
@@ -209,9 +209,9 @@ public:
         orientPrincipleAxis(center);
     }
 
-    /// @brief Returns the cartesian position of the sensed point, relative to the DepthSensor's frame.
+    /// @brief Returns the cartesian position of the sensed point, relative to the Sensor's frame.
     /// @param i Index in the storage vector to return.
-    /// @return Cartesian position of point `i` in the DepthSensor's reference frame.
+    /// @return Cartesian position of point `i` in the Sensor's reference frame.
     /// @throws `std::out_of_range` If `i` is an invalid index.
     point getPosition(const size_t& i) const
     {
@@ -219,18 +219,18 @@ public:
         return getPosition(i, i % intr->u, i / intr->u);
     }
 
-    /// @brief Returns the cartesian position of the sensed point at `(x, y)`, relative to the DepthSensor's frame.
+    /// @brief Returns the cartesian position of the sensed point at `(x, y)`, relative to the Sensor's frame.
     /// @param x X-index in the image sensor to return.
     /// @param y Y-index in the image sensor to return.
-    /// @return Cartesian position of point at `(x, y)` in the DepthSensor's reference frame.
+    /// @return Cartesian position of point at `(x, y)` in the Sensor's reference frame.
     /// @throws `std::out_of_range` If `(x, y)` is an invalid index.
     point getPosition(const size_t& x, const size_t& y) const
     {
         return getPosition(throw_xy_to_i(x, y), x, y);
     }
 
-    /// @brief Returns the cartesian position of all sensed points, relative to the DepthSensor's frame.
-    /// @return Eigen matrix of all depth positions for the sensor, relative to the DepthSensor's reference frame.
+    /// @brief Returns the cartesian position of all sensed points, relative to the Sensor's frame.
+    /// @return Eigen matrix of all depth positions for the sensor, relative to the Sensor's reference frame.
     point_list getAllPositions() const
     {
         const double d_theta = intr->fov_y() / (intr->v - 1),
@@ -345,8 +345,8 @@ private:
     std::uniform_real_distribution<double> uniform_dist;
 
 private:
-    /// @brief Setup helper function for all DepthSensor constructors. Initialized all values to positive infinity.
-    void setupBaseDepthSensor() {
+    /// @brief Setup helper function for Sensor base class construction. Initialized all values to positive infinity.
+    void setupSensor() {
         depth_vector.resize(intr->size(), std::numeric_limits<float>::infinity());
 
         uniform_dist = std::uniform_real_distribution<double>(0.0, 1.0);
@@ -355,13 +355,13 @@ private:
         gen = std::mt19937(rd());  // Standard mersenne_twister_engine seeded with the random device seed.
     }
 
-    /// @brief Returns the cartesian position of the sensed point at `(x, y)`, relative to the DepthSensor's frame.
+    /// @brief Returns the cartesian position of the sensed point at `(x, y)`, relative to the Sensor's frame.
     /// @details This private implementation is called by either public one. It trusts that the `(x, y)` or `i` index
     ///          are both valid. This prevents either public function from re-calculating the index or array coordinates.
     /// @param i Index in the depth vector for the position (x, y).
     /// @param x X-index in the image sensor to return.
     /// @param y Y-index in the image sensor to return.
-    /// @return Cartesian position of point at `(x, y)` in the DepthSensor's reference frame.
+    /// @return Cartesian position of point at `(x, y)` in the Sensor's reference frame.
     point getPosition(const size_t& i, const size_t& x, const size_t& y) const
     {
         double theta = intr->theta_max - y * (intr->fov_y() / (intr->v - 1));

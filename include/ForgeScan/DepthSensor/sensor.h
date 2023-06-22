@@ -362,8 +362,7 @@ private:
     point getPosition(const size_t& i, const size_t& x, const size_t& y) const
     {
         double theta = intr->theta_max - y * (intr->fov_y() / (intr->v - 1));
-        double phi   = intr->phi_max   - x * (intr->fov_x() / (intr->u - 1));
-        // double phi   = intr->phi_min   + x * (intr->fov_x() / (intr->u - 1));
+        double phi   = intr->phi_min   + x * (intr->fov_x() / (intr->u - 1));
         return rotationToCartesian(depth_vector[i], theta, phi);
     }
 

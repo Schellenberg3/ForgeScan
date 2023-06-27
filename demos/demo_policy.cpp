@@ -3,6 +3,7 @@
 
 #include "ForgeScan/Policies/random_sphere.h"
 #include "ForgeScan/Policies/ordered_uniform.h"
+#include "ForgeScan/Policies/low_discrepancy.h"
 
 #include "ForgeScan/DepthSensor/camera.h"
 #include "ForgeScan/DepthSensor/laser.h"
@@ -11,6 +12,7 @@
 #include "ForgeScan/Primitives/scene.h"
 
 #include "ForgeScan/Utilities/arg_parser.h"
+
 
 int main(int argc, char* argv[])
 {
@@ -24,8 +26,8 @@ int main(int argc, char* argv[])
     /// Radius for the camera positions.
     double cr = 2.5;
 
-    /// Seed for the random policy.
-    int seed = 1;
+    /// Seed for the policy. Negative one will use a random seed in each policy.
+    int seed = -1;
 
     /// File name for writing XDMF of results.
     std::string fname = "demo_policy";
@@ -36,12 +38,11 @@ int main(int argc, char* argv[])
     std::filesystem::create_directories(fpath);
 
     /// If true will place the first view in a pre-determined position.
-    bool first   = parser.cmdOptionExists("--first");
-
-    /// If true will user randomly selected poses for each view .
-    bool random = parser.cmdOptionExists("--random");
-
+    bool first = parser.cmdOptionExists("--first");
     bool laser = parser.cmdOptionExists("--laser");
+
+    /// Default for no passed value:
+    ForgeScan::Policies::Type policy_type = ForgeScan::Policies::Type::LowDiscrepancy;
 
     {   /// Command line parsing for reading specific arguments
         const std::string &s_nx = parser.getCmdOption("-nx");
@@ -61,19 +62,26 @@ int main(int argc, char* argv[])
 
         const std::string &s_s = parser.getCmdOption("-s");
         if (!s_s.empty()) seed = std::stoi(s_s);
+
+        const std::string &s_p = parser.getCmdOption("-p");
+        if (!s_p.empty()) {
+            if (s_p == "o") {
+                policy_type = ForgeScan::Policies::Type::OrderedUniform;
+            } else if (s_p == "r") {
+                policy_type = ForgeScan::Policies::Type::RandomSphere;
+            } else if (s_p == "lo") {
+                policy_type = ForgeScan::Policies::Type::LowDiscrepancy;
+            }else if (s_p == "lr") {
+                policy_type = ForgeScan::Policies::Type::LowDiscrepancyRandomInit;
+            } else {
+                /// Default for a passed value:
+                policy_type = ForgeScan::Policies::Type::RandomSphere;
+            }
+        }
     }
 
     /// Create the full file path.
     fpath /= fname;
-
-    std::string sensor_type = laser ? "laser" : "camera";
-    std::cout << "Running for " << nv << " " << sensor_type << " sensors with (" << nx << ", " << ny << ") images." << std::endl;
-    if (first) {
-        std::cout << "Added deterministic first view." << std::endl;
-        --nv;  // Decrement the number of requested views for the rest of the program
-    }
-    std::string which_policy = random ? "random" : "uniform";
-    std::cout << "Adding " << nv << " views. Using a " + which_policy + " policy" << std::endl;
 
     // Set up the Grid as a 2m x 2m x 2m cube with 0.02 m resolution
     ForgeScan::TSDF::Grid::Properties properties(0.02, ForgeScan::Vector3ui(101, 101, 101));
@@ -95,11 +103,23 @@ int main(int argc, char* argv[])
     }
 
     ForgeScan::Policies::Policy* policy = NULL;
-    if (random) {
-        policy = new ForgeScan::Policies::RandomSphere(grid, *sensor, scene, nv, cr, seed);
-    } else {
-        policy = new ForgeScan::Policies::OrderedUniform(grid, *sensor, scene, nv, cr);
+    switch (policy_type) {
+        case ForgeScan::Policies::Type::OrderedUniform:
+            policy = new ForgeScan::Policies::OrderedUniform(grid, *sensor, scene, nv, cr);
+            break;
+        case ForgeScan::Policies::Type::LowDiscrepancy:
+            policy = new ForgeScan::Policies::LowDiscrepancy(grid, *sensor, scene, nv, cr, seed);
+            break;
+        case ForgeScan::Policies::Type::LowDiscrepancyRandomInit:
+            policy = new ForgeScan::Policies::LowDiscrepancyRandomInit(grid, *sensor, scene, nv, cr, 3, seed);
+            break;
+        default:
+            policy = new ForgeScan::Policies::RandomSphere(grid, *sensor, scene, nv, cr, seed);
+            break;
     }
+
+    std::cout << "Adding " << nv << " views. Using a " + policy->getName() + " policy" << std::endl;
+
     policy->run();
 
     grid.saveXDMF(fpath);

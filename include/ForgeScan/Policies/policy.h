@@ -15,6 +15,15 @@ namespace ForgeScan {
 namespace Policies  {
 
 
+enum class Type {
+    Base,
+    OrderedUniform,
+    RandomSphere,
+    LowDiscrepancy,
+    LowDiscrepancyRandomInit
+};
+
+
 /// @brief Abstract policy class. Manages data capture by observing a TSDF Grid and positioning a DepthSensor.
 class Policy {
 public:
@@ -64,6 +73,10 @@ public:
         sensor_record.save(fname, true);
         derivedClassSavePolicyInfo(fname);
     }
+
+    /// @brief Gets the name of the policy.
+    /// @return Name of the policy as a string.
+    virtual std::string getName() = 0;
 
 protected:
     /// @brief Protected constructor for derived classes to call.

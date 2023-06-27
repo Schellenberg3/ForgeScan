@@ -36,7 +36,7 @@ public:
         static const double GOLDEN_ANGLE_RADIANS = M_PI * (std::sqrt(5) - 1);
 
         /// Just less than one; avoids divide by zero errors when just one total view is requested without impacting
-        /// the accuracy for the calculation when more total views are requested. 
+        /// the accuracy for the calculation when more total views are requested.
         static const double NEARLY_ONE = 1 - std::numeric_limits<double>::epsilon();
 
         /// Y walks from 1 to -1
@@ -62,6 +62,10 @@ public:
 
         orientSensorToGridCenter();
     }
+
+    /// @brief Gets the name of the policy.
+    /// @return Name of the policy as a string.
+    virtual std::string getName() { return "OrderedUniform"; }
 
 private:
     /// @brief Number of images captured so far.

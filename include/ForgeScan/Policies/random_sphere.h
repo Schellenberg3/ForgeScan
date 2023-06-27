@@ -19,12 +19,22 @@ public:
     double const radius;
 
     /// @brief Seed for the random number generator.
-    const int seed;
+    unsigned int seed;
 
+    /// @brief A policy based on randomly sampling points from a spherical surface.
+    /// @param grid   Grid for the ongoing reconstruction.
+    /// @param sensor Sensor for collecting data from the scene and adding it to the grid.
+    /// @param scene  Scene to be reconstructed.
+    /// @param n      Number of points to sample.
+    /// @param radius Radius of the sphere.
+    /// @param seed   Seed for the RNG. Negative values will use a random seed. Default is -1.
     RandomSphere(TSDF::Grid& grid, DepthSensor::Sensor& sensor, const Primitives::Scene& scene,
-                 const int& n = 15, const double& radius = 2.5, const int& seed = 0) :
-        Policy(grid, sensor, scene), n_req(n), radius(radius), seed(seed)
+                 const int& n = 15, const double& radius = 2.5, const int& seed = -1) :
+        Policy(grid, sensor, scene), n_req(n), radius(radius)
     {
+        /// Used to obtain a seed for the random number engine.
+        std::random_device rd;
+        this->seed = seed < 0 ? rd() : (unsigned int)seed;
         n_cap = 0;
         uniform_dist = std::uniform_real_distribution<double>(0.0, 1.0);
         gen = std::mt19937(this->seed);
@@ -35,7 +45,25 @@ public:
     bool criteriaMet() const override final { return n_cap >= n_req; };
 
     /// @brief Sets the camera at the next position random position.
-    void nextPosition() override final {
+    virtual void nextPosition() override { setNextPositionRandom(); }
+
+    /// @brief Gets the name of the policy.
+    /// @return Name of the policy as a string.
+    virtual std::string getName() { return "RandomSphere"; }
+
+protected:
+    /// @brief Number of images captured so far.
+    int n_cap;
+
+    /// @brief Random number engine for performing sampling on the uniform real distribution.
+    std::mt19937 gen;
+
+    /// @brief Uniform distribution over [0, 1).
+    std::uniform_real_distribution<double> uniform_dist;
+
+    void postRunLoopCall() override final { ++n_cap; };
+
+    void setNextPositionRandom() {
         double theta = 2 * M_PI * uniform_dist(gen);        /// 0 - 360 degrees in theta  (angle around the positive X-axis)
         double phi = std::acos(1 - 2 * uniform_dist(gen));  /// 0 - 180 degrees in phi    (angle from positive Z-axis)
         if (uniform_dist(gen) < 0.5) phi *= -1;             /// -180 - 180 degrees in phi (important for covering all camera orientations)
@@ -50,19 +78,7 @@ public:
         orientSensorToGridCenter();
     }
 
-private:
-    /// @brief Number of images captured so far.
-    int n_cap;
-
-    /// @brief Random number engine for performing sampling on the uniform real distribution.
-    std::mt19937 gen;
-
-    /// @brief Uniform distribution over [0, 1).
-    std::uniform_real_distribution<double> uniform_dist;
-
-    void postRunLoopCall() override final { ++n_cap; };
-
-    void derivedClassSavePolicyInfo(const std::filesystem::path& fname) const override final {
+    virtual void derivedClassSavePolicyInfo(const std::filesystem::path& fname) const override {
         auto file = HighFive::File(fname.string() + ".h5", HighFive::File::ReadWrite);
         auto policy_group = file.createGroup("Policy");
         auto random_sphere = policy_group.createGroup("RandomSphere");

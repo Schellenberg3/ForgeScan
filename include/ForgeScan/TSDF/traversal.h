@@ -209,7 +209,7 @@ bool addSensorTSDF(Grid& grid, const DepthSensor::Sensor&sensor,
     grid.toThisFromWorld(sensor_pose);
 
     /// Set up tracking objects for the SensorRecord.
-    Metrics::Sensor sensor_metrics( grid.getTransformationTo(sensor), sensor.intr->size() );
+    Metrics::Sensor sensor_metrics( grid.getTransformationFrom(sensor), sensor.intr->size() );
     Metrics::Ray ray_metrics;
 
     /// The points variables is a 3xN matrix, add each one.

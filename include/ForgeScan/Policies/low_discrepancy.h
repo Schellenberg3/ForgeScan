@@ -153,7 +153,10 @@ protected:
         };
 
         /// Call our recursive search which will modify both centroid and out, returning true if they are valid.
-        return recursive_search();
+        if (!recursive_search()) return false;
+
+        /// Verify that we haven't selected the same point twice, return false if we have.
+        return !(out.isApprox(sensor_record[n_record_ajd].pose.translation()));
     }
 
     virtual void derivedClassSavePolicyInfo(const std::filesystem::path& fname) const override {

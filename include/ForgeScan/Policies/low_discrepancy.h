@@ -71,8 +71,8 @@ protected:
     void setNextPositionLowDiscrepancy() {
         /// Centroid and position are both relative to the Grid's reference frame.
         point centroid(0, 0, 0), position(0, 0, 0);
-        for (const auto& rec : sensor_record.record) { centroid += rec.pose.translation(); }
-        centroid /= static_cast<double>(sensor_record.record.size());
+        for (const auto& rec : sensor_record) { centroid += rec.pose.translation(); }
+        centroid /= static_cast<double>(sensor_record.size());
 
         if ( seachLowDiscrepancy(centroid, position) ) {
             grid->toWorldFromThis(position); // Transform to the world reference frame.
@@ -101,7 +101,7 @@ protected:
 
         /// Subtract one from the number of records. We do not want to remove the last point we added
         /// as then we would, likely, just select it again.
-        const size_t n_record_ajd = sensor_record.record.size() - 1;
+        const size_t n_record_ajd = sensor_record.size() - 1;
 
         /// Randomized order of record indicies to remove if a unique point is not found.
         std::vector<size_t> randomized_idx(n_record_ajd, 0);
@@ -130,16 +130,16 @@ protected:
             /// outside of the circle.)
             if (len > radius || len < 1E-8) {
                 /// Recover the sum of points from the centroid.
-                local_centroid *= static_cast<double>( sensor_record.record.size() );
+                local_centroid *= static_cast<double>( sensor_record.size() );
 
                 /// Remove the contribution of the randomly selected point.
-                local_centroid -= sensor_record.record[randomized_idx[depth]].pose.translation();
+                local_centroid -= sensor_record[randomized_idx[depth]].pose.translation();
 
                 /// Increment depth counter for the next call. We do this now to use it in updating the local centroid.
                 ++depth;
 
                 /// Centroid is now adjusted to have the selected point removed.
-                local_centroid /= static_cast<double>( (sensor_record.record.size() - depth) );
+                local_centroid /= static_cast<double>( (sensor_record.size() - depth) );
 
                 /// Call ourselves once more...
                 return recursive_search();

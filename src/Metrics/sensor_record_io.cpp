@@ -32,7 +32,7 @@ void SensorRecord::save(const std::filesystem::path& fname, const bool add_to_gr
         auto sensor_record_group = metrics_group.createGroup("SensorRecord", properties);
 
         int i = 0;
-        for (const auto& sensor : record) {
+        for (const auto& sensor : *this) {
             auto group = sensor_record_group.createGroup(std::to_string(i));
             group.createAttribute("total_updates",  sensor.total_updates);
             group.createAttribute("total_views",    sensor.total_views);

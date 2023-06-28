@@ -84,14 +84,12 @@ struct Sensor
 };
 
 /// @brief Records pose of each view and statistics about about how it changed the Grid.
-class SensorRecord
+class SensorRecord : public std::vector<Sensor>
 {
 public:
-    /// @brief Ordered list of each View's pose and metrics about the information it added to the Grid.
-    std::vector<Sensor> record;
-
     /// @brief Constructor. Pre-allocates space for 20 views.
-    SensorRecord() { record.reserve(20); }
+    SensorRecord() : std::vector<Sensor>()
+        { this->reserve(20); }
 
     /// @brief Adds the Sensor metrics. Performing any final calculations one all RayRecords have been added to it.
     /// @param sensor_record Data to be added.
@@ -100,7 +98,7 @@ public:
         sensor_record.percent_hit    /= sensor_record.size;
         sensor_record.percent_viewed /= sensor_record.size;
 
-        record.push_back(sensor_record);
+        this->push_back(sensor_record);
     }
 
     /// @brief Saves the SensorRecord in the HDF5 format.

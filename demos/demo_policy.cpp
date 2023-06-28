@@ -121,9 +121,9 @@ int main(int argc, char* argv[])
     std::cout << "Adding " << nv << " views. Using a " + policy->getName() + " policy" << std::endl;
 
     policy->run();
+    policy->save(fpath);
 
-    grid.saveXDMF(fpath);
-    std::cout << "Complete! Saved file in ./share/ParaView as: " + fname << std::endl;
+    std::cout << "Complete! Saved policy results in ./share/ParaView as: " + fname << std::endl;
 
     delete sensor;
     delete policy;

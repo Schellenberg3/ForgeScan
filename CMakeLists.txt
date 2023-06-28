@@ -71,12 +71,11 @@ find_package(Eigen3 REQUIRED NO_MODULE)
 set(FORGESCAN_LIBRARY_NAME ${PROJECT_NAME})
 add_library(
     ${FORGESCAN_LIBRARY_NAME}
-
     STATIC
-    src/TSDF/grid_io.cpp
-    src/TSDF/traversal.cpp
-    src/TSDF/processor.cpp
-    src/Metrics/sensor_record_io.cpp
+        src/TSDF/grid_io.cpp
+        src/TSDF/traversal.cpp
+        src/TSDF/processor.cpp
+        src/Metrics/sensor_record_io.cpp
 )
 target_link_libraries(
     ${FORGESCAN_LIBRARY_NAME}
@@ -101,8 +100,8 @@ target_link_libraries(
 target_compile_definitions(
     test_grid
     PUBLIC
-    FORGESCAN_SHARE_DIR="${FORGESCAN_SHARE_DIR}"
-    FORGESCAN_SHARE_PARAVIEW_DIR="${FORGESCAN_SHARE_DIR}"
+        FORGESCAN_SHARE_DIR="${FORGESCAN_SHARE_DIR}"
+        FORGESCAN_SHARE_PARAVIEW_DIR="${FORGESCAN_SHARE_DIR}/ParaView"
 )
 target_include_directories(test_grid PUBLIC ${FORGESCAN_INCLUDE_DIRS})
 
@@ -121,8 +120,8 @@ target_link_libraries(
 target_compile_definitions(
     sim_scan
     PUBLIC
-    FORGESCAN_SHARE_DIR="${FORGESCAN_SHARE_DIR}"
-    FORGESCAN_SHARE_PARAVIEW_DIR="${FORGESCAN_SHARE_DIR}"
+        FORGESCAN_SHARE_DIR="${FORGESCAN_SHARE_DIR}"
+        FORGESCAN_SHARE_PARAVIEW_DIR="${FORGESCAN_SHARE_DIR}/ParaView"
 )
 target_include_directories(sim_scan PUBLIC ${FORGESCAN_INCLUDE_DIRS})
 
@@ -155,8 +154,8 @@ target_link_libraries(
 target_compile_definitions(
     test_traversal
     PUBLIC
-    FORGESCAN_SHARE_DIR="${FORGESCAN_SHARE_DIR}"
-    FORGESCAN_SHARE_PARAVIEW_DIR="${FORGESCAN_SHARE_DIR}"
+        FORGESCAN_SHARE_DIR="${FORGESCAN_SHARE_DIR}"
+        FORGESCAN_SHARE_PARAVIEW_DIR="${FORGESCAN_SHARE_DIR}/ParaView"
 )
 target_include_directories(test_traversal PUBLIC ${FORGESCAN_INCLUDE_DIRS})
 
@@ -176,7 +175,7 @@ target_link_libraries(
 target_compile_definitions(
     demo_policy
     PUBLIC
-    FORGESCAN_SHARE_DIR="${FORGESCAN_SHARE_DIR}"
-    FORGESCAN_SHARE_PARAVIEW_DIR="${FORGESCAN_SHARE_DIR}"
+        FORGESCAN_SHARE_DIR="${FORGESCAN_SHARE_DIR}"
+        FORGESCAN_SHARE_PARAVIEW_DIR="${FORGESCAN_SHARE_DIR}/ParaView"
 )
 target_include_directories(demo_policy PUBLIC ${FORGESCAN_INCLUDE_DIRS})

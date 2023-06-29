@@ -2,6 +2,11 @@
 #define FORGESCAN_POLICIES_BASE_POLICY_H
 
 #include <filesystem>
+#include <functional>
+#include <algorithm>
+#include <random>
+
+#include <highfive/H5File.hpp>
 
 #include "ForgeScan/types.h"
 #include "ForgeScan/TSDF/grid.h"
@@ -17,10 +22,11 @@ namespace Policies  {
 
 enum class Type {
     Base,
-    OrderedUniform,
+    UniformSphereOrdered,
+    UniformSphereRandom,
     RandomSphere,
-    LowDiscrepancy,
-    LowDiscrepancyRandomInit
+    MaxDiscrepancySphere,
+    MaxDiscrepancySphereRandomInit
 };
 
 
@@ -43,13 +49,14 @@ public:
     /// @return True if the criteria are met. False else.
     virtual bool criteriaMet() const = 0;
 
-    /// @brief Sets the camera at the next position for the sensor based on the policies decision making strategy.
-    virtual void nextPosition() = 0;
+    /// @brief Sets the camera at the next view for the sensor based on the policies decision making strategy.
+    virtual void nextView() = 0;
 
+    /// @brief Runs the policy until its stopping criteria are met.
     void run() {
         while (!criteriaMet()) {
             preRunLoopCall();
-            nextPosition();
+            nextView();
             sensor->resetDepth();
             sensor->image(*scene);
             TSDF::addSensorTSDF(*grid, *sensor, sensor_record);
@@ -87,7 +94,7 @@ protected:
         grid(&grid), sensor(&sensor), scene(&scene)
         { }
 
-    /// @brief Points the DepthSensor at the center of the TSDF Grid.
+    /// @brief Orients the DepthSensor's principle axis to the center of the TSDF Grid.
     void orientSensorToGridCenter() { sensor->orientPrincipleAxis(grid->getCenter()); }
 
     /// @brief Runs before the start of each loop of the run method.

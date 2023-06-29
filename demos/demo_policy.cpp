@@ -1,8 +1,9 @@
 #include <iostream>
 #include <filesystem>
 
-#include "ForgeScan/Policies/random_sphere.h"
-#include "ForgeScan/Policies/ordered_uniform.h"
+#include "ForgeScan/Policies/random.h"
+#include "ForgeScan/Policies/uniform.h"
+#include "ForgeScan/Policies/max_discrepancy.h"
 #include "ForgeScan/Policies/low_discrepancy.h"
 
 #include "ForgeScan/DepthSensor/camera.h"
@@ -42,7 +43,7 @@ int main(int argc, char* argv[])
     bool laser = parser.cmdOptionExists("--laser");
 
     /// Default for no passed value:
-    ForgeScan::Policies::Type policy_type = ForgeScan::Policies::Type::LowDiscrepancy;
+    ForgeScan::Policies::Type policy_type = ForgeScan::Policies::Type::UniformSphereRandom;
 
     {   /// Command line parsing for reading specific arguments
         const std::string &s_nx = parser.getCmdOption("-nx");
@@ -65,17 +66,19 @@ int main(int argc, char* argv[])
 
         const std::string &s_p = parser.getCmdOption("-p");
         if (!s_p.empty()) {
-            if (s_p == "o") {
-                policy_type = ForgeScan::Policies::Type::OrderedUniform;
-            } else if (s_p == "r") {
+            if (s_p == "uso") {
+                policy_type = ForgeScan::Policies::Type::UniformSphereOrdered;
+            } else if (s_p == "usr") {
+                policy_type = ForgeScan::Policies::Type::UniformSphereRandom;
+            } else if (s_p == "rs") {
                 policy_type = ForgeScan::Policies::Type::RandomSphere;
-            } else if (s_p == "lo") {
-                policy_type = ForgeScan::Policies::Type::LowDiscrepancy;
-            }else if (s_p == "lr") {
-                policy_type = ForgeScan::Policies::Type::LowDiscrepancyRandomInit;
+            } else if (s_p == "mds") {
+                policy_type = ForgeScan::Policies::Type::MaxDiscrepancySphere;
+            }else if (s_p == "mdsri") {
+                policy_type = ForgeScan::Policies::Type::MaxDiscrepancySphereRandomInit;
             } else {
-                /// Default for a passed value:
-                policy_type = ForgeScan::Policies::Type::RandomSphere;
+                std::cerr << "[Demos::demo_policy::main] Invalid policy flag. Exiting program." << std::endl;
+                return EXIT_FAILURE;
             }
         }
     }
@@ -104,14 +107,17 @@ int main(int argc, char* argv[])
 
     ForgeScan::Policies::Policy* policy = NULL;
     switch (policy_type) {
-        case ForgeScan::Policies::Type::OrderedUniform:
-            policy = new ForgeScan::Policies::OrderedUniform(grid, *sensor, scene, nv, cr);
+        case ForgeScan::Policies::Type::UniformSphereOrdered:
+            policy = new ForgeScan::Policies::UniformSphereOrdered(grid, *sensor, scene, nv, cr);
             break;
-        case ForgeScan::Policies::Type::LowDiscrepancy:
-            policy = new ForgeScan::Policies::LowDiscrepancy(grid, *sensor, scene, nv, cr, seed);
+        case ForgeScan::Policies::Type::UniformSphereRandom:
+            policy = new ForgeScan::Policies::UniformSphereRandom(grid, *sensor, scene, nv, cr, seed);
             break;
-        case ForgeScan::Policies::Type::LowDiscrepancyRandomInit:
-            policy = new ForgeScan::Policies::LowDiscrepancyRandomInit(grid, *sensor, scene, nv, cr, 3, seed);
+        case ForgeScan::Policies::Type::MaxDiscrepancySphere:
+            policy = new ForgeScan::Policies::MaxDiscrepancySphere(grid, *sensor, scene, nv, cr, seed);
+            break;
+        case ForgeScan::Policies::Type::MaxDiscrepancySphereRandomInit:
+            policy = new ForgeScan::Policies::MaxDiscrepancySphereRandomInit(grid, *sensor, scene, nv, cr, 3, seed);
             break;
         default:
             policy = new ForgeScan::Policies::RandomSphere(grid, *sensor, scene, nv, cr, seed);

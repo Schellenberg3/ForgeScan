@@ -44,6 +44,8 @@ public:
         intr(&intr)
         { setupSensor(); }
 
+    virtual ~Sensor() = default;
+
     /// @brief Orients the sensor to point at the specified point.
     /// @param target Point to image. The sensor will point it's principle axis (positive Z-axis) at this point.
     /// @note If the target is equal to the current position, then the orientation is unchanged.

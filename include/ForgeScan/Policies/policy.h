@@ -34,6 +34,8 @@ enum class Type {
 /// @brief Abstract policy class. Manages data capture by observing a TSDF Grid and positioning a DepthSensor.
 class Policy {
 public:
+    virtual ~Policy() = default;
+
     /// @brief TSDF Grid of the ongoing reconstruction.
     TSDF::Grid *const grid;
 

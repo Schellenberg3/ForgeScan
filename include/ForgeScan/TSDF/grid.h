@@ -233,7 +233,7 @@ public:
     /// @param other Entity to transform the resulting point to.
     /// @return Center point of the voxel, relative to the provided Entity.
     point indexToPoint(const index& input, const Entity& other) const
-        { indexToPoint(input, other.extr); }
+        { return indexToPoint(input, other.extr); }
 
     /// @brief Finds the center of the Grid relative to the provided coordinate frame.
     /// @param extr  Frame to transform the resulting point to. Default is the world frame.

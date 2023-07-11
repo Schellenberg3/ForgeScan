@@ -14,12 +14,12 @@ Processor::Processor(Grid& target)
 inline void Processor::setTarget(Grid& new_target)
 {
     target = &new_target;
-    temp.resize(target->voxel_vector.size());
+    // temp.resize(target->voxel_vector.size());
 }
 
 void inline Processor::swap()
 {
-    target->voxel_vector.swap(temp);
+    // target->voxel_vector.swap(temp);
 }
 
 

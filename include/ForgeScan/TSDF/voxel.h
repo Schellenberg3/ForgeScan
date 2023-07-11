@@ -33,6 +33,16 @@ struct Voxel
         }
     };
 
+
+    Voxel(const view_count& views = 0, const update_count& updates = 0,
+          const voxel_dist& min = 0, const voxel_dist& avg = 0, const voxel_dist& var = 0) {
+        this->views = views;
+        this->updates = updates;
+        this->min = min;
+        this->avg = avg;
+        this->var = var;
+    }
+
     view_count   views   = 0;
     update_count updates = 0;
 

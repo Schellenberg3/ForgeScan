@@ -14,6 +14,9 @@
 #include "ForgeScan/DepthSensor/sensor.h"
 #include "ForgeScan/Utilities/vector_memory_use.h"
 
+/// Gets the maximum positive value for a float.
+#define FLOAT_POSITIVE_MAX std::numeric_limits<float>::max()
+
 
 namespace ForgeScan {
 namespace TSDF      {
@@ -165,29 +168,34 @@ public:
 
     /// @brief Accesses the voxels with no bounds checking.
     /// @param voxel Index for the desired voxel.
-    /// @return Writable access to the specified voxel.
-    /// @note Without checking out of bounds lookups may result in undefined behaviour. Use the `at` method
-    ///       to access voxels with bounds checking.
-    Voxel& operator[](const index& voxel) { return voxel_vector[indexToVector(voxel)]; }
-
-    /// @brief Accesses the voxels with no bounds checking.
-    /// @param voxel Index for the desired voxel.
     /// @return Read-only access to the specified voxel.
     /// @note Without checking out of bounds lookups may result in undefined behaviour. Use the `at` method
     ///       to access voxels with bounds checking.
-    const Voxel& operator[](const index& voxel) const { return voxel_vector[indexToVector(voxel)]; }
-
-    /// @brief Accesses the voxels with bounds checking.
-    /// @param voxel Index for the desired voxel.
-    /// @return Writable access to the specified voxel.
-    /// @throw `std::out_of_range` if the requested index exceeds the Grid's size in any dimension.
-    Voxel& at(const index& voxel) { return voxel_vector.at(indexToVectorThrowOutOfRange(voxel)); }
+    Voxel operator[](const index& voxel) {
+        size_t idx = indexToVector(voxel);
+        return Voxel(v_view_count[idx], v_update_count[idx],
+                     v_voxel_dist_min[idx], v_voxel_dist_avg[idx], v_voxel_dist_var[idx]);
+    }
 
     /// @brief Accesses the voxels with bounds checking.
     /// @param voxel Index for the desired voxel.
     /// @return Read-only access to the specified voxel.
     /// @throw `std::out_of_range` if the requested index exceeds the Grid's size in any dimension.
-    const Voxel& at(const index& voxel) const { return voxel_vector.at(indexToVectorThrowOutOfRange(voxel)); }
+    Voxel at(const index& voxel) {
+        size_t idx = indexToVectorThrowOutOfRange(voxel);
+        return Voxel(v_view_count[idx], v_update_count[idx],
+                     v_voxel_dist_min[idx], v_voxel_dist_avg[idx], v_voxel_dist_var[idx]);
+    }
+
+
+    void updateVoxel(const index& voxel, const Voxel::Update& update) { updateVoxel(indexToVector(voxel), update); }
+
+    void updateVoxelBoundsCheck(const index& voxel, const Voxel::Update& update) { updateVoxel(indexToVectorThrowOutOfRange(voxel), update); }
+
+    void updateVoxelViewOnly(const index& voxel) { updateVoxelViewOnly(indexToVector(voxel)); }
+
+    void updateVoxelViewOnlyBoundsCheck(const index& voxel) { updateVoxelViewOnly(indexToVectorThrowOutOfRange(voxel)); }
+
 
     /// @brief Calculates to index that the point falls into within the grid.
     /// @param input Cartesian position of the point, relative to the voxel grid origin.
@@ -250,16 +258,25 @@ public:
         { return getCenter(other.extr);}
 
     /// @brief Rests all data in the grid to zero or its respective defaults.
-    void clear() { for (auto& voxel : voxel_vector) voxel.reset(); }
+    void clear() {
+        const size_t n_idx = properties.grid_size.prod();
+        for (size_t i = 0; i < n_idx; ++i) {
+            v_view_count[i] = 0;
+            v_update_count[i] = 0;
+            v_voxel_dist_min[i] = FLOAT_POSITIVE_MAX;
+            v_voxel_dist_avg[i] = 0;
+            v_voxel_dist_var[i] = 0;
+        }
+    }
 
     /// @brief Updates view count in the voxel grid and resets voxels' viewed flags.
     /// @note  This function is slow! No matter what we must iterate the whole grid. Avoid calling it often.
     void updateViewCount() {
-        for (auto& voxel : voxel_vector) {
-            if (voxel.views > 0x7FFF && voxel.views != 0xFFFF)
+        for (auto& voxel : v_view_count) {
+            if (voxel > 0x7FFF && voxel != 0xFFFF)
             {   /// Checks if the MSB of the views is set to 1 and prevents rollover after 0x7FFF (32767 views).
-                ++voxel.views;
-                voxel.resetViewUpdateFlag();
+                ++voxel;
+                voxel &= 0x7FFF; // Sets the most significant bit of an unsigned 16-bit integer to 0.
             }
         }
     }
@@ -275,7 +292,7 @@ public:
         for (size_t x = 0; x < properties.grid_size[0]; ++x) {
             point voxel_center = indexToPoint(idx);
             signed_dist = primitive.getSignedDistance(voxel_center, extr);
-            operator[](idx).min = static_cast<float>(signed_dist);
+            v_voxel_dist_min[indexToVector(idx)] = static_cast<voxel_dist>(signed_dist);
             ++idx[0];
         } // ^ for x
             idx[0] = 0;
@@ -297,13 +314,6 @@ public:
     /// @throws `std::invalid_argument` if there is an issue parsing the file name.
     void saveXDMF(const std::filesystem::path& fname) const;
 
-    /// @brief Saves in the HDF5 format.
-    /// @param fname File name. Automatically adds ".h5" when writing.
-    /// @details This is the fastest save method and the recommended one if the grid is to be re-loaded
-    ///          into a Grid object.
-    /// @throws `std::invalid_argument` if there is an issue parsing the file name.
-    void saveHDF5(const std::filesystem::path& fname) const;
-
 public:
     /// @brief Accesses voxel operations on the voxels.
     friend class Processor;
@@ -311,13 +321,43 @@ public:
     friend Grid loadGridHDF5(const std::filesystem::path&);
 
 private:
-    /// @brief Container for Voxels. Users see a 3D grid, but this is really just a vector.
-    std::vector<Voxel> voxel_vector;
+    std::vector<view_count>   v_view_count;
+    std::vector<update_count> v_update_count;
+    std::vector<voxel_dist>   v_voxel_dist_min;
+    std::vector<voxel_dist>   v_voxel_dist_avg;
+    std::vector<voxel_dist>   v_voxel_dist_var;
 
     /// @brief Precomputed voxels-per-dimension-length factor for point to index conversion.
     const Eigen::Array3d p2i_scale;
 
 private:
+    void updateVoxel(const size_t& idx, const Voxel::Update& update) {
+        voxel_dist delta = update.dist - v_voxel_dist_avg[idx];
+
+        /// NOTE: Standard deviation is tracked with Welford's Algorithm. What this actually tracks is
+        ///       the sum of square differences (from the current mean). Dividing this sum by the number of
+        ///       samples (updates) gets the variance. Thus to update we need this annoying multiplication
+        ///       and subsequent division. For more, see:
+        ///       https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_online_algorithm
+        v_voxel_dist_var[idx] *= v_update_count[idx];
+
+        v_voxel_dist_avg[idx] += (delta / ++v_update_count[idx]);
+
+        v_voxel_dist_var[idx] += ((update.dist - v_voxel_dist_avg[idx]) * delta);
+        v_voxel_dist_var[idx] /= v_update_count[idx];
+
+        if ( std::abs(v_voxel_dist_min[idx]) > std::abs(update.dist) )
+            v_voxel_dist_min[idx] = update.dist;
+
+        // First step of updating the view count is to set the first bit high. The method `updateViewCount`
+        // then searches for this flag and updates the voxel view count one even if it was updated multiple times.
+        Voxel::set_MSB_high(v_view_count[idx]);
+    }
+
+    void updateVoxelViewOnly(const size_t& idx) {
+        Voxel::set_MSB_high(v_view_count[idx]);
+    }
+
     /// @brief Retrieves the vector index for the given X, Y, Z index in the grid.
     /// @param voxel Index for the desired voxel.
     /// @return Vector position for the desired voxel.
@@ -344,10 +384,12 @@ private:
     /// @brief Helper that all constructors call. Populates the vector and checks memory usage,
     ///        printing to console if more than 100 MB are used.
     void setup() {
-        voxel_vector.resize(properties.grid_size.prod());
-        double mem = ForgeScan::Utilities::byte_to_megabytes(ForgeScan::Utilities::vector_capacity(voxel_vector));
-        if (mem > 100.0)
-            std::cout << "Warning, allocated " << mem << " MB for vector grid!" << std::endl;
+        const size_t n_idx = properties.grid_size.prod();
+        v_view_count.resize(n_idx);
+        v_update_count.resize(n_idx);
+        v_voxel_dist_min.resize(n_idx);
+        v_voxel_dist_avg.resize(n_idx);
+        v_voxel_dist_var.resize(n_idx);
     }
 };
 
@@ -355,7 +397,7 @@ private:
 /// @param fname File name. Automatically adds ".h5" when searching.
 /// @throws `HighFive::Exception` if HighFive encounters an issue while reading the data.
 /// @throws `std::invalid_argument` if there is an issue parsing the file name.
-Grid loadGridHDF5(const std::filesystem::path& fname);
+Grid loadGridXDMF(const std::filesystem::path& fname);
 
 
 } // namespace TSDF

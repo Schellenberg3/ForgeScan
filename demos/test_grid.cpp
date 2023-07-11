@@ -95,16 +95,14 @@ int main(int argc, char** argv)
     paraview_share.make_preferred();
     std::filesystem::create_directories(paraview_share);
 
-    auto hdf5_path = forgescan_share /= "test_points_hdf5";
-    std::cout << "Saving to HDF5..."  << std::endl;
-    grid.saveHDF5(hdf5_path);
+    auto path = paraview_share /= "test_points";
+    std::cout << "Saving to XDMF..."  << std::endl;
+    grid.saveXDMF(path);
 
     std::cout << "Loading from HDF5..."  << std::endl;
-    ForgeScan::TSDF::Grid new_grid = ForgeScan::TSDF::loadGridHDF5(hdf5_path);
+    ForgeScan::TSDF::Grid new_grid = ForgeScan::TSDF::loadGridHDF5(path);
 
-    auto xdmf_path = paraview_share /= "test_points";
-    std::cout << "Saving to XDMF..."  << std::endl;
-    grid.saveXDMF(xdmf_path);
+
 
     std::cout << "Exiting program."  << std::endl;
     return EXIT_SUCCESS;

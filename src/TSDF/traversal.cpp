@@ -210,7 +210,7 @@ bool implementAddRayUpdate(Grid& grid, const point& rs, const point& re, const V
         /// By checking, and breaking, in the if statements we make sure that when we exit the loop c_idx is the last voxel we added.
         while (true) {
             /// Update the current element. Starting with the initial voxel.
-            grid.at(c_idx).update(update);
+            grid.updateVoxelBoundsCheck(c_idx, update);
             if (time[X] < time[Y] && time[X] < time[Z]) {
                 time[X]  += delta[X];
                 if (time[X] > te_adj && time[Y] > te_adj && time[Z] > te_adj) break;
@@ -287,7 +287,10 @@ bool implementAddRayTSDF(Grid& grid, const point &origin, const point &sensed, M
         while (time[X] <= tp_adj || time[Y] <= tp_adj || time[Z] <= tp_adj) {
             voxel_ref = &grid.at(c_idx);
             if (voxel_ref->views == 0) ++ray_metrics.first;
-            voxel_ref->update(update);
+
+            grid.updateVoxelBoundsCheck(c_idx, update);
+
+            voxel_ref = &grid.at(c_idx);
             if (voxel_ref->var > ray_metrics.max_variance_update) ray_metrics.max_variance_update = voxel_ref->var;
 
             if (time[X] < time[Y] && time[X] < time[Z]) {
@@ -311,8 +314,8 @@ bool implementAddRayTSDF(Grid& grid, const point &origin, const point &sensed, M
         while (time[X] <= tf_adj || time[Y] <= tf_adj || time[Z] <= tf_adj) {
             voxel_ref = &grid.at(c_idx);
             if (voxel_ref->views == 0) ++ray_metrics.first;
-            voxel_ref->setViewUpdateFlag();
 
+            grid.updateVoxelViewOnlyBoundsCheck(c_idx);
             if (time[X] < time[Y] && time[X] < time[Z]) {
                 time[X]  += delta[X];
                 c_idx[X] +=  step[X];

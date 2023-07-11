@@ -72,6 +72,8 @@ int main(int argc, char* argv[])
                 policy_type = ForgeScan::Policies::Type::UniformSphereRandom;
             } else if (s_p == "rs") {
                 policy_type = ForgeScan::Policies::Type::RandomSphere;
+            } else if (s_p == "lds") {
+                policy_type = ForgeScan::Policies::Type::LowDiscrepancySphere;
             } else if (s_p == "mds") {
                 policy_type = ForgeScan::Policies::Type::MaxDiscrepancySphere;
             }else if (s_p == "mdsri") {
@@ -112,6 +114,9 @@ int main(int argc, char* argv[])
             break;
         case ForgeScan::Policies::Type::UniformSphereRandom:
             policy = new ForgeScan::Policies::UniformSphereRandom(grid, *sensor, scene, nv, cr, seed);
+            break;
+        case ForgeScan::Policies::Type::LowDiscrepancySphere:
+            policy = new ForgeScan::Policies::LowDiscrepancySphere(grid, *sensor, scene, nv, cr, seed);
             break;
         case ForgeScan::Policies::Type::MaxDiscrepancySphere:
             policy = new ForgeScan::Policies::MaxDiscrepancySphere(grid, *sensor, scene, nv, cr, seed);

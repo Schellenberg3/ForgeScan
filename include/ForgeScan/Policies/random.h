@@ -51,7 +51,7 @@ public:
 
     /// @brief Gets the name of the policy.
     /// @return Name of the policy as a string.
-    virtual std::string getName() { return "RandomSphere"; }
+    virtual std::string getName() override { return "RandomSphere"; }
 
 protected:
     /// @brief Seed for the random number generator.
@@ -68,10 +68,15 @@ protected:
 
     /// @brief Selects a random view on the sphere to move the camera to and orients it at the center of the grid.
     void setNextViewRandomSphere() {
-        double theta = 2 * M_PI * uniform_dist(gen);        /// 0 - 360 degrees in theta  (angle around the positive X-axis)
-        double phi = std::acos(1 - 2 * uniform_dist(gen));  /// 0 - 180 degrees in phi    (angle from positive Z-axis)
-        if (uniform_dist(gen) < 0.5) phi *= -1;             /// -180 - 180 degrees in phi (important for covering all camera orientations)
+        double theta = 0, phi = 0;
+        getRandomThetaPhiPair(theta, phi);
+        setNextViewSpherical(theta, phi);
+    }
 
+    /// @brief Sets the sensor base
+    /// @param theta Rotation about the positive Z-axis, measured from the positive X-axis.
+    /// @param phi   Rotation away from the positive Z-axis.
+    void setNextViewSpherical(const double& theta, const double& phi) {
         point position(std::sin(theta) * std::sin(phi), std::cos(theta) * std::sin(phi), std::cos(phi));
         position *= radius;
         position += grid->getCenter();
@@ -80,6 +85,15 @@ protected:
         sensor->translate(position);
 
         orientSensorToGridCenter();
+    }
+
+    /// @brief Generates a random pair of theta and phi values for spherical coordinates.
+    /// @param theta Rotation about the positive Z-axis, measured from the positive X-axis. (0 - 360)
+    /// @param phi   Rotation away from the positive Z-axis. (-180 - 180)
+    void getRandomThetaPhiPair(double& theta, double& phi) {
+        theta = 2 * M_PI * uniform_dist(gen);        /// 0 - 360 degrees in theta  (angle around the positive X-axis)
+        phi = std::acos(1 - 2 * uniform_dist(gen));  /// 0 - 180 degrees in phi    (angle from positive Z-axis)
+        if (uniform_dist(gen) < 0.5) phi *= -1;             /// Adjust to -180 - 180 degrees in phi (important for covering all camera orientations)
     }
 
     void postRunLoopCall() override final { ++n_cap; };

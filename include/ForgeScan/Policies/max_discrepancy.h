@@ -50,7 +50,7 @@ public:
 
     /// @brief Gets the name of the policy.
     /// @return Name of the policy as a string.
-    virtual std::string getName() { return "MaxDiscrepancySphere"; }
+    virtual std::string getName() override { return "MaxDiscrepancySphere"; }
 
 protected:
     /// @brief Sets the next view as the orthogonal view in X, Y, then Z as the policy is run.
@@ -219,7 +219,7 @@ public:
 
     /// @brief Gets the name of the policy.
     /// @return Name of the policy as a string.
-    virtual std::string getName() { return "MaxDiscrepancySphereRandomInit"; }
+    virtual std::string getName() override { return "MaxDiscrepancySphereRandomInit"; }
 
 protected:
     void derivedClassSavePolicyInfo(const std::filesystem::path& fname) const override final {

@@ -25,6 +25,7 @@ enum class Type {
     UniformSphereOrdered,
     UniformSphereRandom,
     RandomSphere,
+    LowDiscrepancySphere,
     MaxDiscrepancySphere,
     MaxDiscrepancySphereRandomInit
 };

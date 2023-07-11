@@ -13,19 +13,46 @@ namespace TSDF      {
 /// @param grid   Grid to traverse.
 /// @param rs     Start of the ray, relative to the grid's frame.
 /// @param re     End of the ray, relative to the grid's frame.
-/// @param update Update to apply at each traversed voxel.
+/// @param update Update to apply at each traversed voxel. Optional.
 /// @return True if at least one voxel was updated by the ray.
 /// @note   Does nothing, returning false, if rs and re are exactly the same point.
-bool implementAddRayUpdate(Grid& grid, const point& rs, const point& re, const Voxel::Update& update = Voxel::Update(1, 0, 0, 0));
+bool implementAddRayUpdate(Grid& grid, const point& rs, const point& re, const Voxel::Update& update);
+
+
+/// @brief Declaration for the implementation which all overloads of addRayUpdate reference.
+/// @param grid   Grid to traverse.
+/// @param rs     Start of the ray, relative to the grid's frame.
+/// @param re     End of the ray, relative to the grid's frame.
+/// @param update Update to apply at each traversed voxel. Optional.
+/// @return True if at least one voxel was updated by the ray.
+/// @note   Does nothing, returning false, if rs and re are exactly the same point.
+bool implementAddRayUpdate(Grid& grid, const point& rs, const point& re) {
+    return implementAddRayUpdate(grid, rs, re, Voxel::Update(1, 0, 0, 0));
+}
+
 
 /// @brief Declaration for the implementation which all overloads of addRayTSDF reference.
 /// @param grid   Grid to update, with the TSDF parameters to use.
 /// @param origin Origin of the ray, relative to the grid's frame.
 /// @param sensed Sensed point, relative to the grid's frame.
-/// @param ray_metrics[out] Output variable with metrics about the TSDF updates.
+/// @param ray_metrics[out] Output variable with metrics about the TSDF updates. Optional.
 /// @return True if at least one voxel was traversed by the ray.
 /// @note   Does nothing, returning false, if rs and re are exactly the same point.
-bool implementAddRayTSDF(Grid& grid, const point &origin, const point &sensed, Metrics::Ray& ray_metrics = Metrics::Ray());
+bool implementAddRayTSDF(Grid& grid, const point &origin, const point &sensed, Metrics::Ray& ray_metrics);
+
+
+/// @brief Declaration for the implementation which all overloads of addRayTSDF reference.
+/// @param grid   Grid to update, with the TSDF parameters to use.
+/// @param origin Origin of the ray, relative to the grid's frame.
+/// @param sensed Sensed point, relative to the grid's frame.
+/// @param ray_metrics[out] Output variable with metrics about the TSDF updates. Optional.
+/// @return True if at least one voxel was traversed by the ray.
+/// @note   Does nothing, returning false, if rs and re are exactly the same point.
+bool implementAddRayTSDF(Grid& grid, const point &origin, const point &sensed) {
+    Metrics::Ray ray_metrics;
+    return implementAddRayTSDF(grid, origin, sensed, ray_metrics);
+}
+
 
 /// @brief Applied the provided Update to each voxel on the line between the specified points.
 /// @param grid   Grid to traverse.
@@ -35,15 +62,27 @@ bool implementAddRayTSDF(Grid& grid, const point &origin, const point &sensed, M
 /// @param extr   Extrinsic reference frame of the ray coordinates. Default is the world reference frame.
 /// @return True if at least one voxel was updated by the ray.
 /// @note   Does nothing, returning false, if rs and re are exactly the same point.
-bool addRayUpdate(Grid& grid, const point& rs, const point& re,
-                  const Voxel::Update& update = Voxel::Update(1, 0, 0, 0),
-                  const extrinsic& extr = extrinsic::Identity())
-{
+bool addRayUpdate(Grid& grid, const point& rs, const point& re, const Voxel::Update& update,
+                  const extrinsic& extr = extrinsic::Identity()) {
     point rs_this = grid.toThisFromOther(rs, extr), re_this = grid.toThisFromOther(re, extr);
     bool res = implementAddRayUpdate(grid, rs_this, re_this, update);
     grid.updateViewCount();
     return res;
 }
+
+
+/// @brief Applied the provided Update to each voxel on the line between the specified points.
+/// @param grid   Grid to traverse.
+/// @param rs Ray start position.
+/// @param re Ray end position.
+/// @param update Update to apply, default value has distance set to 1 and all other values set to 0. Optional.
+/// @param extr   Extrinsic reference frame of the ray coordinates. Default is the world reference frame. Optional.
+/// @return True if at least one voxel was updated by the ray.
+/// @note   Does nothing, returning false, if rs and re are exactly the same point.
+bool addRayUpdate(Grid& grid, const point& rs, const point& re, const extrinsic& extr = extrinsic::Identity()) {
+    return addRayUpdate(grid, rs, re, Voxel::Update(1, 0, 0, 0), extr);
+}
+
 
 /// @brief Applied the provided Update to each voxel on the line between the specified points.
 /// @param grid   Grid to traverse.
@@ -53,8 +92,7 @@ bool addRayUpdate(Grid& grid, const point& rs, const point& re,
 /// @param extr   Extrinsic reference frame of the ray coordinates. Default is the world reference frame.
 /// @return True if at least one voxel was updated by a ray.
 bool addRayUpdate(Grid& grid, const point& rs, const point_list& re,
-                  const Voxel::Update& update = Voxel::Update(1, 0, 0, 0),
-                  const extrinsic& extr = extrinsic::Identity())
+                  const Voxel::Update& update, const extrinsic& extr = extrinsic::Identity())
 {
     const size_t n = re.cols();
     point rs_this = grid.toThisFromOther(rs, extr);
@@ -65,6 +103,18 @@ bool addRayUpdate(Grid& grid, const point& rs, const point_list& re,
     }
     grid.updateViewCount();
     return res;
+}
+
+
+/// @brief Applied the provided Update to each voxel on the line between the specified points.
+/// @param grid   Grid to traverse.
+/// @param rs Start position for all rays.
+/// @param re List of ray end positions.
+/// @param update Update to apply, default value has distance set to 1 and all other values set to 0.
+/// @param extr   Extrinsic reference frame of the ray coordinates. Default is the world reference frame.
+/// @return True if at least one voxel was updated by a ray.
+bool addRayUpdate(Grid& grid, const point& rs, const point_list& re, const extrinsic& extr = extrinsic::Identity()) {
+    return addRayUpdate(grid, rs, re, Voxel::Update(1, 0, 0, 0), extr);
 }
 
 /// @brief Applied the provided Update to each voxel on the line between the specified points.
@@ -128,13 +178,26 @@ bool addSensorUpdate(Grid& grid, const DepthSensor::Sensor&sensor, const Voxel::
 /// @param ray_metrics[out] Output variable with metrics about the TSDF updates.
 /// @return True if at least one voxel was traversed by the ray.
 bool addRayTSDF(Grid& grid, const point &origin, const point &sensed,
-                const extrinsic& extr = extrinsic::Identity(),
-                Metrics::Ray& ray_metrics = Metrics::Ray())
+                Metrics::Ray& ray_metrics, const extrinsic& extr = extrinsic::Identity())
 {
     point origin_this = grid.toThisFromOther(origin, extr), sensed_this = grid.toThisFromOther(sensed, extr);
     bool res = implementAddRayTSDF(grid, origin_this, sensed_this, ray_metrics);
     grid.updateViewCount();
     return res;
+}
+
+
+/// @brief Adds the ray between the origin and sensed points as a TSDF update.
+/// @param grid   Grid to update, with the TSDF parameters to use.
+/// @param origin Origin of the ray.
+/// @param sensed Sensed point around which the TSDF is updated.
+/// @param extr   Extrinsic reference frame of the ray coordinates. Default is the world reference frame.
+/// @param ray_metrics[out] Output variable with metrics about the TSDF updates.
+/// @return True if at least one voxel was traversed by the ray.
+bool addRayTSDF(Grid& grid, const point &origin, const point &sensed,
+                const extrinsic& extr = extrinsic::Identity()) {
+    Metrics::Ray ray_metrics;
+    return addRayTSDF(grid, origin, sensed, ray_metrics, extr);
 }
 
 /// @brief Adds the ray between the origin and sensed points as a TSDF update.
@@ -145,8 +208,7 @@ bool addRayTSDF(Grid& grid, const point &origin, const point &sensed,
 /// @param ray_metrics[out] Output variable with metrics about the TSDF updates.
 /// @return True if at least one voxel was traversed by a ray.
 bool addRayTSDF(Grid& grid, const point &origin, const point_list &sensed,
-                const extrinsic& extr = extrinsic::Identity(),
-                Metrics::Sensor& sensor_metrics = Metrics::Sensor())
+                Metrics::Sensor& sensor_metrics, const extrinsic& extr = extrinsic::Identity())
 {
     const size_t n = sensed.cols();
     point      origin_this = grid.toThisFromOther(origin, extr);
@@ -162,6 +224,21 @@ bool addRayTSDF(Grid& grid, const point &origin, const point_list &sensed,
     return res;
 }
 
+
+/// @brief Adds the ray between the origin and sensed points as a TSDF update.
+/// @param grid   Grid to update, with the TSDF parameters to use.
+/// @param origin Origin of the ray.
+/// @param sensed List of sensed points around which the TSDF is updated.
+/// @param extr   Extrinsic reference frame of the ray coordinates. Default is the world reference frame.
+/// @param ray_metrics[out] Output variable with metrics about the TSDF updates.
+/// @return True if at least one voxel was traversed by a ray.
+bool addRayTSDF(Grid& grid, const point &origin, const point_list &sensed,
+                const extrinsic& extr = extrinsic::Identity()) {
+    Metrics::Sensor sensor_metrics;
+    return addRayTSDF(grid, origin, sensed, sensor_metrics, extr);
+}
+
+
 /// @brief Adds the ray between the origin and sensed points as a TSDF update.
 /// @param grid   Grid to update, with the TSDF parameters to use.
 /// @param origin List of origins for rays.
@@ -171,8 +248,7 @@ bool addRayTSDF(Grid& grid, const point &origin, const point_list &sensed,
 /// @return True if at least one voxel was traversed by a ray.
 /// @throws `std::invalid_argument` If origin and sensed have a different number of columns.
 bool addRayTSDF(Grid& grid, const point_list &origin, const point_list &sensed,
-                const extrinsic& extr = extrinsic::Identity(),
-                Metrics::Sensor& sensor_metrics = Metrics::Sensor())
+                Metrics::Sensor& sensor_metrics, const extrinsic& extr = extrinsic::Identity())
 {
     const size_t n = sensed.cols();
     if (n != origin.cols()) {
@@ -190,13 +266,26 @@ bool addRayTSDF(Grid& grid, const point_list &origin, const point_list &sensed,
     return res;
 }
 
+/// @brief Adds the ray between the origin and sensed points as a TSDF update.
+/// @param grid   Grid to update, with the TSDF parameters to use.
+/// @param origin List of origins for rays.
+/// @param sensed List of sensed points around which the TSDF is updated.
+/// @param extr   Extrinsic reference frame of the ray coordinates. Default is the world reference frame.
+/// @param ray_metrics[out] Output variable with metrics about the TSDF updates.
+/// @return True if at least one voxel was traversed by a ray.
+/// @throws `std::invalid_argument` If origin and sensed have a different number of columns.
+bool addRayTSDF(Grid& grid, const point_list &origin, const point_list &sensed,
+                const extrinsic& extr = extrinsic::Identity()) {
+    Metrics::Sensor sensor_metrics;
+    return addRayTSDF(grid, origin, sensed, sensor_metrics, extr);
+}
+
 /// @brief Adds the measurements recorded by the depth sensor.
 /// @param grid   Grid to update, with the TSDF parameters to use.
 /// @param sensor Sensor to add.
 /// @param sensor_record[out] Output variable to record metrics about the TSDF updates from this sensor.
 /// @return True if at least one voxel was traversed by a ray from the sensor.
-bool addSensorTSDF(Grid& grid, const DepthSensor::Sensor&sensor,
-                   Metrics::SensorRecord& sensor_record = Metrics::SensorRecord())
+bool addSensorTSDF(Grid& grid, const DepthSensor::Sensor& sensor, Metrics::SensorRecord& sensor_record)
 {
     /// Get the sensor's measured points, relative to the sensor frame, then transform
     /// these points from the sensor frame to this Grid's frame.
@@ -226,6 +315,16 @@ bool addSensorTSDF(Grid& grid, const DepthSensor::Sensor&sensor,
     return res;
 }
 
+
+/// @brief Adds the measurements recorded by the depth sensor.
+/// @param grid   Grid to update, with the TSDF parameters to use.
+/// @param sensor Sensor to add.
+/// @param sensor_record[out] Output variable to record metrics about the TSDF updates from this sensor.
+/// @return True if at least one voxel was traversed by a ray from the sensor.
+bool addSensorTSDF(Grid& grid, const DepthSensor::Sensor& sensor) {
+    Metrics::SensorRecord sensor_record;
+    return addSensorTSDF(grid, sensor, sensor_record);
+}
 
 } // namespace TSDF
 } // namespace ForgeScan

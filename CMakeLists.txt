@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7.2)
 
 project(
     ForgeScan
-    VERSION 0.1
+    VERSION 0.2
     DESCRIPTION
     "Policies for autonomous, iterative, and fast voxelized geometric reconstruction with simulated depth cameras."
     LANGUAGES C CXX
@@ -11,11 +11,11 @@ project(
 
 # ----- Print compiler and toolchain information -----
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    message(STATUS "[ForgeScan::Info] Using GNU/Clang compiler options")
+    message(STATUS "Using GNU/Clang compiler options")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    message(STATUS "[ForgeScan::Info] Using MSVC compiler options")
-    message(STATUS "[ForgeScan::Info] Toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
-    message(STATUS "[ForgeScan::Info] target triplet: ${VCPKG_TARGET_TRIPLET}")
+    message(STATUS "Using MSVC compiler options")
+    message(STATUS "Toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
+    message(STATUS "target triplet: ${VCPKG_TARGET_TRIPLET}")
 endif()
 
 
@@ -25,13 +25,15 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 set(FORGESCAN_INCLUDE_DIRS         ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(FORGESCAN_SHARE_DIR            ${CMAKE_CURRENT_SOURCE_DIR}/share)
-set(FORGESCAN_SHARE_PARAVIEW_DIR   ${FORGESCAN_SHARE_DIR}/paraview)
-
-set(FORGESCAN_LIBRARY_NAME ${PROJECT_NAME})
 
 
-# ----- Find required dependencies -----
+# ----- Find external packages -----
+find_package(Eigen3   REQUIRED NO_MODULE)
+find_package(OpenCV   REQUIRED)
+
+
+# ----- Find HighFive dependency, prefering submodule, if available  -----
+
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/HighFive/CMakeLists.txt")
     # Set a number of HighFive options to off by default. Essentially prevents their examples and
     # unit tests from being compiled automatically when building.
@@ -48,9 +50,10 @@ else()
     message("[ForgeScan::Info] Searching externally for HighFive.")
 endif()
 
-find_package(Eigen3 REQUIRED NO_MODULE)
-
 
 # ----- Add project subdirectories -----
 add_subdirectory(src)
-add_subdirectory(demos)
+
+
+# ----- Install this projects -----
+# -----         TODO          -----

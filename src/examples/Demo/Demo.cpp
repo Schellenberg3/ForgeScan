@@ -27,7 +27,7 @@ int main(const int argc, const char **argv)
 
     auto manager = forge_scan::Manager::create(scene->grid_properties);
 
-    manager->policyAdd("--policy-type RandomSphere --n-views 10 --seed 50 --set-active");
+    manager->policyAdd(" --set-active --policy-type Sphere --n-views 10 --uniform --seed 50");
     manager->reconstructionAddChannel("--channel-name tsdf           --grid-type TSDF          --data-type double");
     manager->reconstructionAddChannel("--channel-name update         --grid-type UpdateCount   --data-type uint");
     manager->reconstructionAddChannel("--channel-name occupancy      --grid-type Occupancy     --data-type uint");

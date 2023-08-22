@@ -6,7 +6,7 @@
 
 #include "ForgeScan/Policies/Policy.hpp"
 
-#include "ForgeScan/Policies/Simple/RandomSphere.hpp"
+#include "ForgeScan/Policies/Simple/Sphere.hpp"
 
 #include "ForgeScan/Utilities/Strings.hpp"
 
@@ -26,9 +26,9 @@ inline std::shared_ptr<Policy> policy_constructor(const utilities::ArgParser& pa
     std::string policy_type = parser.getCmdOption("--policy-type");
     utilities::strings::toLower(policy_type);
 
-    if (policy_type == "randomsphere")
+    if (policy_type == "sphere")
     {
-        return RandomSphere::create(reconstruction, parser);
+        return Sphere::create(reconstruction, parser);
     }
     else
     {

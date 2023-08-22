@@ -84,7 +84,7 @@ inline void correct_traversal_parameters(int step[3], float delta[3], float dist
     // To calculate the traversal information we must virtually shift the initial Point.
     const Point start_point_shift = start_point.array() + 0.5 * resolution;
 
-    if (normal[X] > 0)
+    if (normal[X] >= 0)
     {
         // Update `dis`t with how far it is to the beginning voxel boundary.
         dist[X]  += ((start_voxel[X] + 1) * resolution - start_point_shift[X]) * inv_normal[X];
@@ -98,7 +98,7 @@ inline void correct_traversal_parameters(int step[3], float delta[3], float dist
         delta[X] *= -1;
     }
 
-    if (normal[Y] > 0)
+    if (normal[Y] >= 0)
     {
         dist[Y]  += ((start_voxel[Y] + 1) * resolution - start_point_shift[Y]) * inv_normal[Y];
     }
@@ -109,7 +109,7 @@ inline void correct_traversal_parameters(int step[3], float delta[3], float dist
         delta[Y] *= -1;
     }
 
-    if (normal[Z] > 0)
+    if (normal[Z] >= 0)
     {
         dist[Z]  += ((start_voxel[Z] + 1) * resolution - start_point_shift[Z]) * inv_normal[Z];
     }

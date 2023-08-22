@@ -25,7 +25,7 @@ inline size_t const vector_size(const typename std::vector<T>& vec)
 
 /// @brief Finds the memory usage of a vector.
 /// @param vec Vector of any type.
-/// @return The number of bytes used by the cpacity of the vector.
+/// @return The number of bytes used by the capacity of the vector.
 template<typename T>
 inline size_t const vector_capacity(const typename std::vector<T>& vec)
 {

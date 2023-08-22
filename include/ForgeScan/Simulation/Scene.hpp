@@ -71,8 +71,9 @@ public:
     void save(std::filesystem::path fpath) const
     {
         utilities::checkPathHasFileNameAndExtension(fpath, FS_HDF5_FILE_EXTENSION, "Scene", true);
+        fpath.make_preferred();
 
-        HighFive::File file(fpath, HighFive::File::Truncate);
+        HighFive::File file(fpath.string(), HighFive::File::Truncate);
         auto g_scene = file.createGroup(FS_HDF5_SCENE_GROUP);
         H5Easy::dump(file, FS_HDF5_SCAN_LOWER_BOUND_DSET, this->scan_lower_bound.matrix());
 
@@ -117,9 +118,10 @@ public:
     /// @brief Loads a stored scene object from disk.
     /// @param fpath Location to save the HDF5 file.
     /// @throws Any exception encountered while reading the HDF5 file.
-    void load(const std::filesystem::path& fpath)
+    void load(std::filesystem::path fpath)
     {
-        HighFive::File file(fpath, HighFive::File::ReadOnly);
+        fpath.make_preferred();
+        HighFive::File file(fpath.string(), HighFive::File::ReadOnly);
         auto g_scene  = file.getGroup(FS_HDF5_SCENE_GROUP);
         this->scan_lower_bound.matrix() = H5Easy::load<Eigen::Matrix4f>(file, FS_HDF5_SCAN_LOWER_BOUND_DSET);
 
@@ -463,10 +465,10 @@ private:
     /// @param fpath File path, with file name, for the HDF5 file.
     /// @throws `std::runtime_error` If any issues are ofstream failures are encountered when
     ///         writing the XDMF file.
-    void makeXDMF(std::filesystem::path fpath) const
+    void makeXDMF(const std::filesystem::path& fpath) const
     {
-        const std::string hdf5_fname = fpath.filename();
-        fpath.replace_extension(FS_XDMF_FILE_EXTENSION);
+        std::filesystem::path hdf5_fname = fpath.filename();
+        hdf5_fname.replace_extension(FS_XDMF_FILE_EXTENSION);
 
         const size_t num_voxels = this->grid_properties->getNumVoxels();
 
@@ -495,7 +497,8 @@ private:
                 utilities::XDMF::writeVoxelGridAttribute(
                     file,
                     this->true_occupancy->getTypeName(),
-                    utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_SCENE_GROUP, FS_HDF5_GROUND_TRUTH_GROUP, FS_HDF5_OCCUPANCY_DSET),
+                    utilities::XDMF::makeDataPath(hdf5_fname.string(), FS_HDF5_SCENE_GROUP,
+                                                  FS_HDF5_GROUND_TRUTH_GROUP, FS_HDF5_OCCUPANCY_DSET),
                     getNumberTypeXDMF(this->true_occupancy->type_id),
                     getNumberPrecisionXDMF(this->true_occupancy->type_id),
                     num_voxels
@@ -507,7 +510,8 @@ private:
                 utilities::XDMF::writeVoxelGridAttribute(
                     file,
                     this->true_tsdf->getTypeName(),
-                    utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_SCENE_GROUP, FS_HDF5_GROUND_TRUTH_GROUP, FS_HDF5_TSDF_DSET),
+                    utilities::XDMF::makeDataPath(hdf5_fname.string(), FS_HDF5_SCENE_GROUP,
+                                                  FS_HDF5_GROUND_TRUTH_GROUP, FS_HDF5_TSDF_DSET),
                     getNumberTypeXDMF(this->true_tsdf->type_id),
                     getNumberPrecisionXDMF(this->true_tsdf->type_id),
                     num_voxels

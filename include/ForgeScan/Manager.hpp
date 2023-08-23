@@ -60,11 +60,10 @@ public:
     void save(std::filesystem::path fpath) const
     {
         utilities::checkPathHasFileNameAndExtension(fpath, FS_HDF5_FILE_EXTENSION, "Reconstruction", true);
-        fpath.make_preferred();
 
         try
         {
-            HighFive::File file(fpath.string(), HighFive::File::Truncate);
+            HighFive::File file(fpath, HighFive::File::Truncate);
             this->savePolicies(file);
             this->reconstruction->save(file);
             this->saveMetrics(file);
@@ -327,10 +326,10 @@ private:
     /// @param fpath File path, with file name, for the HDF5 file.
     /// @throws `std::runtime_error` If any issues are ofstream failures are encountered when
     ///         writing the XDMF file.
-    void makeXDMF(const std::filesystem::path& fpath) const
+    void makeXDMF(std::filesystem::path fpath) const
     {
-        std::filesystem::path hdf5_fname = fpath.filename();
-        hdf5_fname.replace_extension(FS_XDMF_FILE_EXTENSION);
+        const std::string hdf5_fname = fpath.filename();
+        fpath.replace_extension(FS_XDMF_FILE_EXTENSION);
 
         const size_t num_voxels = this->grid_properties->getNumVoxels();
 
@@ -354,7 +353,7 @@ private:
                 lower.x(), lower.y(), lower.z()
             );
 
-            this->reconstruction->addToXDMF(file, hdf5_fname.string());
+            this->reconstruction->addToXDMF(file, hdf5_fname);
 
             utilities::XDMF::writeVoxelGridFooter(file);
             utilities::XDMF::writeFooter(file);

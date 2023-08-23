@@ -127,21 +127,22 @@ protected:
 
         for (size_t i = 0; i < n; ++i)
         {
-            uint8_t measurement = experiment[i];
             uint8_t truth       = this->data[i];
-            if (measurement == VoxelOccupancy::FREE && truth == VoxelOccupancy::FREE)
+            uint8_t measurement = experiment[i];
+
+            if (true_positive(truth, measurement))
             {
                 ++confusion.tp;
             }
-            else if (measurement == VoxelOccupancy::OCCUPIED && truth == VoxelOccupancy::OCCUPIED)
+            else if (true_negative(truth, measurement))
             {
                 ++confusion.tn;
             }
-            else if (measurement == VoxelOccupancy::FREE && truth == VoxelOccupancy::OCCUPIED)
+            else if (false_positive(truth, measurement))
             {
                 ++confusion.fp;
             }
-            else if (measurement == VoxelOccupancy::OCCUPIED && truth == VoxelOccupancy::FREE)
+            else if (false_negative(truth, measurement))
             {
                 ++confusion.fn;
             }
@@ -218,6 +219,52 @@ private:
             throw std::runtime_error("Cannot create Occupancy. Grid properties and provided data are not the same size.");
         }
         this->data.swap(data);
+    }
+
+
+    /// @brief Tests if the voxel meets the true-positive case.
+    /// @param truth Occupancy enumeration value for the voxel in the Ground Truth Occupancy Grid.
+    /// @param measurement Experiments measurement for the same voxel in an Occupancy Voxel Grid.
+    /// @return True if this is a true-positive case where the truth is FREE and the measurement is
+    ///         FREE.
+    static bool true_positive(const uint8_t& truth, const uint8_t& measurement)
+    {
+        return (truth == VoxelOccupancy::FREE && measurement == VoxelOccupancy::FREE);
+    }
+
+
+    /// @brief Tests if the voxel meets the true-negative case.
+    /// @param truth Occupancy enumeration value for the voxel in the Ground Truth Occupancy Grid.
+    /// @param measurement Experiments measurement for the same voxel in an Occupancy Voxel Grid.
+    /// @return True if this is a true-negative case where the truth is OCCUPIED and the measurement
+    ///         is OCCUPIED.
+    static bool true_negative(const uint8_t& truth, const uint8_t& measurement)
+    {
+        return (truth == VoxelOccupancy::OCCUPIED && measurement == VoxelOccupancy::OCCUPIED);
+    }
+
+
+    /// @brief Tests if the voxel meets the false-positive case.
+    /// @param truth Occupancy enumeration value for the voxel in the Ground Truth Occupancy Grid.
+    /// @param measurement Experiments measurement for the same voxel in an Occupancy Voxel Grid.
+    /// @return True if this is a false-positive case where the truth is OCCUPIED and the measurement
+    ///         is FREE.
+    static bool false_positive(const uint8_t& truth, const uint8_t& measurement)
+    {
+        /// TODO: Decide if measurements with UNKOWN should count here.
+        return (truth == VoxelOccupancy::OCCUPIED && measurement == VoxelOccupancy::FREE);
+    }
+
+
+    /// @brief Tests if the voxel meets the false-negative case.
+    /// @param truth Occupancy enumeration value for the voxel in the Ground Truth Occupancy Grid.
+    /// @param measurement Experiments measurement for the same voxel in an Occupancy Voxel Grid.
+    /// @return True if this is a false-negative case where the truth is FREE and the measurement
+    ///         is OCCUPIED.
+    static bool false_negative(const uint8_t& truth, const uint8_t& measurement)
+    {
+        /// TODO: Decide if measurements with UNKOWN should count here.
+        return (truth == VoxelOccupancy::FREE && measurement == VoxelOccupancy::OCCUPIED);
     }
 };
 

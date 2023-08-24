@@ -7,6 +7,7 @@
 #include "ForgeScan/Policies/Policy.hpp"
 
 #include "ForgeScan/Policies/Simple/Sphere.hpp"
+#include "ForgeScan/Policies/Simple/Axis.hpp"
 
 #include "ForgeScan/Utilities/Strings.hpp"
 
@@ -29,6 +30,10 @@ inline std::shared_ptr<Policy> policy_constructor(const utilities::ArgParser& pa
     if (policy_type == "sphere")
     {
         return Sphere::create(reconstruction, parser);
+    }
+    if (policy_type == "axis")
+    {
+        return Axis::create(reconstruction, parser);
     }
     else
     {

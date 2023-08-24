@@ -6,6 +6,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# Script-wide definitions
+GREEN     = "green"
+BLUE      = "blue"
+RED       = "red"
+WIREFRAME = "C1"
+
+ORIGIN_LINEWIDTH    = 5
+VIEW_Z_LINEWIDTH    = 3
+VIEW_XY_LINEWIDTH   = 2
+WIREFRAME_LINEWIDTH = 4
+
+VIEW_ID_FONT_SIZE = "xx-large"
+
+
 def open_h5_file(fpath: pathlib.Path) -> h5py.Group:
     """
     Opens an HDF5 file. 
@@ -38,6 +52,20 @@ def plot_voxel_grid(reconstruction_group: h5py.Group,  ax: plt.Axes) -> None:
     lower = np.zeros_like(upper)
     center = (upper - lower) / 2
 
+    # Set the axis limits to ensure uniform scaling
+    max_upper = upper.max() + 1
+    ax.set_xlim((-1, max_upper))
+    ax.set_ylim((-1, max_upper))
+    ax.set_zlim((-1, max_upper))
+
+    # Plot the Grid's reference frame
+    ax.quiver(0, 0, 0, 1, 0, 0, linewidth=ORIGIN_LINEWIDTH, color=RED)
+    ax.quiver(0, 0, 0, 0, 1, 0, linewidth=ORIGIN_LINEWIDTH, color=GREEN)
+    ax.quiver(0, 0, 0, 0, 0, 1, linewidth=ORIGIN_LINEWIDTH, color=BLUE)
+
+    # Plot center and grid wireframe.
+    ax.scatter(center[0], center[1], center[2], color=WIREFRAME, marker='x')
+
     side0 = np.array([[lower[0], lower[1], lower[2]],
                       [upper[0], lower[1], lower[2]],
                       [upper[0], upper[1], lower[2]],
@@ -63,14 +91,10 @@ def plot_voxel_grid(reconstruction_group: h5py.Group,  ax: plt.Axes) -> None:
                       [upper[0], lower[1], lower[2]]
                     ])
     
-    ax.scatter(lower[0],  lower[1],  lower[2],  color='C0')
-    ax.scatter(upper[0],  upper[1],  upper[2],  color='C0')
-    ax.scatter(center[0], center[1], center[2], color='C0', marker='x')
-
-    ax.plot_wireframe(side0[:, 0], side0[:, 1], side0[:, 2])
-    ax.plot_wireframe(side1[:, 0], side1[:, 1], side1[:, 2])
-    ax.plot_wireframe(side2[:, 0], side2[:, 1], side2[:, 2])
-    ax.plot_wireframe(side3[:, 0], side3[:, 1], side3[:, 2])
+    ax.plot_wireframe(side0[:, 0], side0[:, 1], side0[:, 2], linewidth=WIREFRAME_LINEWIDTH, color=WIREFRAME)
+    ax.plot_wireframe(side1[:, 0], side1[:, 1], side1[:, 2], linewidth=WIREFRAME_LINEWIDTH, color=WIREFRAME)
+    ax.plot_wireframe(side2[:, 0], side2[:, 1], side2[:, 2], linewidth=WIREFRAME_LINEWIDTH, color=WIREFRAME)
+    ax.plot_wireframe(side3[:, 0], side3[:, 1], side3[:, 2], linewidth=WIREFRAME_LINEWIDTH, color=WIREFRAME)
 
 
 def add_view_to_plot(extr: np.array, view_id: str, ax: plt.Axes, accept: bool,
@@ -80,28 +104,34 @@ def add_view_to_plot(extr: np.array, view_id: str, ax: plt.Axes, accept: bool,
     near the location of the view. If the accepted flag is True the origin and text are colored 
     green, but if False these are colored red. 
     """
-    green = "green" 
-    blue  = "blue" 
-    red   = "red" 
-    origin_color = green
+    origin_color = GREEN
     if accept is False:
-        origin_color = red
+        origin_color = RED
 
-    x_axis = extr[0:3, 0]
-    y_axis = extr[0:3, 1]
-    z_axis = extr[0:3, 2]
+    scale_xy = 0.25
+    scale_z  = 0.5
+
+    x_axis = extr[0:3, 0] * scale_xy
+    y_axis = extr[0:3, 1] * scale_xy
+    z_axis = extr[0:3, 2] * scale_z
     origin = extr[0:3, 3]
 
     text = x_axis + y_axis + z_axis
-    text = 0.1 * (text / np.linalg.norm(text))
+    text = -0.1 * (text / np.linalg.norm(text))
     text = origin + text
 
+    ax.quiver(origin[0], origin[1], origin[2], z_axis[0], z_axis[1], z_axis[2],
+              linewidth=VIEW_Z_LINEWIDTH, color=BLUE)
+    ax.scatter(origin[0], origin[1], origin[2], linewidth=VIEW_Z_LINEWIDTH, color=origin_color)
+
     if parsed_args and parsed_args.only_z is False:
-        ax.quiver(origin[0], origin[1], origin[2], x_axis[0], x_axis[1], x_axis[2], color=red)
-        ax.quiver(origin[0], origin[1], origin[2], y_axis[0], y_axis[1], y_axis[2], color=green)
-    ax.quiver(origin[0], origin[1], origin[2], z_axis[0], z_axis[1], z_axis[2], color=blue)
-    ax.scatter(origin[0], origin[1], origin[2], color=origin_color)
-    ax.text(text[0], text[1], text[2], view_id, color=origin_color)
+        ax.quiver(origin[0], origin[1], origin[2], x_axis[0], x_axis[1], x_axis[2],
+                  linewidth=VIEW_XY_LINEWIDTH, color=RED)
+        ax.quiver(origin[0], origin[1], origin[2], y_axis[0], y_axis[1], y_axis[2],
+                  linewidth=VIEW_XY_LINEWIDTH, color=GREEN)
+
+    if parsed_args is None or parsed_args.no_id is False:
+        ax.text(text[0], text[1], text[2], view_id, color=origin_color, fontsize=VIEW_ID_FONT_SIZE)
 
 
 def add_accepted_group_to_plot(group: h5py.Group, ax: plt.Axes,
@@ -140,9 +170,6 @@ def main(parsed_args: argparse.Namespace) -> None:
     fig = plt.figure()
     ax: plt.Axes = fig.add_subplot(111, projection='3d')
     ax.set_title("Reconstruction Views")
-    ax.set_xlim((-5, 5))
-    ax.set_ylim((-5, 5))
-    ax.set_zlim((-5, 5))
 
     reconstruction_group = get_reconstruction_group(h5_file)
     plot_voxel_grid(reconstruction_group, ax)
@@ -170,6 +197,12 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
         help="Plots the rejected views too."
+    )
+    parser.add_argument(
+        "--no-id",
+        action="store_true",
+        default=False,
+        help="Turns off displaying the view ID number."
     )
     parser.add_argument(
         "--only-z",

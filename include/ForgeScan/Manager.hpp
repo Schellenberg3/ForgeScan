@@ -170,24 +170,32 @@ public:
 
 
     /// @brief Signals to the active Policy that the last view it suggested was accepted.
+    /// @returns True if the suggested view was accepted. False if there was no view to accept.
     /// @throws `std::runtime_error` If no Policies have been added to the Manager.
-    /// @throws `std::runtime_error` The active Policy has no suggested views.
-    void policyAcceptView()
+    bool policyAcceptView()
     {
         this->throwIfNoActivePolicy();
-        this->policyGetActive()->acceptView(this->policy_total_views);
-        ++this->policy_total_views;
+        bool res = this->policyGetActive()->acceptView(this->policy_total_views);
+        if (res)
+        {
+            ++this->policy_total_views;
+        }
+        return res;
     }
 
 
     /// @brief Signals to the active Policy that the last view it suggested was rejected.
+    /// @returns True if the suggested view was rejected. False if there was no view to accept.
     /// @throws `std::runtime_error` If no Policies have been added to the Manager.
-    /// @throws `std::runtime_error` The active Policy has no suggested views.
-    void policyRejectView()
+    bool policyRejectView()
     {
         this->throwIfNoActivePolicy();
-        this->policyGetActive()->rejectView(this->policy_total_views);
-        ++this->policy_total_views;
+        bool res = this->policyGetActive()->rejectView(this->policy_total_views);
+        if (res)
+        {
+            ++this->policy_total_views;
+        }
+        return res;
     }
 
 

@@ -103,30 +103,32 @@ protected:
     /// @brief Accepts the view returned by this->getView and removed it from the list.
     /// @param count Total number of views accepted/rejected from all policies.
     ///              This is just used as a simple unique, ordered identifier.
-    /// @throws std::runtime_error if the Policy has no suggested views.
-    void acceptView(const size_t& count = 0)
+    /// @returns True if the suggested view was accepted. False if there was no view to accept.
+    bool acceptView(const size_t& count = 0)
     {
         if ( !this->views.empty() )
         {
             this->accepted_views.push_back( {count, this->views.front()} );
-            return views.pop_front();
+            views.pop_front();
+            return true;
         }
-        throw std::runtime_error("The Policy has no proposed views. Cannot accept a view.");
+        return false;
     }
 
 
     /// @brief Rejects the view returned by this->getView and removed it from the list.
     /// @param count Total number of views accepted/rejected from all policies.
     ///              This is just used as a simple unique, ordered identifier.
-    /// @throws std::runtime_error if the Policy has no suggested views.
-    void rejectView(const size_t& count = 0)
+    /// @returns True if the suggested view was accepted. False if there was no view to accept.
+    bool rejectView(const size_t& count = 0)
     {
         if ( !this->views.empty() )
         {
             this->rejected_views.push_back( {count, this->views.front()} );
             this->views.pop_front();
+            return true;
         }
-        throw std::runtime_error("The Policy has no proposed views. Cannot reject a view.");
+        return false;
     }
 
 

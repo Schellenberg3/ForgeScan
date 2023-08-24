@@ -145,6 +145,21 @@ protected:
         }
     }
 
+    /// @brief Saves the accepted views, and their order identifier, to the HDF5 file.
+    /// @param file File to write to.
+    /// @param policy_name Name of the derived Policy class.
+    void saveAcceptedViews(H5Easy::File& file, const std::string& policy_name) const
+    {
+        const std::string hdf5_data_root = "/" FS_HDF5_POLICY_GROUP "/" + policy_name + "/ACCEPT";
+        std::stringstream ss;
+        for (const auto& accept : this->accepted_views)
+        {
+            ss << hdf5_data_root << "/" << accept.first;
+            H5Easy::dump(file, ss.str(), accept.second.matrix());
+            ss.str(std::string());
+        }
+    }
+
 
 
     // ***************************************************************************************** //

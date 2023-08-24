@@ -166,6 +166,7 @@ protected:
         g_rand_sph.createAttribute("seed", this->seed);
         g_rand_sph.createAttribute("completed", static_cast<uint8_t>(this->isComplete()));
         Policy::saveRejectedViews(file, this->getTypeName());
+        Policy::saveAcceptedViews(file, this->getTypeName());
     }
 
 

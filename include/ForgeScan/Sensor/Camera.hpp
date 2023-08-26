@@ -65,7 +65,7 @@ struct Camera : public Entity
     ///       that generated the depth image.
     /// @throws `std::invalid_argument` If the pixel was out of bounds.
     static void getPoint(const std::shared_ptr<Intrinsics>& intr,
-                         const DepthImage& image, const size_t& row, const size_t col,
+                         const DepthImage& image, const Eigen::Index& row, const Eigen::Index col,
                          Point& out)
     {
         throwIfPixelIsInvalid(image, row, col);
@@ -88,9 +88,9 @@ struct Camera : public Entity
         dest.setConstant(3, intr->size(), 0);
         size_t n = 0;
         Point xyz;
-        for (size_t row = 0; row < image.rows(); ++row)
+        for (Eigen::Index row = 0; row < dest.rows(); ++row)
         {
-            for (size_t col = 0; col < image.cols(); ++col)
+            for (Eigen::Index col = 0; col < dest.cols(); ++col)
             {
                 getPoint(intr, image, row, col, xyz);
                 dest.col(n) << xyz;
@@ -231,7 +231,7 @@ private:
     /// @param col Column location to check.
     /// @throws `std::invalid_argument` If the pixel was out of bounds.
     static void throwIfPixelIsInvalid(const DepthImage& image,
-                                      const size_t& row, const size_t col)
+                                      const Eigen::Index& row, const Eigen::Index col)
     {
         if (row >= image.rows() || col >= image.cols())
         {

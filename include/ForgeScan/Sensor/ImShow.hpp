@@ -36,7 +36,7 @@ inline void imshow_depth(const std::shared_ptr<const Camera>& camera,
 
     const float span = camera->intr->max_d - camera->intr->min_d;
     cv_image.forEach<cv::Vec<float, 1>>(
-        [&camera, &span](cv::Vec<float, 1>& pixel, const int * position)
+        [&camera, &span](cv::Vec<float, 1>& pixel, const int * /*position*/)
         {
             pixel[0] -= camera->intr->min_d;
             pixel[0] /= span;

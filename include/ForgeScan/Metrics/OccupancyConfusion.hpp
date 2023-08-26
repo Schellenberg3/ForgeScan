@@ -174,14 +174,14 @@ protected:
     /// @brief Records a pair of Confusion Matrix data and what Reconstruction update it came from.
     std::list<std::pair<ground_truth::Confusion, size_t>> confusion_list;
 
+    /// @brief Name for the channel the Metric makes.
+    const std::string channel_name;
+
     /// @brief The ground truth Occupancy Grid to compare Reconstruction data against.
     std::shared_ptr<const ground_truth::Occupancy> ground_truth;
 
     /// @brief Reference to the Reconstruction Voxel Grid that this Metric uses.
     ground_truth::ExperimentOccupancy experiment;
-
-    /// @brief Name for the channel the Metric makes.
-    const std::string channel_name;
 };
 
 

@@ -137,7 +137,6 @@ protected:
         float y = 1 - (view_number / ((float)n_view_requested - nearly_one)) * 2;
         float r_y = std::sqrt(1 - y*y);
 
-        float phi = std::acos(y);
         float theta = golden_angle_radians * view_number;
 
         float x = std::cos(theta) * r_y;

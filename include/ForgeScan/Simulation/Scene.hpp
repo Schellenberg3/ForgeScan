@@ -373,7 +373,6 @@ public:
         this->true_tsdf = metrics::ground_truth::TSDF::create(this->grid_properties);
 
         const float res = this->true_tsdf->properties->resolution;
-        const float half_res = res * 0.5;
         const size_t nz = this->true_tsdf->properties->size.z();
         const size_t ny = this->true_tsdf->properties->size.y();
         const size_t nx = this->true_tsdf->properties->size.x();

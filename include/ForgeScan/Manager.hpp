@@ -339,8 +339,6 @@ private:
         const std::string hdf5_fname = fpath.filename();
         fpath.replace_extension(FS_XDMF_FILE_EXTENSION);
 
-        const size_t num_voxels = this->grid_properties->getNumVoxels();
-
         Point lower = Point::Zero();
         lower.array() -= 0.5 * this->grid_properties->resolution;
 

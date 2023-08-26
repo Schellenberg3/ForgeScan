@@ -23,3 +23,10 @@ set_target_properties(
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
 )
+target_compile_options(
+    ${EXECUTABLE_NAME}
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)

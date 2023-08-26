@@ -42,7 +42,7 @@ inline void writeVoxelGridHeader(std::ofstream& file, const float& resolution,
     "    <Geometry Type=\"ORIGIN_DXDYDZ\">\n"
     "      <Topology TopologyType=\"3DCoRectMesh\" Dimensions=\"" << nx << " " << ny << " " << nz << " \"></Topology>\n" <<
     "      <!-- Origin  Z, Y, X -->\n"
-    "      <DataItem Format=\"XML\" Dimensions=\"3\">" << oz << " " << oy << " " << oz << "</DataItem>\n" <<
+    "      <DataItem Format=\"XML\" Dimensions=\"3\">" << oz << " " << oy << " " << ox << "</DataItem>\n" <<
     "      <!-- DxDyDz (Spacing/Resolution) Z, Y, X -->\n"
     "      <DataItem Format=\"XML\" Dimensions=\"3\">" << resolution << " " << resolution << " " << resolution << "</DataItem>\n"
     "    </Geometry>\n";

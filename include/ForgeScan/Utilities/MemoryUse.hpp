@@ -17,7 +17,7 @@ namespace memory_use {
 /// @param vec Vector of any type.
 /// @return The number of bytes used by the size of the vector.
 template<typename T>
-inline size_t const vector_size(const typename std::vector<T>& vec)
+inline size_t vector_size(const typename std::vector<T>& vec)
 {
     return sizeof(T) * vec.size();
 }
@@ -27,7 +27,7 @@ inline size_t const vector_size(const typename std::vector<T>& vec)
 /// @param vec Vector of any type.
 /// @return The number of bytes used by the capacity of the vector.
 template<typename T>
-inline size_t const vector_capacity(const typename std::vector<T>& vec)
+inline size_t vector_capacity(const typename std::vector<T>& vec)
 {
     return sizeof(T) * vec.capacity();
 }
@@ -36,7 +36,7 @@ inline size_t const vector_capacity(const typename std::vector<T>& vec)
 /// @brief Converts bytes to megabytes.
 /// @param bytes Number in bytes.
 /// @return Number in megabytes.
-inline float const byte_to_megabytes(const size_t& bytes)
+inline float byte_to_megabytes(const size_t& bytes)
 {
     return static_cast<float>(bytes) * MB_PER_BYTE;
 }

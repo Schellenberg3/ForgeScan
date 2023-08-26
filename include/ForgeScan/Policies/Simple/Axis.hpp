@@ -90,6 +90,7 @@ protected:
                   const float& seed)
         : Policy(reconstruction),
           axis(axis),
+          axis_to_grid_center(this->get_axis_to_grid_center()),
           n_views(n_views),
           n_repeat(n_repeat),
           n_view_requested(this->n_views * this->n_repeat),
@@ -98,7 +99,6 @@ protected:
           height_max(std::max(height, height_max)),
           start_uniform(uniform),
           target_center(target_center),
-          axis_to_grid_center(this->get_axis_to_grid_center()),
           seed(seed),
           sample(this->seed)
     {

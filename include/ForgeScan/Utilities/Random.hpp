@@ -26,8 +26,8 @@ struct RandomSampler
 {
     RandomSampler(const int& seed = -1)
         : seed( seed > 0 ? static_cast<unsigned int>(seed) : RANDOM_DEVICE() ),
-          uniform_dist( std::uniform_real_distribution<double>(0.0, 1.0) ),
-          gen( std::mt19937(this->seed) )
+          gen( std::mt19937(this->seed) ),
+          uniform_dist( std::uniform_real_distribution<double>(0.0, 1.0) )
     {
 
     }
@@ -95,12 +95,12 @@ struct RandomSampler
     /// @brief Seed used to create this generator.
     const unsigned int seed;
 
+    /// @brief Random number engine for performing sampling on the uniform real distribution.
+    std::mt19937 gen;
+
 private:
     /// @brief Uniform distribution of double values over [0, 1).
     std::uniform_real_distribution<double> uniform_dist;
-
-    /// @brief Random number engine for performing sampling on the uniform real distribution.
-    std::mt19937 gen;
 };
 
 

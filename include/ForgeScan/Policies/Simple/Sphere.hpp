@@ -1,6 +1,7 @@
 #ifndef FORGE_SCAN_POLICIES_SIMPLE_SPHERE_POLICY_HPP
 #define FORGE_SCAN_POLICIES_SIMPLE_SPHERE_POLICY_HPP
 
+#include <algorithm> 
 #include <limits>
 #include <functional>
 
@@ -29,6 +30,7 @@ public:
         return std::shared_ptr<Sphere>(new Sphere(reconstruction,
                                                   parser.getCmdOption<size_t>("--n-views",   10),
                                                   parser.cmdOptionExists("--uniform"),
+                                                  parser.cmdOptionExists("--unordered"),
                                                   parser.getCmdOption<float>("--radius",     2.5),
                                                   parser.getCmdOption<float>("--radius-max", 2.5),
                                                   parser.getCmdOption<float>("--seed",       -1)));
@@ -44,28 +46,43 @@ protected:
     /// @param uniform Flag, if true then the this Policy starts be generating `n_views` worth of
     ///                ordered, uniformly sampled views. If false, or one more than `v_views` have
     ///                been generated in the uniform manner, the policy samples the spherical
-    ///                surface randomly. 
+    ///                surface randomly.
+    /// @param unordered  If this is true and uniform is true, then the policy will return uniformly
+    ///                   sampled points but visits them in an unordered manner. A Sphere policy with
+    ///                   `uniform` and `unordered` sampling flags is pseudo low-discrepancy.
     /// @param radius     Minimum radius for camera poses.
     /// @param radius_max Maximum radius for camera poses, used for randomly sampled views only.
     /// @param seed Seed for the random generator the Policy uses. Default -1 for a random seed.
     explicit Sphere(const std::shared_ptr<const data::Reconstruction>& reconstruction,
-                          const size_t& n_views,
-                          const bool& uniform,
-                          const float& radius,
-                          const float& radius_max,
-                          const float& seed)
+                    const size_t& n_views,
+                    const bool& uniform,
+                    const bool& unordered,
+                    const float& radius,
+                    const float& radius_max,
+                    const float& seed)
         : Policy(reconstruction),
           n_view_requested(n_views),
           start_uniform(uniform),
+          unordered(unordered),
           radius(std::min(std::abs(radius), std::abs(radius_max))),
           radius_max(std::max(std::abs(radius), std::abs(radius_max))),
           seed(seed),
           sample(this->seed)
     {
-        this->call_on_generate = this->start_uniform ? std::bind(&Sphere::generateUniform,
-                                                                  this, std::placeholders::_1) :
-                                                       std::bind(&Sphere::generateRandom,  
-                                                                  this, std::placeholders::_1);
+        if (this->start_uniform)
+        {
+            this->call_on_generate = std::bind(&Sphere::generateUniform, this, std::placeholders::_1);
+            this->view_order = std::vector<size_t>(this->n_view_requested);
+            std::iota(this->view_order.begin(), this->view_order.end(), 0);
+            if (this->unordered)
+            {
+                std::shuffle(this->view_order.begin(), this->view_order.end(), this->sample.gen);
+            }
+        }
+        else
+        {
+            this->call_on_generate = std::bind(&Sphere::generateRandom, this, std::placeholders::_1);
+        }
 
         // This Policy can generate on startup.
         this->generate();
@@ -95,8 +112,7 @@ protected:
         // Avoids division by zero errors is n_view_requested is 1.
         static const float nearly_one = 1 - std::numeric_limits<float>::epsilon();
 
-        size_t view_number = this->numAccepted() + this->numRejected();
-
+        const size_t view_number = this->numAccepted() + this->numRejected();
         if (this->n_view_requested <= view_number)
         {
             // One we have reached the last view we may generate we switch to random sampling.
@@ -105,10 +121,10 @@ protected:
             return;
         }
 
-        float y = 1 - (view_number / ((float)n_view_requested - nearly_one)) * 2;
+        float y = 1 - (this->view_order[view_number] / ((float)n_view_requested - nearly_one)) * 2;
         float r_y = std::sqrt(1 - y*y);
 
-        float theta = golden_angle_radians * view_number;
+        float theta = golden_angle_radians * this->view_order[view_number];
 
         float x = std::cos(theta) * r_y;
         float z = std::sin(theta) * r_y;
@@ -180,14 +196,22 @@ protected:
     /// @brief Flag for starting with the `generateUniform` method. If false, the `generateRandom` method is used.
     bool start_uniform;
 
+    /// @brief Flag for using an unordered sampling in `generateUniform`.
+    bool unordered;
+
     /// @brief Radius for sampling positions. Random sampling may sample between `radius` and `radius_max`.
     const float radius, radius_max;
 
-    /// Seed for the random sample. (-1 indicates a random seed is used).
+    /// @brief Seed for the random sample. (-1 indicates a random seed is used).
     float seed;
 
     /// @brief Random sampler utility.
     utilities::RandomSampler<float> sample;
+
+    /// @brief If `unordered` and `start_uniform` are true, then this is the order at which the n_view_requested
+    ///        will be returned. If `unordered` is false then this is ordered [0, ... N]. And if `start_uniform`
+    ///        is false then this is empty.
+    std::vector<size_t> view_order;
 
     /// @brief Abstracts which method - random or ordered, uniform - is used when `generate` is called.
     std::function<void(Extrinsic&)> call_on_generate;

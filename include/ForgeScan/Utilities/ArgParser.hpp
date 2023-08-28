@@ -63,8 +63,7 @@ public:
     {
         if (this->tokens.size() < x)
         {
-            static const std::string empty_string("");
-            return empty_string;
+            return ArgParser::empty_string;
         }
         return this->tokens[x];
     }
@@ -81,8 +80,7 @@ public:
         {
             return *itr;
         }
-        static const std::string empty_string("");
-        return empty_string;
+        return ArgParser::empty_string;
     }
 
 
@@ -162,10 +160,15 @@ private:
         }
     }
 
+    /// @brief Default return of an empty string.
+    const static std::string empty_string;
 
     /// @brief Vector of each input string
     std::vector <std::string> tokens;
 };
+
+
+const std::string ArgParser::empty_string = std::string("");
 
 
 /// @brief Writes the contents of a ArgParser to the output stream.

@@ -63,41 +63,12 @@ protected:
           sample(this->seed)
     {
         this->call_on_generate = this->start_uniform ? std::bind(&Sphere::generateUniform,
-                                                                  this, std::placeholders::_1)   :
+                                                                  this, std::placeholders::_1) :
                                                        std::bind(&Sphere::generateRandom,  
                                                                   this, std::placeholders::_1);
 
         // This Policy can generate on startup.
         this->generate();
-    }
-
-
-
-    // ***************************************************************************************** //
-    // *                           PRIVATE VIRTUAL METHOD OVERRIDES                            * //
-    // ***************************************************************************************** //
-
-
-    virtual const std::string& getTypeName() const override final
-    {
-        const static std::string name("Sphere");
-        return name;
-    }
-
-
-    virtual void generate() override final
-    {
-        const Point grid_center = this->reconstruction->grid_properties->getCenter();
-     
-        Extrinsic extr = Extrinsic::Identity();
-        this->call_on_generate(extr);
-        
-        extr.translation() += grid_center;
-        extr.rotate(vector_math::get_rotation_to_orient_z_axis(extr, grid_center));
-
-        // For this policy, clear any views before adding the newly generated one.
-        this->views.clear();
-        this->views.push_back(extr);
     }
 
 
@@ -146,6 +117,34 @@ protected:
         position *= this->radius;
 
         dest.translation() = position;
+    }
+
+
+    // ***************************************************************************************** //
+    // *                           PRIVATE VIRTUAL METHOD OVERRIDES                            * //
+    // ***************************************************************************************** //
+
+
+    virtual const std::string& getTypeName() const override final
+    {
+        const static std::string name("Sphere");
+        return name;
+    }
+
+
+    virtual void generate() override final
+    {
+        const Point grid_center = this->reconstruction->grid_properties->getCenter();
+     
+        Extrinsic extr = Extrinsic::Identity();
+        this->call_on_generate(extr);
+        
+        extr.translation() += grid_center;
+        extr.rotate(vector_math::get_rotation_to_orient_z_axis(extr, grid_center));
+
+        // For this policy, clear any views before adding the newly generated one.
+        this->views.clear();
+        this->views.push_back(extr);
     }
 
 

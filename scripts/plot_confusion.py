@@ -10,7 +10,7 @@ def accuracy(true_positive: int,  true_negative: int,
     """
     Returns the accuracy value for the given confusion matrix.
     """
-    return true_positive / float(true_positive + false_positive + true_negative + false_negative)
+    return (true_positive + true_negative) / float(true_positive + false_positive + true_negative + false_negative)
 
 
 def precision(true_positive: int, false_positive: int) -> float:

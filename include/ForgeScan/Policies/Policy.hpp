@@ -37,6 +37,8 @@ public:
     // ***************************************************************************************** //
 
 
+    virtual ~Policy() { }
+
     /// @brief Queries the Policy to get its suggested view.
     /// @return Gets a constant reference to the best view suggested by the Policy.
     const Extrinsic& getView()

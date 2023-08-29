@@ -235,6 +235,9 @@ struct Grid
     };
 
 
+    virtual ~Grid() { }
+
+
     /// @brief Shared, constant Properties of the Grid.
     const std::shared_ptr<const Grid::Properties> properties;
 

@@ -17,7 +17,7 @@ namespace metrics {
 namespace simulation {
 
     // Forward definition to allow friend access.
-    class Scene;
+    struct Scene;
 
 } // namespace simulation
 } // namespace forge_scan
@@ -74,7 +74,7 @@ class Occupancy : public Grid
     friend class metrics::OccupancyConfusion;
 
     /// @brief Required to call the save method and modify values in the Occupancy Grid.
-    friend class simulation::Scene;
+    friend struct simulation::Scene;
 
 
 public:

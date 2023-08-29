@@ -51,6 +51,9 @@ public:
     // ***************************************************************************************** //
 
 
+    virtual ~VoxelGrid() { }
+
+
     /// @brief Calculates how much space the data vector is using.
     /// @param size_bytes[out]     Number of bytes used by the vector.
     /// @param capacity_bytes[out] Number of bytes used by the vector, including capacity.

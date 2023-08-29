@@ -34,7 +34,7 @@ public:
     /// @throws `std::invalid_argument` if the ground truth Occupancy Grid Properties are not equal
     ///         to those of the Reconstruction.
     static std::shared_ptr<OccupancyConfusion> create(const std::shared_ptr<data::Reconstruction>& reconstruction,
-                                                      const std::shared_ptr<const ground_truth::Occupancy>&   ground_truth,
+                                                      const std::shared_ptr<const ground_truth::Occupancy>& ground_truth,
                                                       const std::string& use_channel = "")
     {
         return std::shared_ptr<OccupancyConfusion>(new OccupancyConfusion(reconstruction, ground_truth, use_channel));
@@ -71,7 +71,7 @@ protected:
     /// @throws `std::invalid_argument` if the ground truth Occupancy Grid Properties are not equal
     ///          to those of the Reconstruction.
     explicit OccupancyConfusion(const std::shared_ptr<data::Reconstruction>& reconstruction,
-                                const std::shared_ptr<const ground_truth::Occupancy>&   ground_truth,
+                                const std::shared_ptr<const ground_truth::Occupancy>& ground_truth,
                                 const std::string& use_channel = "")
         : Metric(reconstruction),
           channel_name(FS_METRIC_CHANNEL_PREFIX + this->getTypeName()),
@@ -134,7 +134,7 @@ protected:
     // ***************************************************************************************** //
 
 
-    void postUpdate(const size_t& reconstruction_update_count)
+    void postUpdate(const size_t& reconstruction_update_count) override final
     {
         this->confusion_list.push_back({ground_truth::Confusion(), reconstruction_update_count});
         

@@ -15,7 +15,7 @@ namespace metrics {
 namespace simulation {
 
     // Forward definition to allow friend access.
-    class Scene;
+    struct Scene;
 
 } // namespace simulation
 } // namespace forge_scan
@@ -31,10 +31,11 @@ namespace ground_truth {
 class TSDF : public Grid
 {
     /// @brief Required to call the compare method.
+    /// TODO: Create the Metric which uses this.
     /// friend class metrics::OccupancyConfusion;
 
     /// @brief Required to call the save method and modify values in the Occupancy Grid.
-    friend class simulation::Scene;
+    friend struct simulation::Scene;
 
 public:
     /// @brief Creates a shared pointer to a Ground Truth TSDF Grid.

@@ -69,7 +69,7 @@ private:
                     NEGATIVE_INFINITY,
                     type_id,
                     DataType::TYPE_FLOATING_POINT),
-          update_callable(this->dist_min, this->dist_max)
+          update_callable(*this)
     {
 
     }
@@ -86,10 +86,10 @@ private:
 
         void operator()(std::vector<float>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -104,10 +104,10 @@ private:
 
         void operator()(std::vector<double>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -144,11 +144,9 @@ private:
 
 
         /// @brief Creates an UpdateCallable to implement the derived class's update function.
-        /// @param dist_min Minimum distance of the Voxel Grid using this Update Callable.
-        /// @param dist_max Maximum distance of the Voxel Grid using this Update Callable.
-        UpdateCallable(const float& dist_min, const float& dist_max)
-            : dist_min(dist_min),
-              dist_max(dist_max)
+        /// @param caller Reference to the specific derived class calling this object.
+        UpdateCallable(TSDF& caller)
+            : caller(caller)
         {
 
         }
@@ -172,11 +170,8 @@ private:
         /// @brief Parameter for the voxel update functions.
         std::shared_ptr<const trace> ray_trace{nullptr};
 
-        /// @brief Minimum distance of the Voxel Grid using this Update Callable.
-        const float& dist_min;
-
-        /// @brief Maximum distance of the Voxel Grid using this Update Callable.
-        const float& dist_max;
+        /// @brief Reference to the specific derived class calling this object.
+        TSDF& caller;
 
         /// @brief A message for the error message if a type is not supported.
         const std::string type_not_supported_message = "TSDF only supports voxel vectors of float and double types. "

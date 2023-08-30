@@ -74,7 +74,7 @@ private:
                     default_value,
                     type_id,
                     DataType::TYPE_ANY),
-          update_callable(this->dist_min, this->dist_max)
+          update_callable(*this)
     {
 
     }
@@ -92,10 +92,10 @@ private:
 
         void operator()(std::vector<int8_t>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -107,10 +107,10 @@ private:
 
         void operator()(std::vector<int16_t>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -122,10 +122,10 @@ private:
 
         void operator()(std::vector<int32_t>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -137,10 +137,10 @@ private:
 
         void operator()(std::vector<int64_t>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -152,10 +152,10 @@ private:
 
         void operator()(std::vector<uint8_t>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -167,10 +167,10 @@ private:
 
         void operator()(std::vector<uint16_t>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -182,10 +182,10 @@ private:
 
         void operator()(std::vector<uint32_t>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -197,10 +197,10 @@ private:
 
         void operator()(std::vector<size_t>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -212,10 +212,10 @@ private:
 
         void operator()(std::vector<float>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -227,10 +227,10 @@ private:
 
         void operator()(std::vector<double>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
@@ -257,13 +257,13 @@ private:
         // ************************************************************************************* //
 
 
-        UpdateCallable(const float& dist_min, const float& dist_max)
-            : dist_min(dist_min),
-              dist_max(dist_max)
+        /// @brief Creates an UpdateCallable to implement the derived class's update function.
+        /// @param caller Reference to the specific derived class calling this object.
+        UpdateCallable(UpdateCount& caller)
+            : caller(caller)
         {
 
         }
-
 
         /// @brief Acquires temporary shared ownership of a trace.
         /// @param ray_trace Trace to perform update from.
@@ -283,15 +283,13 @@ private:
         /// @brief Parameter for the voxel update functions.
         std::shared_ptr<const trace> ray_trace{nullptr};
 
-        /// @brief Minimum distance of the Voxel Grid using this Update Callable.
-        const float& dist_min;
-
-        /// @brief Maximum distance of the Voxel Grid using this Update Callable.
-        const float& dist_max;
+        /// @brief Reference to the specific derived class calling this object.
+        UpdateCount& caller;
 
         /// @brief A message for the error message if a type is not supported.
         const std::string type_not_supported_message = "";  // No unsupported types.
     };
+
 
 public:
     /// @brief Updates the Grid with new information along a ray.

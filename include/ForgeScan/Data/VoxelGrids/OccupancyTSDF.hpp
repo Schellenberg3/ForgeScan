@@ -58,7 +58,7 @@ public:
     /// @return Read-only reference to the Occupancy data vector.  
     const std::vector<uint8_t>& getOccupancyData() const
     {
-        return *this->data_occupancy;
+        return this->data_occupancy;
     }
 
 
@@ -78,9 +78,9 @@ private:
                     NEGATIVE_INFINITY,
                     type_id,
                     DataType::TYPE_FLOATING_POINT),
-          data_occupancy(std::make_shared<std::vector<uint8_t>>(this->properties->getNumVoxels(),
-                                                                VoxelOccupancy::UNKNOWN)),
-          update_callable(this->dist_min, this->dist_max, this->data_occupancy)
+          data_occupancy(std::vector<uint8_t>(this->properties->getNumVoxels(),
+                                              VoxelOccupancy::UNKNOWN)),
+          update_callable(*this)
     {
 
     }
@@ -101,12 +101,12 @@ private:
             if (this->type_id == DataType::FLOAT)
             {
                 g_channel.createDataSet(grid_type + "_TSDF", std::get<std::vector<float>>(this->data));
-                g_channel.createDataSet(grid_type + "_Occupancy", *this->data_occupancy);
+                g_channel.createDataSet(grid_type + "_Occupancy", this->data_occupancy);
             }
             else if (this->type_id == DataType::DOUBLE)
             {
                 g_channel.createDataSet(grid_type + "_TSDF", std::get<std::vector<double>>(this->data));
-                g_channel.createDataSet(grid_type + "_Occupancy", *this->data_occupancy);
+                g_channel.createDataSet(grid_type + "_Occupancy", this->data_occupancy);
             }
             else
             {
@@ -162,15 +162,15 @@ private:
 
         void operator()(std::vector<float>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
                 // ************************** APPLY VOXEL UPDATE HERE ************************** //
-                this->data_occupancy->operator[](iter->first) = iter->second <= 0 ? VoxelOccupancy::OCCUPIED : VoxelOccupancy::FREE;
+                this->caller.data_occupancy[iter->first] = iter->second <= 0 ? VoxelOccupancy::OCCUPIED : VoxelOccupancy::FREE;
 
                 if(utilities::math::is_greater_in_magnitude(vector[iter->first], iter->second))
                 {
@@ -182,15 +182,15 @@ private:
 
         void operator()(std::vector<double>& vector) const
         {
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->dist_min);
+            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->second > this->dist_max)
+                if (iter == this->ray_trace->end() || iter->second > this->caller.dist_max)
                 {
                     return;
                 }
                 // ************************** APPLY VOXEL UPDATE HERE ************************** //
-                this->data_occupancy->operator[](iter->first) = iter->second <= 0 ? VoxelOccupancy::OCCUPIED : VoxelOccupancy::FREE;
+                this->caller.data_occupancy[iter->first] = iter->second <= 0 ? VoxelOccupancy::OCCUPIED : VoxelOccupancy::FREE;
 
                 if(utilities::math::is_greater_in_magnitude(vector[iter->first], static_cast<double>(iter->second)))
                 {
@@ -224,18 +224,11 @@ private:
 
 
         /// @brief Creates an UpdateCallable to implement the derived class's update function.
-        /// @param dist_min Minimum distance of the Voxel Grid using this Update Callable.
-        /// @param dist_max Maximum distance of the Voxel Grid using this Update Callable.
-        /// @param data_occupancy Shared pointer th the occupancy data of the Voxel Grid using this
-        ///                       Update Callable.
-        UpdateCallable(const float& dist_min, const float& dist_max,
-                       const std::shared_ptr<std::vector<uint8_t>>& data_occupancy)
-            : dist_min(dist_min),
-              dist_max(dist_max),
-              data_occupancy(data_occupancy)
+        /// @param caller Reference to the specific derived class calling this object.
+        UpdateCallable(OccupancyTSDF& caller)
+            : caller(caller)
         {
-            assert(data_occupancy != nullptr && "Input is null");
-            assert(this->data_occupancy != nullptr && "Member is null");
+
         }
 
 
@@ -257,14 +250,8 @@ private:
         /// @brief Parameter for the voxel update functions.
         std::shared_ptr<const trace> ray_trace{nullptr};
 
-        /// @brief Minimum distance of the Voxel Grid using this Update Callable.
-        const float& dist_min;
-
-        /// @brief Maximum distance of the Voxel Grid using this Update Callable.
-        const float& dist_max;
-
-        /// @brief Occupancy data of the Voxel Grid using this Update Callable.
-        const std::shared_ptr<std::vector<uint8_t>> data_occupancy{nullptr};
+        /// @brief Reference to the specific derived class calling this object.
+        OccupancyTSDF& caller;
 
         /// @brief A message for the error message if a type is not supported.
         const std::string type_not_supported_message = "Occupancy TSDF only supports voxel vectors of float and double types. "
@@ -285,7 +272,7 @@ public:
 
 private:
     /// @brief Stores the occupancy data that the grid uses.
-    std::shared_ptr<std::vector<uint8_t>> data_occupancy; 
+    std::vector<uint8_t> data_occupancy; 
 
     /// @brief Subclass callable that std::visit uses to perform updates with typed information.
     /// @note  Initialization order matters. This must be declared last so the other class members that

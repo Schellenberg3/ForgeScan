@@ -62,6 +62,16 @@ public:
     }
 
 
+    /// @brief Updates the Grid with new information along a ray.
+    /// @param ray_trace Trace with update voxel location and distances.
+    void update(std::shared_ptr<const trace> ray_trace) override final
+    {
+        this->update_callable.acquireRayTrace(ray_trace);
+        std::visit(this->update_callable, this->data);
+        this->update_callable.releaseRayTrace();
+    }
+
+
 private:
     /// @brief Private constructor to enforce shared pointer usage.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
@@ -153,7 +163,7 @@ private:
 
     /// @brief Subclass provides update functions for each supported DataType/VectorVariant of
     ///        the data vector. 
-    struct UpdateCallable
+    struct UpdateCallable : public VoxelGrid::Callable
     {
         // ************************************************************************************* //
         // *                                SUPPORTED DATATYPES                                * //
@@ -179,7 +189,6 @@ private:
             }
         }
 
-
         void operator()(std::vector<double>& vector) const
         {
             trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
@@ -198,7 +207,6 @@ private:
                 }
             }
         }
-
 
         // ************************************************************************************* //
         // *                               UNSUPPORTED DATATYPES                               * //
@@ -231,46 +239,11 @@ private:
 
         }
 
-
-        /// @brief Acquires temporary shared ownership of a trace.
-        /// @param ray_trace Trace to perform update from.
-        void acquireRayTrace(std::shared_ptr<const trace> ray_trace)
-        {
-            this->ray_trace = ray_trace;
-        }
-
-
-        /// @brief Releases the VoxelGrid's reference to the trace.
-        void releaseRayTrace()
-        {
-            this->ray_trace.reset();
-        }
-
-
-        /// @brief Parameter for the voxel update functions.
-        std::shared_ptr<const trace> ray_trace{nullptr};
-
         /// @brief Reference to the specific derived class calling this object.
         OccupancyTSDF& caller;
-
-        /// @brief A message for the error message if a type is not supported.
-        const std::string type_not_supported_message = "Occupancy TSDF only supports voxel vectors of float and double types. "
-                                                       "PLEASE CHECK WHAT YOU HAVE DONE: THIS EXCEPTION SHOULD NEVER BE REACHED.";
     };
 
 
-public:
-    /// @brief Updates the Grid with new information along a ray.
-    /// @param ray_trace Trace with update voxel location and distances.
-    void update(std::shared_ptr<const trace> ray_trace) override final
-    {
-        this->update_callable.acquireRayTrace(ray_trace);
-        std::visit(this->update_callable, this->data);
-        this->update_callable.releaseRayTrace();
-    }
-
-
-private:
     /// @brief Stores the occupancy data that the grid uses.
     std::vector<uint8_t> data_occupancy; 
 

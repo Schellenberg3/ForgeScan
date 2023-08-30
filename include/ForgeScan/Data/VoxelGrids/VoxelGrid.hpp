@@ -122,6 +122,38 @@ public:
 
 protected:
     // ***************************************************************************************** //
+    // *                               PROTECTED NESTED CLASS                                  * //
+    // ***************************************************************************************** //
+
+
+    /// @brief A base for the Callable structure that all derived Voxel Grid classes to use when
+    ///        performing an update to their data.
+    struct Callable
+    {
+        /// @brief Acquires temporary, shared ownership of a trace.
+        /// @param ray_trace Trace to perform an update from.
+        void acquireRayTrace(std::shared_ptr<const trace> ray_trace)
+        {
+            this->ray_trace = ray_trace;
+        }
+
+
+        /// @brief Releases the VoxelGrid's reference to the trace.
+        void releaseRayTrace()
+        {
+            this->ray_trace.reset();
+        }
+
+
+        /// @brief Parameter for the voxel update functions.
+        std::shared_ptr<const trace> ray_trace{nullptr};
+
+        /// @brief A the error message if a type is not supported.
+        static const std::string type_not_supported_message;
+    };
+
+
+    // ***************************************************************************************** //
     // *                               PROTECTED CLASS METHODS                                 * //
     // ***************************************************************************************** //
 
@@ -401,6 +433,12 @@ private:
                                     DataTypeToString.at(requested) + " was requested.");
     }
 };
+
+
+// Provide definition for the static variable declared in Callable base class.
+const std::string VoxelGrid::Callable::type_not_supported_message =
+    std::string("A Voxel Grid's Update Callable encountered a vector variant of an unsupported data type. "
+                "PLEASE CHECK WHAT YOU HAVE DONE: THIS EXCEPTION SHOULD NEVER BE REACHED.");
 
 
 } // namespace data

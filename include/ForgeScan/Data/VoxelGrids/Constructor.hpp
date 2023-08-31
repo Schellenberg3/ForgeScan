@@ -5,6 +5,7 @@
 
 #include "ForgeScan/Data/VoxelGrids/Occupancy.hpp"
 #include "ForgeScan/Data/VoxelGrids/OccupancyTSDF.hpp"
+#include "ForgeScan/Data/VoxelGrids/Probability.hpp"
 #include "ForgeScan/Data/VoxelGrids/TSDF.hpp"
 #include "ForgeScan/Data/VoxelGrids/UpdateCount.hpp"
 
@@ -33,6 +34,10 @@ inline std::shared_ptr<VoxelGrid> grid_constructor(const utilities::ArgParser& a
     else if (grid_type == "occupancytsdf")
     {
         return OccupancyTSDF::create(properties, args);
+    }
+    else if (grid_type == "probability")
+    {
+        return Probability::create(properties, args);
     }
     else if (grid_type == "tsdf")
     {

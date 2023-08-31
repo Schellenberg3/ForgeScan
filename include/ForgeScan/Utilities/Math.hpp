@@ -65,6 +65,27 @@ inline T lerp(const T& a, const T& b, const T& t)
 }
 
 
+/// @brief Turns the log-odds probability into a probability value
+/// @param x Log-odds value.
+/// @return Probability for the log odds.
+template <typename T>
+inline T probability(const T& x)
+{
+    return std::exp(x) / (1 + std::exp(x));
+}
+
+
+/// @brief Turns the probability value into its log-odds value.
+/// @param p First value.
+/// @return Log odds for the probability.
+/// @warning This does not check if 0 <= p <= 1.
+template <typename T>
+inline T log_odds(const T& p)
+{
+    return std::log(p) - std::log(1 - p);
+}
+
+
 } // namespace math
 } // namespace utilities
 } // namespace forge_scan

@@ -27,13 +27,13 @@ inline std::shared_ptr<VoxelGrid> grid_constructor(const utilities::ArgParser& a
     std::string grid_type = args.getCmdOption("--grid-type");
     utilities::strings::toLower(grid_type);
 
-    if (grid_type == "occupancy")
+    if (grid_type == "binary")
     {
-        return Occupancy::create(properties, args);
+        return Binary::create(properties, args);
     }
-    else if (grid_type == "occupancytsdf")
+    else if (grid_type == "binarytsdf")
     {
-        return OccupancyTSDF::create(properties, args);
+        return BinaryTSDF::create(properties, args);
     }
     else if (grid_type == "probability")
     {

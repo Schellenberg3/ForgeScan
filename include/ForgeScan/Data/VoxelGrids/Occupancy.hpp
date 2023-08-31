@@ -1,5 +1,5 @@
-#ifndef FORGE_SCAN_RECONSTRUCTIONS_GRID_OCCUPANCY_HPP
-#define FORGE_SCAN_RECONSTRUCTIONS_GRID_OCCUPANCY_HPP
+#ifndef FORGE_SCAN_RECONSTRUCTIONS_GRID_BINARY_HPP
+#define FORGE_SCAN_RECONSTRUCTIONS_GRID_BINARY_HPP
 
 #include "ForgeScan/Data/VoxelGrids/VoxelGrid.hpp"
 
@@ -10,14 +10,14 @@ namespace data {
 
 /// @brief Tracks binary occupancy values for each voxel. The whole Voxel Grid begins as "occupied"
 ///        and are updated to be "free" rays travel through them. 
-class Occupancy : public VoxelGrid
+class Binary : public VoxelGrid
 {
 public:
-    /// @brief Constructor for a shared pointer to an Occupancy Voxel Grid.
+    /// @brief Constructor for a shared pointer to an Binary Voxel Grid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @param parser Arg Parser with arguments to construct an Occupancy Grid from.
-    /// @return Shared pointer to a Occupancy Grid.
-    static std::shared_ptr<Occupancy> create(const std::shared_ptr<const Grid::Properties>& properties,
+    /// @param parser Arg Parser with arguments to construct an Binary Grid from.
+    /// @return Shared pointer to a Binary Grid.
+    static std::shared_ptr<Binary> create(const std::shared_ptr<const Grid::Properties>& properties,
                                              const utilities::ArgParser& parser)
     {
         return create(properties, parser.getCmdOption<float>("--dist-min", 0),
@@ -25,23 +25,23 @@ public:
     }
 
 
-    /// @brief Constructor for a shared pointer to an Occupancy Voxel Grid.
+    /// @brief Constructor for a shared pointer to an Binary Voxel Grid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param dist_min    Minimum update distance. Default 0.
     /// @param dist_max    Maximum update distance. Default infinity.
-    /// @return Shared pointer to an Occupancy Grid.
-    static std::shared_ptr<Occupancy> create(const std::shared_ptr<const Grid::Properties>& properties,
+    /// @return Shared pointer to an Binary Grid.
+    static std::shared_ptr<Binary> create(const std::shared_ptr<const Grid::Properties>& properties,
                                              const float& dist_min = 0,
                                              const float& dist_max = INFINITY)
     {
-        return std::shared_ptr<Occupancy>(new Occupancy(properties, dist_min, dist_max));
+        return std::shared_ptr<Binary>(new Binary(properties, dist_min, dist_max));
     }
 
 
     /// @brief Returns the class type name for the Voxel Grid.
     const std::string& getTypeName() const override final
     {
-        static const std::string name = "Occupancy";
+        static const std::string name = "Binary";
         return name;
     }
 
@@ -71,7 +71,7 @@ private:
     /// @param dist_max   Maximum trace update distance for this Voxel Grid.
     /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
     ///         (This should not happen.)
-    explicit Occupancy(const std::shared_ptr<const Grid::Properties>& properties,
+    explicit Binary(const std::shared_ptr<const Grid::Properties>& properties,
                        const float& dist_min,
                        const float& dist_max)
         : VoxelGrid(properties,
@@ -119,7 +119,7 @@ private:
 
         /// @brief Creates an UpdateCallable to implement the derived class's update function.
         /// @param caller Reference to the specific derived class calling this object.
-        UpdateCallable(Occupancy& caller)
+        UpdateCallable(Binary& caller)
             : caller(caller)
         {
 
@@ -127,7 +127,7 @@ private:
 
 
         /// @brief Reference to the specific derived class calling this object.
-        Occupancy& caller;
+        Binary& caller;
     };
 
 
@@ -142,4 +142,4 @@ private:
 } // namespace forge_scan
 
 
-#endif // FORGE_SCAN_RECONSTRUCTIONS_GRID_OCCUPANCY_HPP
+#endif // FORGE_SCAN_RECONSTRUCTIONS_GRID_BINARY_HPP

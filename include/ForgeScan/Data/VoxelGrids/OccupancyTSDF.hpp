@@ -1,5 +1,5 @@
-#ifndef FORGE_SCAN_RECONSTRUCTIONS_GRID_OCCUPANCY_TSDF_HPP
-#define FORGE_SCAN_RECONSTRUCTIONS_GRID_OCCUPANCY_TSDF_HPP
+#ifndef FORGE_SCAN_RECONSTRUCTIONS_GRID_BINARY_TSDF_HPP
+#define FORGE_SCAN_RECONSTRUCTIONS_GRID_BINARY_TSDF_HPP
 
 #include "ForgeScan/Data/VoxelGrids/VoxelGrid.hpp"
 #include "ForgeScan/Utilities/Math.hpp"
@@ -9,18 +9,18 @@ namespace forge_scan {
 namespace data {
 
 
-/// @brief Represents a truncated signed-distance function (Occupancy TSDF).
-/// @note Uses a minimum magnitude strategy to update the voxel's distance.
-/// @note Supports `float` and `double` data types only.
-class OccupancyTSDF : public VoxelGrid
+/// @brief Represents a truncated signed-distance function and binary occupation.
+/// @note Supports `float` and `double` data types only. These are for the TSDF. Binary occupation
+///       is always `uint8_t`.
+class BinaryTSDF : public VoxelGrid
 {
 public:
-    /// @brief Constructor for a shared pointer to a Occupancy Occupancy TSDF Voxel Grid.
+    /// @brief Constructor for a shared pointer to a Binary TSDF Voxel Grid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @param parser Arg Parser with arguments to construct an Occupancy Occupancy TSDF Grid from.
-    /// @return Shared pointer to a Occupancy Occupancy TSDF Grid.
+    /// @param parser Arg Parser with arguments to construct an Binary TSDF Grid from.
+    /// @return Shared pointer to a Binary TSDF Grid.
     /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
-    static std::shared_ptr<OccupancyTSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
+    static std::shared_ptr<BinaryTSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                  const utilities::ArgParser& parser)
     {
         return create(properties, parser.getCmdOption<float>("--dist-min", -0.2),
@@ -29,26 +29,26 @@ public:
     }
 
 
-    /// @brief Constructor for a shared pointer to a Occupancy Occupancy TSDF Voxel Grid.
+    /// @brief Constructor for a shared pointer to a Binary TSDF Voxel Grid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param dist_min   Minimum update distance. Default -0.2.
     /// @param dist_max   Maximum update distance. Default +0.2.
     /// @param type_id Datatype for the Grid. Default is float.
-    /// @return Shared pointer to a Occupancy Occupancy TSDF Grid.
+    /// @return Shared pointer to a Binary TSDF Grid.
     /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
-    static std::shared_ptr<OccupancyTSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
+    static std::shared_ptr<BinaryTSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                  const float& dist_min = -0.2,
                                                  const float& dist_max =  0.2,
                                                  const DataType& type_id = DataType::FLOAT)
     {
-        return std::shared_ptr<OccupancyTSDF>(new OccupancyTSDF(properties, dist_min, dist_max, type_id));
+        return std::shared_ptr<BinaryTSDF>(new BinaryTSDF(properties, dist_min, dist_max, type_id));
     }
 
 
     /// @brief Returns the class type name for the Voxel Grid.
     const std::string& getTypeName() const override final
     {
-        static const std::string name = "OccupancyTSDF";
+        static const std::string name = "BinaryTSDF";
         return name;
     }
 
@@ -78,7 +78,7 @@ private:
     /// @param dist_min   Minimum trace update distance for this Voxel Grid.
     /// @param dist_max   Maximum trace update distance for this Voxel Grid.
     /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
-    explicit OccupancyTSDF(const std::shared_ptr<const Grid::Properties>& properties,
+    explicit BinaryTSDF(const std::shared_ptr<const Grid::Properties>& properties,
                            const float& dist_min,
                            const float& dist_max,
                            const DataType& type_id)
@@ -111,12 +111,12 @@ private:
             if (this->type_id == DataType::FLOAT)
             {
                 g_channel.createDataSet(grid_type + "_TSDF", std::get<std::vector<float>>(this->data));
-                g_channel.createDataSet(grid_type + "_Occupancy", this->data_occupancy);
+                g_channel.createDataSet(grid_type + "_Binary", this->data_occupancy);
             }
             else if (this->type_id == DataType::DOUBLE)
             {
                 g_channel.createDataSet(grid_type + "_TSDF", std::get<std::vector<double>>(this->data));
-                g_channel.createDataSet(grid_type + "_Occupancy", this->data_occupancy);
+                g_channel.createDataSet(grid_type + "_Binary", this->data_occupancy);
             }
             else
             {
@@ -152,8 +152,8 @@ private:
         // Write occupancy data
         utilities::XDMF::writeVoxelGridAttribute(
             file,
-            grid_name + "_Occupancy",
-            utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type + "_Occupancy"),
+            grid_name + "_Binary",
+            utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type + "_Binary"),
             getNumberTypeXDMF(DataType::UINT8_T),
             getNumberPrecisionXDMF(DataType::UINT8_T),
             this->properties->getNumVoxels()
@@ -219,14 +219,14 @@ private:
 
         /// @brief Creates an UpdateCallable to implement the derived class's update function.
         /// @param caller Reference to the specific derived class calling this object.
-        UpdateCallable(OccupancyTSDF& caller)
+        UpdateCallable(BinaryTSDF& caller)
             : caller(caller)
         {
 
         }
 
         /// @brief Reference to the specific derived class calling this object.
-        OccupancyTSDF& caller;
+        BinaryTSDF& caller;
     };
 
 
@@ -245,4 +245,4 @@ private:
 } // namespace forge_scan
 
 
-#endif // FORGE_SCAN_RECONSTRUCTIONS_GRID_OCCUPANCY_TSDF_HPP
+#endif // FORGE_SCAN_RECONSTRUCTIONS_GRID_BINARY_TSDF_HPP

@@ -8,8 +8,6 @@
 #include "ForgeScan/Metrics/Metric.hpp"
 #include "ForgeScan/Metrics/GroundTruth/ExperimentVariants.hpp"
 #include "ForgeScan/Metrics/GroundTruth/Occupancy.hpp"
-#include "ForgeScan/Metrics/GroundTruth/TSDF.hpp"
-#include "ForgeScan/Data/VoxelGrids/Occupancy.hpp"
 
 
 namespace forge_scan {
@@ -86,7 +84,7 @@ protected:
         }
         catch(const std::exception&)
         {
-            auto voxel_grid = data::Occupancy::create(this->reconstruction->grid_properties);
+            auto voxel_grid = data::Binary::create(this->reconstruction->grid_properties);
             this->addChannel(voxel_grid, this->getTypeName());
             this->experiment = voxel_grid;
         }

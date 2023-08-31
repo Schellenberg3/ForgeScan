@@ -119,11 +119,11 @@ private:
         : VoxelGrid(properties,
                     dist_min,
                     dist_max,
-                    p_init,
+                    utilities::math::log_odds(p_init),
                     type_id,
                     DataType::TYPE_FLOATING_POINT),
-          p_max(p_max),
-          p_min(p_min),
+          log_p_max(utilities::math::log_odds(p_max)),
+          log_p_min(utilities::math::log_odds(p_min)),
           p_past(p_past),
           p_sensed(p_sensed),
           p_far(p_far),
@@ -158,19 +158,8 @@ private:
                 }
                 // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 float px = this->get_px(iter);
-                float px = this->caller.p_far;
-                if(iter->second <= 0)
-                {
-                    float dx = std::abs(iter->second / this->caller.dist_min);
-                    px = lerp(this->caller.p_sensed, this->caller.p_past, dx);
-                }
-                else if (iter->second <= this->caller.dist_max)
-                {
-                    float dx = std::abs(iter->second / this->caller.dist_max);
-                    px = lerp(this->caller.p_sensed, this->caller.p_far, dx);
-                }
-                vector[iter->first] = std::clamp(probability(log_odds(vector[iter->first]) + log_odds(px)),
-                                                 this->caller.p_min, this->caller.p_max);
+                vector[iter->first] = std::clamp(vector[iter->first] + log_odds(px),
+                                                 this->caller.log_p_min, this->caller.log_p_max);
             }
         }
 
@@ -188,6 +177,9 @@ private:
                 }
                 // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 float px = this->get_px(iter);
+                vector[iter->first] = std::clamp(vector[iter->first] + log_odds(px),
+                                                 static_cast<double>(this->caller.log_p_min),
+                                                 static_cast<double>(this->caller.log_p_max));
             }
         }
 
@@ -199,14 +191,14 @@ private:
         {
             using namespace forge_scan::utilities::math;
 
-                if(iter->second <= 0)
-                {
-                    float dx = std::abs(iter->second / this->caller.dist_min);
+            if(iter->second <= 0)
+            {
+                float dx = std::abs(iter->second / this->caller.dist_min);
                 return lerp(this->caller.p_sensed, this->caller.p_past, dx);
-                }
-                else if (iter->second <= this->caller.dist_max)
-                {
-                    float dx = std::abs(iter->second / this->caller.dist_max);
+            }
+            else if (iter->second <= this->caller.dist_max)
+            {
+                float dx = std::abs(iter->second / this->caller.dist_max);
                 return lerp(this->caller.p_sensed, this->caller.p_far, dx);
             }
             return this->caller.p_far;
@@ -232,11 +224,11 @@ private:
 
 
 private:
-    /// @brief Probability for maximum voxel value saturation.
-    const float p_max;
+    /// @brief Log probability for maximum voxel value saturation.
+    const float log_p_max;
 
-    /// @brief Probability for minimum voxel values saturation.
-    const float p_min;
+    /// @brief Log probability for minimum voxel values saturation.
+    const float log_p_min;
 
     /// @brief Probability for voxels past the sensed point
     const float p_past;

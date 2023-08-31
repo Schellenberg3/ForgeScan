@@ -28,12 +28,12 @@ public:
     {
         return create(properties, parser.getCmdOption<float>("--dist-min", -0.2),
                                   parser.getCmdOption<float>("--dist-max",  0.2),
-                                  parser.getCmdOption<float>("--p-max",     0.98),
-                                  parser.getCmdOption<float>("--p-min",     0.02),
-                                  parser.getCmdOption<float>("--p-past",    0.50),
-                                  parser.getCmdOption<float>("--p-sensed",  0.90),
-                                  parser.getCmdOption<float>("--p-far",     0.15),
-                                  parser.getCmdOption<float>("--p-init",    0.50),
+                                  parser.getCmdOption<float>("--p-max",    0.98f),
+                                  parser.getCmdOption<float>("--p-min",    0.02f),
+                                  parser.getCmdOption<float>("--p-past",   0.50f),
+                                  parser.getCmdOption<float>("--p-sensed", 0.90f),
+                                  parser.getCmdOption<float>("--p-far",    0.15f),
+                                  parser.getCmdOption<float>("--p-init",   0.50f),
                                   stringToDataType(parser.getCmdOption("--data-type"), DataType::FLOAT));
     }
 
@@ -63,15 +63,13 @@ public:
                                                const float& p_init   =  0.50,
                                                const DataType& type_id = DataType::FLOAT)
     {
-        return std::shared_ptr<Probability>(new Probability(properties,
-                                                            dist_min,
-                                                            dist_max,
-                                                            p_max,
-                                                            p_min,
-                                                            p_past,
-                                                            p_sensed,
-                                                            p_far,
-                                                            p_init,
+        return std::shared_ptr<Probability>(new Probability(properties, dist_min, dist_max,
+                                                            std::clamp(p_max,    0.0f, 1.0f),
+                                                            std::clamp(p_min,    0.0f, 1.0f),
+                                                            std::clamp(p_past,   0.0f, 1.0f),
+                                                            std::clamp(p_sensed, 0.0f, 1.0f),
+                                                            std::clamp(p_far,    0.0f, 1.0f),
+                                                            std::clamp(p_init,   0.0f, 1.0f),
                                                             type_id));
     }
 

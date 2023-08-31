@@ -87,14 +87,16 @@ private:
 
     /// @brief Subclass provides update functions for each supported DataType/VectorVariant of
     ///        the data vector. 
-    struct UpdateCallable : public VoxelGrid::Callable
+    struct UpdateCallable : public VoxelGrid::UpdateCallable
     {
+        using VoxelGrid::UpdateCallable::operator();
+
         // ************************************************************************************* //
         // *                                SUPPORTED DATATYPES                                * //
         // ************************************************************************************* //
 
 
-        void operator()(std::vector<float>& vector) const
+        void operator()(std::vector<float>& vector)
         {
             trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
@@ -112,7 +114,7 @@ private:
         }
 
 
-        void operator()(std::vector<double>& vector) const
+        void operator()(std::vector<double>& vector)
         {
             trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
@@ -128,24 +130,6 @@ private:
                 }
             }
         }
-
-
-        // ************************************************************************************* //
-        // *                               UNSUPPORTED DATATYPES                               * //
-        // * These should be unreachable; the VoxelGrid constructor should ensure no invalid   * //
-        // * vectors are used in this derived class. But for safety these are still defined to * //
-        // * throw a runtime error if they are ever reached.                                   * //
-        // ************************************************************************************* //
-
-        void operator()(std::vector<int8_t>&)   const { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<int16_t>&)  const { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<int32_t>&)  const { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<int64_t>&)  const { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<uint8_t>&)  const { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<uint16_t>&) const { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<uint32_t>&) const { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<size_t>&)   const { throw std::runtime_error(this->type_not_supported_message); }
-
 
 
         // ************************************************************************************* //

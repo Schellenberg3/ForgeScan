@@ -88,8 +88,10 @@ private:
 
     /// @brief Subclass provides update functions for each supported DataType/VectorVariant of
     ///        the data vector. 
-    struct UpdateCallable : public VoxelGrid::Callable
+    struct UpdateCallable : public VoxelGrid::UpdateCallable
     {
+        using VoxelGrid::UpdateCallable::operator();
+
         // ************************************************************************************* //
         // *                                SUPPORTED DATATYPES                                * //
         // ************************************************************************************* //
@@ -108,27 +110,6 @@ private:
                 vector[iter->first] = iter->second <= 0 ? VoxelOccupancy::OCCUPIED : VoxelOccupancy::FREE;
             }
         }
-
-
-
-        // ************************************************************************************* //
-        // *                               UNSUPPORTED DATATYPES                               * //
-        // * These should be unreachable; the VoxelGrid constructor should ensure no invalid   * //
-        // * vectors are used in this derived class. But for safety these are still defined to * //
-        // * throw a runtime error if they are ever reached.                                   * //
-        // ************************************************************************************* //
-
-
-        void operator()(std::vector<int8_t>&)   { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<int16_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<int32_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<int64_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<uint16_t>&) { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<uint32_t>&) { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<size_t>&)   { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<float>&)    { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<double>&)   { throw std::runtime_error(this->type_not_supported_message); }
-
 
 
         // ************************************************************************************* //

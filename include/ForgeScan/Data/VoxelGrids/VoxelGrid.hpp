@@ -126,9 +126,15 @@ protected:
     // ***************************************************************************************** //
 
 
-    /// @brief A base for the Callable structure that all derived Voxel Grid classes to use when
-    ///        performing an update to their data.
-    struct Callable
+    /// @brief A base for the UpdateCallable structure that all derived Voxel Grid classes to use
+    ///        when performing an update to their data with `std::visit`.
+    /// @details This provides a default unsupported definition for all datatypes. A derived class
+    ///          only needs to define `operator()` functions for the types which its derived
+    ///          Voxel Grid explicitly supports.
+    /// @note To prevent name hiding of this class's default `operator()` functions in a derived
+    ///       Voxel Grid's UpdateCallable, the UpdateCallable body must include: 
+    ///           `using VoxelGrid::UpdateCallable::operator();`
+    struct UpdateCallable
     {
         /// @brief Acquires temporary, shared ownership of a trace.
         /// @param ray_trace Trace to perform an update from.
@@ -150,6 +156,25 @@ protected:
 
         /// @brief A the error message if a type is not supported.
         static const std::string type_not_supported_message;
+
+
+        // ************************************************************************************* //
+        // *                               UNSUPPORTED DATATYPES                               * //
+        // * These should be unreachable; the VoxelGrid constructor should ensure no invalid   * //
+        // * vectors are used in this derived class. But for safety these are still defined to * //
+        // * throw a runtime error if they are ever reached.                                   * //
+        // ************************************************************************************* //
+
+        void operator()(std::vector<int8_t>&)   { throw std::runtime_error(this->type_not_supported_message); }
+        void operator()(std::vector<int16_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
+        void operator()(std::vector<int32_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
+        void operator()(std::vector<int64_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
+        void operator()(std::vector<uint8_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
+        void operator()(std::vector<uint16_t>&) { throw std::runtime_error(this->type_not_supported_message); }
+        void operator()(std::vector<uint32_t>&) { throw std::runtime_error(this->type_not_supported_message); }
+        void operator()(std::vector<size_t>&)   { throw std::runtime_error(this->type_not_supported_message); }
+        void operator()(std::vector<float>&)    { throw std::runtime_error(this->type_not_supported_message); }
+        void operator()(std::vector<double>&)   { throw std::runtime_error(this->type_not_supported_message); }
     };
 
 
@@ -436,7 +461,7 @@ private:
 
 
 // Provide definition for the static variable declared in Callable base class.
-const std::string VoxelGrid::Callable::type_not_supported_message =
+const std::string VoxelGrid::UpdateCallable::type_not_supported_message =
     std::string("A Voxel Grid's Update Callable encountered a vector variant of an unsupported data type. "
                 "PLEASE CHECK WHAT YOU HAVE DONE: THIS EXCEPTION SHOULD NEVER BE REACHED.");
 

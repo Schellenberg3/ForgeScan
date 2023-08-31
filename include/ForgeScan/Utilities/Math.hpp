@@ -52,6 +52,19 @@ inline T greatest_magnitude(const T& x, const T& y)
 }
 
 
+/// @brief Linear interpolation between `a` and `b`.
+/// @param a First value.
+/// @param b Second value.
+/// @param t Proportion between `a` and `b`.
+/// @note  Assumes `0<=t<=1` but does not check this.
+/// @return `a+t(b−a)`
+template <typename T>
+inline T lerp(const T& a, const T& b, const T& t)
+{
+    return a * (1.0 - t) + (b * t);
+}
+
+
 } // namespace math
 } // namespace utilities
 } // namespace forge_scan

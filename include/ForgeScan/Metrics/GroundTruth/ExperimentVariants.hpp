@@ -3,8 +3,8 @@
 
 #include <variant>
 
-#include "ForgeScan/Data/VoxelGrids/Occupancy.hpp"
-#include "ForgeScan/Data/VoxelGrids/OccupancyTSDF.hpp"
+#include "ForgeScan/Data/VoxelGrids/Binary.hpp"
+#include "ForgeScan/Data/VoxelGrids/BinaryTSDF.hpp"
 #include "ForgeScan/Data/VoxelGrids/TSDF.hpp"
 
 

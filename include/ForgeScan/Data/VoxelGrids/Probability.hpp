@@ -157,6 +157,7 @@ private:
                     return;
                 }
                 // ************************** APPLY VOXEL UPDATE HERE ************************** //
+                float px = this->get_px(iter);
                 float px = this->caller.p_far;
                 if(iter->second <= 0)
                 {
@@ -186,21 +187,29 @@ private:
                     return;
                 }
                 // ************************** APPLY VOXEL UPDATE HERE ************************** //
-                float px = this->caller.p_far;
+                float px = this->get_px(iter);
+            }
+        }
+
+
+        /// @brief Gets the occupation probability for a location on the ray.
+        /// @param iter Iterator for the ray trace.
+        /// @return Occupation probability for the iterator's location on the ray.  
+        float get_px(const trace::const_iterator& iter)
+        {
+            using namespace forge_scan::utilities::math;
+
                 if(iter->second <= 0)
                 {
                     float dx = std::abs(iter->second / this->caller.dist_min);
-                    px = lerp(this->caller.p_sensed, this->caller.p_past, dx);
+                return lerp(this->caller.p_sensed, this->caller.p_past, dx);
                 }
                 else if (iter->second <= this->caller.dist_max)
                 {
                     float dx = std::abs(iter->second / this->caller.dist_max);
-                    px = lerp(this->caller.p_sensed, this->caller.p_far, dx);
-                }
-                vector[iter->first] = std::clamp(probability(log_odds(vector[iter->first]) + log_odds(px)),
-                                                 static_cast<double>(this->caller.p_min),
-                                                 static_cast<double>(this->caller.p_max));
+                return lerp(this->caller.p_sensed, this->caller.p_far, dx);
             }
+            return this->caller.p_far;
         }
 
 

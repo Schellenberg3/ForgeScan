@@ -12,11 +12,6 @@ namespace forge_scan {
 // *************************************** GENERAL TYPES *************************************** //
 
 
-/// @brief Collection of voxel locations (in vector position, not Grid Index) and distance values
-///        for that voxel. Assumed to be sorted in ascending order of distance value.
-typedef std::vector<std::pair<size_t, float>> trace;
-
-
 /// @brief Represents an image taken by a depth camera.
 /// @note Can be mapped to/from OpenCV. See: https://stackoverflow.com/a/21706778
 typedef Eigen::MatrixXf DepthImage;

@@ -78,8 +78,8 @@ public:
     {
         for (const auto& sensed : sensed_points.colwise())
         {
-            ray_trace::get_ray_trace(this->ray_trace, sensed, origin, this->grid_properties,
-                                     this->min_dist_min, this->max_dist_max);
+            get_ray_trace(this->ray_trace, sensed, origin, this->grid_properties,
+                          this->min_dist_min, this->max_dist_max);
 
             for (const auto& item : this->channels)
             {

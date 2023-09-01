@@ -1,16 +1,11 @@
-#ifndef FORGE_SCAN_RECONSTRUCTION_RAY_TRACING_GRID_TRAVERSAL_HPP
-#define FORGE_SCAN_RECONSTRUCTION_RAY_TRACING_GRID_TRAVERSAL_HPP
+#ifndef FORGE_SCAN_COMMON_RAY_TRACE_HPP
+#define FORGE_SCAN_COMMON_RAY_TRACE_HPP
 
 #include <cstddef>
 
 #include "ForgeScan/Common/AABB.hpp"
 #include "ForgeScan/Common/Grid.hpp"
 #include "ForgeScan/Common/VectorMath.hpp"
-
-
-namespace forge_scan {
-namespace data {
-namespace ray_trace {
 
 
 // *********************************************************************************************************************** //
@@ -38,6 +33,17 @@ namespace ray_trace {
 // * code considers the "origin" to be the center of the voxel then a reference frame shift of half the voxel resolution * //
 // * must be applied to the ray's start point when calculating `dist`. See `correct_traversal_parameters` for more.      * //
 // *********************************************************************************************************************** //
+
+
+namespace forge_scan {
+
+
+/// @brief Collection of voxel locations (in vector position, not Grid Index) and distance values
+///        for that voxel. Assumed to be sorted in ascending order of distance value.
+typedef std::vector<std::pair<size_t, float>> trace;
+
+
+namespace ray_trace_helpers {
 
 
 /// @brief Finds the first item in the trace with a distance greater than the specified value.
@@ -98,6 +104,9 @@ inline std::ptrdiff_t get_min_dist(const float* dist)
 }
 
 
+} // namespace ray_trace_helpers 
+
+
 /// @brief Calculates what voxels are hit on the ray between `sensed` and `origin`.
 /// @param ray_trace[out] A trace of what voxels were hit and the distance from that voxel to the `sensed` voxel. 
 /// @param sensed Sensed point, the start of the ray.
@@ -136,30 +145,32 @@ inline bool get_ray_trace(std::shared_ptr<trace>& ray_trace,
         const std::ptrdiff_t sign[3] = {std::signbit(normal[X]), std::signbit(normal[Y]), std::signbit(normal[Z])};
 
         // Direction of travel (increment or decrement) along the respective axis.
-        const int step[3] = { get_step(X, sign), get_step(Y, sign), get_step(Z, sign) };
+        const int step[3] = { ray_trace_helpers::get_step(X, sign),
+                              ray_trace_helpers::get_step(Y, sign),
+                              ray_trace_helpers::get_step(Z, sign) };
 
         // The amount of distance to move one voxel length along each axis based on the ray's direction.
-        const float delta[3] = { get_delta(X, inv_normal, properties),
-                                 get_delta(Y, inv_normal, properties),
-                                 get_delta(Z, inv_normal, properties) };
+        const float delta[3] = { ray_trace_helpers::get_delta(X, inv_normal, properties),
+                                 ray_trace_helpers::get_delta(Y, inv_normal, properties),
+                                 ray_trace_helpers::get_delta(Z, inv_normal, properties) };
 
         // Cumulative distance traveled along the respective axis.
-        float dist[3] = { get_dist(X, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
-                          get_dist(Y, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
-                          get_dist(Z, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties) };
+        float dist[3] = { ray_trace_helpers::get_dist(X, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
+                          ray_trace_helpers::get_dist(Y, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
+                          ray_trace_helpers::get_dist(Z, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties) };
 
         try
         {
             ray_trace->emplace_back(properties->at(c_idx), dist_min_adj);
 
-            std::ptrdiff_t i = get_min_dist(dist);
+            std::ptrdiff_t i = ray_trace_helpers::get_min_dist(dist);
             while (dist[i] <= dist_max_adj)
             {
                 c_idx[i] +=  step[i];
                 ray_trace->emplace_back(properties->at(c_idx), dist[i]);
 
                 dist[i]  += delta[i];
-                i = get_min_dist(dist);
+                i = ray_trace_helpers::get_min_dist(dist);
             }
         }
         catch (const std::out_of_range& e)
@@ -174,9 +185,7 @@ inline bool get_ray_trace(std::shared_ptr<trace>& ray_trace,
 }
 
 
-} // namespace ray_trace
-} // namespace data
 } // namespace forge_scan
 
 
-#endif // FORGE_SCAN_RECONSTRUCTION_RAY_TRACING_GRID_TRAVERSAL_HPP
+#endif // FORGE_SCAN_COMMON_RAY_TRACE_HPP

@@ -149,7 +149,7 @@ private:
         {
             using namespace forge_scan::utilities::math;
 
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
+            trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
                 if (iter == this->ray_trace->end())
@@ -168,7 +168,7 @@ private:
         {
             using namespace forge_scan::utilities::math;
 
-            trace::const_iterator iter = ray_trace::first_above_min_dist(this->ray_trace, this->caller.dist_min);
+            trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
                 if (iter == this->ray_trace->end())

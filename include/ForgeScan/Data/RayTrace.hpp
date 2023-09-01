@@ -40,10 +40,6 @@ namespace ray_trace {
 // *********************************************************************************************************************** //
 
 
-/// Index constants.
-static constexpr std::ptrdiff_t X = 0, Y = 1, Z = 2;
-
-
 /// @brief Finds the first item in the trace with a distance greater than the specified value.
 /// @param ray_trace A shared, constant trace to search through.
 /// @param min_dist  Lower bound distance to find.
@@ -64,61 +60,32 @@ inline trace::const_iterator first_above_min_dist(std::shared_ptr<const trace> r
 }
 
 
-/// @brief Takes voxel traversal parameters and updates them in case initial assumptions were off.
-/// @param step[out]   Direction of travel along each axis.
-//                     Must decrement if the normal was negative.
-/// @param delta[out]  Value to update `dist` by when a step is taken.
-///                    Must ensure this is positive if the normal was negative.
-/// @param dist[out]   Initial distance from the starting Point to the next voxel in each direction.
-/// @param resolution  The resolution of the Grid - edge length of the square voxels.
-/// @param start_voxel The voxel the vector starts in.
-/// @param start_point Starting position of the vector.
-/// @param normal      Normal vector for the ray.
-/// @param inv_normal  Pre-computed inverse of the normal vector.
-/// @warning This function is a helper for `get_ray_trace` and should not be called on its own.
-inline void correct_traversal_parameters(int step[3], float delta[3], float dist[3], const float& resolution,
-                                         const Index& start_voxel, const Point& start_point,
-                                         const Direction& normal, const Direction& inv_normal)
+/// @brief Helper for `get_ray_trace`.
+/// @warning This should only be called by `get_ray_trace`.
+inline int get_step(const std::ptrdiff_t& d, const std::ptrdiff_t* sign)
 {
-    // The voxel traversal algorithm assumes a voxel's origin to be at the lower bound, rather than its center.
-    // To calculate the traversal information we must virtually shift the initial Point.
-    const Point start_point_shift = start_point.array() + 0.5 * resolution;
+    static constexpr int STEP_DIR[2] = {1, -1};
+    return STEP_DIR[sign[d]];
+}
 
-    if (normal[X] >= 0)
-    {
-        // Update `dis`t with how far it is to the beginning voxel boundary.
-        dist[X]  += ((start_voxel[X] + 1) * resolution - start_point_shift[X]) * inv_normal[X];
-    }
-    else
-    {
-        // If we decrease in a direction, we need to flip our assumptions: decrement and correct the negative sign in delta.
-        // Update `dist` with how far it is to the beginning of the voxel we are in.
-        dist[X]  += ((start_voxel[X] - 0) * resolution - start_point_shift[X]) * inv_normal[X];
-        step[X]   = -1;
-        delta[X] *= -1;
-    }
 
-    if (normal[Y] >= 0)
-    {
-        dist[Y]  += ((start_voxel[Y] + 1) * resolution - start_point_shift[Y]) * inv_normal[Y];
-    }
-    else
-    {
-        dist[Y]  += ((start_voxel[Y] - 0) * resolution - start_point_shift[Y]) * inv_normal[Y];
-        step[Y]   = -1;
-        delta[Y] *= -1;
-    }
+/// @brief Helper for `get_ray_trace`.
+/// @warning This should only be called by `get_ray_trace`.
+inline float get_delta(const std::ptrdiff_t& d, const Direction& inv_normal,
+                       const std::shared_ptr<const Grid::Properties>& properties)
+{
+    return std::abs(properties->resolution * inv_normal[d]);
+}
 
-    if (normal[Z] >= 0)
-    {
-        dist[Z]  += ((start_voxel[Z] + 1) * resolution - start_point_shift[Z]) * inv_normal[Z];
-    }
-    else
-    {
-        dist[Z]  += ((start_voxel[Z] - 0) * resolution - start_point_shift[Z]) * inv_normal[Z];
-        step[Z]   = -1;
-        delta[Z] *= -1;
-    }
+
+/// @brief Helper for `get_ray_trace`.
+/// @warning This should only be called by `get_ray_trace`.
+inline float get_dist(const std::ptrdiff_t& d, const std::ptrdiff_t* sign, const Index& c_idx,
+                      const Point& sensed_adj, const Direction& inv_normal, const float& dist_min_adj,
+                      const std::shared_ptr<const Grid::Properties>& properties)
+{
+    static constexpr float NEXT_ADJ[2] = {0.5, -0.5};
+    return dist_min_adj + ((c_idx[d] + NEXT_ADJ[sign[d]]) * properties->resolution - sensed_adj[d]) * inv_normal[d];
 }
 
 
@@ -130,50 +97,50 @@ inline void correct_traversal_parameters(int step[3], float delta[3], float dist
 /// @param dist_min Minimum distance to trace along the ray, relative to the `sensed` point.
 /// @param dist_min Maximum distance to trace along the ray, relative to the `sensed` point.
 /// @return True if the ray intersected the Grid, this indicates that `ray_trace` has valid data to add.
-inline bool get_ray_trace(std::shared_ptr<trace> ray_trace,
+inline bool get_ray_trace(std::shared_ptr<trace>& ray_trace,
                           const Point& sensed, const Point& origin,
-                          std::shared_ptr<const Grid::Properties> properties,
+                          const std::shared_ptr<const Grid::Properties>& properties,
                           const float& dist_min, const float& dist_max)
 {
-    // Ensure any prior data is erased. Capacity is maintained.
+    static constexpr std::ptrdiff_t X = 0, Y = 1, Z = 2;
+
     ray_trace->clear();
 
     // Adjusted min and max distances so we only trace the ray while it is within the Grid's bounds.
-    float dist_min_adj = 0, dist_max_adj = 0;
+    float dist_min_adj, dist_max_adj;
 
-    // Normalized direction for the ray (with pre-computed inverse values for AABB intersection and traversal info).
-    Direction normal(0, 0, 0), inv_normal(0, 0, 0);
-    float length = 0;
-
+    float length;
+    Direction normal, inv_normal;
     vector_math::get_length_normal_and_inverse_normal(sensed, origin, length, normal, inv_normal);
     length = std::min(length, dist_max);
     
-    bool valid_intersection = AABB::fast_eigen_find_bounded_intersection(properties->dimensions, sensed, inv_normal,
+    const bool valid_intersection = AABB::fast_eigen_find_bounded_intersection(properties->dimensions, sensed, inv_normal,
                                                                          dist_min, length, dist_min_adj, dist_max_adj);
     if (valid_intersection == false)
     {
         return false;
     }
 
-    // Update the min/max distances to either the users bounds or the valid intersecting bounds.
     dist_min_adj = std::max(dist_min_adj, dist_min);
     dist_max_adj = std::min(dist_max_adj, dist_max);
 
     const Point sensed_adj = sensed + normal * dist_min_adj;
     Index c_idx = properties->pointToIndex(sensed_adj);
 
+    const std::ptrdiff_t sign[3] = {std::signbit(normal[X]), std::signbit(normal[Y]), std::signbit(normal[Z])};
+
     // Direction of travel (increment or decrement) along the respective axis.
-    int step[3] = {1, 1, 1};
+    const int step[3] = { get_step(X, sign), get_step(Y, sign), get_step(Z, sign) };
 
     // The amount of distance to move one voxel length along each axis based on the ray's direction.
-    float delta[3] = { properties->resolution * inv_normal[X],
-                       properties->resolution * inv_normal[Y],
-                       properties->resolution * inv_normal[Z]  };
+    const float delta[3] = { get_delta(X, inv_normal, properties),
+                             get_delta(Y, inv_normal, properties),
+                             get_delta(Z, inv_normal, properties) };
 
     // Cumulative distance traveled along the respective axis.
-    float dist[3] = {dist_min_adj, dist_min_adj, dist_min_adj};
-
-    correct_traversal_parameters(step, delta, dist, properties->resolution, c_idx, sensed_adj, normal, inv_normal);
+    float dist[3] = { get_dist(X, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
+                      get_dist(Y, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
+                      get_dist(Z, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties) };
 
     /// TODO: Return to this and ensure we are recording the correct value here.
     // Pointer to the current distance moved along the ray for whatever direction we just took a step in.

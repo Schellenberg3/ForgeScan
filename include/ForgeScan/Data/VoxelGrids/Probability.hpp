@@ -84,7 +84,7 @@ public:
 
     /// @brief Updates the Grid with new information along a ray.
     /// @param ray_trace Trace with update voxel location and distances.
-    void update(std::shared_ptr<const trace> ray_trace) override final
+    void update(const std::shared_ptr<const Trace>& ray_trace) override final
     {
         this->update_callable.acquireRayTrace(ray_trace);
         std::visit(this->update_callable, this->data);
@@ -149,7 +149,7 @@ private:
         {
             using namespace forge_scan::utilities::math;
 
-            trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
+            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
                 if (iter == this->ray_trace->end())
@@ -158,8 +158,8 @@ private:
                 }
                 // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 float px = this->get_px(iter);
-                vector[iter->first] = std::clamp(vector[iter->first] + log_odds(px),
-                                                 this->caller.log_p_min, this->caller.log_p_max);
+                vector[iter->i] = std::clamp(vector[iter->i] + log_odds(px),
+                                             this->caller.log_p_min, this->caller.log_p_max);
             }
         }
 
@@ -168,7 +168,7 @@ private:
         {
             using namespace forge_scan::utilities::math;
 
-            trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
+            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
             for (; ; ++iter)
             {
                 if (iter == this->ray_trace->end())
@@ -177,9 +177,9 @@ private:
                 }
                 // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 float px = this->get_px(iter);
-                vector[iter->first] = std::clamp(vector[iter->first] + log_odds(px),
-                                                 static_cast<double>(this->caller.log_p_min),
-                                                 static_cast<double>(this->caller.log_p_max));
+                vector[iter->i] = std::clamp(vector[iter->i] + log_odds(px),
+                                             static_cast<double>(this->caller.log_p_min),
+                                             static_cast<double>(this->caller.log_p_max));
             }
         }
 
@@ -187,18 +187,18 @@ private:
         /// @brief Gets the occupation probability for a location on the ray.
         /// @param iter Iterator for the ray trace.
         /// @return Occupation probability for the iterator's location on the ray.  
-        float get_px(const trace::const_iterator& iter)
+        float get_px(const Trace::const_iterator& iter)
         {
             using namespace forge_scan::utilities::math;
 
-            if(iter->second <= 0)
+            if(iter->d <= 0)
             {
-                float dx = std::abs(iter->second / this->caller.dist_min);
+                float dx = std::abs(iter->d / this->caller.dist_min);
                 return lerp(this->caller.p_sensed, this->caller.p_past, dx);
             }
-            else if (iter->second <= this->caller.dist_max)
+            else if (iter->d <= this->caller.dist_max)
             {
-                float dx = std::abs(iter->second / this->caller.dist_max);
+                float dx = std::abs(iter->d / this->caller.dist_max);
                 return lerp(this->caller.p_sensed, this->caller.p_far, dx);
             }
             return this->caller.p_far;

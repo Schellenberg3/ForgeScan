@@ -38,9 +38,31 @@
 namespace forge_scan {
 
 
-/// @brief Collection of voxel locations (in vector position, not Grid Index) and distance values
-///        for that voxel. Assumed to be sorted in ascending order of distance value.
-typedef std::vector<std::pair<size_t, float>> trace;
+/// @brief Voxel information within a Trace.
+struct TraceVoxel
+{
+    TraceVoxel(const size_t& i, const float& d) 
+        : i(i), d(d)
+    {
+
+    }
+
+    /// @brief Vector index for the voxel. See `Grid::Properties::at`.
+    size_t i;
+
+    /// @brief Distance from the voxel to the sensed point.
+    float  d;
+};
+
+
+/// @brief Collection of voxels hit by a ray. Stores pairs of the voxel's vector index and its
+///        distance from the ray's sended point.
+/// @note  This is sorted in ascending distance from the sensed point.
+struct Trace : public std::vector<TraceVoxel>
+{
+
+};
+
 
 
 namespace ray_trace_helpers {
@@ -51,12 +73,12 @@ namespace ray_trace_helpers {
 /// @param min_dist  Lower bound distance to find.
 /// @return Constant iterator for `ray_trace` which points either to the first element greater than
 ///         `min_dist` or to the end of ray_trace.
-inline trace::const_iterator first_above_min_dist(std::shared_ptr<const trace> ray_trace, const float& min_dist)
+inline Trace::const_iterator first_above_min_dist(const std::shared_ptr<const Trace>& ray_trace, const float& min_dist)
 {
-    trace::const_iterator iter = ray_trace->begin();
+    Trace::const_iterator iter = ray_trace->begin();
     while (iter != ray_trace->end())
     {
-        if (iter->second >= min_dist)
+        if (iter->d >= min_dist)
         {
             return iter;
         }
@@ -115,7 +137,7 @@ inline std::ptrdiff_t get_min_dist(const float* dist)
 /// @param dist_min Minimum distance to trace along the ray, relative to the `sensed` point.
 /// @param dist_min Maximum distance to trace along the ray, relative to the `sensed` point.
 /// @return True if the ray intersected the Grid, this indicates that `ray_trace` has valid data to add.
-inline bool get_ray_trace(std::shared_ptr<trace>& ray_trace,
+inline bool get_ray_trace(const std::shared_ptr<Trace>& ray_trace,
                           const Point& sensed, const Point& origin,
                           const std::shared_ptr<const Grid::Properties>& properties,
                           const float& dist_min, const float& dist_max)

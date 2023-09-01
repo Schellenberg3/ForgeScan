@@ -168,7 +168,7 @@ private:
     ///                        These Grid Properties are utilized by all Voxel Grids.
     explicit Reconstruction(const std::shared_ptr<const Grid::Properties>& grid_properties)
         : grid_properties(grid_properties),
-          ray_trace(std::make_shared<trace>())
+          ray_trace(std::make_shared<Trace>())
     {
 
     }
@@ -332,7 +332,7 @@ private:
     float min_dist_min = 0, max_dist_max = 0;
 
     /// @brief Stores an ray trace used for performing updates on each Voxel Grid. 
-    std::shared_ptr<trace> ray_trace;
+    std::shared_ptr<Trace> ray_trace;
 };
 
 

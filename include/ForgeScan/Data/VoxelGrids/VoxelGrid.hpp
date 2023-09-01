@@ -99,7 +99,7 @@ public:
 
     /// @brief Updates the Voxel Grid with new information along a ray.
     /// @param ray_trace A trace to update the Voxel Grid along. 
-    virtual void update(std::shared_ptr<const trace> ray_trace) = 0;
+    virtual void update(const std::shared_ptr<const Trace>& ray_trace) = 0;
 
 
 
@@ -138,7 +138,7 @@ protected:
     {
         /// @brief Acquires temporary, shared ownership of a trace.
         /// @param ray_trace Trace to perform an update from.
-        void acquireRayTrace(std::shared_ptr<const trace> ray_trace)
+        void acquireRayTrace(const std::shared_ptr<const Trace>& ray_trace)
         {
             this->ray_trace = ray_trace;
         }
@@ -152,7 +152,7 @@ protected:
 
 
         /// @brief Parameter for the voxel update functions.
-        std::shared_ptr<const trace> ray_trace{nullptr};
+        std::shared_ptr<const Trace> ray_trace{nullptr};
 
         /// @brief A the error message if a type is not supported.
         static const std::string type_not_supported_message;

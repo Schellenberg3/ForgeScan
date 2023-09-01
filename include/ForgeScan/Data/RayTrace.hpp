@@ -89,6 +89,15 @@ inline float get_dist(const std::ptrdiff_t& d, const std::ptrdiff_t* sign, const
 }
 
 
+/// @brief Helper for `get_ray_trace`.
+/// @warning This should only be called by `get_ray_trace`.
+inline std::ptrdiff_t get_min_dist(const float* dist)
+{
+    static constexpr std::ptrdiff_t X = 0, Y = 1, Z = 2;
+    return (dist[X] < dist[Y] && dist[X] < dist[Z]) ? X : (dist[Y] < dist[Z]) ? Y : Z;
+}
+
+
 /// @brief Calculates what voxels are hit on the ray between `sensed` and `origin`.
 /// @param ray_trace[out] A trace of what voxels were hit and the distance from that voxel to the `sensed` voxel. 
 /// @param sensed Sensed point, the start of the ray.
@@ -115,7 +124,7 @@ inline bool get_ray_trace(std::shared_ptr<trace>& ray_trace,
     length = std::min(length, dist_max);
     
     const bool valid_intersection = AABB::fast_eigen_find_bounded_intersection(properties->dimensions, sensed, inv_normal,
-                                                                         dist_min, length, dist_min_adj, dist_max_adj);
+                                                                               dist_min, length, dist_min_adj, dist_max_adj);
     if (valid_intersection == false)
     {
         return false;
@@ -142,35 +151,27 @@ inline bool get_ray_trace(std::shared_ptr<trace>& ray_trace,
                       get_dist(Y, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
                       get_dist(Z, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties) };
 
-    /// TODO: Return to this and ensure we are recording the correct value here.
-    // Pointer to the current distance moved along the ray for whatever direction we just took a step in.
-    float c_dist = dist_min_adj;
-    Direction res_normal = normal.cwiseAbs() * properties->resolution;
 
     try
     {
-        // Loop runs until each direction has just passed the adjusted max distance.
-        while (dist[X] <= dist_max_adj || dist[Y] <= dist_max_adj || dist[Z] <= dist_max_adj)
+        ray_trace->emplace_back(properties->at(c_idx), dist_min_adj);
+
+        std::ptrdiff_t i = get_min_dist(dist);
+        while (dist[i] <= dist_max_adj)
         {
-            // Add the last step we took to the ray trace. For ease the Index is converted to a vector position.
-            ray_trace->emplace_back(properties->at(c_idx), c_dist);
-
-            // Identify which direction we have spent the least amount of time walking in.
-            // Then use this direction to update for that direction.
-            std::ptrdiff_t i = (dist[X] < dist[Y] && dist[X] < dist[Z]) ? X : (dist[Y] < dist[Z]) ? Y : Z;
-
-            c_dist   += res_normal[i];
-            dist[i]  += delta[i];
             c_idx[i] +=  step[i];
+            ray_trace->emplace_back(properties->at(c_idx), dist[i]);
+
+            dist[i]  += delta[i];
+            i = get_min_dist(dist);
         }
     }
     catch (const std::out_of_range& e)
     {
-        // If the traversal parameters and AABB check are correct then the algorithm should never select an
-        // out of rance voxel. But checking voxel validity here does not impact performance and prevents serous
-        // and potentially silent errors from occurring in a Reconstruction's Voxel Grid update steps.
+        // Algorithm should never go out of bounds. But catching here dose not impact performance and prevents
+        // undefined behavior and silent errors in a Voxel Grid update where all indicies are assumed to be valid.
         const std::string e_what(e.what());
-        throw std::out_of_range("Encountered exception in get_ray_trace: " + e_what);
+        throw std::out_of_range("Ray tracing failed. This should not happen. Failed with: " + e_what);
     }
 
     return true;

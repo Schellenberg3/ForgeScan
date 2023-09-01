@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-#include "ForgeScan/Data/RayTrace.hpp"
+#include "ForgeScan/Common/RayTrace.hpp"
 #include "ForgeScan/Data/VoxelGrids/Constructor.hpp"
 #include "ForgeScan/Utilities/ArgParser.hpp"
 

@@ -125,56 +125,52 @@ inline bool get_ray_trace(std::shared_ptr<trace>& ray_trace,
     
     const bool valid_intersection = AABB::fast_eigen_find_bounded_intersection(properties->dimensions, sensed, inv_normal,
                                                                                dist_min, length, dist_min_adj, dist_max_adj);
-    if (valid_intersection == false)
+    if (valid_intersection)
     {
-        return false;
-    }
+        dist_min_adj = std::max(dist_min_adj, dist_min);
+        dist_max_adj = std::min(dist_max_adj, dist_max);
 
-    dist_min_adj = std::max(dist_min_adj, dist_min);
-    dist_max_adj = std::min(dist_max_adj, dist_max);
+        const Point sensed_adj = sensed + normal * dist_min_adj;
+        Index c_idx = properties->pointToIndex(sensed_adj);
 
-    const Point sensed_adj = sensed + normal * dist_min_adj;
-    Index c_idx = properties->pointToIndex(sensed_adj);
+        const std::ptrdiff_t sign[3] = {std::signbit(normal[X]), std::signbit(normal[Y]), std::signbit(normal[Z])};
 
-    const std::ptrdiff_t sign[3] = {std::signbit(normal[X]), std::signbit(normal[Y]), std::signbit(normal[Z])};
+        // Direction of travel (increment or decrement) along the respective axis.
+        const int step[3] = { get_step(X, sign), get_step(Y, sign), get_step(Z, sign) };
 
-    // Direction of travel (increment or decrement) along the respective axis.
-    const int step[3] = { get_step(X, sign), get_step(Y, sign), get_step(Z, sign) };
+        // The amount of distance to move one voxel length along each axis based on the ray's direction.
+        const float delta[3] = { get_delta(X, inv_normal, properties),
+                                 get_delta(Y, inv_normal, properties),
+                                 get_delta(Z, inv_normal, properties) };
 
-    // The amount of distance to move one voxel length along each axis based on the ray's direction.
-    const float delta[3] = { get_delta(X, inv_normal, properties),
-                             get_delta(Y, inv_normal, properties),
-                             get_delta(Z, inv_normal, properties) };
+        // Cumulative distance traveled along the respective axis.
+        float dist[3] = { get_dist(X, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
+                          get_dist(Y, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
+                          get_dist(Z, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties) };
 
-    // Cumulative distance traveled along the respective axis.
-    float dist[3] = { get_dist(X, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
-                      get_dist(Y, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties),
-                      get_dist(Z, sign, c_idx, sensed_adj, inv_normal, dist_min_adj, properties) };
-
-
-    try
-    {
-        ray_trace->emplace_back(properties->at(c_idx), dist_min_adj);
-
-        std::ptrdiff_t i = get_min_dist(dist);
-        while (dist[i] <= dist_max_adj)
+        try
         {
-            c_idx[i] +=  step[i];
-            ray_trace->emplace_back(properties->at(c_idx), dist[i]);
+            ray_trace->emplace_back(properties->at(c_idx), dist_min_adj);
 
-            dist[i]  += delta[i];
-            i = get_min_dist(dist);
+            std::ptrdiff_t i = get_min_dist(dist);
+            while (dist[i] <= dist_max_adj)
+            {
+                c_idx[i] +=  step[i];
+                ray_trace->emplace_back(properties->at(c_idx), dist[i]);
+
+                dist[i]  += delta[i];
+                i = get_min_dist(dist);
+            }
+        }
+        catch (const std::out_of_range& e)
+        {
+            // Algorithm should never go out of bounds. But catching here dose not impact performance and prevents
+            // undefined behavior and silent errors in a Voxel Grid update where all indicies are assumed to be valid.
+            const std::string e_what(e.what());
+            throw std::out_of_range("Ray tracing failed. This should not happen. Failed with: " + e_what);
         }
     }
-    catch (const std::out_of_range& e)
-    {
-        // Algorithm should never go out of bounds. But catching here dose not impact performance and prevents
-        // undefined behavior and silent errors in a Voxel Grid update where all indicies are assumed to be valid.
-        const std::string e_what(e.what());
-        throw std::out_of_range("Ray tracing failed. This should not happen. Failed with: " + e_what);
-    }
-
-    return true;
+    return valid_intersection;
 }
 
 

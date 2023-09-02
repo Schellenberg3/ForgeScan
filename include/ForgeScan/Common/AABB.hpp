@@ -124,29 +124,27 @@ inline bool fast_eigen_intersection_check(const Eigen::Vector3f& min_dist,
                                           const float& s_dist, const float& e_dist,
                                           float& s_dist_bound, float& e_dist_bound)
 {
-    float dist_min_y, dist_max_y, dist_min_z, dist_max_z;
-    bool bound_check_1 = true, bound_check_2 = true;
-
     s_dist_bound = inv_normal[X] >= 0 ? min_dist[X] :  max_dist[X];
     e_dist_bound = inv_normal[X] >= 0 ? max_dist[X] :  min_dist[X];
 
-    dist_min_y   = inv_normal[Y] >= 0 ? min_dist[Y] :  max_dist[Y];
-    dist_max_y   = inv_normal[Y] >= 0 ? max_dist[Y] :  min_dist[Y];
+    float dist_min_y = inv_normal[Y] >= 0 ? min_dist[Y] : max_dist[Y];
+    float dist_max_y = inv_normal[Y] >= 0 ? max_dist[Y] : min_dist[Y];
 
-    bound_check_1 = s_dist_bound > dist_max_y || dist_min_y > e_dist_bound ? false : bound_check_1;
+    bool bound_check_1 = !(s_dist_bound > dist_max_y || dist_min_y > e_dist_bound);
 
     s_dist_bound = dist_min_y > s_dist_bound ? dist_min_y : s_dist_bound;
     e_dist_bound = dist_max_y < e_dist_bound ? dist_min_y : e_dist_bound;
 
-    dist_min_z = inv_normal[Z] >= 0 ? min_dist[Z] : max_dist[Z];
-    dist_max_z = inv_normal[Z] >= 0 ? max_dist[Z] : min_dist[Z];
+    float dist_min_z = inv_normal[Z] >= 0 ? min_dist[Z] : max_dist[Z];
+    float dist_max_z = inv_normal[Z] >= 0 ? max_dist[Z] : min_dist[Z];
 
-    bound_check_2 = s_dist_bound > dist_max_z || dist_min_z > e_dist_bound ? false : bound_check_2;
+    bool bound_check_2 = !(s_dist_bound > dist_max_z || dist_min_z > e_dist_bound);
 
     s_dist_bound = dist_min_z > s_dist_bound ? dist_min_z : s_dist_bound;
     e_dist_bound = dist_max_z < e_dist_bound ? dist_max_z : e_dist_bound;
 
-    return (s_dist_bound < e_dist && s_dist < e_dist_bound) && bound_check_1 && bound_check_2;
+    return bound_check_1 && bound_check_2 && s_dist_bound <= e_dist_bound &&
+           s_dist_bound <= e_dist && s_dist <= e_dist_bound;
 }
 
 

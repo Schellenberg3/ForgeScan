@@ -78,12 +78,13 @@ public:
     {
         for (const auto& sensed : sensed_points.colwise())
         {
-            get_ray_trace(this->ray_trace, sensed, origin, this->grid_properties,
-                          this->min_dist_min, this->max_dist_max);
-
-            for (const auto& item : this->channels)
+            if(get_ray_trace(this->ray_trace, sensed, origin, this->grid_properties,
+                             this->min_dist_min, this->max_dist_max))
             {
-                item.second->update(this->ray_trace);
+                for (const auto& item : this->channels)
+                {
+                    item.second->update(this->ray_trace);
+                }
             }
         }
     }

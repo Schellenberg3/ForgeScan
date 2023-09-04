@@ -189,26 +189,6 @@ private:
 namespace ray_trace_helpers {
 
 
-/// @brief Finds the first item in the trace with a distance greater than the specified value.
-/// @param ray_trace A shared, constant trace to search through.
-/// @param min_dist  Lower bound distance to find.
-/// @return Constant iterator for `ray_trace` which points either to the first element greater than
-///         `min_dist` or to the end of ray_trace.
-inline Trace::const_iterator first_above_min_dist(const std::shared_ptr<const Trace>& ray_trace, const float& min_dist)
-{
-    Trace::const_iterator iter = ray_trace->begin();
-    while (iter != ray_trace->end())
-    {
-        if (iter->d >= min_dist)
-        {
-            return iter;
-        }
-        ++iter;
-    }
-    return iter;
-}
-
-
 /// @brief Helper for `get_ray_trace`.
 /// @warning This should only be called by `get_ray_trace`.
 inline int get_step(const std::ptrdiff_t& d, const std::ptrdiff_t* sign)

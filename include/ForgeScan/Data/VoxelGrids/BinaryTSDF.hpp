@@ -174,40 +174,39 @@ private:
 
         void operator()(std::vector<float>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
-            {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
-                this->caller.data_occupancy[iter->i] = iter->d <= 0 ? VoxelOccupancy::OCCUPIED : VoxelOccupancy::FREE;
+            Trace::const_iterator iter            = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last_occ  = this->ray_trace->first_above(0, iter);
+            const Trace::const_iterator last_free = this->ray_trace->first_above(this->caller.dist_max, last_occ);
 
-                if(utilities::math::is_greater_in_magnitude(vector[iter->i], iter->d))
-                {
-                    vector[iter->i] = iter->d;
-                }
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last_occ; ++iter)
+            {
+                this->caller.data_occupancy[iter->i] = VoxelOccupancy::OCCUPIED;
+                vector[iter->i] = utilities::math::smallest_magnitude(vector[iter->i], iter->d);
+            }
+            for ( ; iter != last_free; ++iter)
+            {
+                this->caller.data_occupancy[iter->i] = VoxelOccupancy::FREE;
+                vector[iter->i] = utilities::math::smallest_magnitude(vector[iter->i], iter->d);
             }
         }
 
 
         void operator()(std::vector<double>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator iter            = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last_occ  = this->ray_trace->first_above(0, iter);
+            const Trace::const_iterator last_free = this->ray_trace->first_above(this->caller.dist_max, last_occ);
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last_occ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
-                this->caller.data_occupancy[iter->i] = iter->d <= 0 ? VoxelOccupancy::OCCUPIED : VoxelOccupancy::FREE;
-
-                if(utilities::math::is_greater_in_magnitude(vector[iter->i], static_cast<double>(iter->d)))
-                {
-                    vector[iter->i] = iter->d;
-                }
+                this->caller.data_occupancy[iter->i] = VoxelOccupancy::OCCUPIED;
+                vector[iter->i] = utilities::math::smallest_magnitude(vector[iter->i], static_cast<double>(iter->d));
+            }
+            for ( ; iter != last_free; ++iter)
+            {
+                this->caller.data_occupancy[iter->i] = VoxelOccupancy::FREE;
+                vector[iter->i] = utilities::math::smallest_magnitude(vector[iter->i], static_cast<double>(iter->d));
             }
         }
 

@@ -149,14 +149,12 @@ private:
         {
             using namespace forge_scan::utilities::math;
 
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end())
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 float px = this->get_px(iter);
                 vector[iter->i] = std::clamp(vector[iter->i] + log_odds(px),
                                              this->caller.log_p_min, this->caller.log_p_max);
@@ -168,14 +166,12 @@ private:
         {
             using namespace forge_scan::utilities::math;
 
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end())
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 float px = this->get_px(iter);
                 vector[iter->i] = std::clamp(vector[iter->i] + log_odds(px),
                                              static_cast<double>(this->caller.log_p_min),

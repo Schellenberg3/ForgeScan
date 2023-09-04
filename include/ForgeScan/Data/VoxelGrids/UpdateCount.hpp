@@ -103,14 +103,12 @@ private:
 
         void operator()(std::vector<int8_t>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 ++vector[iter->i];
             }
         }
@@ -118,14 +116,12 @@ private:
 
         void operator()(std::vector<int16_t>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 ++vector[iter->i];
             }
         }
@@ -133,14 +129,12 @@ private:
 
         void operator()(std::vector<int32_t>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 ++vector[iter->i];
             }
         }
@@ -148,14 +142,12 @@ private:
 
         void operator()(std::vector<int64_t>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 ++vector[iter->i];
             }
         }
@@ -163,14 +155,12 @@ private:
 
         void operator()(std::vector<uint8_t>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 ++vector[iter->i];
             }
         }
@@ -178,14 +168,12 @@ private:
 
         void operator()(std::vector<uint16_t>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 ++vector[iter->i];
             }
         }
@@ -193,14 +181,12 @@ private:
 
         void operator()(std::vector<uint32_t>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 ++vector[iter->i];
             }
         }
@@ -208,14 +194,12 @@ private:
 
         void operator()(std::vector<size_t>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 ++vector[iter->i];
             }
         }
@@ -223,14 +207,12 @@ private:
 
         void operator()(std::vector<float>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 ++vector[iter->i];
             }
         }
@@ -238,14 +220,12 @@ private:
 
         void operator()(std::vector<double>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
                 ++vector[iter->i];
             }
         }

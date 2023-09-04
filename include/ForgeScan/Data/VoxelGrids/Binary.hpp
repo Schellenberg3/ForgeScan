@@ -99,15 +99,18 @@ private:
 
         void operator()(std::vector<uint8_t>& vector)
         {
-            Trace::const_iterator iter = ray_trace_helpers::first_above_min_dist(this->ray_trace, this->caller.dist_min);
-            for (; ; ++iter)
+            Trace::const_iterator iter = this->ray_trace->first_above(this->caller.dist_min);
+            const Trace::const_iterator last_occ  = this->ray_trace->first_above(0, iter);
+            const Trace::const_iterator last_free = this->ray_trace->first_above(this->caller.dist_max, last_occ);
+
+            // **************************** APPLY VOXEL UPDATE HERE **************************** //
+            for ( ; iter != last_occ; ++iter)
             {
-                if (iter == this->ray_trace->end() || iter->d > this->caller.dist_max)
-                {
-                    return;
-                }
-                // ************************** APPLY VOXEL UPDATE HERE ************************** //
-                vector[iter->i] = iter->d <= 0 ? VoxelOccupancy::OCCUPIED : VoxelOccupancy::FREE;
+                vector[iter->i] = VoxelOccupancy::OCCUPIED;
+            }
+            for ( ; iter != last_free; ++iter)
+            {
+                vector[iter->i] = VoxelOccupancy::FREE;
             }
         }
 

@@ -60,9 +60,130 @@ struct TraceVoxel
 /// @note  This is sorted in ascending distance from the sensed point.
 struct Trace : public std::vector<TraceVoxel>
 {
+    /// @brief Required to set the sensed iterator for the Trace.
+    friend bool get_ray_trace(const std::shared_ptr<Trace>&, const Point&, const Point&,
+                              const std::shared_ptr<const Grid::Properties>&, const float&, const float&);
 
+
+    /// @brief Describes where the sensed point is relative to the traced ray.
+    enum SensedLocation : uint8_t
+    {
+        UNKNOWN = 0b0000'0011,
+        BEFORE  = 0b0000'0001,
+        AFTER   = 0b0000'0010,
+        IN      = 0b0000'0000
+    };
+
+
+    /// @brief Empties the contents of the vector and resets information about the sensed point.
+    void clear()
+    {
+        std::vector<TraceVoxel>::clear();
+        this->sensed_location   = SensedLocation::UNKNOWN;
+        this->sensed_iter       = this->end();
+    }
+
+
+    /// @brief Checks if the sensed point is on the trace.
+    /// @return True if the sensed point is on the trace. False if the sensed point is before or
+    ///         after the trace.
+    bool hasSensed() const
+    {
+        return this->sensed_location == SensedLocation::IN;
+    }
+
+
+    /// @brief  Returns an iterator to the voxel containing the sensed point it in.
+    /// @return The voxel with the sensed point. If the point is before the Trace then this is the
+    ///         `begin` iterator and if it is after the Trace then this is the `end` iterator.
+    Trace::const_iterator sensed() const
+    {
+       return this->sensed_iter;
+    }
+
+
+    /// @brief Finds the voxel at a distance greater than the specified value.
+    /// @param dist Threshold distance.
+    /// @return First voxel with a value greater than the specified distance threshold.
+    ///         Or the `end` iterator if all values are below the distance threshold.
+    Trace::const_iterator first_above(const float& dist) const
+    {
+        Trace::const_iterator iter = this->begin();
+        this->increment_to_first_above(iter, dist);
+        return iter;
+    }
+
+
+    /// @brief Finds the voxel at a distance greater than the specified value.
+    /// @param dist  Threshold distance.
+    /// @param start Iterator to begin the search from.
+    /// @return First voxel with a value greater than the specified distance threshold.
+    ///         Or the `end` iterator if all values are below the distance threshold.
+    /// @warning If the `start` iterator does not point to this Trace or this Trace has moved
+    ///          since the iterator's creation then this will have unintended consequences.
+    ///          Likely an infinite loop but return values should be treated as undefined behavior.
+    Trace::const_iterator first_above(const float& dist, const Trace::const_iterator& start) const
+    {
+        Trace::const_iterator iter = start;
+        this->increment_to_first_above(iter, dist);
+        return iter;
+    }
+
+
+private:
+    /// @brief Implements finding the voxel at a distance greater than the specified value.
+    /// @param iter Vector iterator (constant).
+    /// @param dist Threshold distance.
+    /// @return First voxel with a value greater than the specified distance threshold.
+    ///         Or the `end` iterator if all values are below the distance threshold.
+    void increment_to_first_above(Trace::const_iterator& iter, const float& dist) const
+    {
+        if (dist == INFINITY)
+        {
+            iter = this->end();
+        }
+        else
+        {
+            while (iter != this->end() && iter->d < dist)
+            {
+                ++iter;
+            }
+        }
+    }
+
+
+    /// @brief Sets the sensed_iter used by the `sensed` function.
+    /// @param idx Vector index for the voxel containing the sensed point. Only used if the sensed
+    ///            point is located within the trace.
+    /// @param sensed_location Flag describing the sensed point's position relative to the traced ray.
+    void set_sensed(const size_t& idx, const SensedLocation& sensed_location)
+    {
+        if (sensed_location == SensedLocation::UNKNOWN)
+        {
+            throw std::runtime_error("Cannot set with an unknown sensed location.");
+        }
+        this->sensed_location   = sensed_location;
+
+        // Offset to set the iters to `end` only if the location is after the Trace.
+        const size_t offset = (1 + this->size()) * (this->sensed_location == SensedLocation::AFTER);
+        this->sensed_iter       = this->begin() + offset;
+
+        if(this->sensed_location == SensedLocation::IN)
+        {
+            while (this->sensed_iter != this->end() && this->sensed_iter->i != idx)
+            {
+                ++this->sensed_iter;
+            }
+        }
+    }
+
+
+    /// @brief Flag for the status of the sensed point relative to the Trace.
+    SensedLocation sensed_location = SensedLocation::UNKNOWN;
+
+    /// @brief Iterator to the voxel containing the sensed point.
+    Trace::const_iterator sensed_iter;
 };
-
 
 
 namespace ray_trace_helpers {
@@ -123,6 +244,24 @@ inline std::ptrdiff_t get_min_dist(const float* dist)
 {
     static constexpr std::ptrdiff_t X = 0, Y = 1, Z = 2;
     return (dist[X] < dist[Y] && dist[X] < dist[Z]) ? X : (dist[Y] < dist[Z]) ? Y : Z;
+}
+
+
+/// @brief Gets the correct enumeration value for the location of the sensed voxel, relative to the
+///        rest of the Trace.
+/// @param d_min Distance parameter for the minimum of the trace.
+/// @param d_min Distance parameter for the maximum of the trace.
+/// @return One of SensedLocation IN, BEFORE, or AFTER as appropriate.
+/// @note The distance parameter for the sensed location is implicitly at `0`.
+/// @warning This should only be called by `get_ray_trace`.
+inline Trace::SensedLocation get_sensed_location(const float& d_min,  const float& d_max)
+{
+    uint8_t l = Trace::SensedLocation::UNKNOWN;
+    l ^= Trace::SensedLocation::BEFORE*(d_min <= 0.0);   // Rules out the sensed point being before the trace.
+    l ^= Trace::SensedLocation::AFTER *(0.0   <= d_max); // Rules out the sensed point being after the trace.
+    assert(l != Trace::SensedLocation::UNKNOWN &&
+           "Sensed location cannot be both after and before the trace.");
+    return static_cast<Trace::SensedLocation>(l);
 }
 
 
@@ -202,6 +341,9 @@ inline bool get_ray_trace(const std::shared_ptr<Trace>& ray_trace,
             const std::string e_what(e.what());
             throw std::out_of_range("Ray tracing failed. This should not happen. Failed with: " + e_what);
         }
+
+        ray_trace->set_sensed(properties->operator[](properties->pointToIndex(sensed)),
+                              ray_trace_helpers::get_sensed_location(dist_min_adj, dist_max_adj));
     }
     return valid_intersection;
 }

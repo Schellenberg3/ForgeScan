@@ -73,7 +73,7 @@ public:
     /// @return A view of the command string if it exists. Empty string if the flag was not included.
     const std::string& operator[](const size_t& x) const
     {
-        if (this->tokens.size() < x)
+        if (this->tokens.size() <= x)
         {
             return ArgParser::empty_string;
         }

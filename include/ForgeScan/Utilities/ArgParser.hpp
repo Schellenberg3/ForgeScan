@@ -192,19 +192,19 @@ const std::string ArgParser::empty_string = std::string("");
 /// @return Reference to the output stream.
 std::ostream& operator<< (std::ostream &out, const ArgParser& parser)
 {
-    if (parser.tokens.size() == 0) return out;
-    for (auto it = parser.tokens.begin(); ; )
+    out << "[";
+    auto it = parser.tokens.begin();
+    while (!parser.tokens.empty())
     {
         out << *it;
         if (++it == parser.tokens.end())
         {
-            return out;
+            break;
         }
-        else
-        {
-            out << " ";
-        }
+        out << "] [";
     }
+    out << "]";
+    return out;
 }
 
 

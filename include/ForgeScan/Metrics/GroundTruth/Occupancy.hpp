@@ -228,7 +228,7 @@ private:
     static bool true_positive(const uint8_t& truth, const uint8_t& measurement)
     {
         return measurement == VoxelOccupancy::OCCUPIED &&
-               truth       == VoxelOccupancy::OCCUPIED;
+               truth & VoxelOccupancy::TYPE_OCCUPIED;
     }
 
 
@@ -240,7 +240,7 @@ private:
     static bool false_negative(const uint8_t& truth, const uint8_t& measurement)
     {
         return (measurement == VoxelOccupancy::FREE || measurement == VoxelOccupancy::UNKNOWN) &&
-                truth       == VoxelOccupancy::OCCUPIED;
+               truth & VoxelOccupancy::TYPE_OCCUPIED;
     }
 
     /// @brief Tests the false-positive case where a free voxel is labeled as occupied.
@@ -250,7 +250,7 @@ private:
     static bool false_positive(const uint8_t& truth, const uint8_t& measurement)
     {
         return measurement == VoxelOccupancy::OCCUPIED &&
-               truth       == VoxelOccupancy::FREE;
+               truth & VoxelOccupancy::TYPE_FREE;
     }
 
 
@@ -261,7 +261,7 @@ private:
     static bool true_negative(const uint8_t& truth, const uint8_t& measurement)
     {
         return measurement == VoxelOccupancy::FREE &&
-               truth       == VoxelOccupancy::FREE;
+               truth & VoxelOccupancy::TYPE_FREE;
     }
 };
 

@@ -235,8 +235,12 @@ enum VoxelOccupancy
     : uint8_t
 {
     UNKNOWN  = 0b0000'0000,
-    OCCUPIED = 0b0000'0001,
-    FREE     = 0b0000'0010,
+    FREE     = 0b0100'0001,
+    OCCUPIED = 0b1000'0001,
+    CLIPPED  = 0b1000'0010,
+
+    TYPE_FREE     = 0b0100'0000,
+    TYPE_OCCUPIED = 0b1000'0000,
 };
 
 

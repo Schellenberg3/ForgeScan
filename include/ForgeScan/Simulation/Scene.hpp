@@ -41,14 +41,6 @@ namespace simulation {
 /// @brief A collection of Primitive objects which are imaged together in the same scene.
 struct Scene
 {
-    // ***************************************************************************************** //
-    // *                                        FRIENDS                                        * //
-    // ***************************************************************************************** //
-
-    /// @brief Requires access to the private voxelOccupied function.
-    friend class metrics::ground_truth::Occupancy;
-
-
 public:
     // ***************************************************************************************** //
     // *                                 PUBLIC CLASS METHODS                                  * //
@@ -339,14 +331,7 @@ public:
             {
                 for (size_t x = 0; x < nx; ++x)
                 {
-                    if (this->voxelOccupied(voxel_scan_f, half_res))
-                    {
-                        this->true_occupancy->operator[](n) = VoxelOccupancy::OCCUPIED;
-                    }
-                    else
-                    {
-                        this->true_occupancy->operator[](n) = VoxelOccupancy::FREE;
-                    }
+                    this->true_occupancy->operator[](n) = this->voxelOccupied(voxel_scan_f, half_res);
                     ++n;
                     voxel_scan_f.x() += res;
                 }
@@ -536,7 +521,7 @@ private:
     /// @param center   Voxel center location, relative to the scan_lowe_bound frame.
     /// @param half_res Half of the voxel resolution; the distance from the center to any face.
     /// @return True if the voxel is occupied.
-    bool voxelOccupied(const Point& center, const float& half_res) const
+    VoxelOccupancy voxelOccupied(const Point& center, const float& half_res) const
     {
         Point center_primitive_f;
         for (const auto& item : this->shapes_map)
@@ -544,7 +529,7 @@ private:
             if (item.second->isInside(center, this->scan_lower_bound, center_primitive_f))
             {
                 // Fully inside at least one shape.
-                return true;
+                return VoxelOccupancy::OCCUPIED;
             }
             else
             {
@@ -552,12 +537,12 @@ private:
                 if ((to_surface.array() < half_res).all())
                 {
                     // Clipped by at the shape.
-                    return true;
+                    return VoxelOccupancy::CLIPPED;
                 }
             }
         }
         // Neither inside any shape nor clipped by any shape.
-        return false;
+        return VoxelOccupancy::FREE;
     }
 
 

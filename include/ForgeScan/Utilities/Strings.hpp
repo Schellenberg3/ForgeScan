@@ -27,6 +27,45 @@ inline void toUpper(std::string& data)
 }
 
 
+/// @brief Trims space characters, in place, from the beginning of the string.
+/// @param data Input string.
+/// @details Adapted from https://stackoverflow.com/questions/216823/how-to-trim-an-stdstring/217605#217605
+inline void ltrim(std::string &data)
+{
+    data.erase(data.begin(),
+               std::find_if(data.begin(), data.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+}
+
+
+/// @brief Trims space characters, in place, from the end of the string.
+/// @param data Input string.
+/// @details Adapted from https://stackoverflow.com/questions/216823/how-to-trim-an-stdstring/217605#217605
+inline void rtrim(std::string &data)
+{
+    data.erase(std::find_if(data.rbegin(), data.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(),
+               data.end());
+}
+
+
+/// @brief Trims space characters, in place, from the beginning and end of the string.
+/// @param data Input string.
+/// @details Adapted from https://stackoverflow.com/questions/216823/how-to-trim-an-stdstring/217605#217605
+inline void trim(std::string &data)
+{
+    rtrim(data);
+    ltrim(data);
+}
+
+
+/// @brief Checks if the string has interesting contents.
+/// @param data Input string.
+/// @return False if the string is empty or only contains space characters 
+inline bool has_contents(const std::string &data)
+{
+    return !data.empty() && (data.find_first_not_of(' ') != std::string::npos);
+}
+
+
 /// @brief Checks if the string has a specific prefix.
 /// @param str String to check.
 /// @param prefix Prefix to look for as an array of characters.

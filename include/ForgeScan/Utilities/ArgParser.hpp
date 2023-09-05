@@ -1,10 +1,11 @@
 #ifndef FORGE_SCAN_UTILITIES_ARG_PARSER_HPP
 #define FORGE_SCAN_UTILITIES_ARG_PARSER_HPP
 
+#include <algorithm>
+#include <limits>
 #include <string>
 #include <sstream>
 #include <vector>
-#include <algorithm>
 
 #include "Strings.hpp"
 
@@ -22,6 +23,8 @@ namespace utilities {
 class ArgParser
 {
 friend std::ostream& operator<< (std::ostream&, const ArgParser&);
+
+friend std::istream& operator>> (std::istream&, ArgParser&);
 
 public:
     /// @brief Constructs an argument parser ready to parse a string via `setArgs`.
@@ -170,9 +173,9 @@ private:
             if (strings::has_contents(s))
             {
                 strings::trim(s);
-            this->tokens.push_back(s);
+                this->tokens.push_back(s);
+            }
         }
-    }
     }
 
     /// @brief Default return of an empty string.
@@ -186,12 +189,39 @@ private:
 const std::string ArgParser::empty_string = std::string("");
 
 
+/// @brief Reads from the input stream.
+/// @param stream Input stream to read from.
+/// @param parser ArgParser to read to.
+/// @return Reference to the input stream.
+/// @warning The parser reads a maximum 300 characters from a line in the stream.
+std::istream& operator>> (std::istream& stream, ArgParser& parser)
+{
+    static const size_t string_buffer_size = 300;
+    std::string s(string_buffer_size, ' ');
+    stream.getline(&s[0], string_buffer_size);
+    
+    // Downsize the string and trim any whitespace before parsing.
+    s.resize(std::char_traits<char>::length(&s[0]));
+    strings::trim(s);
+    parser.parse(s);
+
+    // Flush any remaining characters from the rest of the buffer and reset any
+    // flags; the failbit is set if the input steam exceeds string_buffer_size.
+    if (stream.fail())
+    {
+        stream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+    stream.clear();
+    return stream;
+}
+
+
 /// @brief Writes the contents of a ArgParser to the output stream.
 /// @param out Output stream to write to.
 /// @param parser ArgParser to write out.
 /// @return Reference to the output stream.
 std::ostream& operator<< (std::ostream &out, const ArgParser& parser)
-{
+{   
     out << "[";
     auto it = parser.tokens.begin();
     while (!parser.tokens.empty())

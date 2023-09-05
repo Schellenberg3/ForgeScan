@@ -85,8 +85,8 @@ protected:
         for (size_t i = 0; i < n; ++i)
         {
             /// TODO: Decide how to compare.
-            double measurement = other[i];
-            double truth  = this->data[i];
+            // double measurement = other[i];
+            // double truth  = this->data[i];
         }
         return true;
     }
@@ -106,8 +106,8 @@ protected:
         for (size_t i = 0; i < n; ++i)
         {
             /// TODO: Decide how to compare.
-            double measurement = other[i];
-            double truth  = this->data[i];
+            // double measurement = other[i];
+            // double truth  = this->data[i];
 
         }
         return true;

@@ -16,7 +16,7 @@ namespace metrics {
 /// @return A pointer to the requested implementation of the Metric class.
 /// @throws std::invalid_argument if the Metric type is not recognized.
 inline std::shared_ptr<Metric> metric_constructor(const utilities::ArgParser& args,
-                                                  std::shared_ptr<data::Reconstruction> reconstruction)
+                                                  std::shared_ptr<data::Reconstruction> /*reconstruction*/)
 {
     std::string metric_type = args.getCmdOption("--metric");
     utilities::strings::toLower(metric_type);

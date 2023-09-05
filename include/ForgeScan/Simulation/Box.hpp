@@ -76,9 +76,9 @@ public:
         extr.translation().y() = args.getCmdOption<float>("--y", 0);
         extr.translation().z() = args.getCmdOption<float>("--z", 0);
 
-        float l = scale * args.getCmdOption<float>("--l", 1);
-        float w = scale * args.getCmdOption<float>("--w", 1);
-        float h = scale * args.getCmdOption<float>("--h", 1);
+        float l = args.getCmdOption<float>("--l", 1);
+        float w = args.getCmdOption<float>("--w", 1);
+        float h = args.getCmdOption<float>("--h", 1);
 
         return std::shared_ptr<Box>(new Box(l, w, h, extr));
     }

@@ -24,6 +24,13 @@ class ArgParser
 friend std::ostream& operator<< (std::ostream&, const ArgParser&);
 
 public:
+    /// @brief Constructs an argument parser ready to parse a string via `setArgs`.
+    ArgParser()
+    {
+
+    }
+
+
     /// @brief Constructs the argument parser from the argument count and argument array.
     /// @param argc Count of arguments in the argument vector.
     /// @param argv Argument array.

@@ -153,6 +153,14 @@ public:
     }
 
 
+    /// @brief True if the ArgParser has arguments to be queried. False if it is empty. This can
+    ///        check if the line that was parsed was empty.
+    bool hasArgs()
+    {
+        return !(this->tokens.size() <= 1 && this->tokens[0] == ArgParser::empty_string);
+    }
+
+
 private:
     /// @brief Parses the inputs into the ArgParser's tokens
     /// @param argc Count of arguments in the argument vector.

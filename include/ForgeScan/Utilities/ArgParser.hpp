@@ -6,6 +6,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "Strings.hpp"
+
 
 namespace forge_scan {
 namespace utilities {
@@ -139,6 +141,7 @@ private:
     /// @param argv Argument array.
     void parse(const int &argc, const char **argv)
     {
+        tokens.clear();
         this->tokens.reserve(argc - 1);
         for (int i=1; i < argc; ++i)
         {
@@ -152,12 +155,17 @@ private:
     void parse(const std::string& args)
     {
         static const char delim = ' ';
+        tokens.clear();
         std::stringstream ss(args);
         std::string s;
         while (std::getline(ss, s, delim))
         {
+            if (strings::has_contents(s))
+            {
+                strings::trim(s);
             this->tokens.push_back(s);
         }
+    }
     }
 
     /// @brief Default return of an empty string.

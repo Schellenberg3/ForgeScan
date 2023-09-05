@@ -30,7 +30,7 @@ public:
     /// @brief Constructs an argument parser ready to parse a string via `setArgs`.
     ArgParser()
     {
-
+        this->clear();
     }
 
 
@@ -145,6 +145,14 @@ public:
     }
 
 
+    /// @brief Clears arguments from the ArgParser and sets the token vector to one empty string.
+    void clear()
+    {
+        this->tokens.clear();
+        this->if_no_tokens_add_empty();
+    }
+
+
 private:
     /// @brief Parses the inputs into the ArgParser's tokens
     /// @param argc Count of arguments in the argument vector.
@@ -157,6 +165,7 @@ private:
         {
             this->tokens.push_back(std::string(argv[i]));
         }
+        this->if_no_tokens_add_empty();
     }
 
 
@@ -176,13 +185,25 @@ private:
                 this->tokens.push_back(s);
             }
         }
+        this->if_no_tokens_add_empty();
+    }
+
+
+    /// @brief Ensures that the token vector contains one item that is an empty string in the case
+    ///        that no args were parsed into it.
+    void if_no_tokens_add_empty()
+    {
+        if (this->tokens.size() == 0)
+        {
+            this->tokens.push_back(ArgParser::empty_string);
+        }
     }
 
     /// @brief Default return of an empty string.
     const static std::string empty_string;
 
     /// @brief Vector of each input string
-    std::vector <std::string> tokens;
+    std::vector<std::string> tokens;
 };
 
 

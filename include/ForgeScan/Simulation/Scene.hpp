@@ -41,6 +41,9 @@ namespace simulation {
 /// @brief A collection of Primitive objects which are imaged together in the same scene.
 struct Scene
 {
+    /// @brief Required to print the shape dictionary.
+    friend std::ostream& operator<<(std::ostream &, const Scene&);
+
 public:
     // ***************************************************************************************** //
     // *                                 PUBLIC CLASS METHODS                                  * //
@@ -589,6 +592,28 @@ private:
     /// @brief Shared reference to a Ground Truth TSDF for the Scene.
     std::shared_ptr<metrics::ground_truth::TSDF> true_tsdf{nullptr};
 };
+
+
+/// @brief Writes the contents of the Grid Properties to the output stream.
+/// @param out Output stream to write to.
+/// @param scene Scene to write out.
+/// @return Reference to the output stream.
+std::ostream& operator<<(std::ostream &out, const Scene& scene)
+{   
+    if (!scene.shapes_map.empty())
+    {
+        out << "Scene contains:";
+        for (const auto& dict_item : scene.shapes_map)
+        {
+            out << "\n\t" << dict_item.first << ": " << *dict_item.second;
+        }
+    }
+    else
+    {
+        out << "Empty Scene.";
+    }
+    return out;
+}
 
 
 } // namespace simulation

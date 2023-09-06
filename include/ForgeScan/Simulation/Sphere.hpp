@@ -57,6 +57,15 @@ struct Sphere : public Primitive
     }
 
 
+    /// @return Help message for constructing a Sphere with ArgParser.
+    static std::string helpMessage()
+    {
+        return "A Sphere may be added with the following arguments:"
+               "\n\t" + Sphere::help_string +
+               "\nIf the optional arguments are not provided, the default values are:"
+               "\n\t" + Sphere::default_arguments;
+    }
+
 
     // ***************************************************************************************** //
     // *                            PUBLIC VIRTUAL METHOD OVERRIDES                            * //
@@ -194,6 +203,12 @@ struct Sphere : public Primitive
     /// @brief Sphere radius in world units.
     const float radius;
 
+    static const float default_radius;
+
+    static const std::string parse_radius;
+
+    static const std::string help_string, default_arguments;
+
 
 private:
     // ***************************************************************************************** //
@@ -219,6 +234,16 @@ private:
     }
 
 
+    /// @brief Prints information about the Sphere to the output stream. 
+    /// @param out Output stream to write to.
+    void print(std::ostream& out) const override final
+    {
+        out << this->getTypeName() << " ";
+        Primitive::print(out);
+        out << " with radius " << this->radius;
+    }
+
+
     /// @brief Helper constant for the ray hit calculation.
     const float radius_squared;
 };
@@ -228,6 +253,16 @@ const float Sphere::default_radius = 1.0;
 
 /// @brief ArgParser key for the Sphere radius.
 const std::string Sphere::parse_radius = "--radius";
+
+/// @brief String explaining what arguments this class accepts.
+const std::string Sphere::help_string =
+    Sphere::translation_help_string + " [" + Sphere::parse_radius + " <sphere radius>]";
+
+/// @brief String explaining what this class's default parsed values are.
+const std::string Sphere::default_arguments =
+    Sphere::translation_default_arguments + " " +
+    Sphere::parse_radius + " " + std::to_string(Sphere::default_radius);
+
 
 
 } // namespace simulation

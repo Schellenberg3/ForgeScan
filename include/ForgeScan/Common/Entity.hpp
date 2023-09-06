@@ -236,6 +236,17 @@ struct Entity
         x = this->getToOtherFromThis(other) * x.colwise().homogeneous();
     }
 
+
+    /// @return Help message for setting a translation with ArgParser.
+    static std::string helpMessageTranslation()
+    {
+        return "Translation may be specified with the following arguments:"
+               "\n\t" + Entity::translation_help_string +
+               "\nIf the optional arguments are not provided, the default values are:"
+               "\n\t" + Entity::translation_default_arguments;
+    }
+
+
     /// @brief Sets the Extrinsic's translation based on the parsed arguments.
     /// @param parser Arguments for the translation.
     /// @param extr Extrinsic to be set.
@@ -246,6 +257,15 @@ struct Entity
         extr.translation().z() = parser.getCmdOption<float>(Entity::parse_z, Entity::default_translation);
     }
 
+
+    /// @return Help message for setting a rotation with ArgParser.
+    static std::string helpMessageRotation()
+    {
+        return "Translation may be specified with the following arguments:"
+               "\n\t" + Entity::rotation_help_string +
+               "\nIf the optional arguments are not provided, the default values are:"
+               "\n\t" + Entity::rotation_default_arguments;
+    }
 
 
     /// @brief Sets the Extrinsic's rotation based on the parsed arguments.
@@ -274,6 +294,12 @@ struct Entity
 
     static const std::string parse_rx, parse_ry, parse_rz;
 
+    static const std::string parse_rotation_degrees;
+
+    static const std::string translation_help_string, translation_default_arguments;
+
+    static const std::string rotation_help_string, rotation_default_arguments;
+
 protected:
     /// @brief Extrinsic transformation from the world coordinates to the entity.
     Extrinsic extr;
@@ -295,6 +321,35 @@ const float Entity::default_rotation = 0.0;
 const std::string Entity::parse_rx = std::string("--rx"),
                   Entity::parse_ry = std::string("--ry"),
                   Entity::parse_rz = std::string("--rz");
+
+/// @brief ArgParser key for a flag that the rotation values are in degrees.
+const std::string Entity::parse_rotation_degrees = std::string("--degrees");
+
+/// @brief String explaining what arguments this class accepts for setting translation.
+const std::string Entity::translation_help_string =
+    "[" + Entity::parse_x + " <translation in X>]" +
+    " [" + Entity::parse_y + " <translation in Y>]" +
+    " [" + Entity::parse_z + " <translation in Z>]";
+
+/// @brief String explaining what this class's default parsed values are for setting translation.
+const std::string Entity::translation_default_arguments =
+    Entity::parse_x + " " + std::to_string(Entity::default_translation) +
+    " " + Entity::parse_y + " " + std::to_string(Entity::default_translation) +
+    " " + Entity::parse_z + " " + std::to_string(Entity::default_translation);
+
+/// @brief String explaining what arguments this class accepts for setting rotation.
+const std::string Entity::rotation_help_string =
+    "[" + Entity::parse_x + " <rotation in X>]" +
+    " [" + Entity::parse_y + " <rotation in Y>]" +
+    " [" + Entity::parse_z + " <rotation in Z>]" +
+    " [" + Entity::parse_rotation_degrees + "]";
+
+/// @brief String explaining what this class's default parsed values are for setting rotation.
+const std::string Entity::rotation_default_arguments =
+    Entity::parse_rx + " " + std::to_string(Entity::default_rotation) +
+    " " + Entity::parse_ry + " " + std::to_string(Entity::default_rotation) +
+    " " + Entity::parse_rz + " " + std::to_string(Entity::default_rotation);
+
 
 } // namespace forge_scan
 

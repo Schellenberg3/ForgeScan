@@ -22,12 +22,24 @@ namespace simulation {
 /// @brief Base class for Primitive geometry types.
 struct Primitive : Entity
 {
+    /// @brief Required to call print method.
+    friend std::ostream& operator<<(std::ostream&, const Primitive&);
+
 public:
     virtual ~Primitive() { }
 
 
+    /// @return Help message for constructing a Primitive with ArgParser.
+    static std::string helpMessage()
+    {
+        return "A primitive shape may be added with the following arguments:"
+               "\n\t" + Primitive::help_string +
+               "\n\nFor details on primitive shape options, enter \"-h <shape>\".";
+    }
+
+
     // ***************************************************************************************** //
-    // *                              PUBLIC PURE VIRTUAL METHODS                              * //
+    // *                                PUBLIC VIRTUAL METHODS                                 * //
     // ***************************************************************************************** //
 
 
@@ -107,6 +119,8 @@ public:
 
     static const std::string parse_name, parse_shape;
 
+    static const std::string help_string;
+
 
 protected:
     // ***************************************************************************************** //
@@ -153,7 +167,25 @@ protected:
         const Ray inverse_ray = (end - start).cwiseInverse();
         return AABB::find_bounded_intersection(lowerAABBbound, upperAABBbound, start, inverse_ray, 0, 1, t, tmax);
     }
+
+
+    /// @brief Prints information about the Primitive to the output stream. 
+    /// @param out Output stream to write to.
+    virtual void print(std::ostream& out) const
+    {
+        out << "Primitive at (" << this->extr.translation().transpose() << ")";
+    }
 };
+
+
+/// @brief Prints info about the Primitive to the output stream.
+/// @param out Output stream to write to.
+/// @return Reference to the output stream.
+std::ostream& operator<<(std::ostream &out, const Primitive& primitive)
+{
+    primitive.print(out);
+    return out;
+}
 
 
 /// @brief ArgParser key for the dictionary name of a shape.
@@ -161,6 +193,11 @@ const std::string Primitive::parse_name  = "--name";
 
 /// @brief ArgParser key for the type name of of a shape.
 const std::string Primitive::parse_shape = "--shape";
+
+/// @brief String explaining what arguments this class accepts.
+const std::string Primitive::help_string =
+    "--name <unique identifier> --shape <sphere | box> [shape-specific options]";
+
 
 } // namespace simulation
 } // namespace forge_scan

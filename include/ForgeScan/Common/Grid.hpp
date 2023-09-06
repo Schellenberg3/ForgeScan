@@ -2,6 +2,7 @@
 #define FORGE_SCAN_COMMON_GRID_HPP
 
 #include <memory>
+#include <iostream>
 
 #include "ForgeScan/Common/Types.hpp"
 #include "ForgeScan/Utilities/ArgParser.hpp"
@@ -65,7 +66,7 @@ struct Grid
 
 
         /// @brief Creates a shared pointer to a constant Grid Properties.
-        /// @param resolution Edge length of each voxel in world units. Default 0.02.
+        /// @param resolution Edge length of each voxel in world units.
         /// @param size       Number of voxels in the Grid in each direction. Default (101, 101, 101)
         /// @note Ensures there is a minimum GridSize of (1, 1, 1).
         /// @note Ensures the resolution is positive.
@@ -93,6 +94,34 @@ struct Grid
         static std::shared_ptr<const Properties> createConst(const Properties& other)
         {
             return std::shared_ptr<Properties>(new Properties(other));
+        }
+
+
+        /// @brief Interactively creates Grid Properties from a users input to stdin.
+        /// @return Shared, constant pointer to Grid Properties.
+        static std::shared_ptr<const Properties> createConstInteractive()
+        {
+            utilities::ArgParser parser;
+            while (true)
+            {
+                parser.getInput("Please specify the Grid Properties to use [-h for help]:");
+                if (parser[0] != "-h")
+                {
+                    std::shared_ptr<const Grid::Properties> properties = Properties::createConst(parser);
+                    return properties;
+                }
+                std::cout << Properties::helpMessage() << "\n" << std::endl;
+            }
+        }
+
+
+        /// @return Help message for constructing Grid Properties with ArgParser.
+        static std::string helpMessage()
+        {
+            return "A Forge Scan Grid Properties object may be created with the following arguments:"
+                   "\n\t" + Properties::help_string +
+                   "\nIf the optional arguments are not provided, the default values are:"
+                   "\n\t" + Properties::default_arguments;
         }
 
 
@@ -207,6 +236,8 @@ struct Grid
         
         static const size_t default_size;
 
+        static const std::string help_string, default_arguments;
+
     private:
         /// @brief Ensures there is at least one voxel in each direction.
         void checkMinimumGridSize()
@@ -268,6 +299,20 @@ protected:
     }
 };
 
+
+/// @brief Writes the contents of the Grid Properties to the output stream.
+/// @param out Output stream to write to.
+/// @param properties Grid Properties to write out.
+/// @return Reference to the output stream.
+std::ostream& operator<<(std::ostream &out, const Grid::Properties& properties)
+{   
+    out << "grid properties with size of (" << properties.size.transpose() <<
+           ") voxels with resolution of " << properties.resolution <<
+           " for a bounded area of (" << properties.dimensions.transpose() << ")";
+    return out;
+}
+
+
 /// @brief ArgParser key for the number of voxel in X, Y and Z.
 const std::string Grid::Properties::parse_nx = std::string("--nx"),
                   Grid::Properties::parse_ny = std::string("--ny"),
@@ -281,6 +326,21 @@ const float  Grid::Properties::default_resolution = 0.02;
 
 /// @brief Default size value (for each dimension).
 const size_t Grid::Properties::default_size       = 101;
+
+/// @brief String explaining what arguments this class accepts.
+const std::string Grid::Properties::help_string =
+    "[" + Properties::parse_resolution + " <dimension of a voxel>]" +
+    " [" + Properties::parse_nx + " <number voxel in X>]" +
+    " [" + Properties::parse_ny + " <number voxel in Y>]" +
+    " [" + Properties::parse_nz + " <number voxel in Z>]";
+
+/// @brief String explaining what this class's default parsed values are.
+const std::string Grid::Properties::default_arguments =
+    Properties::parse_resolution + " " + std::to_string(Properties::default_resolution) +
+    " " + Properties::parse_nx + " " + std::to_string(Properties::default_size) +
+    " " + Properties::parse_ny + " " + std::to_string(Properties::default_size) +
+    " " + Properties::parse_nz + " " + std::to_string(Properties::default_size);
+
 
 } // forge_scan
 

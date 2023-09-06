@@ -71,6 +71,12 @@ public:
 
 
     /// @return Help message for constructing a Box with ArgParser.
+    static std::string helpMessage()
+    {
+        return "A Box may be added with the following arguments:"
+               "\n\t" + Box::help_string +
+               "\nIf the optional arguments are not provided, the default values are:"
+               "\n\t" + Box::default_arguments;
     }
 
 
@@ -151,6 +157,9 @@ public:
 
     static const std::string parse_l, parse_w, parse_h;
 
+    static const std::string help_string, default_arguments;
+
+
 private:
     // ***************************************************************************************** //
     // *                                 PRIVATE CLASS METHODS                                 * //
@@ -187,6 +196,16 @@ private:
         g_primitive.createAttribute(FS_HDF5_BOX_L_ATTR, this->length);
         g_primitive.createAttribute(FS_HDF5_BOX_W_ATTR, this->width);
         g_primitive.createAttribute(FS_HDF5_BOX_H_ATTR, this->height);
+    }
+
+
+    /// @brief Prints information about the Box to the output stream. 
+    /// @param out Output stream to write to.
+    void print(std::ostream& out) const override final
+    {
+        out << this->getTypeName() << " ";
+        Primitive::print(out);
+        out << " with dimensions (" << this->length << ", " << this->width << ", " << this->height << ")";
     }
 
 
@@ -274,6 +293,21 @@ const float Box::default_length = 1.0, Box::default_width = 1.0, Box::default_he
 const std::string Box::parse_l = std::string("--l"),
                   Box::parse_w = std::string("--w"),
                   Box::parse_h = std::string("--h");
+
+/// @brief String explaining what arguments this class accepts.
+const std::string Box::help_string =
+    Box::translation_help_string + " " + Box::rotation_help_string +
+    " [" + Box::parse_l + " <X dimension>]" +
+    " [" + Box::parse_w + " <Y dimension>]" +
+    " [" + Box::parse_h + " <Z dimension>]";
+
+/// @brief String explaining what this class's default parsed values are.
+const std::string Box::default_arguments =
+    Box::translation_default_arguments + " " + Box::rotation_default_arguments +
+    " " + Box::parse_l + " " + std::to_string(Box::default_length) +
+    " " + Box::parse_w + " " + std::to_string(Box::default_width) +
+    " " + Box::parse_h + " " + std::to_string(Box::default_height);
+
 
 } // namespace primitives
 } // namespace forge_scan

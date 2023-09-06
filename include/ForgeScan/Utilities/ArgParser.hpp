@@ -59,6 +59,19 @@ public:
     }
 
 
+    /// @brief Prompts the user to provide input.
+    /// @param prompt Optional prompt to display on the line before user input is collected.
+    void getInput(const std::string& prompt = ArgParser::empty_string)
+    {
+        if (prompt != ArgParser::empty_string)
+        {
+            std::cout << prompt << "\n";
+        }
+        std::cout << "> ";
+        std::cin >> *this;
+    }
+
+
     /// @brief Changes the parsed arguments of the ArgParser to a new string.
     /// @param args A string of arguments deliminated by a space.
     void setArgs(const std::string& args)

@@ -3,6 +3,7 @@
 
 
 #include "ForgeScan/Common/Types.hpp"
+#include "ForgeScan/Utilities/ArgParser.hpp"
 
 
 namespace forge_scan {
@@ -235,12 +236,65 @@ struct Entity
         x = this->getToOtherFromThis(other) * x.colwise().homogeneous();
     }
 
+    /// @brief Sets the Extrinsic's translation based on the parsed arguments.
+    /// @param parser Arguments for the translation.
+    /// @param extr Extrinsic to be set.
+    static void setTranslation(const utilities::ArgParser& parser, Extrinsic& extr)
+    {
+        extr.translation().x() = parser.getCmdOption<float>(Entity::parse_x, Entity::default_translation);
+        extr.translation().y() = parser.getCmdOption<float>(Entity::parse_y, Entity::default_translation);
+        extr.translation().z() = parser.getCmdOption<float>(Entity::parse_z, Entity::default_translation);
+    }
+
+
+
+    /// @brief Sets the Extrinsic's rotation based on the parsed arguments.
+    /// @param parser Arguments for the translation.
+    /// @param extr Extrinsic to be set.
+    static void setRotation(const utilities::ArgParser& parser, Extrinsic& extr)
+    {
+        // Its silly to store this, but I couldn't quickly find an intuitive way to reset
+        // only the rotation part of the Extrinsic.
+        Eigen::Vector3f translation = extr.translation();
+        extr.setIdentity();
+
+        float scale = parser.cmdOptionExists(Entity::parse_rotation_degrees) ? M_PI / 180.0f : 1;      
+        extr.rotate(Eigen::AngleAxisf(scale * parser.getCmdOption<float>(Entity::parse_rx, Entity::default_rotation), Ray::UnitX()) *
+                    Eigen::AngleAxisf(scale * parser.getCmdOption<float>(Entity::parse_ry, Entity::default_rotation), Ray::UnitY()) *
+                    Eigen::AngleAxisf(scale * parser.getCmdOption<float>(Entity::parse_rz, Entity::default_rotation), Ray::UnitZ()));
+        extr.translation() = translation;
+    }
+
+
+    static const float default_translation;
+
+    static const std::string parse_x, parse_y, parse_z;
+
+    static const float default_rotation;
+
+    static const std::string parse_rx, parse_ry, parse_rz;
 
 protected:
     /// @brief Extrinsic transformation from the world coordinates to the entity.
     Extrinsic extr;
 };
 
+
+/// @brief Default translation (in each direction axis).
+const float Entity::default_translation = 0.0;
+
+/// @brief ArgParser key for the translation in X, Y and Z.
+const std::string Entity::parse_x  = std::string("--x"),
+                  Entity::parse_y  = std::string("--y"),
+                  Entity::parse_z  = std::string("--z");
+
+/// @brief Default rotation (about each axis).
+const float Entity::default_rotation = 0.0;
+
+/// @brief ArgParser key for the rotation around X, Y and Z.
+const std::string Entity::parse_rx = std::string("--rx"),
+                  Entity::parse_ry = std::string("--ry"),
+                  Entity::parse_rz = std::string("--rz");
 
 } // namespace forge_scan
 

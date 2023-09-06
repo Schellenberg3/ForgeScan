@@ -58,29 +58,19 @@ public:
     /// @brief Constructor for a shared pointer to a Box.
     /// @param parser Arg Parser with arguments to construct a Box from.
     /// @return Shared pointer to a Box.
-    static std::shared_ptr<Box> create(const utilities::ArgParser& args)
+    static std::shared_ptr<Box> create(const utilities::ArgParser& parser)
     {
         Extrinsic extr = Extrinsic::Identity();
+        Entity::setRotation(parser, extr);
+        Entity::setTranslation(parser, extr);
 
-        // Find and apply the rotation arguments.
-        float scale = args.cmdOptionExists("--degrees") ? M_PI / 180.0f : 1;
-        float rx = scale * args.getCmdOption<float>("--rx", 0);
-        float ry = scale * args.getCmdOption<float>("--ry", 0);
-        float rz = scale * args.getCmdOption<float>("--rz", 0);
-        extr.rotate(Eigen::AngleAxisf(rx, Ray::UnitX()) *
-                    Eigen::AngleAxisf(ry, Ray::UnitY()) *
-                    Eigen::AngleAxisf(rz, Ray::UnitZ()));
+        return std::shared_ptr<Box>(new Box(parser.getCmdOption<float>(Box::parse_l, Box::default_length),
+                                            parser.getCmdOption<float>(Box::parse_w, Box::default_width),
+                                            parser.getCmdOption<float>(Box::parse_h, Box::default_height), extr));
+    }
 
-        // Find and apply the translation arguments.
-        extr.translation().x() = args.getCmdOption<float>("--x", 0);
-        extr.translation().y() = args.getCmdOption<float>("--y", 0);
-        extr.translation().z() = args.getCmdOption<float>("--z", 0);
 
-        float l = args.getCmdOption<float>("--l", 1);
-        float w = args.getCmdOption<float>("--w", 1);
-        float h = args.getCmdOption<float>("--h", 1);
-
-        return std::shared_ptr<Box>(new Box(l, w, h, extr));
+    /// @return Help message for constructing a Box with ArgParser.
     }
 
 
@@ -157,6 +147,9 @@ public:
     /// @brief Dimensions of the box: length in X-direction, width in Y-direction, and height it Z-direction.
     const float length, width, height;
 
+    static const float default_length, default_width, default_height;
+
+    static const std::string parse_l, parse_w, parse_h;
 
 private:
     // ***************************************************************************************** //
@@ -273,6 +266,14 @@ private:
     }
 };
 
+
+/// @brief Default dimensions of the box.
+const float Box::default_length = 1.0, Box::default_width = 1.0, Box::default_height = 1.0;
+
+/// @brief ArgParser key for the Box length, width, and height.
+const std::string Box::parse_l = std::string("--l"),
+                  Box::parse_w = std::string("--w"),
+                  Box::parse_h = std::string("--h");
 
 } // namespace primitives
 } // namespace forge_scan

@@ -105,6 +105,8 @@ public:
     ///        Positions are relative to the derived class's reference frame.
     const Point upperAABBbound, lowerAABBbound;
 
+    static const std::string parse_name, parse_shape;
+
 
 protected:
     // ***************************************************************************************** //
@@ -153,6 +155,12 @@ protected:
     }
 };
 
+
+/// @brief ArgParser key for the dictionary name of a shape.
+const std::string Primitive::parse_name  = "--name";
+
+/// @brief ArgParser key for the type name of of a shape.
+const std::string Primitive::parse_shape = "--shape";
 
 } // namespace simulation
 } // namespace forge_scan

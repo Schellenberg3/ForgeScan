@@ -47,10 +47,10 @@ struct Grid
         /// @note Ensures there is a minimum GridSize of (1, 1, 1).
         /// @note Ensures the resolution is positive.
         Properties(const utilities::ArgParser& parser)
-            : resolution(parser.getCmdOption<float>("--resolution", 0.02)),
-              size(std::max(parser.getCmdOption<int>("--nx", 101), 1),
-                   std::max(parser.getCmdOption<int>("--ny", 101), 1),
-                   std::max(parser.getCmdOption<int>("--nz", 101), 1))
+            : resolution(parser.getCmdOption<float>(Properties::parse_resolution, Properties::default_resolution)),
+              size(std::max(parser.getCmdOption<int>(Properties::parse_nx, Properties::default_size), 1),
+                   std::max(parser.getCmdOption<int>(Properties::parse_ny, Properties::default_size), 1),
+                   std::max(parser.getCmdOption<int>(Properties::parse_nz, Properties::default_size), 1))
         {
             this->setDimensions();
         }
@@ -199,6 +199,13 @@ struct Grid
         /// @note  It is set by the setDimensions method.
         Eigen::Vector3f p2i_scale;
 
+        static const std::string parse_nx, parse_ny, parse_nz;
+        
+        static const std::string parse_resolution;
+        
+        static const float default_resolution;
+        
+        static const size_t default_size;
 
     private:
         /// @brief Ensures there is at least one voxel in each direction.
@@ -261,6 +268,19 @@ protected:
     }
 };
 
+/// @brief ArgParser key for the number of voxel in X, Y and Z.
+const std::string Grid::Properties::parse_nx = std::string("--nx"),
+                  Grid::Properties::parse_ny = std::string("--ny"),
+                  Grid::Properties::parse_nz = std::string("--nz");
+
+/// @brief ArgParser key for the resolution of the voxels.
+const std::string Grid::Properties::parse_resolution = std::string("--resolution");
+
+/// @brief Default resolution value.
+const float  Grid::Properties::default_resolution = 0.02;
+
+/// @brief Default size value (for each dimension).
+const size_t Grid::Properties::default_size       = 101;
 
 } // forge_scan
 

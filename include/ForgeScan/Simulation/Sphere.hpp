@@ -52,11 +52,8 @@ struct Sphere : public Primitive
     static std::shared_ptr<Sphere> create(const utilities::ArgParser& parser)
     {
         Extrinsic extr = Extrinsic::Identity();
-        extr.translation().x() = parser.getCmdOption<float>("--x", 0);
-        extr.translation().y() = parser.getCmdOption<float>("--y", 0);
-        extr.translation().z() = parser.getCmdOption<float>("--z", 0);
-        float radius = parser.getCmdOption<float>("--radius", 1);
-        return std::shared_ptr<Sphere>(new Sphere(radius, extr));
+        Entity::setTranslation(parser, extr);
+        return std::shared_ptr<Sphere>(new Sphere(parser.getCmdOption<float>(Sphere::parse_radius, Sphere::default_radius), extr));
     }
 
 
@@ -225,6 +222,12 @@ private:
     /// @brief Helper constant for the ray hit calculation.
     const float radius_squared;
 };
+
+/// @brief Default radius value.
+const float Sphere::default_radius = 1.0;
+
+/// @brief ArgParser key for the Sphere radius.
+const std::string Sphere::parse_radius = "--radius";
 
 
 } // namespace simulation

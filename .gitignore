@@ -10,6 +10,9 @@ scripts/plots/*
 .devcontainer/*
 .pylintrc
 
+*.h5
+*.xdmf
+
 ## -------------------------------------------------------------------- ##
 ## Standard .gitignore for C++ from GitHub                              ##
 ## See: https://github.com/github/gitignore/blob/main/C%2B%2B.gitignore ##

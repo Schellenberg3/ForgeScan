@@ -82,8 +82,8 @@ public:
 
 
     /// @brief Gets the command in the X-th position.
-    /// @param option Which position to get.
-    /// @return A view of the command string if it exists. Empty string if the flag was not included.
+    /// @param x Which position to get.
+    /// @return A view of that position's command string if it exists. Empty string if the flag was not exist.
     const std::string& operator[](const size_t& x) const
     {
         if (this->tokens.size() <= x)
@@ -91,6 +91,46 @@ public:
             return ArgParser::empty_string;
         }
         return this->tokens[x];
+    }
+
+
+    /// @brief Gets the command in the X-th position.
+    /// @tparam T Type to cast to.
+    /// @param x Which position to get.
+    /// @return A cast of that position's command string if it exists.
+    /// @throws std::invalid_argument if the option flag was not found.
+    template <typename T>
+    T get(const size_t& x) const
+    {
+        const std::string& opt = this->operator[](x);
+        if (opt.empty())
+        {
+            throw std::invalid_argument("Cannot find option  at position " + std::to_string(x) + " was not found. No default was provided.");
+        }
+        std::stringstream ss(opt);
+        T result;
+        ss >> result;
+        return result;
+    }
+
+
+    /// @brief Gets the command in the X-th position.
+    /// @tparam T Type to cast to.
+    /// @param x Which position to get.
+    /// @param default_val Default value if that option flag was not found.
+    /// @return A cast of that position's command string or the default value.
+    template <typename T>
+    T get(const size_t& x, const T& default_val) const
+    {
+        const std::string& opt = this->operator[](x);
+        if (opt.empty())
+        {
+            return default_val;
+        }
+        std::stringstream ss(opt);
+        T result;
+        ss >> result;
+        return result;
     }
 
 

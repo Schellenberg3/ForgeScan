@@ -20,7 +20,7 @@ namespace simulation {
 /// @throws std::invalid_argument if the primitive type is not recognized.
 std::shared_ptr<Primitive> primitive_constructor(const utilities::ArgParser& parser)
 {
-    std::string shape = parser.getCmdOption(Primitive::parse_shape);
+    std::string shape = parser.get(Primitive::parse_shape);
     utilities::strings::toLower(shape);
 
     if (shape == "box")

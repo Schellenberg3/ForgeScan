@@ -11,9 +11,9 @@
 int main(const int argc, const char **argv)
 {
     forge_scan::utilities::ArgParser parser(argc, argv);
-    const float reject_rate   = std::clamp(parser.getCmdOption<float>("--reject", 0.0), 0.0f, 1.0f);
-    const bool  show_im       = parser.cmdOptionExists("--show");
-    const bool  sphere_policy = parser.cmdOptionExists("--sphere");
+    const float reject_rate   = std::clamp(parser.get<float>("--reject", 0.0), 0.0f, 1.0f);
+    const bool  show_im       = parser.has("--show");
+    const bool  sphere_policy = parser.has("--sphere");
 
 
     // ************************************ Load the scene ************************************* //

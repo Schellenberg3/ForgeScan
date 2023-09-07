@@ -48,10 +48,10 @@ struct Grid
         /// @note Ensures there is a minimum GridSize of (1, 1, 1).
         /// @note Ensures the resolution is positive.
         Properties(const utilities::ArgParser& parser)
-            : resolution(parser.getCmdOption<float>(Properties::parse_resolution, Properties::default_resolution)),
-              size(std::max(parser.getCmdOption<int>(Properties::parse_nx, Properties::default_size), 1),
-                   std::max(parser.getCmdOption<int>(Properties::parse_ny, Properties::default_size), 1),
-                   std::max(parser.getCmdOption<int>(Properties::parse_nz, Properties::default_size), 1))
+            : resolution(parser.get<float>(Properties::parse_resolution, Properties::default_resolution)),
+              size(std::max(parser.get<int>(Properties::parse_nx, Properties::default_size), 1),
+                   std::max(parser.get<int>(Properties::parse_ny, Properties::default_size), 1),
+                   std::max(parser.get<int>(Properties::parse_nz, Properties::default_size), 1))
         {
             this->setDimensions();
         }

@@ -24,7 +24,7 @@ namespace data {
 inline std::shared_ptr<VoxelGrid> grid_constructor(const utilities::ArgParser& args,
                                                    std::shared_ptr<const Grid::Properties> properties)
 {
-    std::string grid_type = args.getCmdOption("--grid-type");
+    std::string grid_type = args.get("--grid-type");
     utilities::strings::toLower(grid_type);
 
     if (grid_type == "binary")

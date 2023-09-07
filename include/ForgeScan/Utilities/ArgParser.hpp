@@ -81,9 +81,10 @@ public:
     }
 
 
-    /// @brief Gets the command in the X-th position.
-    /// @param x Which position to get.
-    /// @return A view of that position's command string if it exists. Empty string if the flag was not exist.
+    /// @brief Gets the command in the specified position.
+    /// @param x Position to retrieve.
+    /// @return A view of that position's command string if the position exists.
+    ///         Empty string if the number of parsed tokens is less than X.
     const std::string& operator[](const size_t& x) const
     {
         if (this->tokens.size() <= x)
@@ -94,11 +95,10 @@ public:
     }
 
 
-    /// @brief Gets the command in the X-th position.
-    /// @tparam T Type to cast to.
-    /// @param x Which position to get.
-    /// @return A cast of that position's command string if it exists.
-    /// @throws std::invalid_argument if the option flag was not found.
+    /// @brief Gets the command in the specified position.
+    /// @param x Position to retrieve.
+    /// @return A cast of that position's command string to the requested type.
+    /// @throws `std::invalid_argument` if the number of parsed tokens is less than X.
     template <typename T>
     T get(const size_t& x) const
     {
@@ -114,11 +114,11 @@ public:
     }
 
 
-    /// @brief Gets the command in the X-th position.
-    /// @tparam T Type to cast to.
-    /// @param x Which position to get.
-    /// @param default_val Default value if that option flag was not found.
-    /// @return A cast of that position's command string or the default value.
+    /// @brief Gets the command in the specified position.
+    /// @param x Position to retrieve.
+    /// @param default_val Default value if  the number of parsed tokens is less than X.
+    /// @return A cast of that position's command string to the requested type.
+    ///         Or `default_val` if the number of parsed tokens is less than X.
     template <typename T>
     T get(const size_t& x, const T& default_val) const
     {
@@ -137,7 +137,7 @@ public:
     /// @brief Checks of the option flag was passed and returns the associated value.
     /// @param option Option flag.
     /// @return A view of the command flag's value if it exists. Empty string if the flag was not included.
-    const std::string& getCmdOption(const std::string &option) const
+    const std::string& get(const std::string &option) const
     {
         std::vector<std::string>::const_iterator itr;
         itr = std::find(this->tokens.begin(), this->tokens.end(), option);
@@ -155,9 +155,9 @@ public:
     /// @return Value associated with the flag.
     /// @throws std::invalid_argument if the option flag was not found.
     template <typename T>
-    T getCmdOption(const std::string &option) const
+    T get(const std::string &option) const
     {
-        const std::string& opt = this->getCmdOption(option);
+        const std::string& opt = this->get(option);
         if (opt.empty())
         {
             throw std::invalid_argument("Cannot find option  \"" + option + "\". No default was provided.");
@@ -175,9 +175,9 @@ public:
     /// @param default_val Default value if that option flag was not found.
     /// @return Value associated with the flag or the default value.
     template <typename T>
-    T getCmdOption(const std::string &option, const T& default_val) const
+    T get(const std::string &option, const T& default_val) const
     {
-        const std::string& opt = this->getCmdOption(option);
+        const std::string& opt = this->get(option);
         if (opt.empty())
         {
             return default_val;
@@ -192,7 +192,7 @@ public:
     /// @brief Checks if the specific option was included in the command line input.
     /// @param option Option to search check for.
     /// @return True if the option exists. False else.
-    bool cmdOptionExists(const std::string &option) const
+    bool has(const std::string &option) const
     {
         return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
     }

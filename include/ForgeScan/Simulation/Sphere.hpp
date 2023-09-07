@@ -53,7 +53,7 @@ struct Sphere : public Primitive
     {
         Extrinsic extr = Extrinsic::Identity();
         Entity::setTranslation(parser, extr);
-        return std::shared_ptr<Sphere>(new Sphere(parser.getCmdOption<float>(Sphere::parse_radius, Sphere::default_radius), extr));
+        return std::shared_ptr<Sphere>(new Sphere(parser.get<float>(Sphere::parse_radius, Sphere::default_radius), extr));
     }
 
 

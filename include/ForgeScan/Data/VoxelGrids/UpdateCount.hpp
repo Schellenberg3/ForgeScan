@@ -22,10 +22,10 @@ public:
     static std::shared_ptr<UpdateCount> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const utilities::ArgParser& parser)
     {
-        return create(properties, parser.getCmdOption<float>("--dist-min", 0),
-                                  parser.getCmdOption<float>("--dist-max", INFINITY),
-                                  parser.getCmdOption<float>("--default-val", 0),
-                                  stringToDataType(parser.getCmdOption("--data-type"), DataType::UINT32_T));
+        return create(properties, parser.get<float>("--dist-min", 0),
+                                  parser.get<float>("--dist-max", INFINITY),
+                                  parser.get<float>("--default-val", 0),
+                                  stringToDataType(parser.get("--data-type"), DataType::UINT32_T));
     }
 
 

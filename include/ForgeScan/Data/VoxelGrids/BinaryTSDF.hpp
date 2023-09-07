@@ -23,9 +23,9 @@ public:
     static std::shared_ptr<BinaryTSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                  const utilities::ArgParser& parser)
     {
-        return create(properties, parser.getCmdOption<float>("--dist-min", -0.2),
-                                  parser.getCmdOption<float>("--dist-max",  0.2),
-                                  stringToDataType(parser.getCmdOption("--data-type"), DataType::FLOAT));
+        return create(properties, parser.get<float>("--dist-min", -0.2),
+                                  parser.get<float>("--dist-max",  0.2),
+                                  stringToDataType(parser.get("--data-type"), DataType::FLOAT));
     }
 
 

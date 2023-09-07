@@ -252,9 +252,9 @@ struct Entity
     /// @param extr Extrinsic to be set.
     static void setTranslation(const utilities::ArgParser& parser, Extrinsic& extr)
     {
-        extr.translation().x() = parser.getCmdOption<float>(Entity::parse_x, Entity::default_translation);
-        extr.translation().y() = parser.getCmdOption<float>(Entity::parse_y, Entity::default_translation);
-        extr.translation().z() = parser.getCmdOption<float>(Entity::parse_z, Entity::default_translation);
+        extr.translation().x() = parser.get<float>(Entity::parse_x, Entity::default_translation);
+        extr.translation().y() = parser.get<float>(Entity::parse_y, Entity::default_translation);
+        extr.translation().z() = parser.get<float>(Entity::parse_z, Entity::default_translation);
     }
 
 
@@ -278,10 +278,10 @@ struct Entity
         Eigen::Vector3f translation = extr.translation();
         extr.setIdentity();
 
-        float scale = parser.cmdOptionExists(Entity::parse_rotation_degrees) ? M_PI / 180.0f : 1;      
-        extr.rotate(Eigen::AngleAxisf(scale * parser.getCmdOption<float>(Entity::parse_rx, Entity::default_rotation), Ray::UnitX()) *
-                    Eigen::AngleAxisf(scale * parser.getCmdOption<float>(Entity::parse_ry, Entity::default_rotation), Ray::UnitY()) *
-                    Eigen::AngleAxisf(scale * parser.getCmdOption<float>(Entity::parse_rz, Entity::default_rotation), Ray::UnitZ()));
+        float scale = parser.has(Entity::parse_rotation_degrees) ? M_PI / 180.0f : 1;      
+        extr.rotate(Eigen::AngleAxisf(scale * parser.get<float>(Entity::parse_rx, Entity::default_rotation), Ray::UnitX()) *
+                    Eigen::AngleAxisf(scale * parser.get<float>(Entity::parse_ry, Entity::default_rotation), Ray::UnitY()) *
+                    Eigen::AngleAxisf(scale * parser.get<float>(Entity::parse_rz, Entity::default_rotation), Ray::UnitZ()));
         extr.translation() = translation;
     }
 

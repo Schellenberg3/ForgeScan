@@ -25,7 +25,7 @@ inline void get_rotation(forge_scan::utilities::ArgParser& parser,
         if (parser[0] != "-h")
         {
             forge_scan::Entity::setRotation(parser, scan_lower_bound);
-            std::string rotation_units = parser.cmdOptionExists("--degrees") ? " [degrees]" : " [radians]";
+            std::string rotation_units = parser.has("--degrees") ? " [degrees]" : " [radians]";
             std::cout << "\nGround Truth will be generated from a lower bound with the following rotation:"
                       << "\n" << scan_lower_bound.rotation()
                       << std::endl;

@@ -28,9 +28,9 @@ public:
     static std::shared_ptr<Axis> create(const std::shared_ptr<const data::Reconstruction>& reconstruction,
                                                 const utilities::ArgParser& parser)
     {
-        float x = parser.getCmdOption<float>("--x", std::nanf("1"));
-        float y = parser.getCmdOption<float>("--y", std::nanf("1"));
-        float z = parser.getCmdOption<float>("--z", std::nanf("1"));
+        float x = parser.get<float>("--x", std::nanf("1"));
+        float y = parser.get<float>("--y", std::nanf("1"));
+        float z = parser.get<float>("--z", std::nanf("1"));
 
         // Default is `--z-axis` so we don't actually check this.
         Direction axis = Direction::UnitZ();
@@ -39,26 +39,26 @@ public:
             axis = Direction(x, y, z);
             axis.normalize();
         }
-        else if (parser.cmdOptionExists("--x-axis"))
+        else if (parser.has("--x-axis"))
         {
             axis = Direction::UnitX();
         }
-        else if (parser.cmdOptionExists("--y-axis"))
+        else if (parser.has("--y-axis"))
         {
             axis = Direction::UnitY();
         }
 
-        int n_views  = std::max(parser.getCmdOption<int>("--n-views",  10), 1);
-        int n_repeat = std::max(parser.getCmdOption<int>("--n-repeat", 1),  1);
+        int n_views  = std::max(parser.get<int>("--n-views",  10), 1);
+        int n_repeat = std::max(parser.get<int>("--n-repeat", 1),  1);
 
         return std::shared_ptr<Axis>(new Axis(reconstruction,
                                               axis, n_views, n_repeat,
-                                              parser.getCmdOption<float>("--radius",     2.5),
-                                              parser.getCmdOption<float>("--height",     0.0),
-                                              parser.getCmdOption<float>("--height_max", 1.0),
-                                              parser.cmdOptionExists("--target-center"),
-                                              parser.cmdOptionExists("--uniform"),
-                                              parser.getCmdOption<float>("--seed", -1)));
+                                              parser.get<float>("--radius",     2.5),
+                                              parser.get<float>("--height",     0.0),
+                                              parser.get<float>("--height_max", 1.0),
+                                              parser.has("--target-center"),
+                                              parser.has("--uniform"),
+                                              parser.get<float>("--seed", -1)));
     }
 
 

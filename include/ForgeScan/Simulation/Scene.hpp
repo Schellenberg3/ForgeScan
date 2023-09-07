@@ -195,7 +195,7 @@ public:
     /// @throw `std::runtime_error` If a shape with the same name already exists.
     void add(const utilities::ArgParser& parser)
     {
-        const std::string name = parser.getCmdOption(Primitive::parse_name);
+        const std::string name = parser.get(Primitive::parse_name);
         if (name.empty())
         {
             throw std::runtime_error("No name provided for the shape.");

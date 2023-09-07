@@ -20,8 +20,8 @@ public:
     static std::shared_ptr<Binary> create(const std::shared_ptr<const Grid::Properties>& properties,
                                              const utilities::ArgParser& parser)
     {
-        return create(properties, parser.getCmdOption<float>("--dist-min", 0),
-                                  parser.getCmdOption<float>("--dist-max", INFINITY));
+        return create(properties, parser.get<float>("--dist-min", 0),
+                                  parser.get<float>("--dist-max", INFINITY));
     }
 
 

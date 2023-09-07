@@ -64,9 +64,9 @@ public:
         Entity::setRotation(parser, extr);
         Entity::setTranslation(parser, extr);
 
-        return std::shared_ptr<Box>(new Box(parser.getCmdOption<float>(Box::parse_l, Box::default_length),
-                                            parser.getCmdOption<float>(Box::parse_w, Box::default_width),
-                                            parser.getCmdOption<float>(Box::parse_h, Box::default_height), extr));
+        return std::shared_ptr<Box>(new Box(parser.get<float>(Box::parse_l, Box::default_length),
+                                            parser.get<float>(Box::parse_w, Box::default_width),
+                                            parser.get<float>(Box::parse_h, Box::default_height), extr));
     }
 
 

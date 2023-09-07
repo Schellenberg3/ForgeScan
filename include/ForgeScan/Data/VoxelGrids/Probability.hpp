@@ -26,15 +26,15 @@ public:
     static std::shared_ptr<Probability> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const utilities::ArgParser& parser)
     {
-        return create(properties, parser.getCmdOption<float>("--dist-min", -0.2),
-                                  parser.getCmdOption<float>("--dist-max",  0.2),
-                                  parser.getCmdOption<float>("--p-max",    0.98f),
-                                  parser.getCmdOption<float>("--p-min",    0.02f),
-                                  parser.getCmdOption<float>("--p-past",   0.50f),
-                                  parser.getCmdOption<float>("--p-sensed", 0.90f),
-                                  parser.getCmdOption<float>("--p-far",    0.15f),
-                                  parser.getCmdOption<float>("--p-init",   0.50f),
-                                  stringToDataType(parser.getCmdOption("--data-type"), DataType::FLOAT));
+        return create(properties, parser.get<float>("--dist-min", -0.2),
+                                  parser.get<float>("--dist-max",  0.2),
+                                  parser.get<float>("--p-max",    0.98f),
+                                  parser.get<float>("--p-min",    0.02f),
+                                  parser.get<float>("--p-past",   0.50f),
+                                  parser.get<float>("--p-sensed", 0.90f),
+                                  parser.get<float>("--p-far",    0.15f),
+                                  parser.get<float>("--p-init",   0.50f),
+                                  stringToDataType(parser.get("--data-type"), DataType::FLOAT));
     }
 
 

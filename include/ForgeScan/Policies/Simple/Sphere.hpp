@@ -28,12 +28,12 @@ public:
                                                 const utilities::ArgParser& parser)
     {
         return std::shared_ptr<Sphere>(new Sphere(reconstruction,
-                                                  parser.getCmdOption<size_t>("--n-views",   10),
-                                                  parser.cmdOptionExists("--uniform"),
-                                                  parser.cmdOptionExists("--unordered"),
-                                                  parser.getCmdOption<float>("--radius",     2.5),
-                                                  parser.getCmdOption<float>("--radius-max", 2.5),
-                                                  parser.getCmdOption<float>("--seed",       -1)));
+                                                  parser.get<size_t>("--n-views",   10),
+                                                  parser.has("--uniform"),
+                                                  parser.has("--unordered"),
+                                                  parser.get<float>("--radius",     2.5),
+                                                  parser.get<float>("--radius-max", 2.5),
+                                                  parser.get<float>("--seed",       -1)));
     }
 
 

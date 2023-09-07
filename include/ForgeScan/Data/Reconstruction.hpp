@@ -98,7 +98,7 @@ public:
     /// @throws `std::invalid_argument` If there is an issue with the Voxel Grid creation process.
     void addChannel(const utilities::ArgParser& parser)
     {
-        std::string channel_name = parser.getCmdOption("--channel-name");
+        std::string channel_name = parser.get("--channel-name");
         if (channel_name.empty())
         {
             throw std::invalid_argument("Must provide a name for the new channel before it may be added to the reconstruction.");

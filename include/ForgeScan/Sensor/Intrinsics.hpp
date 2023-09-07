@@ -79,27 +79,27 @@ struct Intrinsics
     /// @return Shared pointer to an Intrinsics struct.
     static std::shared_ptr<Intrinsics> create(const utilities::ArgParser& parser)
     {
-        if (parser.cmdOptionExists("--fov"))
+        if (parser.has("--fov"))
         {
-            return std::shared_ptr<Intrinsics>(new Intrinsics(parser.getCmdOption<float>("--width", 1280),
-                                                              parser.getCmdOption<float>("--height", 720),
-                                                              parser.getCmdOption<float>("--min-d", 0.0),
-                                                              parser.getCmdOption<float>("--max-d", 10),
-                                                              parser.getCmdOption<float>("--fov",   80)));
+            return std::shared_ptr<Intrinsics>(new Intrinsics(parser.get<float>("--width", 1280),
+                                                              parser.get<float>("--height", 720),
+                                                              parser.get<float>("--min-d", 0.0),
+                                                              parser.get<float>("--max-d", 10),
+                                                              parser.get<float>("--fov",   80)));
         }
-        else if (parser.cmdOptionExists("--d455"))
+        else if (parser.has("--d455"))
         {
-            float scale =  std::min( std::max(parser.getCmdOption<float>("--d455", 1.0f), 0.01f), 2.0f);
+            float scale =  std::min( std::max(parser.get<float>("--d455", 1.0f), 0.01f), 2.0f);
             return std::shared_ptr<Intrinsics>(new Intrinsics(1280 * scale, 780 * scale, 0.6, 6.0, 87, 58));
         }
         else
         {
-            return std::shared_ptr<Intrinsics>(new Intrinsics(parser.getCmdOption<float>("--width", 1280),
-                                                              parser.getCmdOption<float>("--height", 720),
-                                                              parser.getCmdOption<float>("--min-d", 0.0),
-                                                              parser.getCmdOption<float>("--max-d", 10),
-                                                              parser.getCmdOption<float>("--fov-x", 87),
-                                                              parser.getCmdOption<float>("--fov-y", 58)));
+            return std::shared_ptr<Intrinsics>(new Intrinsics(parser.get<float>("--width", 1280),
+                                                              parser.get<float>("--height", 720),
+                                                              parser.get<float>("--min-d", 0.0),
+                                                              parser.get<float>("--max-d", 10),
+                                                              parser.get<float>("--fov-x", 87),
+                                                              parser.get<float>("--fov-y", 58)));
         }
     }
 

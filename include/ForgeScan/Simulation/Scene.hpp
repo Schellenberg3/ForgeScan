@@ -527,25 +527,27 @@ private:
     VoxelOccupancy voxelOccupied(const Point& center, const float& half_res) const
     {
         Point center_primitive_f;
+        VoxelOccupancy result = VoxelOccupancy::FREE;
         for (const auto& item : this->shapes_map)
         {
             if (item.second->isInside(center, this->scan_lower_bound, center_primitive_f))
             {
-                // Fully inside at least one shape.
-                return VoxelOccupancy::OCCUPIED;
+                // Mark as fully inside at least one shape. Can exit after the first is found.
+                result = VoxelOccupancy::OCCUPIED;
+                break;
             }
             else
             {
                 Translation to_surface = (item.second->getNearestSurfacePoint(center_primitive_f) - center_primitive_f).cwiseAbs();
                 if ((to_surface.array() < half_res).all())
                 {
-                    // Clipped by at the shape.
-                    return VoxelOccupancy::CLIPPED;
+                    // Mark as clipped by at least one shape.
+                    // But must keep searching to see if we are inside any. 
+                    result = VoxelOccupancy::CLIPPED;
                 }
             }
         }
-        // Neither inside any shape nor clipped by any shape.
-        return VoxelOccupancy::FREE;
+        return result;
     }
 
 

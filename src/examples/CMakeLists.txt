@@ -1,3 +1,3 @@
-add_subdirectory(Demo)
+add_subdirectory(Reconstruction)
 
-add_subdirectory(GroundTruth)
+add_subdirectory(Scene)

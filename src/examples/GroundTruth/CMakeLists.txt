@@ -1,7 +1,8 @@
 find_package(OpenCV REQUIRED)
 
-set(EXECUTABLE_NAME GroundTruth)
-set(SOURCE_NAME ${EXECUTABLE_NAME}.cpp)
+set(EXECUTABLE_NAME Scene)
+set(SOURCE_NAME     main.cpp)
+
 add_executable(
     ${EXECUTABLE_NAME}
         ${SOURCE_NAME}

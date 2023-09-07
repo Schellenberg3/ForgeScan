@@ -1,5 +1,6 @@
-set(EXECUTABLE_NAME Demo)
-set(SOURCE_NAME ${EXECUTABLE_NAME}.cpp)
+set(EXECUTABLE_NAME Reconstruction)
+set(SOURCE_NAME     main.cpp)
+
 add_executable(
     ${EXECUTABLE_NAME}
         ${SOURCE_NAME}

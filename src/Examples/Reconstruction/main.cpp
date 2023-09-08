@@ -1,10 +1,7 @@
 #include "ForgeScan/Manager.hpp"
-#include "ForgeScan/Metrics/OccupancyConfusion.hpp"
 #include "ForgeScan/Simulation/Scene.hpp"
-#include "ForgeScan/Sensor/ImShow.hpp"
 
-#include "ForgeScan/Utilities/ArgParser.hpp"
-#include "ForgeScan/Utilities/Random.hpp"
+#include "ForgeScan/Sensor/ImShow.hpp"
 #include "ForgeScan/Utilities/Timer.hpp"
 
 
@@ -15,11 +12,14 @@ int main(const int argc, const char **argv)
     const bool  show_im       = parser.has("--show");
     const bool  sphere_policy = parser.has("--sphere");
 
+    std::filesystem::path save_fpath  = parser.get<std::filesystem::path>("--save",  FORGE_SCAN_SHARE_DIR "/Examples/Reconstruction.h5");
+    std::filesystem::path scene_fpath = parser.get<std::filesystem::path>("--scene", FORGE_SCAN_SHARE_DIR "/Examples/Scene.h5");
+
 
     // ************************************ Load the scene ************************************* //
 
     auto scene = forge_scan::simulation::Scene::create();
-    scene->load("GroundTruth.h5");
+    scene->load(scene_fpath);
 
 
     // ************************************ Create a camera ************************************ //
@@ -97,9 +97,10 @@ int main(const int argc, const char **argv)
     }
     timer.stop();
 
-    manager->save("DemoRayTrace.h5");
+    auto updated_fpath = manager->save(save_fpath);
 
     std::cout << "Finished! Process took " << timer.elapsedSeconds() << " seconds." << std::endl;
+    std::cout << "Saved scene at " << updated_fpath << std::endl; 
 
     return 0;
 }

@@ -55,7 +55,11 @@ else()
 endif()
 
 
-# ----- Add project subdirectories -----
+# ----- Setup project compilation -----
+
+add_compile_definitions(FORGE_SCAN_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+add_compile_definitions(FORGE_SCAN_SHARE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/share")
+
 add_subdirectory(src)
 
 

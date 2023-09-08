@@ -1,3 +1,7 @@
+## --------------------------------------------------------------------------------------------- ## 
+## ------------------- DEFINE INTERFACE LIBRARY FOR COMPILIATION DEFINITIONS ------------------- ##
+## --------------------------------------------------------------------------------------------- ## 
+
 set(DEFNITIONS_LIBRARY ${PROJECT_NAME}Definitions)
 add_library(
     ${DEFNITIONS_LIBRARY}

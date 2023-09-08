@@ -11,7 +11,9 @@ include(GNUInstallDirs)
 set(FORGE_SCAN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 
-# ----- Print compiler and toolchain information -----
+## --------------------------------------------------------------------------------------------- ## 
+## ------------------------------- COMPILER OPTIONS AND WARNINGS ------------------------------- ##
+## --------------------------------------------------------------------------------------------- ## 
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     message(STATUS "Using GNU/Clang compiler options")
@@ -26,24 +28,23 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 endif()
 
 
-# ----- Find external packages -----
+## --------------------------------------------------------------------------------------------- ## 
+## ---------------------------------- FIND EXTERNAL PACKAGES ----------------------------------- ##
+## --------------------------------------------------------------------------------------------- ## 
 
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE)
 
-
-# ----- Find HighFive dependency, prefering submodule, if available  -----
-
+# Prefere using the submodule of HighFive, if it exists.
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/HighFive/CMakeLists.txt")
-    # Set a number of HighFive options to off by default. Essentially prevents their examples and
-    # unit tests from being compiled automatically when building.
+    # Set a number of HighFive options to OFF. Prevents examples and unit tests from compiling when
+    # building this project.
     set(HIGHFIVE_UNIT_TESTS OFF CACHE BOOL "Enable unit tests(requires Catch2 to be present)")
     set(HIGHFIVE_BUILD_DOCS OFF CACHE BOOL "Enable documentation building")
     set(HIGHFIVE_EXAMPLES   OFF CACHE BOOL "Compile examples")
     set(USE_BOOST           OFF CACHE BOOL "Enable Boost Support")
 
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/HighFive)
-    set(HIGHFIVE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/deps/HighFive/include)
     message(STATUS "[ForgeScan::Info] Using local sub-module for HighFive.")
 else()
     find_package(HighFive REQUIRED)
@@ -51,7 +52,9 @@ else()
 endif()
 
 
-# ----- Setup project compilation -----
+## --------------------------------------------------------------------------------------------- ## 
+## ----------------------------- DEFINE PROJECT INTERFACE LIBRARY ------------------------------ ##
+## --------------------------------------------------------------------------------------------- ## 
 
 set(INTERFACE_LIBRARY ${PROJECT_NAME})
 add_library(
@@ -85,10 +88,13 @@ set_target_properties(
         CXX_EXTENSIONS NO
 )
 
+# Add project executable targets.
 add_subdirectory(src)
 
 
-# ----- Install this project -----
+## --------------------------------------------------------------------------------------------- ## 
+## ----------------------------- DEFINE PROJECT INSTALLATION STEPS ----------------------------- ##
+## --------------------------------------------------------------------------------------------- ## 
 
 set(FORGE_SCAN_INSTALL_DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
 

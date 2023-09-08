@@ -7,9 +7,12 @@ project(
     "Policies for autonomous, iterative, and fast voxelized geometric reconstruction with simulated depth cameras."
     LANGUAGES C CXX
 )
+include(GNUInstallDirs)
+set(FORGE_SCAN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 # ----- Print compiler and toolchain information -----
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     message(STATUS "Using GNU/Clang compiler options")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
@@ -23,17 +26,10 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 endif()
 
 
-# ----- Set local varialbes -----
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-
-set(FORGESCAN_INCLUDE_DIRS         ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-
 # ----- Find external packages -----
-find_package(Eigen3   REQUIRED NO_MODULE)
-find_package(OpenCV   REQUIRED)
+
+find_package(OpenCV REQUIRED)
+find_package(Eigen3 REQUIRED NO_MODULE)
 
 
 # ----- Find HighFive dependency, prefering submodule, if available  -----
@@ -48,17 +44,46 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/HighFive/CMakeLists.txt")
 
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/HighFive)
     set(HIGHFIVE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/deps/HighFive/include)
-    message("[ForgeScan::Info] Using local sub-module for HighFive.")
+    message(STATUS "[ForgeScan::Info] Using local sub-module for HighFive.")
 else()
     find_package(HighFive REQUIRED)
-    message("[ForgeScan::Info] Searching externally for HighFive.")
+    message(STATUS "[ForgeScan::Info] Using external libaray for HighFive.")
 endif()
 
 
 # ----- Setup project compilation -----
 
-add_compile_definitions(FORGE_SCAN_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
-add_compile_definitions(FORGE_SCAN_SHARE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/share")
+set(INTERFACE_LIBRARY ${PROJECT_NAME})
+add_library(
+    ${INTERFACE_LIBRARY}
+        INTERFACE
+)
+add_library(
+    ${PROJECT_NAME}::${PROJECT_NAME}
+    ALIAS
+        ${INTERFACE_LIBRARY}
+)
+
+target_include_directories(
+    ${INTERFACE_LIBRARY}
+    INTERFACE 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+target_link_libraries(
+    ${INTERFACE_LIBRARY}
+    INTERFACE
+        ${OpenCV_LIBS}
+        Eigen3::Eigen
+        HighFive
+)
+set_target_properties(
+    ${INTERFACE_LIBRARY}
+    PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO
+)
 
 add_subdirectory(src)
 

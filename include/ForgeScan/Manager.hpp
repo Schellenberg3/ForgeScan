@@ -55,26 +55,26 @@ public:
 
     /// @brief Saves the current state of all items (Voxel Grids, Policies, Metrics, etc.) handled by the Manager. 
     /// @param fpath File path and file name for the data.
+    /// @returns Full path to the location the file was saved, including name and file extension.
     /// @note  - If the file path does not already have the `.h5` extension, then this is added.
     /// @note  - If a file name is not provided then this uses a default of `ForgeScan-[TIME STAMP].h5`.
-    void save(std::filesystem::path fpath) const
+    std::filesystem::path save(std::filesystem::path fpath) const
     {
         utilities::checkPathHasFileNameAndExtension(fpath, FS_HDF5_FILE_EXTENSION, "Reconstruction", true);
+        fpath.make_preferred();
+        fpath = std::filesystem::absolute(fpath);
+        if (!std::filesystem::exists(fpath.parent_path()))
+        {
+            std::filesystem::create_directories(fpath.parent_path());
+        }
 
-        try
-        {
-            HighFive::File file(fpath, HighFive::File::Truncate);
-            this->savePolicies(file);
-            this->reconstruction->save(file);
-            this->saveMetrics(file);
-        }
-        catch (const HighFive::Exception& e)
-        {
-            std::stringstream ss("Encountered a HighFive exception while saving file: ");
-            ss << e.what();
-            throw std::runtime_error(ss.str());
-        }
+        HighFive::File file(fpath, HighFive::File::Truncate);
+        this->savePolicies(file);
+        this->reconstruction->save(file);
+        this->saveMetrics(file);
+
         this->makeXDMF(fpath);
+        return fpath;
     }
 
 

@@ -62,10 +62,17 @@ public:
     /// @brief Saves the scene. The records what objects were in the scene and any ground truth
     ///        information that was generated.
     /// @param fpath Location to save the HDF5 file.
+    /// @returns Full path to the location the file was saved, including name and file extension.
     /// @throws Any exception encountered while saving the HDF5 file or XDMF file.
-    void save(std::filesystem::path fpath) const
+    std::filesystem::path save(std::filesystem::path fpath) const
     {
         utilities::checkPathHasFileNameAndExtension(fpath, FS_HDF5_FILE_EXTENSION, "Scene", true);
+        fpath.make_preferred();
+        fpath = std::filesystem::absolute(fpath);
+        if (!std::filesystem::exists(fpath.parent_path()))
+        {
+            std::filesystem::create_directories(fpath.parent_path());
+        }
 
         HighFive::File file(fpath, HighFive::File::Truncate);
         auto g_scene = file.createGroup(FS_HDF5_SCENE_GROUP);
@@ -106,6 +113,7 @@ public:
                 this->makeXDMF(fpath);
             }
         }
+        return fpath;
     }
 
 

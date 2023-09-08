@@ -88,5 +88,56 @@ set_target_properties(
 add_subdirectory(src)
 
 
-# ----- Install this projects -----
-# -----         TODO          -----
+# ----- Install this project -----
+
+set(FORGE_SCAN_INSTALL_DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
+
+install(
+    TARGETS
+        ${INTERFACE_LIBRARY}
+    EXPORT
+        ${PROJECT_NAME}Targets
+    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    ${PROJECT_SOURCE_DIR}/CMake/${PROJECT_NAME}Config.cmake.in
+    ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    INSTALL_DESTINATION
+        ${FORGE_SCAN_INSTALL_DESTINATION}
+)
+write_basic_package_version_file(
+    ${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(
+    EXPORT
+        ${PROJECT_NAME}Targets
+    FILE
+        ${PROJECT_NAME}Targets.cmake
+    NAMESPACE
+        ${PROJECT_NAME}::
+    DESTINATION
+        ${FORGE_SCAN_INSTALL_DESTINATION}
+)
+install(
+    FILES
+        ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+        ${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION
+       ${FORGE_SCAN_INSTALL_DESTINATION}
+)
+install(
+    DIRECTORY
+        ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION
+        include
+)
+
+message(STATUS ${FORGE_SCAN_INSTALL_DESTINATION})
+

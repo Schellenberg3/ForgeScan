@@ -154,7 +154,7 @@ public:
     void policyGenerate()
     {
         this->throwIfNoActivePolicy();
-        return this->policyGetActive()->generate();
+        return this->policyGetActiveNonConst()->generate();
     }
 
 
@@ -165,7 +165,7 @@ public:
     const Extrinsic& policyGetView()
     {
         this->throwIfNoActivePolicy();
-        return this->policyGetActive()->getView();
+        return this->policyGetActiveNonConst()->getView();
     }
 
 
@@ -175,7 +175,7 @@ public:
     bool policyAcceptView()
     {
         this->throwIfNoActivePolicy();
-        bool res = this->policyGetActive()->acceptView(this->policy_total_views);
+        bool res = this->policyGetActiveNonConst()->acceptView(this->policy_total_views);
         if (res)
         {
             ++this->policy_total_views;
@@ -190,7 +190,7 @@ public:
     bool policyRejectView()
     {
         this->throwIfNoActivePolicy();
-        bool res = this->policyGetActive()->rejectView(this->policy_total_views);
+        bool res = this->policyGetActiveNonConst()->rejectView(this->policy_total_views);
         if (res)
         {
             ++this->policy_total_views;
@@ -386,7 +386,7 @@ private:
     /// @throws `std::runtime_error` If no Policies have been added to the Manager.
     /// @note Unlike the public method, this is used to access a non-constant-qualified pointer
     ///       to the active policy. Many of the Manager's public policy methods use this overload. 
-    std::shared_ptr<policies::Policy> policyGetActive()
+    std::shared_ptr<policies::Policy> policyGetActiveNonConst()
     {
         this->throwIfNoActivePolicy();
         return this->policy_vec[active_policy_idx];

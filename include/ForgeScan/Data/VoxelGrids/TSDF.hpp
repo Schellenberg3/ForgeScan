@@ -23,9 +23,9 @@ public:
     static std::shared_ptr<TSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
                                         const utilities::ArgParser& parser)
     {
-        return create(properties, parser.get<float>("--dist-min", -0.2),
-                                  parser.get<float>("--dist-max",  0.2),
-                                  stringToDataType(parser.get("--data-type"), DataType::FLOAT));
+        return create(properties, parser.get<float>(VoxelGrid::parse_d_min, VoxelGrid::default_d_min),
+                                  parser.get<float>(VoxelGrid::parse_d_max, VoxelGrid::default_d_max),
+                                  stringToDataType(parser.get(VoxelGrid::parse_dtype), DataType::FLOAT));
     }
 
 

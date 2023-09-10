@@ -115,7 +115,7 @@ public:
         this->policy_vec.push_back(policies::policy_constructor(parser, this->reconstruction));
         this->policy_vec.back()->setup();
         size_t policy_idx = this->policy_vec.size() - 1;
-        if (parser.has("--set-active"))
+        if (parser.has(policies::Policy::parse_set_active))
         {
             this->active_policy_idx = policy_idx;
         }

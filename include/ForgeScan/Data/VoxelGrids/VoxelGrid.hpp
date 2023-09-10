@@ -120,6 +120,11 @@ public:
     DataVariant default_value;
 
 
+    static const float default_zero, default_infinity, default_d_min, default_d_max;
+
+    static const std::string parse_type, parse_d_min, parse_d_max, parse_default, parse_dtype;
+
+
 protected:
     // ***************************************************************************************** //
     // *                               PROTECTED NESTED CLASS                                  * //
@@ -464,6 +469,29 @@ private:
 const std::string VoxelGrid::UpdateCallable::type_not_supported_message =
     std::string("A Voxel Grid's Update Callable encountered a vector variant of an unsupported data type. "
                 "PLEASE CHECK WHAT YOU HAVE DONE: THIS EXCEPTION SHOULD NEVER BE REACHED.");
+
+
+/// @brief Default values for common distances or initialization values used by derived Voxel Grids.
+const float VoxelGrid::default_zero     = 0.0f,
+            VoxelGrid::default_infinity = INFINITY,
+            VoxelGrid::default_d_min      = -0.2f,
+            VoxelGrid::default_d_max      =  0.2f;
+
+
+/// @brief ArgParser key for the derived VoxelGrid type to create.
+const std::string VoxelGrid::parse_type = "--type";
+
+/// @brief ArgParser key for the minimum update distance.
+const std::string VoxelGrid::parse_d_min = "--d-min";
+
+/// @brief ArgParser key for the maximum update distance.
+const std::string VoxelGrid::parse_d_max = "--d-max";
+
+/// @brief ArgParser key for the default (and initial) values of voxels.
+const std::string VoxelGrid::parse_default = "--default";
+
+/// @brief ArgParser key for the data type of the voxels.
+const std::string VoxelGrid::parse_dtype = "--dtype";
 
 
 } // namespace data

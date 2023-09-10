@@ -18,7 +18,7 @@ namespace metrics {
 inline std::shared_ptr<Metric> metric_constructor(const utilities::ArgParser& args,
                                                   std::shared_ptr<data::Reconstruction> /*reconstruction*/)
 {
-    std::string metric_type = args.get("--metric");
+    std::string metric_type = args.get(Metric::parse_type);
     utilities::strings::toLower(metric_type);
 
     if (metric_type == "occupancyconfusion")

@@ -36,18 +36,18 @@ int main(const int argc, const char **argv)
     if (sphere_policy)
     {
         std::cout << "using Sphere policy..." << std::endl;
-        manager->policyAdd("--set-active --policy-type Sphere --n-views 10 --uniform --unordered --seed 50");
+        manager->policyAdd("--set-active --type Sphere --n-views 10 --uniform --unordered --seed 50");
     }
     else
     {
         std::cout << "using Axis policy..." << std::endl;
-        manager->policyAdd("--set-active --policy-type Axis   --n-views 7 --n-repeat 3 --x -1.0 --y -1.0 --z -1.0 --seed 50 --uniform");
+        manager->policyAdd("--set-active --type Axis   --n-views 7 --n-repeat 3 --x -1.0 --y -1.0 --z -1.0 --seed 50 --uniform");
     }
-    manager->reconstructionAddChannel("--channel-name tsdf           --grid-type TSDF           --data-type double");
-    manager->reconstructionAddChannel("--channel-name update         --grid-type UpdateCount    --data-type uint");
-    manager->reconstructionAddChannel("--channel-name binary         --grid-type Binary         --data-type uint");
-    manager->reconstructionAddChannel("--channel-name binary_tsdf    --grid-type BinaryTSDF     --data-type uint");
-    manager->reconstructionAddChannel("--channel-name probability    --grid-type Probability    --data-type float");
+    manager->reconstructionAddChannel("--name tsdf           --type TSDF           --dtype double");
+    manager->reconstructionAddChannel("--name update         --type UpdateCount    --dtype uint");
+    manager->reconstructionAddChannel("--name binary         --type Binary         --dtype uint");
+    manager->reconstructionAddChannel("--name binary_tsdf    --type BinaryTSDF     --dtype uint");
+    manager->reconstructionAddChannel("--name probability    --type Probability    --dtype float");
 
 
     // ******* Set up an OccupancyConfusion Metric for the Scene, add it to the Manager ******** //

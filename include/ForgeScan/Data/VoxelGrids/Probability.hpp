@@ -26,15 +26,15 @@ public:
     static std::shared_ptr<Probability> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const utilities::ArgParser& parser)
     {
-        return create(properties, parser.get<float>("--dist-min", -0.2),
-                                  parser.get<float>("--dist-max",  0.2),
-                                  parser.get<float>("--p-max",    0.98f),
-                                  parser.get<float>("--p-min",    0.02f),
-                                  parser.get<float>("--p-past",   0.50f),
-                                  parser.get<float>("--p-sensed", 0.90f),
-                                  parser.get<float>("--p-far",    0.15f),
-                                  parser.get<float>("--p-init",   0.50f),
-                                  stringToDataType(parser.get("--data-type"), DataType::FLOAT));
+        return create(properties, parser.get<float>(VoxelGrid::parse_d_min, VoxelGrid::default_d_min),
+                                  parser.get<float>(VoxelGrid::parse_d_max, VoxelGrid::default_d_max),
+                                  parser.get<float>(Probability::parse_p_max,    Probability::default_p_max),
+                                  parser.get<float>(Probability::parse_p_min,    Probability::default_p_min),
+                                  parser.get<float>(Probability::parse_p_past,   Probability::default_p_past),
+                                  parser.get<float>(Probability::parse_p_sensed, Probability::default_p_sensed),
+                                  parser.get<float>(Probability::parse_p_far,    Probability::default_p_far),
+                                  parser.get<float>(Probability::parse_p_init,   Probability::default_p_init),
+                                  stringToDataType(parser.get(VoxelGrid::parse_dtype), DataType::FLOAT));
     }
 
 
@@ -55,12 +55,12 @@ public:
     static std::shared_ptr<Probability> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const float& dist_min = -0.2,
                                                const float& dist_max =  0.2,
-                                               const float& p_max    =  0.98,
-                                               const float& p_min    =  0.02,
-                                               const float& p_past   =  0.50,
-                                               const float& p_sensed =  0.90,
-                                               const float& p_far    =  0.15,
-                                               const float& p_init   =  0.50,
+                                               const float& p_max    =  Probability::default_p_max,
+                                               const float& p_min    =  Probability::default_p_min,
+                                               const float& p_past   =  Probability::default_p_past,
+                                               const float& p_sensed =  Probability::default_p_sensed,
+                                               const float& p_far    =  Probability::default_p_far,
+                                               const float& p_init   =  Probability::default_p_init,
                                                const DataType& type_id = DataType::FLOAT)
     {
         return std::shared_ptr<Probability>(new Probability(properties, dist_min, dist_max,
@@ -90,6 +90,11 @@ public:
         std::visit(this->update_callable, this->data);
         this->update_callable.releaseRayTrace();
     }
+
+
+    static const float default_p_max, default_p_min, default_p_past, default_p_sensed, default_p_far, default_p_init;
+
+    static const std::string parse_p_max, parse_p_min, parse_p_past, parse_p_sensed, parse_p_far, parse_p_init;
 
 
 private:
@@ -241,6 +246,34 @@ private:
     UpdateCallable update_callable;
 };
 
+
+/// @brief Default occupation probability threshold values.
+const float Probability::default_p_max    = 0.98f,
+            Probability::default_p_min    = 0.02f;
+
+/// @brief Default occupation probability values at specific positions along a ray.
+const float Probability::default_p_past   = 0.50f,
+            Probability::default_p_sensed = 0.90f,
+            Probability::default_p_far    = 0.15f,
+            Probability::default_p_init   = 0.50f;
+
+/// @brief ArgParser key for the maximum occupation probability a voxel may have.
+const std::string Probability::parse_p_max = "--p-max"; 
+
+/// @brief ArgParser key for the minimum occupation probability a voxel may have.
+const std::string Probability::parse_p_min = "--p-min"; 
+
+/// @brief ArgParser key for the occupation probability at d-min.
+const std::string Probability::parse_p_past = "--p-past"; 
+
+/// @brief ArgParser key for the occupation probability at the sensed point.
+const std::string Probability::parse_p_sensed = "--p-sensed"; 
+
+/// @brief ArgParser key for the occupation probability at d-max and above.
+const std::string Probability::parse_p_far = "--p-far"; 
+
+/// @brief ArgParser key for the occupation probability to initialize a voxel to.
+const std::string Probability::parse_p_init = "--p-init";
 
 
 } // namespace data

@@ -24,7 +24,7 @@ namespace policies {
 inline std::shared_ptr<Policy> policy_constructor(const utilities::ArgParser& parser,
                                                   std::shared_ptr<const data::Reconstruction> reconstruction)
 {
-    std::string policy_type = parser.get("--policy-type");
+    std::string policy_type = parser.get(Policy::parse_type);
     utilities::strings::toLower(policy_type);
 
     if (policy_type == "sphere")

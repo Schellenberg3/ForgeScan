@@ -22,10 +22,10 @@ public:
     static std::shared_ptr<UpdateCount> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const utilities::ArgParser& parser)
     {
-        return create(properties, parser.get<float>("--dist-min", 0),
-                                  parser.get<float>("--dist-max", INFINITY),
-                                  parser.get<float>("--default-val", 0),
-                                  stringToDataType(parser.get("--data-type"), DataType::UINT32_T));
+        return create(properties, parser.get<float>(VoxelGrid::parse_d_min,   VoxelGrid::default_zero),
+                                  parser.get<float>(VoxelGrid::parse_d_max,   VoxelGrid::default_infinity),
+                                  parser.get<float>(VoxelGrid::parse_default, VoxelGrid::default_zero),
+                                  stringToDataType(parser.get(VoxelGrid::parse_dtype), DataType::UINT32_T));
     }
 
 

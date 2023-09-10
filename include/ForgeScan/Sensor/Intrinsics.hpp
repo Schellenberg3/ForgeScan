@@ -79,30 +79,43 @@ struct Intrinsics
     /// @return Shared pointer to an Intrinsics struct.
     static std::shared_ptr<Intrinsics> create(const utilities::ArgParser& parser)
     {
-        if (parser.has("--fov"))
+        if (parser.has(Intrinsics::parse_d455))
         {
-            return std::shared_ptr<Intrinsics>(new Intrinsics(parser.get<float>("--width", 1280),
-                                                              parser.get<float>("--height", 720),
-                                                              parser.get<float>("--min-d", 0.0),
-                                                              parser.get<float>("--max-d", 10),
-                                                              parser.get<float>("--fov",   80)));
+            float scale =  std::min( std::max(parser.get<float>(Intrinsics::parse_d455, 1.0f), 0.01f), 2.0f);
+            return std::shared_ptr<Intrinsics>(new Intrinsics(Intrinsics::default_width  * scale, 
+                                                              Intrinsics::default_height * scale,
+                                                              Intrinsics::realsense_min_d,
+                                                              Intrinsics::realsense_max_d,
+                                                              Intrinsics::default_fov_x,
+                                                              Intrinsics::default_fov_y));
         }
-        else if (parser.has("--d455"))
+        else if (parser.has(Intrinsics::parse_fov))
         {
-            float scale =  std::min( std::max(parser.get<float>("--d455", 1.0f), 0.01f), 2.0f);
-            return std::shared_ptr<Intrinsics>(new Intrinsics(1280 * scale, 780 * scale, 0.6, 6.0, 87, 58));
+            return std::shared_ptr<Intrinsics>(new Intrinsics(parser.get<size_t>(Intrinsics::parse_width,  Intrinsics::default_width),
+                                                              parser.get<size_t>(Intrinsics::parse_height, Intrinsics::default_height),
+                                                              parser.get<float>(Intrinsics::parse_min_d,   Intrinsics::default_min_d),
+                                                              parser.get<float>(Intrinsics::parse_max_d,   Intrinsics::default_max_d),
+                                                              parser.get<float>(Intrinsics::parse_fov,     Intrinsics::default_fov)));
         }
         else
         {
-            return std::shared_ptr<Intrinsics>(new Intrinsics(parser.get<float>("--width", 1280),
-                                                              parser.get<float>("--height", 720),
-                                                              parser.get<float>("--min-d", 0.0),
-                                                              parser.get<float>("--max-d", 10),
-                                                              parser.get<float>("--fov-x", 87),
-                                                              parser.get<float>("--fov-y", 58)));
+            return std::shared_ptr<Intrinsics>(new Intrinsics(parser.get<size_t>(Intrinsics::parse_width,  Intrinsics::default_width),
+                                                              parser.get<size_t>(Intrinsics::parse_height, Intrinsics::default_height),
+                                                              parser.get<float>(Intrinsics::parse_min_d,   Intrinsics::default_min_d),
+                                                              parser.get<float>(Intrinsics::parse_max_d,   Intrinsics::default_max_d),
+                                                              parser.get<float>(Intrinsics::parse_fov_x,   Intrinsics::default_fov_x),
+                                                              parser.get<float>(Intrinsics::parse_fov_y,   Intrinsics::default_fov_y)));
         }
     }
 
+
+    static const size_t default_width, default_height;
+    
+    static const float default_min_d, default_max_d, default_fov, default_fov_x, default_fov_y,
+                       realsense_min_d, realsense_max_d;
+
+    static const std::string parse_width, parse_height, parse_min_d, parse_max_d,
+                             parse_fov, parse_fov_x, parse_fov_y, parse_d455;
 
 
     // ***************************************************************************************** //
@@ -254,6 +267,41 @@ private:
         return 0.5 * distance  / std::tan(0.5 * (M_PI / 180) * fov_deg);
     }
 };
+
+
+/// @brief Default width and height for pixels on a sensor. Uses RealSense d455 properties.
+const size_t Intrinsics::default_width = 1280,
+             Intrinsics::default_height = 720;
+
+/// @brief Default minimum and maximum depth for a sensor.
+const float Intrinsics::default_min_d = 0.0f,
+            Intrinsics::default_max_d = 10.0f;
+
+/// @brief Default minimum and maximum depth for a RealSense d455.
+const float Intrinsics::realsense_min_d = 0.6f,
+            Intrinsics::realsense_max_d = 6.0f;
+
+/// @brief Default field of view properties for a sensor. Uses RealSense d455 properties.
+const float Intrinsics::default_fov = 80.0f,
+            Intrinsics::default_fov_x = 87.0f,
+            Intrinsics::default_fov_y = 58.0f;
+
+/// @brief ArgParser key for number of pixels in the X (width) and Y (height) directions.
+const std::string Intrinsics::parse_width = "--width",
+                  Intrinsics::parse_height = "--height";
+
+/// @brief ArgParser key for minimum and maximum depth.
+const std::string Intrinsics::parse_min_d = "--min-d",
+                  Intrinsics::parse_max_d = "--max-d";
+
+/// @brief ArgParser key for field of view properties.
+const std::string Intrinsics::parse_fov = "--fov",
+                  Intrinsics::parse_fov_x = "--fov-x",
+                  Intrinsics::parse_fov_y = "--fov-y";
+
+/// @brief ArgParser flag to use Intel RealSense d455 properties and ArgParser key for how
+///        much to scale the number of pixels used.
+const std::string Intrinsics::parse_d455 = "--d455";
 
 
 } // namespace sensor

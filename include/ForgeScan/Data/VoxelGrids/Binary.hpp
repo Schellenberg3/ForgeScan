@@ -20,8 +20,8 @@ public:
     static std::shared_ptr<Binary> create(const std::shared_ptr<const Grid::Properties>& properties,
                                              const utilities::ArgParser& parser)
     {
-        return create(properties, parser.get<float>("--dist-min", 0),
-                                  parser.get<float>("--dist-max", INFINITY));
+        return create(properties, parser.get<float>(VoxelGrid::parse_d_min, VoxelGrid::default_zero),
+                                  parser.get<float>(VoxelGrid::parse_d_max, VoxelGrid::default_infinity));
     }
 
 

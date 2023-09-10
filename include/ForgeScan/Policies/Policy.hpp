@@ -85,6 +85,12 @@ public:
     virtual void generate() = 0;
 
 
+    static const int default_n_views;
+
+    static const float default_seed; 
+
+    static const std::string parse_set_active, parse_type, parse_n_views, parse_seed;
+
 
 protected:
     /* ***************************************************************************************** */
@@ -219,6 +225,28 @@ protected:
     ///        channel which they require.
     std::shared_ptr<const data::Reconstruction> reconstruction;
 };
+
+
+/// @brief Default number of views for a Policy to collect.
+const int Policy::default_n_views = 10;
+
+/// @brief Default RNG seed for a Policy to use. 
+const float Policy::default_seed = -1;
+
+/// @brief ArgParser key for the flag to set a new Policy as the active one.
+const std::string Policy::parse_set_active = "--set-active";
+
+/// @brief ArgParser key for the type of Policy to add.
+const std::string Policy::parse_type = "--type";
+
+/// @brief ArgParser key for number of views a policy should collect. Policies may generate more
+///        views than this but some require an expected number up-front or use this to judge if
+///        they have reached completion.
+const std::string Policy::parse_n_views = "--n-views";
+
+/// @brief ArgParser key for the seed to use to initialize the Policy's RNG.
+///        Negative values indicate the program should use a random RNG seed.
+const std::string Policy::parse_seed = "--seed";
 
 
 } // namespace policies

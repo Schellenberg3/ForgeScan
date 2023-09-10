@@ -98,7 +98,7 @@ public:
     /// @throws `std::invalid_argument` If there is an issue with the Voxel Grid creation process.
     void addChannel(const utilities::ArgParser& parser)
     {
-        std::string channel_name = parser.get("--channel-name");
+        std::string channel_name = parser.get(Reconstruction::parse_name);
         if (channel_name.empty())
         {
             throw std::invalid_argument("Must provide a name for the new channel before it may be added to the reconstruction.");
@@ -156,6 +156,8 @@ public:
 
     /// @brief Shared, constant Grid Properties used by all Voxel Grids. 
     const std::shared_ptr<const Grid::Properties> grid_properties;
+
+    static const std::string parse_name;
 
 
 private:
@@ -335,6 +337,10 @@ private:
     /// @brief Stores an ray trace used for performing updates on each Voxel Grid. 
     std::shared_ptr<Trace> ray_trace;
 };
+
+
+/// @brief ArgParser key for the name of the Data Channel to be add.
+const std::string Reconstruction::parse_name = "--name";
 
 
 } // namespace data

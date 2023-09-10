@@ -28,38 +28,47 @@ public:
     static std::shared_ptr<Axis> create(const std::shared_ptr<const data::Reconstruction>& reconstruction,
                                                 const utilities::ArgParser& parser)
     {
-        float x = parser.get<float>("--x", std::nanf("1"));
-        float y = parser.get<float>("--y", std::nanf("1"));
-        float z = parser.get<float>("--z", std::nanf("1"));
-
-        // Default is `--z-axis` so we don't actually check this.
+        // Assume that Z-axis is requested.
         Direction axis = Direction::UnitZ();
-        if ( !(std::isnan(x) || std::isnan(y) || std::isnan(z)) )
+
+        // Look for user-specified axis then check if the a unit axis other than Z was requested.
+        float x = parser.get<float>(Axis::parse_x, Axis::default_axis_val);
+        float y = parser.get<float>(Axis::parse_y, Axis::default_axis_val);
+        float z = parser.get<float>(Axis::parse_z, Axis::default_axis_val);
+        if (x != Axis::default_axis_val || y != Axis::default_axis_val ||  z != Axis::default_axis_val)
         {
             axis = Direction(x, y, z);
             axis.normalize();
         }
-        else if (parser.has("--x-axis"))
+        else if (parser.has(Axis::parse_x_axis))
         {
             axis = Direction::UnitX();
         }
-        else if (parser.has("--y-axis"))
+        else if (parser.has(Axis::parse_y_axis))
         {
             axis = Direction::UnitY();
         }
 
-        int n_views  = std::max(parser.get<int>("--n-views",  10), 1);
-        int n_repeat = std::max(parser.get<int>("--n-repeat", 1),  1);
+        int n_views  = std::max(parser.get<int>(Policy::parse_n_views,  Policy::default_n_views), 1);
+        int n_repeat = std::max(parser.get<int>(Axis::parse_n_repeat, 1),  1);
 
         return std::shared_ptr<Axis>(new Axis(reconstruction,
                                               axis, n_views, n_repeat,
-                                              parser.get<float>("--radius",     2.5),
-                                              parser.get<float>("--height",     0.0),
-                                              parser.get<float>("--height_max", 1.0),
-                                              parser.has("--target-center"),
-                                              parser.has("--uniform"),
-                                              parser.get<float>("--seed", -1)));
+                                              parser.get<float>(Axis::parse_r,     Axis::default_r),
+                                              parser.get<float>(Axis::parse_h,     Axis::default_h),
+                                              parser.get<float>(Axis::parse_h_max, Axis::default_h_max),
+                                              parser.has(Axis::parse_target_center),
+                                              parser.has(Axis::parse_uniform),
+                                              parser.get<float>(Policy::parse_seed, Policy::default_seed)));
     }
+
+
+    static const int default_n_repeat; 
+
+    static const float default_axis_val, default_r, default_h, default_h_max;
+
+    static const std::string parse_r, parse_h, parse_h_max, parse_target_center, parse_uniform, parse_n_repeat,
+                             parse_x_axis, parse_y_axis, parse_z_axis, parse_x, parse_y, parse_z;
 
 
 protected:
@@ -325,6 +334,46 @@ protected:
     ///        orienting the camera.
     std::function<void(Direction&, const Direction&, const Direction&)> call_for_z_axis;
 };
+
+
+/// @brief Default number of repetitions about the sampling axis.
+const int Axis::default_n_repeat = 1;
+
+/// @brief Default value for each unit direction of a user-specified axis.
+const float Axis::default_axis_val = 0.0f;
+
+/// @brief Default distance from the sampling axis to generate views at.
+const float Axis::default_r = 2.5;
+
+/// @brief Default minimum and maximum heights along sampling axis to generate views at.
+const float Axis::default_h = 0.0f, Axis::default_h_max = 2.5f;
+
+/// @brief ArgParser key for the distance from the sampling axis to generate views at.
+const std::string Axis::parse_r = "--r";
+
+/// @brief ArgParser key for the minimum and maximum heights along sampling axis to generate views at.
+const std::string Axis::parse_h = "--h", Axis::parse_h_max = "--h-max";
+
+/// @brief ArgParser flag to always point the sensor at the origin of the Grid. If not provided
+///        the sensor is pointed at the axis at the same height as the sensor.
+const std::string Axis::parse_target_center = "--target-center";
+
+/// @brief ArgParser flag to sample in uniform rotations around the axis.
+const std::string Axis::parse_uniform = "--uniform";
+
+/// @brief ArgParser key for the number of rotations to make about the axis. Rotations are
+///        linearly spaced between `h` and `h_max`
+const std::string Axis::parse_n_repeat = "--n-repeat";
+
+/// @brief ArgParser flags to use the specified cartesian axis (in the Grid's frame) as the rotation axis.
+const std::string Axis::parse_x_axis = "--x-axis",
+                  Axis::parse_y_axis = "--y-axis",
+                  Axis::parse_z_axis = "--z-axis";
+
+/// @brief ArgPArser keys for a user-defined rotation axis (in the Grid's frame).
+const std::string Axis::parse_x = "--x",
+                  Axis::parse_y = "--y",
+                  Axis::parse_z = "--z";
 
 
 } // namespace policies

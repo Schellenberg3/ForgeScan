@@ -28,13 +28,18 @@ public:
                                                 const utilities::ArgParser& parser)
     {
         return std::shared_ptr<Sphere>(new Sphere(reconstruction,
-                                                  parser.get<size_t>("--n-views",   10),
-                                                  parser.has("--uniform"),
-                                                  parser.has("--unordered"),
-                                                  parser.get<float>("--radius",     2.5),
-                                                  parser.get<float>("--radius-max", 2.5),
-                                                  parser.get<float>("--seed",       -1)));
+                                                  parser.get<size_t>(Policy::parse_n_views, Policy::default_n_views),
+                                                  parser.has(Sphere::parse_uniform),
+                                                  parser.has(Sphere::parse_unordered),
+                                                  parser.get<float>(Sphere::parse_r,     Sphere::default_r),
+                                                  parser.get<float>(Sphere::parse_r_max, Sphere::default_r_max),
+                                                  parser.get<float>(Policy::parse_seed,  Policy::default_seed)));
     }
+
+
+    static const float default_r, default_r_max;
+
+    static const std::string parse_uniform, parse_unordered, parse_r, parse_r_max;
 
 
 protected:
@@ -216,6 +221,23 @@ protected:
     /// @brief Abstracts which method - random or ordered, uniform - is used when `generate` is called.
     std::function<void(Extrinsic&)> call_on_generate;
 };
+
+
+/// @brief Default radius (and maximum radius) for view to be sampled from.
+const float Sphere::default_r = 2.5, Sphere::default_r_max = 2.5;
+
+/// @brief ArgParser flag to use a uniform sampling method. 
+const std::string Sphere::parse_uniform = "--uniform";
+
+/// @brief ArgParser flag to select the uniform views in an unordered manner.
+const std::string Sphere::parse_unordered = "--unordered";
+
+/// @brief ArgParser key for the sensor distance from the grid center.
+const std::string Sphere::parse_r = "--r";
+
+/// @brief ArgParser key for the maximum distance between the sensor and grid center.
+///        Used in the random sampling mode.
+const std::string Sphere::parse_r_max = "--r-max";
 
 
 } // namespace policies

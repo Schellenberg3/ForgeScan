@@ -35,6 +35,7 @@ class Metric
 public:
     virtual ~Metric() { }
 
+    static const std::string parse_type;
 
 protected:
     // ***************************************************************************************** //
@@ -136,6 +137,10 @@ protected:
     ///        channel which they require.
     const std::shared_ptr<data::Reconstruction> reconstruction{nullptr};
 };
+
+
+/// @brief ArgParser key for the type of Metric to add.
+const std::string Metric::parse_type = "--type";
 
 
 } // namespace metrics

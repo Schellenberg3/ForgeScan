@@ -61,6 +61,7 @@ public:
 
     /// @brief Prompts the user to provide input.
     /// @param prompt Optional prompt to display on the line before user input is collected.
+    /// @note This clears any existing tokens the ArgParser had stored.
     void getInput(const std::string& prompt = ArgParser::empty_string)
     {
         if (prompt != ArgParser::empty_string)
@@ -74,6 +75,7 @@ public:
 
     /// @brief Changes the parsed arguments of the ArgParser to a new string.
     /// @param args A string of arguments deliminated by a space.
+    /// @note This clears any existing tokens the ArgParser had stored.
     void setArgs(const std::string& args)
     {
         this->tokens.clear();
@@ -208,7 +210,7 @@ public:
 
     /// @brief True if the ArgParser has arguments to be queried. False if it is empty. This can
     ///        check if the line that was parsed was empty.
-    bool hasArgs()
+    bool hasArgs() const
     {
         return !(this->tokens.size() <= 1 && this->tokens[0] == ArgParser::empty_string);
     }

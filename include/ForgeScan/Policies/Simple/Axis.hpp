@@ -28,6 +28,9 @@ public:
     static std::shared_ptr<Axis> create(const std::shared_ptr<const data::Reconstruction>& reconstruction,
                                                 const utilities::ArgParser& parser)
     {
+        // Get the seed (in case we need a random axis).
+        float seed = parser.get<float>(Policy::parse_seed, Policy::default_seed);
+
         // Assume that Z-axis is requested.
         Direction axis = Direction::UnitZ();
 
@@ -48,6 +51,15 @@ public:
         {
             axis = Direction::UnitY();
         }
+        else if (parser.has(Axis::parse_random_axis))
+        {
+            std::random_device rd;
+            unsigned int gen_seed = seed > 0 ? static_cast<unsigned int>(seed) : rd();
+            std::mt19937 gen(gen_seed);
+            std::uniform_real_distribution<float> dist(-1.0, 1.0);
+            axis = Direction::NullaryExpr([&](){return dist(gen);});
+            axis.normalize();
+        }
 
         int n_views  = std::max(parser.get<int>(Policy::parse_n_views,  Policy::default_n_views), 1);
         int n_repeat = std::max(parser.get<int>(Axis::parse_n_repeat, 1),  1);
@@ -59,7 +71,7 @@ public:
                                               parser.get<float>(Axis::parse_h_max, Axis::default_h_max),
                                               parser.has(Axis::parse_target_center),
                                               parser.has(Axis::parse_uniform),
-                                              parser.get<float>(Policy::parse_seed, Policy::default_seed)));
+                                              seed));
     }
 
 
@@ -82,7 +94,7 @@ public:
     static const float default_axis_val, default_r, default_h, default_h_max;
 
     static const std::string parse_r, parse_h, parse_h_max, parse_target_center, parse_uniform, parse_n_repeat,
-                             parse_x_axis, parse_y_axis, parse_z_axis, parse_x, parse_y, parse_z;
+                             parse_x_axis, parse_y_axis, parse_z_axis, parse_random_axis, parse_x, parse_y, parse_z;
 
     static const std::string help_string_basic, help_string_1, help_string_2, default_arguments;
 
@@ -244,7 +256,7 @@ protected:
     {
         std::string method = this->start_uniform ? "uniform" : "random";
         out << this->getTypeName() << " Policy sampling at around the axis " << this->axis.transpose() << " using a " << method 
-            << " at a radius of " << this->radius;
+            << " method at a radius of " << this->radius;
         if (this->start_uniform)
         {
             out << " for " << this->n_repeat << " repetitions of " << this->n_views << " views evenly spaced";
@@ -399,7 +411,8 @@ const std::string Axis::parse_n_repeat = "--n-repeat";
 /// @brief ArgParser flags to use the specified cartesian axis (in the Grid's frame) as the rotation axis.
 const std::string Axis::parse_x_axis = "--x-axis",
                   Axis::parse_y_axis = "--y-axis",
-                  Axis::parse_z_axis = "--z-axis";
+                  Axis::parse_z_axis = "--z-axis",
+                  Axis::parse_random_axis = "--random-axis";
 
 /// @brief ArgPArser keys for a user-defined rotation axis (in the Grid's frame).
 const std::string Axis::parse_x = "--x",
@@ -419,16 +432,15 @@ const std::string Axis::help_string_basic =
 
 /// @brief String explaining what arguments this class accepts when using a cartesian axis.
 const std::string Axis::help_string_1 =
-    "["  + Policy::parse_n_views + " <number of views>]" +
-    " <" + Axis::parse_x_axis + " | " + 
-           Axis::parse_y_axis + " | " + 
-           Axis::parse_z + ">";
+    "<" + Axis::parse_x_axis + " | " +
+          Axis::parse_y_axis + " | " +
+          Axis::parse_z_axis + " | " +
+          Axis::parse_random_axis + ">";
 
 
 /// @brief String explaining what arguments this class accepts when using a user-specified axis.
 const std::string Axis::help_string_2 =
-    "["  + Policy::parse_n_views + " <number of views>]" +
-    " [" + Axis::parse_x      + " <axis X component>]" + 
+    "[" + Axis::parse_x      + " <axis X component>]" + 
     " [" + Axis::parse_y      + " <axis Y component>]" + 
     " [" + Axis::parse_z      + " <axis Z component>]";
 

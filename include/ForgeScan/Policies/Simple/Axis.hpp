@@ -1,8 +1,9 @@
 #ifndef FORGE_SCAN_POLICIES_SIMPLE_AXIS_POLICY_HPP
 #define FORGE_SCAN_POLICIES_SIMPLE_AXIS_POLICY_HPP
 
-#include <limits>
 #include <functional>
+#include <limits>
+#include <list>
 
 #include "ForgeScan/Policies/Policy.hpp"
 
@@ -71,6 +72,7 @@ public:
                                               parser.get<float>(Axis::parse_h_max, Axis::default_h_max),
                                               parser.has(Axis::parse_target_center),
                                               parser.has(Axis::parse_uniform),
+                                              parser.has(Axis::parse_change_random),
                                               seed));
     }
 
@@ -93,8 +95,10 @@ public:
 
     static const float default_axis_val, default_r, default_h, default_h_max;
 
-    static const std::string parse_r, parse_h, parse_h_max, parse_target_center, parse_uniform, parse_n_repeat,
-                             parse_x_axis, parse_y_axis, parse_z_axis, parse_random_axis, parse_x, parse_y, parse_z;
+    static const std::string parse_r, parse_h, parse_h_max, parse_target_center,
+                             parse_uniform, parse_n_repeat, parse_change_random,
+                             parse_x_axis, parse_y_axis, parse_z_axis, parse_random_axis,
+                             parse_x, parse_y, parse_z;
 
     static const std::string help_string_basic, help_string_1, help_string_2, default_arguments;
 
@@ -123,10 +127,9 @@ protected:
                   const float& height_max,
                   const bool& target_center,
                   const bool& uniform,
+                  const bool& change_random,
                   const float& seed)
         : Policy(reconstruction),
-          axis(axis),
-          axis_to_grid_center(this->get_axis_to_grid_center()),
           n_views(n_views),
           n_repeat(n_repeat),
           n_view_requested(this->n_views * this->n_repeat),
@@ -135,11 +138,21 @@ protected:
           height_max(std::max(height, height_max)),
           start_uniform(uniform),
           target_center(target_center),
+          change_random(change_random),
           seed(seed),
           sample(this->seed)
     {
         assert(this->n_repeat >= 1 && this->n_views >= 1 &&
                "Policy cannot operate if either n_view or n_repeat equal zero.");
+
+        this->axis.push_back(axis);
+        this->axis_to_grid_center = this->get_axis_to_grid_center();
+
+        if (this->change_random)
+        {
+            this->height = 0.0f;
+            this->height_max = 0.0f;
+        }
 
         this->height_linspace.reserve(this->n_repeat);
         float dh = this->n_repeat > 1 ? (this->height_max - this->height) / (this->n_repeat - 1) : 0;
@@ -149,11 +162,11 @@ protected:
             this->height_linspace[i] = h;
             h += dh;
         }
-
+    
         this->call_on_generate = this->start_uniform ? std::bind(&Axis::generateUniform,
-                                                                  this, std::placeholders::_1) :
+                                                                  this, std::placeholders::_1, std::placeholders::_2) :
                                                        std::bind(&Axis::generateRandom,  
-                                                                  this, std::placeholders::_1);
+                                                                  this, std::placeholders::_1, std::placeholders::_2);
 
 
         this->call_for_z_axis = this->target_center ? std::bind(&Axis::targetAtCenter, this,
@@ -171,15 +184,15 @@ protected:
     /// @return 
     Rotation get_axis_to_grid_center()
     {
-        // Rotation rot_1 = Eigen::Quaternionf().setFromTwoVectors(this->axis, Direction::UnitX()).matrix();
-        return Eigen::Quaternionf().setFromTwoVectors(Direction::UnitZ(), this->axis).matrix();
+        return Eigen::Quaternionf().setFromTwoVectors(Direction::UnitZ(), this->axis.back()).matrix();
     }
 
 
     /// @brief Generate the position for a random view along the axis between the heigh bounds.
     /// @param dest Extrinsic matrix in which the position is stored.
+    /// @param view_number[unused] The view number being generated.
     /// @note When returned `dest` is still in the Axis's reference frame.
-    void generateRandom(Extrinsic& dest)
+    void generateRandom(Extrinsic& dest, const size_t&)
     {
         float theta = this->sample.uniform() * 2 * M_PI;
 
@@ -191,16 +204,15 @@ protected:
 
     /// @brief Generates the next uniform position for a view along the axis.
     /// @param dest Extrinsic matrix in which the position is stored.
+    /// @param view_number The view number being generated.
     /// @note When returned `dest` is still in the Axis's reference frame.
-    void generateUniform(Extrinsic& dest)
+    void generateUniform(Extrinsic& dest, const size_t& view_number)
     {
-        size_t view_number = this->numAccepted() + this->numRejected();
-
         if (this->n_view_requested <= view_number)
         {
             // One we have reached the last view we may generate we switch to random sampling.
-            this->call_on_generate = std::bind(&Axis::generateRandom, this, std::placeholders::_1);
-            this->generateRandom(dest);
+            this->call_on_generate = std::bind(&Axis::generateRandom, this, std::placeholders::_1, std::placeholders::_2);
+            this->generateRandom(dest, view_number);
             return;
         }
 
@@ -255,7 +267,7 @@ protected:
     void print(std::ostream& out) const override final
     {
         std::string method = this->start_uniform ? "uniform" : "random";
-        out << this->getTypeName() << " Policy sampling at around the axis " << this->axis.transpose() << " using a " << method 
+        out << this->getTypeName() << " Policy sampling at around the axis " << this->axis.back().transpose() << " using a " << method 
             << " method at a radius of " << this->radius;
         if (this->start_uniform)
         {
@@ -274,8 +286,18 @@ protected:
      
         Extrinsic extr = Extrinsic::Identity();
         
+        size_t view_number = this->numAccepted() + this->numRejected();
+        if (this->change_random &&
+            view_number > 0 &&
+            view_number % this->n_views == 0)
+        {
+            this->axis.push_back(Direction::NullaryExpr([this](){return this->sample.uniform();}));
+            this->axis.back().normalize();
+            this->axis_to_grid_center = this->get_axis_to_grid_center();
+        }
+
         // Generate the position in the Axis reference frame and store the target for the axis.
-        this->call_on_generate(extr);
+        this->call_on_generate(extr, view_number);
         Point target_axis = Point(0.0, 0.0, extr.translation().z());
 
         // Rotate the position to the Grid Center's reference frame.
@@ -285,8 +307,8 @@ protected:
         Direction z_axis;
         this->call_for_z_axis(z_axis, extr.translation(), target_axis);
 
-        extr.matrix().array().block<3, 1>(0, 0) = this->axis;
-        extr.matrix().array().block<3, 1>(0, 1) = z_axis.cross(this->axis);
+        extr.matrix().array().block<3, 1>(0, 0) = this->axis.back();
+        extr.matrix().array().block<3, 1>(0, 1) = z_axis.cross(this->axis.back());
         extr.matrix().array().block<3, 1>(0, 2) = z_axis;
 
         // Translate the position to the Grid Lower Bound's reference frame.
@@ -308,7 +330,6 @@ protected:
     {
         auto g_rand_sph = g_policy.createGroup(this->getTypeName());
 
-        g_rand_sph.createAttribute("axis",       this->axis);
         g_rand_sph.createAttribute("n_views",    this->n_views);
         g_rand_sph.createAttribute("n_repeat",   this->n_repeat);
         g_rand_sph.createAttribute("radius",     this->radius);
@@ -319,6 +340,17 @@ protected:
         g_rand_sph.createAttribute("start_uniform", static_cast<uint8_t>(this->start_uniform));
         g_rand_sph.createAttribute("seed", this->seed);
         g_rand_sph.createAttribute("completed", static_cast<uint8_t>(this->isComplete()));
+
+        int n = 0;
+        const std::string hdf5_data_root = "/" FS_HDF5_POLICY_GROUP "/" + this->getTypeName() + "/axis";
+        std::stringstream ss;
+        for (const auto& ax: this->axis)
+        {
+            ss << hdf5_data_root << "/" << n;
+            H5Easy::dump(file, ss.str(), ax);
+            ss.str(std::string());
+            ++n;
+        }
 
         Policy::saveRejectedViews(file, this->getTypeName());
         Policy::saveAcceptedViews(file, this->getTypeName());
@@ -331,11 +363,12 @@ protected:
     // ***************************************************************************************** //
 
 
-    /// @brief The axis about which to sample. This is the Z-axis of the sampling reference frame.
-    const Direction axis;
+    /// @brief list of the axis about which to sample. The last item is the current axis.
+    ///        This is the Z-axis of the sampling reference frame.
+    std::list<Direction> axis;
 
     /// @brief Rotation from the sampling View Axis's reference frame to the Grid Center's reference frame.
-    const Rotation axis_to_grid_center;
+    Rotation axis_to_grid_center;
 
     /// @brief Number of views per ring.
     const size_t n_views;
@@ -350,10 +383,10 @@ protected:
     const float radius;
 
     /// @brief Height of the first ring.
-    const float height;
+    float height;
 
     /// @brief Height of the last ring.
-    const float height_max;
+    float height_max;
 
     /// @brief Linear spacing of `n_repeat` between `height` and `height_max`.
     std::vector<float> height_linspace;
@@ -364,6 +397,9 @@ protected:
     /// @brief If true will target the center of the grid.
     const bool target_center;
 
+    /// @brief If true will target the center of the grid.
+    const bool change_random;
+
     /// Seed for the random sample. (-1 indicates a random seed is used).
     const float seed;
 
@@ -371,7 +407,7 @@ protected:
     utilities::RandomSampler<float> sample;
 
     /// @brief Abstracts which method - random or ordered, uniform - is used when `generate` is called.
-    std::function<void(Extrinsic&)> call_on_generate;
+    std::function<void(Extrinsic&, const size_t&)> call_on_generate;
 
     /// @brief Abstracts which method - the Grid's center or View Axis - is used in `generate` when
     ///        orienting the camera.
@@ -408,6 +444,9 @@ const std::string Axis::parse_uniform = "--uniform";
 ///        linearly spaced between `h` and `h_max`
 const std::string Axis::parse_n_repeat = "--n-repeat";
 
+/// @brief ArgParser flag for how many views about and random axis before changing the random axis. 
+const std::string Axis::parse_change_random = "--change-random";
+
 /// @brief ArgParser flags to use the specified cartesian axis (in the Grid's frame) as the rotation axis.
 const std::string Axis::parse_x_axis = "--x-axis",
                   Axis::parse_y_axis = "--y-axis",
@@ -428,7 +467,7 @@ const std::string Axis::help_string_basic =
     " [" + Axis::parse_h         + " <starting height>]" +
     " [" + Axis::parse_h_max     + " <maximum height>]" +
     " [" + Policy::parse_seed    + " <RNG seed>]" +
-    " [" + Axis::parse_uniform + "] [" + Axis::parse_target_center + "]";
+    " [" + Axis::parse_uniform + "] [" + Axis::parse_target_center + "] [" + Axis::parse_change_random + "]";
 
 /// @brief String explaining what arguments this class accepts when using a cartesian axis.
 const std::string Axis::help_string_1 =

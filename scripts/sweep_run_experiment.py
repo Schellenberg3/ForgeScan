@@ -139,15 +139,22 @@ def main(parsed_args: argparse.Namespace) -> None:
                         n += 1
                         if (n < start):
                             continue
+
                         seed = random.randrange(1, 1e8) if RANDOM_SEED else rep
 
                         fpath = pathlib.Path(intr[0], scene.name.removesuffix(HDF5_EXTENSION),
                                              policy[0], str(n_views), str(rep))
                         print(f"({n} / {N}) {fpath}")
+                        
                         fpath = fpath_base / fpath
                         if fpath.exists() is False:
                             fpath.mkdir(parents=True)
                         fpath /= "results" + HDF5_EXTENSION
+
+                        if fpath.exists() is True and parsed_args.no_override:
+                            print("\tAlready exists. Skipping experiment...")
+                            continue
+
                         call_process(fpath, scene, intr[1], policy[1], n_views, seed, parsed_args)
 
 
@@ -161,6 +168,12 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
         help="Optionally pause after each experiment and display stdin/stdout."
+    )
+    parser.add_argument(
+        "--no-override",
+        action="store_true",
+        default=False,
+        help="Optionally skip an experiment if a file already exists for it."
     )
     parser.add_argument(
         "--start-at",

@@ -52,7 +52,6 @@ REJECTION_RATE = 0.0
 RANDOM_SEED = False
 
 N_VIEWS = [5, 10, 15, 20]
-N_REPS  = [1, 2, 3, 4]  # TODO: use this?
 
 
 # ([Name], [Intrinsic args])
@@ -88,20 +87,26 @@ METHODS: list[tuple[str, str, str]] = [
     ),
     (
         "Axis_Random",
-        "--type axis --random-axis --r " + str(VIEW_RADIUS),
+        "--type axis --random-axis --change-random  --r " + str(VIEW_RADIUS),
         RANDOM_RERUNS
     ),
 ]
 
 
-def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: str,
+def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: str, policy_name: str,
                  policy: str, n_views: int, seed: int = 0, parsed_args: argparse.Namespace = None):
     stdin  = ""
     stdin += str(fpath) + STDIN_NEWLINE
     stdin += str(scene) + STDIN_NEWLINE
     stdin += str(REJECTION_RATE) + STDIN_NEWLINE
     stdin += intr + STDIN_NEWLINE
-    stdin += policy + " --n-views " + str(n_views) + " --seed " + str(seed) + STDIN_NEWLINE
+    stdin += policy
+    if (policy_name == "Axis_Random"):
+        # Axis Random always takes five views before taking a random axis. 
+        stdin += " --n-views 5 --n-repeat " + str(n_views / 5)
+    else:
+        stdin += " --n-views " + str(n_views)
+    stdin += " --seed "  + str(seed) + STDIN_NEWLINE
 
     # Add data channels
     stdin += "--name probability  --type Probability  --dtype float" + STDIN_NEWLINE
@@ -155,7 +160,7 @@ def main(parsed_args: argparse.Namespace) -> None:
                             print("\tAlready exists. Skipping experiment...")
                             continue
 
-                        call_process(fpath, scene, intr[1], policy[1], n_views, seed, parsed_args)
+                        call_process(fpath, scene, intr[1], policy[0], policy[1], n_views, seed, parsed_args)
 
 
 if __name__ == "__main__":

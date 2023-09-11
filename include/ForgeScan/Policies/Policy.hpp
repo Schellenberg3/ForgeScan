@@ -67,6 +67,16 @@ public:
     }
 
 
+    /// @return Help message for constructing a Policy with ArgParser.
+    static std::string helpMessage()
+    {
+        return "A Policy generates views which may be added to a Reconstruction. Some policies follow a geometric "
+               "algorithm while others use a data-driven approach."
+               "\nA Policy may be created with the following arguments:"
+               "\n\t" + Policy::help_string +
+               "\n\nFor details on specific Policy options, enter \"-h <policy type>\".";
+    }
+
 
     // ***************************************************************************************** //
     // *                           PURE VIRTUAL PUBLIC CLASS METHODS                           * //
@@ -75,6 +85,11 @@ public:
 
     /// @brief Returns the name of the Policy as a string.
     virtual const std::string& getTypeName() const = 0;
+
+
+    /// @brief Prints information about the Policy to the output stream. 
+    /// @param out Output stream to write to.
+    virtual void print(std::ostream& out) const = 0;
 
 
     /// @brief Returns true if the Policy believed the scan is complete.
@@ -90,6 +105,8 @@ public:
     static const float default_seed; 
 
     static const std::string parse_set_active, parse_type, parse_n_views, parse_seed;
+
+    static const std::string help_string;
 
 
 protected:
@@ -227,6 +244,16 @@ protected:
 };
 
 
+/// @brief Prints info about the Primitive to the output stream.
+/// @param out Output stream to write to.
+/// @return Reference to the output stream.
+std::ostream& operator<<(std::ostream &out, const Policy& policy)
+{
+    policy.print(out);
+    return out;
+}
+
+
 /// @brief Default number of views for a Policy to collect.
 const int Policy::default_n_views = 10;
 
@@ -247,6 +274,10 @@ const std::string Policy::parse_n_views = "--n-views";
 /// @brief ArgParser key for the seed to use to initialize the Policy's RNG.
 ///        Negative values indicate the program should use a random RNG seed.
 const std::string Policy::parse_seed = "--seed";
+
+/// @brief String explaining what arguments a generic Policy class accepts.
+const std::string Policy::help_string =
+    Policy::parse_type + " <policy type> [policy-specific options]";
 
 
 } // namespace policies

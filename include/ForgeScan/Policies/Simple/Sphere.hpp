@@ -37,9 +37,22 @@ public:
     }
 
 
+    /// @return Help message for constructing a Sphere Policy with ArgParser.
+    static std::string helpMessage()
+    {
+        return "A Sphere Policy generates views on a spherical surface."
+               "\nA Sphere Policy may be created with the following arguments:"
+               "\n\t" + Sphere::help_string +
+               "\nIf the optional arguments are not provided, the default values are:"
+               "\n\t" + Sphere::default_arguments;
+    }
+
+
     static const float default_r, default_r_max;
 
     static const std::string parse_uniform, parse_unordered, parse_r, parse_r_max;
+
+    static const std::string help_string, default_arguments;
 
 
 protected:
@@ -153,6 +166,15 @@ protected:
     }
 
 
+    void print(std::ostream& out) const override final
+    {
+        std::string method = this->start_uniform ? "uniform" : "random";
+        std::string ordering = this->start_uniform && this->unordered ? " in an unordered manner" : ""; 
+        out << this->getTypeName() << " Policy sampling at radius (" << this->radius << ", " << this->radius_max << ")"
+            << " using a " << method << ordering << " method to collect at least " << this->n_view_requested << " views";
+    }
+
+
     virtual void generate() override final
     {
         const Point grid_center = this->reconstruction->grid_properties->getCenter();
@@ -238,6 +260,19 @@ const std::string Sphere::parse_r = "--r";
 /// @brief ArgParser key for the maximum distance between the sensor and grid center.
 ///        Used in the random sampling mode.
 const std::string Sphere::parse_r_max = "--r-max";
+
+/// @brief String explaining what arguments this class accepts.
+const std::string Sphere::help_string =
+    "["  + Policy::parse_n_views + " <number of views>]"
+    " [" + Sphere::parse_r       + " <radius>]" +
+    " [" + Sphere::parse_r_max   + " <maximum radius>]" +
+    " [" + Policy::parse_seed    + " <RNG seed>]" +
+    " [" + Sphere::parse_uniform + "] [" + Sphere::parse_unordered + "]";
+
+/// @brief String explaining what this class's default parsed values are.
+const std::string Sphere::default_arguments =
+    Policy::parse_type + " Sphere " + Sphere::parse_r + " " +
+    std::to_string(Sphere::default_r);
 
 
 } // namespace policies

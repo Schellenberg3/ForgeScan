@@ -63,6 +63,20 @@ public:
     }
 
 
+    /// @return Help message for constructing a Axis Policy with ArgParser.
+    static std::string helpMessage()
+    {
+        return "An Axis Policy generates views around a specified axis. The views may be repeated at "
+               "different hights along the axis."
+               "\nAn Axis Policy may be created with the following arguments:"
+               "\n\t" + help_string_basic +
+               "\nThe axis to use may be specified with either:"
+               "\n\t(1) " + Axis::help_string_1 +
+               "\n\t(2) " + Axis::help_string_2 +
+               "\nIf the optional arguments are not provided, the default values are:"
+               "\n\t" + Axis::default_arguments;
+    }
+
     static const int default_n_repeat; 
 
     static const float default_axis_val, default_r, default_h, default_h_max;
@@ -70,6 +84,7 @@ public:
     static const std::string parse_r, parse_h, parse_h_max, parse_target_center, parse_uniform, parse_n_repeat,
                              parse_x_axis, parse_y_axis, parse_z_axis, parse_x, parse_y, parse_z;
 
+    static const std::string help_string_basic, help_string_1, help_string_2, default_arguments;
 
 protected:
     /// @brief Protected constructor to enforce usage of shared pointer.
@@ -225,6 +240,22 @@ protected:
     }
 
 
+    void print(std::ostream& out) const override final
+    {
+        std::string method = this->start_uniform ? "uniform" : "random";
+        out << this->getTypeName() << " Policy sampling at around the axis " << this->axis.transpose() << " using a " << method 
+            << " at a radius of " << this->radius;
+        if (this->start_uniform)
+        {
+            out << " for " << this->n_repeat << " repetitions of " << this->n_views << " views evenly spaced";
+        }
+        else
+        {
+            out << " for " << this->n_view_requested << " views";
+        }
+        out << " between the heights " << this->height << " and " << this->height_max;
+    }
+
     virtual void generate() override final
     {
         const Point grid_center = this->reconstruction->grid_properties->getCenter();
@@ -375,6 +406,36 @@ const std::string Axis::parse_x = "--x",
                   Axis::parse_y = "--y",
                   Axis::parse_z = "--z";
 
+
+/// @brief String explaining the non axis-related arguments this class accepts when using a cartesian axis.
+const std::string Axis::help_string_basic =
+    "["  + Policy::parse_n_views + " <views per rotation>]" +
+    " [" + Axis::parse_n_repeat  + " <repetitions>]" +
+    " [" + Axis::parse_r         + " <radius>]" +
+    " [" + Axis::parse_h         + " <starting height>]" +
+    " [" + Axis::parse_h_max     + " <maximum height>]" +
+    " [" + Policy::parse_seed    + " <RNG seed>]" +
+    " [" + Axis::parse_uniform + "] [" + Axis::parse_target_center + "]";
+
+/// @brief String explaining what arguments this class accepts when using a cartesian axis.
+const std::string Axis::help_string_1 =
+    "["  + Policy::parse_n_views + " <number of views>]" +
+    " <" + Axis::parse_x_axis + " | " + 
+           Axis::parse_y_axis + " | " + 
+           Axis::parse_z + ">";
+
+
+/// @brief String explaining what arguments this class accepts when using a user-specified axis.
+const std::string Axis::help_string_2 =
+    "["  + Policy::parse_n_views + " <number of views>]" +
+    " [" + Axis::parse_x      + " <axis X component>]" + 
+    " [" + Axis::parse_y      + " <axis Y component>]" + 
+    " [" + Axis::parse_z      + " <axis Z component>]";
+
+/// @brief String explaining what this class's default parsed values are.
+const std::string Axis::default_arguments =
+    Policy::parse_type + " Axis " + Axis::parse_z_axis + " " + Policy::parse_n_views + " " +
+    std::to_string(Policy::default_n_views) + " " + Axis::parse_r + " " + std::to_string(Axis::default_r);
 
 } // namespace policies
 } // namespace forge_scan

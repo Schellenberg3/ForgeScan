@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7.2)
+cmake_minimum_required(VERSION 3.12)
 
 project(
     ForgeScan
@@ -55,6 +55,21 @@ endif()
 ## --------------------------------------------------------------------------------------------- ## 
 ## ----------------------------- DEFINE PROJECT INTERFACE LIBRARY ------------------------------ ##
 ## --------------------------------------------------------------------------------------------- ## 
+
+# Ensure C++ 17 or greater is used within this project.
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+elseif(CMAKE_CXX_STANDARD < 17)
+    message(FATAL "[ForgeScan] ForgeScan requires C++ 17 or greater.")
+endif()
+
+# Set output directories for build.
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
 
 set(INTERFACE_LIBRARY ${PROJECT_NAME})
 add_library(

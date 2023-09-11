@@ -53,6 +53,13 @@ public:
 
     virtual ~VoxelGrid() { }
 
+    /// @return Help message for constructing a derived Voxel Grid with ArgParser.
+    static std::string helpMessage()
+    {
+        /// TODO: Return an fill this in.
+        return "TODO: VoxelGrid help message";
+    }
+
 
     /// @brief Calculates how much space the data vector is using.
     /// @param size_bytes[out]     Number of bytes used by the vector.

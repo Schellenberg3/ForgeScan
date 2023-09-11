@@ -47,6 +47,14 @@ public:
     }
 
 
+    /// @return Help message for constructing a UpdateCount Voxel Grid with ArgParser.
+    static std::string helpMessage()
+    {
+        /// TODO: Return an fill this in.
+        return "TODO: UpdateCount help message";
+    }
+
+
     /// @brief Returns the class type name for the Voxel Grid.
     const std::string& getTypeName() const override final
     {

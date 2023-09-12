@@ -13,26 +13,26 @@ EXECUTABLE_PATH = None
 # Find the project root and binary directory and the executable (regardless of its file extension).
 PROJECT_ROOT_PATH = pathlib.Path(__file__).parent.resolve().parent
 BINARIES_PATH     = PROJECT_ROOT_PATH / 'bin'
-assert(BINARIES_PATH.exists() and 
-       BINARIES_PATH.is_dir() and 
-      "Cannot find binary directory: " + str(BINARIES_PATH))
+assert BINARIES_PATH.exists() and \
+       BINARIES_PATH.is_dir(),    \
+       f"Cannot find binary directory: {BINARIES_PATH}"
 
 for item in BINARIES_PATH.iterdir():
     if item.is_file() and item.name.find(EXECUTABLE_NAME) == 0:
         EXECUTABLE_PATH = item
         break
 
-assert(EXECUTABLE_PATH is not None and 
-       EXECUTABLE_PATH.exists() and 
-       EXECUTABLE_PATH.is_file() and
-       "Cannot find executable in: " + str(BINARIES_PATH))
+assert EXECUTABLE_PATH is not None and \
+       EXECUTABLE_PATH.exists() and    \
+       EXECUTABLE_PATH.is_file(),      \
+       F"Cannot find executable in: {EXECUTABLE_PATH}"
 
 
 # Find the GroundTruth directory and all of the HSF5 scene files in it.
 GROUND_TRUTH_PATH = PROJECT_ROOT_PATH / "share" / "Experiments" / "GroundTruth"
-assert(GROUND_TRUTH_PATH.exists() and 
-       GROUND_TRUTH_PATH.is_dir() and 
-      "Cannot find GroundTruth directory: " + str(GROUND_TRUTH_PATH))
+assert GROUND_TRUTH_PATH.exists() and \
+       GROUND_TRUTH_PATH.is_dir(),    \
+       f"Cannot find GroundTruth directory: {GROUND_TRUTH_PATH}"
 
 GROUND_TRUTH_FILES: list[pathlib.Path] = []
 for item in GROUND_TRUTH_PATH.iterdir():

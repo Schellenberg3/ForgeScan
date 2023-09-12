@@ -84,8 +84,7 @@ protected:
           unordered(unordered),
           radius(std::min(std::abs(radius), std::abs(radius_max))),
           radius_max(std::max(std::abs(radius), std::abs(radius_max))),
-          seed(seed),
-          sample(this->seed)
+          sample(seed)
     {
         if (this->start_uniform)
         {
@@ -204,7 +203,7 @@ protected:
         g_rand_sph.createAttribute("radius_max", this->radius_max);
         g_rand_sph.createAttribute("n_view_requested", this->n_view_requested);
         g_rand_sph.createAttribute("start_uniform",    static_cast<uint8_t>(this->start_uniform));
-        g_rand_sph.createAttribute("seed", this->seed);
+        g_rand_sph.createAttribute("seed", this->sample.seed);
         g_rand_sph.createAttribute("completed", static_cast<uint8_t>(this->isComplete()));
         Policy::saveRejectedViews(file, this->getTypeName());
         Policy::saveAcceptedViews(file, this->getTypeName());
@@ -228,9 +227,6 @@ protected:
 
     /// @brief Radius for sampling positions. Random sampling may sample between `radius` and `radius_max`.
     const float radius, radius_max;
-
-    /// @brief Seed for the random sample. (-1 indicates a random seed is used).
-    float seed;
 
     /// @brief Random sampler utility.
     utilities::RandomSampler<float> sample;

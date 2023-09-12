@@ -139,8 +139,7 @@ protected:
           start_uniform(uniform),
           target_center(target_center),
           change_random(change_random),
-          seed(seed),
-          sample(this->seed)
+          sample(seed)
     {
         assert(this->n_repeat >= 1 && this->n_views >= 1 &&
                "Policy cannot operate if either n_view or n_repeat equal zero.");
@@ -338,7 +337,7 @@ protected:
 
         g_rand_sph.createAttribute("target_center", static_cast<uint8_t>(this->target_center));
         g_rand_sph.createAttribute("start_uniform", static_cast<uint8_t>(this->start_uniform));
-        g_rand_sph.createAttribute("seed", this->seed);
+        g_rand_sph.createAttribute("seed", this->sample.seed);
         g_rand_sph.createAttribute("completed", static_cast<uint8_t>(this->isComplete()));
 
         int n = 0;
@@ -399,9 +398,6 @@ protected:
 
     /// @brief If true will target the center of the grid.
     const bool change_random;
-
-    /// Seed for the random sample. (-1 indicates a random seed is used).
-    const float seed;
 
     /// @brief Random sampler utility.
     utilities::RandomSampler<float> sample;

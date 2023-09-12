@@ -4,6 +4,8 @@ import subprocess
 import random
 
 
+## ----------------------- LOCATE EXECUTABLE FILES AND GROUND TRUTH DATA ----------------------- ##
+
 HDF5_EXTENSION  = ".h5"
 EXECUTABLE_NAME = 'RunExperiment'
 EXECUTABLE_PATH = None
@@ -38,9 +40,9 @@ for item in GROUND_TRUTH_PATH.iterdir():
         GROUND_TRUTH_FILES.append(item)
 
 
-# File constants
-STDIN_NEWLINE = "\n" 
+## ----------------------------------- DEFINE FILE CONSTANTS ----------------------------------- ##
 
+STDIN_NEWLINE = "\n" 
 
 # Exploration space
 REGULAR_RERUNS = 1
@@ -48,6 +50,9 @@ RANDOM_RERUNS  = 10
 
 VIEW_RADIUS = 2.5
 REJECTION_RATE = 0.0
+
+# Use RealSense uncertainty model 
+DIST = 0.02 * VIEW_RADIUS
 
 RANDOM_SEED = False
 
@@ -93,6 +98,8 @@ METHODS: list[tuple[str, str, str]] = [
 ]
 
 
+## ------------------------------ SCRIPT METHODS AND ENTRY POINT ------------------------------- ##
+
 def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: str, policy_name: str,
                  policy: str, n_views: int, seed: int = 0, parsed_args: argparse.Namespace = None):
     stdin  = ""
@@ -110,9 +117,9 @@ def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: str, policy_nam
     stdin += " --seed "  + str(seed) + STDIN_NEWLINE
 
     # Add data channels
-    stdin += "--name probability  --type Probability  --dtype float" + STDIN_NEWLINE
-    stdin += "--name TSDF         --type TSDF         --dtype float" + STDIN_NEWLINE
-    stdin += "--name binary       --type binary" + STDIN_NEWLINE
+    stdin += f"--name probability  --type Probability  --d-min -{DIST} --d-max {DIST} --dtype float" + STDIN_NEWLINE
+    stdin += f"--name TSDF         --type TSDF         --d-min -{DIST} --d-max {DIST} --dtype float" + STDIN_NEWLINE
+    stdin +=  "--name binary       --type binary" + STDIN_NEWLINE
 
     # Add metrics
     stdin += STDIN_NEWLINE

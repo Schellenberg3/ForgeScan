@@ -1,5 +1,7 @@
 #include "ForgeScan/Manager.hpp"
 #include "ForgeScan/Simulation/Scene.hpp"
+
+#include "ForgeScan/Sensor/DepthImageProccessing.hpp"
 #include "ForgeScan/Utilities/Timer.hpp"
 
 
@@ -167,6 +169,10 @@ int main()
     parser.getInput("Enter a file path for this experiment data:");
     std::filesystem::path fpath = parser.get<std::string>(0, default_file_path);
 
+    std::filesystem::path image_fpath = fpath;
+    const std::string image_prefix    = fpath.filename().replace_extension("").string() + "View";
+    parser.getInput("Save images with reconstruction data? [y/n]:");
+    const bool save_im = parser[0] == "y";
 
     // *********************************** SETUP EXPERIMENT ************************************ //
 
@@ -211,6 +217,7 @@ int main()
     forge_scan::utilities::RandomSampler<float> rand_sample;
     forge_scan::utilities::Timer timer;
     forge_scan::PointMatrix sensed_points;
+    size_t n = 0;
 
     timer.start();
     while (!manager->policyIsComplete())
@@ -225,6 +232,11 @@ int main()
             camera->setExtr(camera_pose);
 
             scene->image(camera);
+            if (save_im)
+            {
+                image_fpath.replace_filename(image_prefix + std::to_string(n) + ".jpg");
+                forge_scan::sensor::DepthImageProcessing::imwrite(camera, image_fpath);
+            }
 
             camera->getPointMatrix(sensed_points);
             manager->reconstructionUpdate(sensed_points, camera->getExtr());
@@ -233,6 +245,7 @@ int main()
         {
             manager->policyRejectView();
         }
+        ++n;
     }
     timer.stop();
 

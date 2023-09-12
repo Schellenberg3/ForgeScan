@@ -97,6 +97,7 @@ def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: str, policy_nam
                  policy: str, n_views: int, seed: int = 0, parsed_args: argparse.Namespace = None):
     stdin  = ""
     stdin += str(fpath) + STDIN_NEWLINE
+    stdin += "don't save images" + STDIN_NEWLINE
     stdin += str(scene) + STDIN_NEWLINE
     stdin += str(REJECTION_RATE) + STDIN_NEWLINE
     stdin += intr + STDIN_NEWLINE

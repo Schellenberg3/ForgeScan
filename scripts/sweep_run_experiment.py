@@ -78,7 +78,7 @@ METHODS: list[tuple[str, str, str]] = [
     (
         "Sphere_Unordered",
         "--type sphere --uniform --unordered --r " + str(VIEW_RADIUS),
-        REGULAR_RERUNS
+        RANDOM_RERUNS
     ),
     (
         "Sphere_Random",

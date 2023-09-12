@@ -285,7 +285,7 @@ if __name__ == "__main__":
         "-d", "--dir",
         type=pathlib.Path,
         required=False,
-        default=PROJECT_ROOT_PATH / "share" / "GroundTruth",
+        default=PROJECT_ROOT_PATH / "share" / "Experiments" / "GroundTruth",
         help="Where to save the generated data."
     )
 

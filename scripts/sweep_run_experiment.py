@@ -29,7 +29,7 @@ assert(EXECUTABLE_PATH is not None and
 
 
 # Find the GroundTruth directory and all of the HSF5 scene files in it.
-GROUND_TRUTH_PATH = PROJECT_ROOT_PATH / "share" / "GroundTruth"
+GROUND_TRUTH_PATH = PROJECT_ROOT_PATH / "share" / "Experiments" / "GroundTruth"
 assert(GROUND_TRUTH_PATH.exists() and 
        GROUND_TRUTH_PATH.is_dir() and 
       "Cannot find GroundTruth directory: " + str(GROUND_TRUTH_PATH))
@@ -143,7 +143,7 @@ def main(parsed_args: argparse.Namespace) -> None:
         len(N_VIEWS) * sum([m[2] for m in METHODS])
     print(f"Generating {N} experiments, beginning at experiment {start}...")
 
-    fpath_base = PROJECT_ROOT_PATH / "share" / "Results"
+    fpath_base = PROJECT_ROOT_PATH / "share" / "Experiments" / "Results"
     for intr in INTRINSICS:
         for scene in GROUND_TRUTH_FILES:
             for policy in METHODS:

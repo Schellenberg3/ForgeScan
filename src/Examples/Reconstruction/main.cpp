@@ -10,11 +10,13 @@ int main(const int argc, const char **argv)
     forge_scan::utilities::ArgParser parser(argc, argv);
     const float reject_rate   = std::clamp(parser.get<float>("--reject", 0.0), 0.0f, 1.0f);
     const bool  show_im       = parser.has("--show");
+    const bool  save_im       = parser.has("--save");
     const bool  sphere_policy = parser.has("--sphere");
 
-    std::filesystem::path save_fpath  = parser.get<std::filesystem::path>("--save",  FORGE_SCAN_SHARE_DIR "/Examples/Reconstruction.h5");
     std::filesystem::path scene_fpath = parser.get<std::filesystem::path>("--scene", FORGE_SCAN_SHARE_DIR "/Examples/Scene.h5");
-
+    std::filesystem::path save_fpath  = parser.get<std::filesystem::path>("--save",  FORGE_SCAN_SHARE_DIR "/Examples/Reconstruction.h5");
+    std::filesystem::path image_fpath = save_fpath;
+    const std::string image_prefix    = save_fpath.filename().replace_extension("").string() + "View";
 
     // ************************************ Load the scene ************************************* //
 
@@ -81,7 +83,12 @@ int main(const int argc, const char **argv)
             scene->image(camera);
             if (show_im)
             {
-                forge_scan::sensor::imshow_depth(camera, true);
+                forge_scan::sensor::DepthImageProcessing::imshow(camera, true);
+            }
+            if (save_im)
+            {
+                image_fpath.replace_filename(image_prefix + std::to_string(n) + ".jpg");
+                forge_scan::sensor::DepthImageProcessing::imwrite(camera, image_fpath);
             }
 
             camera->getPointMatrix(sensed_points);

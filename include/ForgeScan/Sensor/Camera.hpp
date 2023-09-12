@@ -32,8 +32,9 @@ struct Camera : public Entity
     // *                                        FRIENDS                                        * //
     // ***************************************************************************************** //
 
-    /// @brief Required to directly access the depth image and Camera Intrinsic properties.
-    friend void imshow_depth(const std::shared_ptr<const Camera>&, const bool&);
+    /// @brief Required to access the depth image and intrinsics when converting an Eigen matrix
+    ///        to an OpenCV image.
+    friend struct DepthImageProcessing;
 
     /// @brief Required to directly access the depth image when generating a synthetic image.
     friend struct simulation::Scene;

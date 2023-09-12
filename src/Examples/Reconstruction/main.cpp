@@ -1,7 +1,7 @@
 #include "ForgeScan/Manager.hpp"
 #include "ForgeScan/Simulation/Scene.hpp"
 
-#include "ForgeScan/Sensor/ImShow.hpp"
+#include "ForgeScan/Sensor/DepthImageProccessing.hpp"
 #include "ForgeScan/Utilities/Timer.hpp"
 
 

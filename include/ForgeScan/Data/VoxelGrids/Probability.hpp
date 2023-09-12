@@ -163,7 +163,7 @@ private:
             using namespace forge_scan::utilities::math;
 
             Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
-            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+            const Trace::const_iterator last = this->ray_trace->end();
 
             // **************************** APPLY VOXEL UPDATE HERE **************************** //
             for ( ; iter != last; ++iter)
@@ -180,7 +180,7 @@ private:
             using namespace forge_scan::utilities::math;
 
             Trace::const_iterator       iter = this->ray_trace->first_above(this->caller.dist_min);
-            const Trace::const_iterator last = this->ray_trace->first_above(this->caller.dist_max, iter);
+            const Trace::const_iterator last = this->ray_trace->end();
 
             // **************************** APPLY VOXEL UPDATE HERE **************************** //
             for ( ; iter != last; ++iter)
@@ -261,8 +261,8 @@ const float Probability::default_p_max    = 0.98f,
 
 /// @brief Default occupation probability values at specific positions along a ray.
 const float Probability::default_p_past   = 0.50f,
-            Probability::default_p_sensed = 0.90f,
-            Probability::default_p_far    = 0.15f,
+            Probability::default_p_sensed = 0.80f,
+            Probability::default_p_far    = 0.10f,
             Probability::default_p_init   = 0.50f;
 
 /// @brief ArgParser key for the maximum occupation probability a voxel may have.

@@ -4,6 +4,8 @@ import pathlib
 import h5py
 import matplotlib.pyplot as plt
 
+HDF5_EXTENSION  = ".h5"
+
 
 def accuracy(true_positive: int,  true_negative: int,
              false_positive: int, false_negative: int) -> float:
@@ -20,16 +22,17 @@ def precision(true_positive: int, false_positive: int) -> float:
     return true_positive / float(true_positive + false_positive)
 
 
-def get_metric_occupancy_confusion_group(fpath: pathlib.Path) -> h5py.Group:
+def get_metric_occupancy_confusion_group(hdf5_path: pathlib.Path) -> h5py.Group:
     """
     Opens an HDF5 file and access the location of the Confusion Matrix data. 
     """
-    h5_file  = h5py.File(fpath, "r")
+    h5_file  = h5py.File(hdf5_path, "r")
     h5_group = h5_file["Metric"]["OccupancyConfusion"]
     return h5_group
 
 
-def plot_raw_confusion(data: h5py.Dataset, labels: list[str], parsed_args: argparse.Namespace = None):
+def plot_raw_confusion(hdf5_path: pathlib.Path, data: h5py.Dataset, labels: list[str],
+                       parsed_args: argparse.Namespace = None):
     """
     Creates a plot of the true/false positive/negative values.
     May plot the count of unknown values if the flag `--raw-unknown` was provided.
@@ -37,6 +40,7 @@ def plot_raw_confusion(data: h5py.Dataset, labels: list[str], parsed_args: argpa
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
 
+    fig.suptitle(hdf5_path)
     ax.set_title("Raw Confusion Values")
     ax.set_xlabel("Views Added")
     ax.set_ylabel("Voxel Count")
@@ -51,17 +55,17 @@ def plot_raw_confusion(data: h5py.Dataset, labels: list[str], parsed_args: argpa
 
     ax.legend()
 
-    if parsed_args and parsed_args.save:
-        fpath: pathlib.Path = parsed_args.save
-        if fpath.exists() is False:
-            fpath.mkdir(parents=True)
-        fpath /= "raw_confusion.png"
-        plt.savefig(fpath)
-    else:
+    if parsed_args and parsed_args.display_only:
         plt.show()
+    else:
+        image_fpath = hdf5_path.parent
+        image_fpath /= "acc_pre.png"
+        plt.savefig(image_fpath)
+    plt.close()
 
 
-def plot_acc_pre(data: h5py.Dataset, parsed_args: argparse.Namespace = None):
+def plot_acc_pre(hdf5_path: pathlib.Path, data: h5py.Dataset,
+                 parsed_args: argparse.Namespace = None):
     """
     Creates a plot of the accuracy and precision at each step.
     """
@@ -72,6 +76,7 @@ def plot_acc_pre(data: h5py.Dataset, parsed_args: argparse.Namespace = None):
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
 
+    fig.suptitle(hdf5_path)
     ax.set_title("Reconstruction Accuracy and Precision")
     ax.set_xlabel("Views Added")
 
@@ -80,27 +85,44 @@ def plot_acc_pre(data: h5py.Dataset, parsed_args: argparse.Namespace = None):
 
     ax.legend()
 
-    if parsed_args and parsed_args.save:
-        fpath: pathlib.Path = parsed_args.save
-        if fpath.exists() is False:
-            fpath.mkdir(parents=True)
-        fpath /= "acc_pre.png"
-        plt.savefig(fpath)
-    else:
+    if parsed_args and parsed_args.display_only:
         plt.show()
+    else:
+        image_fpath = hdf5_path.parent
+        image_fpath /= "acc_pre.png"
+        plt.savefig(image_fpath)
+    plt.close()
+
+
+def plot_file(hdf5_path: pathlib.Path, parsed_args: argparse.Namespace):
+    """
+    Opens an HDF5 file and accesses the data before calling the plotting functions.
+    """
+    confusion_group = get_metric_occupancy_confusion_group(hdf5_path)
+    confusion_data: h5py.Dataset = confusion_group.get("data")
+    confusion_labels: list[str]  = confusion_data.attrs["header"]
+    if parsed_args.plot_raw:
+        plot_raw_confusion(hdf5_path, confusion_data, confusion_labels, parsed_args)
+
+    plot_acc_pre(hdf5_path, confusion_data, parsed_args)
 
 
 def main(parsed_args: argparse.Namespace):
     """
     Program entry point.
     """
-    confusion_group = get_metric_occupancy_confusion_group(parsed_args.file)
-    confusion_data: h5py.Dataset = confusion_group.get("data")
-    confusion_labels: list[str]  = confusion_data.attrs["header"]
-    if parsed_args.plot_raw:
-        plot_raw_confusion(confusion_data, confusion_labels, parsed_args)
+    fpath: pathlib.Path = parsed_args.file
+    if not fpath.exists():
+        print("File or directory does not exits. Please check your path.")
+        return
 
-    plot_acc_pre(confusion_data, parsed_args)
+    # Convert a single file to a list or a generate a list of all HDF5 files in a directory. 
+    fpath_list = [fpath] if fpath.is_file() else list(fpath.glob(f"**/*{HDF5_EXTENSION}"))
+
+    n = len(fpath_list)
+    for i, hdf5_path in enumerate(fpath_list):
+        print(f"({i} / {n}) Plotting for:\n\t{hdf5_path}")
+        plot_file(hdf5_path, parsed_args)
 
 
 if __name__ == "__main__":
@@ -113,13 +135,13 @@ if __name__ == "__main__":
         "-f", "--file",
         type=pathlib.Path,
         required=True,
-        help="Path to the HDF5 file to load."
+        help="Path to the HDF5 file to load or directory with HDF5 files within it."
     )
     parser.add_argument(
-        "-s", "--save",
-        type=pathlib.Path,
-        required=False,
-        help="Path to a directory to save the plots within."
+        "-s", "--display-only",
+        action="store_true",
+        default=False,
+        help="If true, will only display the plot but not save it."
     )
     parser.add_argument(
         "--plot-raw",

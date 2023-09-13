@@ -20,7 +20,7 @@ namespace forge_scan {
 namespace simulation {
 
 
-/// @brief A simple analytical sphere object.
+/// @brief A simple analytical box object.
 /// @note The reference frame for a Box is located at its center and oriented so the length is
 ///       aligned with the X-axis, width is aligned with the Y-axis, and width is aligned with
 ///       the Z-axis.
@@ -56,7 +56,7 @@ public:
 
 
     /// @brief Constructor for a shared pointer to a Box.
-    /// @param parser Arg Parser with arguments to construct a Box from.
+    /// @param parser ArgParser with arguments to construct a Box from.
     /// @return Shared pointer to a Box.
     static std::shared_ptr<Box> create(const utilities::ArgParser& parser)
     {
@@ -199,7 +199,7 @@ private:
     }
 
 
-    /// @brief Prints information about the Box to the output stream. 
+    /// @brief Prints information about the Box to the output stream.
     /// @param out Output stream to write to.
     void print(std::ostream& out) const override final
     {

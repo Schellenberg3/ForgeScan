@@ -35,7 +35,7 @@ namespace data {
 
 
 /// @brief Contains, manages, and updates the measured data to represent a a 3D scene.
-/// @note  The `Reconstruction` class implicitly uses the origin of the Grid Properties it was
+/// @note  The `Reconstruction` class implicitly uses the origin of the `Grid::Properties` it was
 ///        instantiated with as its reference frame. It is required that any 3D data passed in has
 ///        was already transformed into this frame. Generally a Manager class handles this.
 class Reconstruction
@@ -61,8 +61,8 @@ public:
 
 
     /// @brief Creates a shared pointer to a Reconstruction.
-    /// @param grid_properties Shared, constant pointer to the Grid Properties to use.
-    ///                        These Grid Properties are utilized by all VoxelGrids.
+    /// @param grid_properties Shared, constant pointer to the `Grid::Properties` to use.
+    ///                        These `Grid::Properties` are utilized by all VoxelGrids.
     /// @return Shared pointer to a Reconstruction.
     static std::shared_ptr<Reconstruction> create(std::shared_ptr<const Grid::Properties> grid_properties)
     {
@@ -91,7 +91,7 @@ public:
 
 
     /// @brief Adds a VoxelGrid data channel to the Reconstruction.
-    /// @param parser Arg Parser with arguments to construct a new VoxelGrid from.
+    /// @param parser ArgParser with arguments to construct a new VoxelGrid from.
     ///               See `forge_scan::data::Reconstruction::addChannel` for details.
     /// @throws InvalidMapKey If no name was provided for the channel.
     /// @throws InvalidMapKey If there is already a channel with that name.
@@ -130,7 +130,7 @@ public:
         throw InvalidMapKey::NonexistantValue(name);
     }
 
-    
+
     /// @brief Removes a VoxelGrid data channel.
     /// @param name Name of the channel in the channel dictionary to remove.
     /// @returns True if successful. False if that channel did not exits or if it is owned by a
@@ -155,7 +155,7 @@ public:
     // ***************************************************************************************** //
 
 
-    /// @brief Shared, constant Grid Properties used by all VoxelGrids. 
+    /// @brief Shared, constant `Grid::Properties` used by all VoxelGrids.
     const std::shared_ptr<const Grid::Properties> grid_properties;
 
     static const std::string parse_name;
@@ -168,8 +168,8 @@ private:
 
 
     /// @brief Private constructor to enforce use of shared pointers.
-    /// @param grid_properties Shared, constant pointer to the Grid Properties to use.
-    ///                        These Grid Properties are utilized by all VoxelGrids.
+    /// @param grid_properties Shared, constant pointer to the `Grid::Properties` to use.
+    ///                        These `Grid::Properties` are utilized by all VoxelGrids.
     explicit Reconstruction(const std::shared_ptr<const Grid::Properties>& grid_properties)
         : grid_properties(grid_properties),
           ray_trace(std::make_shared<Trace>())
@@ -178,7 +178,7 @@ private:
     }
 
 
-    /// @brief Saves Grid Properties into the HDF5 file as attributes and calls the save method
+    /// @brief Saves `Grid::Properties` into the HDF5 file as attributes and calls the save method
     ///        for each VoxelGrid in the channel dictionary.
     /// @param h5_file An opened HDF5 file to write data into.
     void save(HighFive::File& h5_file)
@@ -197,7 +197,7 @@ private:
     }
 
 
-    /// @brief Adds each VoxelGrid's data to the XDMF file provided by the Manager. 
+    /// @brief Adds each VoxelGrid's data to the XDMF file provided by the Manager.
     /// @param file An opened file stream.
     /// @param hdf5_fname File name (not the full path) of the HDF5 file that this XDMF relates to.
     void addToXDMF(std::ofstream& file, const std::string& hdf5_fname) const
@@ -230,7 +230,7 @@ private:
     }
 
 
-    /// @brief Used by the Metric class to request a new VoxelGrid channel be added. 
+    /// @brief Used by the Metric class to request a new VoxelGrid channel be added.
     /// @param channel Shared pointer to the VoxelGrid channel to add.
     /// @param metric_name Name of the Metric class adding the channel.
     /// @throws InvalidMapKey If `metic_name` is empty.
@@ -254,7 +254,7 @@ private:
     }
 
 
-    /// @brief Used by the Policy class to request a new VoxelGrid channel be added. 
+    /// @brief Used by the Policy class to request a new VoxelGrid channel be added.
     /// @param channel Shared pointer to the VoxelGrid channel to add.
     /// @param metric_name Name of the Policy class adding the channel.
     /// @throws ReservedMapKey If `policy_name` is empty.
@@ -335,7 +335,7 @@ private:
     ///        trace calculations to only the regions which VoxelGrids will actually update.
     float min_dist_min = 0, max_dist_max = 0;
 
-    /// @brief Stores an ray trace used for performing updates on each VoxelGrid. 
+    /// @brief Stores an ray trace used for performing updates on each VoxelGrid.
     std::shared_ptr<Trace> ray_trace;
 };
 

@@ -22,7 +22,7 @@ VIEW_ID_FONT_SIZE = "xx-large"
 
 def open_h5_file(fpath: pathlib.Path) -> h5py.Group:
     """
-    Opens an HDF5 file. 
+    Opens an HDF5 file.
     """
     h5_file  = h5py.File(fpath, "r")
     return h5_file
@@ -30,7 +30,7 @@ def open_h5_file(fpath: pathlib.Path) -> h5py.Group:
 
 def get_policy_group(h5_file: pathlib.Path) -> h5py.Group:
     """
-    Retrieves the Policy group within an HDF5 file. 
+    Retrieves the Policy group within an HDF5 file.
     """
     h5_group = h5_file["Policy"]
     return h5_group
@@ -38,7 +38,7 @@ def get_policy_group(h5_file: pathlib.Path) -> h5py.Group:
 
 def get_reconstruction_group(h5_file: h5py.File) -> h5py.Group:
     """
-    Retrieves the Reconstruction group within an HDF5 file. 
+    Retrieves the Reconstruction group within an HDF5 file.
     """
     h5_group = h5_file["Reconstruction"]
     return h5_group
@@ -46,7 +46,7 @@ def get_reconstruction_group(h5_file: h5py.File) -> h5py.Group:
 
 def plot_voxel_grid(reconstruction_group: h5py.Group,  ax: plt.Axes) -> None:
     """
-    Plots a wireframe of the voxel grid with the lower corner, upper corner, and center marked. 
+    Plots a wireframe of the voxel grid with the lower corner, upper corner, and center marked.
     """
     upper = reconstruction_group.attrs["VoxelGrid Dimensions"]
     lower = np.zeros_like(upper)
@@ -90,7 +90,7 @@ def plot_voxel_grid(reconstruction_group: h5py.Group,  ax: plt.Axes) -> None:
                       [upper[0], lower[1], upper[2]],
                       [upper[0], lower[1], lower[2]]
                     ])
-    
+
     ax.plot_wireframe(side0[:, 0], side0[:, 1], side0[:, 2], linewidth=WIREFRAME_LINEWIDTH, color=WIREFRAME)
     ax.plot_wireframe(side1[:, 0], side1[:, 1], side1[:, 2], linewidth=WIREFRAME_LINEWIDTH, color=WIREFRAME)
     ax.plot_wireframe(side2[:, 0], side2[:, 1], side2[:, 2], linewidth=WIREFRAME_LINEWIDTH, color=WIREFRAME)
@@ -101,8 +101,8 @@ def add_view_to_plot(extr: np.array, view_id: str, ax: plt.Axes, accept: bool,
                      parsed_args: argparse.Namespace = None) -> None:
     """
     Adds a view to the plot. The whole extrinsic matrix is plotted and a view ID is placed as text
-    near the location of the view. If the accepted flag is True the origin and text are colored 
-    green, but if False these are colored red. 
+    near the location of the view. If the accepted flag is True the origin and text are colored
+    green, but if False these are colored red.
     """
     origin_color = GREEN
     if accept is False:
@@ -141,7 +141,7 @@ def add_accepted_group_to_plot(group: h5py.Group, ax: plt.Axes,
             add_view_to_plot(np.array(dset), dset_name, ax, accept=True, parsed_args=parsed_args)
 
 
-def add_rejected_group_to_plot(group: h5py.Group, ax: plt.Axes, 
+def add_rejected_group_to_plot(group: h5py.Group, ax: plt.Axes,
                                parsed_args: argparse.Namespace = None) -> None:
     for (dset_name, dset) in group.items():
         if isinstance(dset, h5py.Dataset):

@@ -29,7 +29,7 @@ BOX_TRUTH_NAME    = "box"
 BIN_TRUTH_NAME    = "bin"
 BAR_TRUTH_NAME    = "bar"
 
-STDIN_NEWLINE     = "\n" 
+STDIN_NEWLINE     = "\n"
 
 
 def get_grid_properties(nx: float = 101, ny: float = 101, nz: float = 101, resolution: float = 0.02) -> str:
@@ -116,7 +116,7 @@ def get_bin() -> str:
     dy = 0.5 * by
 
 
-    # Base 
+    # Base
     stdin_shape += f" --name base --shape box --l {bx} --w {by} --h {bz} "
     stdin_shape += get_translation(0, 0, -0.5*bz)
     stdin_shape += STDIN_NEWLINE # End shape
@@ -177,7 +177,7 @@ def get_bar() -> str:
     stdin_shape += get_translation(0, 0, rs)
     stdin_shape += STDIN_NEWLINE # End shape
 
-    # Rod 
+    # Rod
     stdin_shape += f" --name rod --shape box --l {rx} --w {ry} --h {rz} "
     stdin_shape += get_translation(0, 0, dz0)
     stdin_shape += STDIN_NEWLINE # End shape

@@ -20,11 +20,11 @@ class Axis : public Policy
 {
 public:
     /// @brief Creates a Axis Policy.
-    /// @details This policy samples views from around a specified axis, the View Axis. It is
-    ///          functionally equal to rotating the a part in front of a stationary camera. 
+    /// @details This Policy samples views from around a specified axis, the View Axis. It is
+    ///          functionally equal to rotating the a part in front of a stationary camera.
     /// @param reconstruction Shared pointer to the Reconstruction that the Policy suggests new
     ///                       views for.
-    /// @param parser Arg Parser with arguments to construct an Axis Policy from.
+    /// @param parser ArgParser with arguments to construct an Axis Policy from.
     /// @return Shared pointer to a Axis Policy.
     static std::shared_ptr<Axis> create(const std::shared_ptr<const data::Reconstruction>& reconstruction,
                                                 const utilities::ArgParser& parser)
@@ -91,7 +91,7 @@ public:
                "\n\t" + Axis::default_arguments;
     }
 
-    static const int default_n_repeat; 
+    static const int default_n_repeat;
 
     static const float default_axis_val, default_r, default_h, default_h_max;
 
@@ -116,7 +116,7 @@ protected:
     ///                      views point at the view axis.
     /// @param uniform  Flag to begin with a uniform sampling strategy. If false or if
     ///                 more than `n_view_requested` have been generated in the uniform manner,
-    ///                 then the policy samples randomly between `height` and `height_max`. 
+    ///                 then the Policy samples randomly between `height` and `height_max`.
     /// @param change_random Flag, if true will not use `height`/`height_max` and instead randomly select
     ///                      a new axis to rotate around.
     /// @param seed     Seed for the random generator the Policy uses. Default -1 for a random seed.
@@ -163,10 +163,10 @@ protected:
             this->height_linspace[i] = h;
             h += dh;
         }
-    
+
         this->call_on_generate = this->start_uniform ? std::bind(&Axis::generateUniform,
                                                                   this, std::placeholders::_1, std::placeholders::_2) :
-                                                       std::bind(&Axis::generateRandom,  
+                                                       std::bind(&Axis::generateRandom,
                                                                   this, std::placeholders::_1, std::placeholders::_2);
 
 
@@ -182,7 +182,7 @@ protected:
 
     /// @brief  Calculates the rotation matrix that transforms a point from the View Axis's
     ///         reference frame to the Grid Center's reference frame
-    /// @return 
+    /// @return
     Rotation get_axis_to_grid_center()
     {
         return Eigen::Quaternionf().setFromTwoVectors(Direction::UnitZ(), this->axis.back()).matrix();
@@ -242,7 +242,7 @@ protected:
     /// @brief Returns where the Z-axis should point.
     /// @param [out] z_axis The output Z-axis to uses for the view.
     /// @param position    Cartesian position of the view, relative to the Grid's reference frame.
-    /// @param axis_target View target location on the axis.  
+    /// @param axis_target View target location on the axis.
     void targetAtAxis(Direction& z_axis, const Direction& position, const Direction& axis_target)
     {
         z_axis = (this->axis_to_grid_center * axis_target).array() - position.array();
@@ -266,7 +266,7 @@ protected:
     void print(std::ostream& out) const override final
     {
         std::string method = this->start_uniform ? "uniform" : "random";
-        out << this->getTypeName() << " Policy sampling at around the axis " << this->axis.back().transpose() << " using a " << method 
+        out << this->getTypeName() << " Policy sampling at around the axis " << this->axis.back().transpose() << " using a " << method
             << " method at a radius of " << this->radius;
         if (this->start_uniform)
         {
@@ -282,9 +282,9 @@ protected:
     virtual void generate() override final
     {
         const Point grid_center = this->reconstruction->grid_properties->getCenter();
-     
+
         Extrinsic extr = Extrinsic::Identity();
-        
+
         size_t view_number = this->numAccepted() + this->numRejected();
         if (this->change_random &&
             view_number > 0 &&
@@ -440,7 +440,7 @@ const std::string Axis::parse_uniform = "--uniform";
 ///        linearly spaced between `h` and `h_max`
 const std::string Axis::parse_n_repeat = "--n-repeat";
 
-/// @brief ArgParser flag for how many views about and random axis before changing the random axis. 
+/// @brief ArgParser flag for how many views about and random axis before changing the random axis.
 const std::string Axis::parse_change_random = "--change-random";
 
 /// @brief ArgParser flags to use the specified cartesian axis (in the Grid's frame) as the rotation axis.
@@ -475,8 +475,8 @@ const std::string Axis::help_string_1 =
 
 /// @brief String explaining what arguments this class accepts when using a user-specified axis.
 const std::string Axis::help_string_2 =
-    "[" + Axis::parse_x      + " <axis X component>]" + 
-    " [" + Axis::parse_y      + " <axis Y component>]" + 
+    "[" + Axis::parse_x      + " <axis X component>]" +
+    " [" + Axis::parse_y      + " <axis Y component>]" +
     " [" + Axis::parse_z      + " <axis Z component>]";
 
 /// @brief String explaining what this class's default parsed values are.

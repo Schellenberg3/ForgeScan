@@ -14,7 +14,7 @@ namespace forge_scan {
 
 /// @brief Base interface for Grid of uniformly-sized voxels.
 /// @details Derived classes are responsible for providing a vector for the voxel data.
-///          This vector stores data continuously in memory, and is expected to 
+///          This vector stores data continuously in memory, and is expected to
 ///          increment fastest in X, then Y, then Z.
 /// @note  The `Grid` class and those derived from it may be treated as axis-aligned bounding box
 ///        (AABB). The AABB's shape is based on the Grid Properties: the lower bound is always at
@@ -44,7 +44,7 @@ struct Grid
 
 
         /// @brief Constructs the Grid Properties based on the provided Parser.
-        /// @param parser Arg Parser with arguments to construct Grid Properties from.
+        /// @param parser ArgParser with arguments to construct Grid Properties from.
         /// @note Ensures there is a minimum GridSize of (1, 1, 1).
         /// @note Ensures the resolution is positive.
         Properties(const utilities::ArgParser& parser)
@@ -78,7 +78,7 @@ struct Grid
 
 
         /// @brief Creates a shared pointer to a constant Grid Properties.
-        /// @param parser Arg Parser with arguments to construct Grid Properties from.
+        /// @param parser ArgParser with arguments to construct Grid Properties from.
         /// @note Ensures there is a minimum GridSize of (1, 1, 1).
         /// @note Ensures the resolution is positive.
         static std::shared_ptr<const Properties> createConst(const utilities::ArgParser& parser)
@@ -229,11 +229,10 @@ struct Grid
         Eigen::Vector3f p2i_scale;
 
         static const std::string parse_nx, parse_ny, parse_nz;
-        
+
         static const std::string parse_resolution;
-        
+
         static const float default_resolution;
-        
         static const size_t default_size;
 
         static const std::string help_string, default_arguments;
@@ -303,7 +302,7 @@ protected:
 /// @param properties Grid Properties to write out.
 /// @return Reference to the output stream.
 std::ostream& operator<<(std::ostream &out, const Grid::Properties& properties)
-{   
+{
     out << "grid properties with size of (" << properties.size.transpose() <<
            ") voxels with resolution of " << properties.resolution <<
            " for a bounded area of (" << properties.dimensions.transpose() << ")";

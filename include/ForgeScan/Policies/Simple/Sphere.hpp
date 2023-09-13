@@ -1,7 +1,7 @@
 #ifndef FORGE_SCAN_POLICIES_SIMPLE_SPHERE_POLICY_HPP
 #define FORGE_SCAN_POLICIES_SIMPLE_SPHERE_POLICY_HPP
 
-#include <algorithm> 
+#include <algorithm>
 #include <limits>
 #include <functional>
 
@@ -22,7 +22,7 @@ public:
     /// @brief Creates a Sphere Policy.
     /// @param reconstruction Shared pointer to the Reconstruction that the Policy suggests new
     ///                       views for.
-    /// @param parser Arg Parser with arguments to construct an Sphere Policy from.
+    /// @param parser ArgParser with arguments to construct an Sphere Policy from.
     /// @return Shared pointer to a Sphere Policy.
     static std::shared_ptr<Sphere> create(const std::shared_ptr<const data::Reconstruction>& reconstruction,
                                                 const utilities::ArgParser& parser)
@@ -63,13 +63,13 @@ protected:
     ///                considers the Reconstruction complete.
     /// @param uniform Flag, if true then the this Policy starts be generating `n_views` worth of
     ///                ordered, uniformly sampled views. If false, or one more than `v_views` have
-    ///                been generated in the uniform manner, the policy samples the spherical
+    ///                been generated in the uniform manner, the Policy samples the spherical
     ///                surface randomly.
-    /// @param unordered  If this is true and uniform is true, then the policy will return uniformly
-    ///                   sampled points but visits them in an unordered manner. A Sphere policy with
+    /// @param unordered  If this is true and uniform is true, then the Policy will return uniformly
+    ///                   sampled points but visits them in an unordered manner. A Sphere Policy with
     ///                   `uniform` and `unordered` sampling flags is pseudo low-discrepancy.
-    /// @param radius     Minimum radius for camera poses.
-    /// @param radius_max Maximum radius for camera poses, used for randomly sampled views only.
+    /// @param radius     Minimum radius for Camera poses.
+    /// @param radius_max Maximum radius for Camera poses, used for randomly sampled views only.
     /// @param seed Seed for the random generator the Policy uses. Default -1 for a random seed.
     explicit Sphere(const std::shared_ptr<const data::Reconstruction>& reconstruction,
                     const size_t& n_views,
@@ -168,7 +168,7 @@ protected:
     void print(std::ostream& out) const override final
     {
         std::string method = this->start_uniform ? "uniform" : "random";
-        std::string ordering = this->start_uniform && this->unordered ? " in an unordered manner" : ""; 
+        std::string ordering = this->start_uniform && this->unordered ? " in an unordered manner" : "";
         out << this->getTypeName() << " Policy sampling at radius (" << this->radius << ", " << this->radius_max << ")"
             << " using a " << method << ordering << " method to collect at least " << this->n_view_requested << " views";
     }
@@ -177,10 +177,10 @@ protected:
     virtual void generate() override final
     {
         const Point grid_center = this->reconstruction->grid_properties->getCenter();
-     
+
         Extrinsic extr = Extrinsic::Identity();
         this->call_on_generate(extr);
-        
+
         extr.translation() += grid_center;
         extr.rotate(vector_math::get_rotation_to_orient_z_axis(extr, grid_center));
 
@@ -244,7 +244,7 @@ protected:
 /// @brief Default radius (and maximum radius) for view to be sampled from.
 const float Sphere::default_r = 2.5, Sphere::default_r_max = 2.5;
 
-/// @brief ArgParser flag to use a uniform sampling method. 
+/// @brief ArgParser flag to use a uniform sampling method.
 const std::string Sphere::parse_uniform = "--uniform";
 
 /// @brief ArgParser flag to select the uniform views in an unordered manner.

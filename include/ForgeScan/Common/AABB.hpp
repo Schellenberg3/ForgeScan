@@ -56,7 +56,7 @@ inline bool find_intersection(const Eigen::Vector3f& dist_b1,
 /// @param bound1  The first corner of the AABB.
 /// @param bound2  The second corner of the AABB.
 /// @param start   Starting point of the ray.
-/// @param inv_ray Element-wise inverse of the ray. This value may either be from the full ray 
+/// @param inv_ray Element-wise inverse of the ray. This value may either be from the full ray
 ///                (which makes the outputs scalar multipliers for the ray) or its unit-direction
 ///                (which makes the outputs distances to the box in the same units of the ray)
 /// @param tmin_bound Lower bound time for the intersection to be valid.
@@ -83,7 +83,7 @@ inline bool find_bounded_intersection(const Point& bound1,     const Point& boun
 ///        or distances in the same units of the ray.
 /// @param bound   The corner of the AABB. The other corner is implicitly at (0, 0, 0).
 /// @param start   Starting point of the ray.
-/// @param inv_ray Element-wise inverse of the ray. This value may either be from the full ray 
+/// @param inv_ray Element-wise inverse of the ray. This value may either be from the full ray
 ///                (which makes the outputs scalar multipliers for the ray) or its unit-direction
 ///                (which makes the outputs distances to the box in the same units of the ray)
 /// @param tmin_bound Lower bound time for the intersection to be valid.

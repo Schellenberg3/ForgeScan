@@ -41,7 +41,7 @@ namespace forge_scan {
 /// @brief Voxel information within a Trace.
 struct TraceVoxel
 {
-    TraceVoxel(const size_t& i, const float& d) 
+    TraceVoxel(const size_t& i, const float& d)
         : i(i), d(d)
     {
 
@@ -245,14 +245,14 @@ inline Trace::SensedLocation get_sensed_location(const float& d_min,  const floa
 }
 
 
-} // namespace ray_trace_helpers 
+} // namespace ray_trace_helpers
 
 
 /// @brief Calculates what voxels are hit on the ray between `sensed` and `origin`.
-/// @param [out] ray_trace A trace of what voxels were hit and the distance from that voxel to the `sensed` voxel. 
+/// @param [out] ray_trace A trace of what voxels were hit and the distance from that voxel to the `sensed` voxel.
 /// @param sensed Sensed point, the start of the ray.
 /// @param origin Origin point, the end of the ray.
-/// @param properties Shared Grid Properties for the VoxelGrids begin traversed.
+/// @param properties Shared `Grid::Properties` for the VoxelGrids begin traversed.
 /// @param dist_min Minimum distance to trace along the ray, relative to the `sensed` point.
 /// @param dist_max Maximum distance to trace along the ray, relative to the `sensed` point.
 /// @return True if the ray intersected the Grid, this indicates that `ray_trace` has valid data to add.
@@ -272,7 +272,7 @@ inline bool get_ray_trace(const std::shared_ptr<Trace>& ray_trace,
     Direction normal, inv_normal;
     vector_math::get_length_normal_and_inverse_normal(sensed, origin, length, normal, inv_normal);
     length = std::min(length, dist_max);
-    
+
     const bool valid_intersection = AABB::fast_eigen_find_bounded_intersection(properties->dimensions, sensed, inv_normal,
                                                                                dist_min, length, dist_min_adj, dist_max_adj);
     if (valid_intersection)

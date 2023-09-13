@@ -32,7 +32,7 @@ struct Camera : public Entity
     // *                                        FRIENDS                                        * //
     // ***************************************************************************************** //
 
-    /// @brief Required to access the depth image and intrinsics when converting an Eigen matrix
+    /// @brief Required to access the depth image and Intrinsics when converting an Eigen matrix
     ///        to an OpenCV image.
     friend struct DepthImageProcessing;
 
@@ -56,7 +56,7 @@ struct Camera : public Entity
     }
 
 
-    /// @brief Static method to extract a 3D point from a pixel in a depth image. 
+    /// @brief Static method to extract a 3D point from a pixel in a depth image.
     /// @param intr  Intrinsics for the Camera.
     /// @param image Depth image.
     /// @param row Pixel row in the image.
@@ -82,7 +82,7 @@ struct Camera : public Entity
     /// @param [out] dest Matrix to store the depth image's Points in.
     /// @note The ouput points are implicitly relative to the optical frame of the camera
     ///       that generated the depth image.
-    static void getPointsFromImageAndIntrinsics(const std::shared_ptr<Intrinsics>& intr, 
+    static void getPointsFromImageAndIntrinsics(const std::shared_ptr<Intrinsics>& intr,
                                                 const DepthImage& image,
                                                 PointMatrix& dest)
     {
@@ -177,7 +177,7 @@ struct Camera : public Entity
     }
 
 
-    /// @brief Sets new intrinsic parameters for the camera.
+    /// @brief Sets new Intrinsic parameters for the camera.
     ///        The stored image is automatically resized and cleared.
     void setIntr(const std::shared_ptr<Intrinsics>& new_intr)
     {

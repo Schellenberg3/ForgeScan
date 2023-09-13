@@ -55,7 +55,7 @@ int main(const int argc, const char **argv)
     // ******* Set up an OccupancyConfusion Metric for the Scene, add it to the Manager ******** //
 
     auto occ_conf = forge_scan::metrics::OccupancyConfusion::create(manager->reconstruction,
-                                                                    scene->getGroundTruthOccupancy(), 
+                                                                    scene->getGroundTruthOccupancy(),
                                                                     "binary");
     manager->metricAdd(occ_conf);
 
@@ -73,7 +73,7 @@ int main(const int argc, const char **argv)
     {
         camera_pose = manager->policyGetView();
 
-        float val = rand_sample.uniform(); 
+        float val = rand_sample.uniform();
         if (val >= reject_rate)
         {
             manager->policyAcceptView();
@@ -107,7 +107,7 @@ int main(const int argc, const char **argv)
     auto updated_fpath = manager->save(save_fpath);
 
     std::cout << "Finished! Process took " << timer.elapsedSeconds() << " seconds." << std::endl;
-    std::cout << "Saved scene at " << updated_fpath << std::endl; 
+    std::cout << "Saved scene at " << updated_fpath << std::endl;
 
     return 0;
 }

@@ -29,7 +29,7 @@ int main(const int argc, const char **argv)
     // **************************** Write the scene to an HDF5 file **************************** //
 
     auto updated_fpath = scene->save(fpath);
-    std::cout << "Saved scene at " << updated_fpath << std::endl; 
+    std::cout << "Saved scene at " << updated_fpath << std::endl;
 
 
     // *********************** Verify that we can re-load the HDF5 file ************************ //
@@ -39,7 +39,7 @@ int main(const int argc, const char **argv)
     auto scene2 = forge_scan::simulation::Scene::create();
     scene2->load(updated_fpath);
 
-    std::cout << "Success! Reloaded the scene." << std::endl; 
+    std::cout << "Success! Reloaded the scene." << std::endl;
 
     return 0;
 }

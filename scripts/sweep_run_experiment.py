@@ -42,7 +42,7 @@ for item in GROUND_TRUTH_PATH.iterdir():
 
 ## ----------------------------------- DEFINE FILE CONSTANTS ----------------------------------- ##
 
-STDIN_NEWLINE = "\n" 
+STDIN_NEWLINE = "\n"
 
 # Exploration space
 REGULAR_RERUNS = 1
@@ -51,7 +51,7 @@ RANDOM_RERUNS  = 10
 VIEW_RADIUS = 2.5
 REJECTION_RATE = 0.0
 
-# Use RealSense uncertainty model 
+# Use RealSense uncertainty model
 DIST = 0.02 * VIEW_RADIUS
 
 RANDOM_SEED = False
@@ -110,7 +110,7 @@ def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: str, policy_nam
     stdin += intr + STDIN_NEWLINE
     stdin += policy
     if (policy_name == "Axis_Random"):
-        # Axis Random always takes five views before taking a random axis. 
+        # Axis Random always takes five views before taking a random axis.
         stdin += " --n-views 5 --n-repeat " + str(n_views / 5)
     else:
         stdin += " --n-views " + str(n_views)
@@ -158,7 +158,7 @@ def main(parsed_args: argparse.Namespace) -> None:
                         fpath = pathlib.Path(intr[0], scene.name.removesuffix(HDF5_EXTENSION),
                                              policy[0], str(n_views), str(rep))
                         print(f"({n} / {N}) {fpath}")
-                        
+
                         fpath = fpath_base / fpath
                         if fpath.exists() is False:
                             fpath.mkdir(parents=True)

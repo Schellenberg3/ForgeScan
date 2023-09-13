@@ -33,8 +33,8 @@ public:
 
 
     /// @brief Creates a shared pointer to a Manager.
-    /// @param parser Arg Parser with arguments to construct Grid Properties from.
-    ///               These Grid Properties are utilized by all Reconstruction VoxelGrids.
+    /// @param parser ArgParser with arguments to construct `Grid::Properties` from.
+    ///               These `Grid::Properties` are utilized by all Reconstruction VoxelGrids.
     ///               See `forge_scan::Grid::Properties` for details.
     /// @return Shared pointer to a Manager.
     static std::shared_ptr<Manager> create(const utilities::ArgParser& parser)
@@ -44,8 +44,8 @@ public:
 
 
     /// @brief Creates a shared pointer to a Manager
-    /// @param grid_properties Shared, constant pointer to the Grid Properties to use.
-    ///                        These Grid Properties are utilized by all Reconstruction VoxelGrids.
+    /// @param grid_properties Shared, constant pointer to the `Grid::Properties` to use.
+    ///                        These `Grid::Properties` are utilized by all Reconstruction VoxelGrids.
     /// @return Shared pointer to a Manager.
     static std::shared_ptr<Manager> create(const std::shared_ptr<const Grid::Properties>& grid_properties)
     {
@@ -53,7 +53,7 @@ public:
     }
 
 
-    /// @brief Saves the current state of all items (VoxelGrids, Policies, Metrics, etc.) handled by the Manager. 
+    /// @brief Saves the current state of all items (VoxelGrids, Policies, Metrics, etc.) handled by the Manager.
     /// @param fpath File path and file name for the data.
     /// @returns Full path to the location the file was saved, including name and file extension.
     /// @note  - If the file path does not already have the `.h5` extension, then this is added.
@@ -104,7 +104,7 @@ public:
 
 
     /// @brief Adds a new Policy option.
-    /// @param parser Arg Parser with arguments to construct a new Policy from.
+    /// @param parser ArgParser with arguments to construct a new Policy from.
     ///               See `forge_scan::policies::policy_constructor` for details
     /// @return Index position in the Policy list if the Policy was successfully added.
     /// @note   - If `--set-active` is passed as a flag then the new Policy will immediately be
@@ -138,7 +138,7 @@ public:
         return false;
     }
 
-    
+
     /// @brief Gets the Policy the Manager is currently using to suggest views.
     /// @return Shared, constant reference to the active Policy.
     /// @throws std::runtime_error If no Policies have been added to the Manager.
@@ -215,7 +215,7 @@ public:
 
 
     /// @brief Adds a VoxelGrid data channel to the Reconstruction.
-    /// @param parser Arg Parser with arguments to construct a new VoxelGrid from.
+    /// @param parser ArgParser with arguments to construct a new VoxelGrid from.
     ///               See `forge_scan::data::Reconstruction::addChannel` for details.
     /// @throws Any exceptions thrown by Reconstruction::addChannel pass through this.
     void reconstructionAddChannel(const utilities::ArgParser& parser)
@@ -247,9 +247,9 @@ public:
         ++this->reconstruction_update_count;
     }
 
-    
+
     /// @brief Queries the Reconstruction for how many times it has been updated with new data.
-    /// @return Total number of successful updates the Reconstruction has had. 
+    /// @return Total number of successful updates the Reconstruction has had.
     size_t reconstructionGetUpdateCount() const
     {
         return this->reconstruction_update_count;
@@ -263,7 +263,7 @@ public:
 
 
     /// @brief Adds a new Metric to track information about the Reconstruction.
-    /// @param parser Arg Parser with arguments to construct a new Metric from.
+    /// @param parser ArgParser with arguments to construct a new Metric from.
     ///               See `forge_scan::metrics::metric_constructor` for details.
     /// @throws InvalidMapKey If a Metric of the requested type is already in use.
     void metricAdd(const utilities::ArgParser& parser)
@@ -292,7 +292,7 @@ public:
     // *                                 PUBLIC CLASS MEMBERS                                  * //
     // ***************************************************************************************** //
 
-    /// @brief Shared, constant Grid Properties used by all items the handled by the Manager. 
+    /// @brief Shared, constant `Grid::Properties` used by all items the handled by the Manager.
     const std::shared_ptr<const Grid::Properties> grid_properties;
 
     /// @brief Stores the Reconstruction class.
@@ -306,8 +306,8 @@ private:
 
 
     /// @brief Private constructor to enforce use of shared pointers.
-    /// @param parser Arg Parser with arguments to construct Grid Properties from.
-    ///               These Grid Properties are utilized by all Reconstruction VoxelGrids.
+    /// @param parser ArgParser with arguments to construct `Grid::Properties` from.
+    ///               These `Grid::Properties` are utilized by all Reconstruction VoxelGrids.
     ///               See `forge_scan::Grid::Properties` for details.
     explicit Manager(const utilities::ArgParser& parser)
         : grid_properties(Grid::Properties::createConst(parser)),
@@ -317,8 +317,8 @@ private:
     }
 
     /// @brief Private constructor to enforce use of shared pointers.
-    /// @param grid_properties Shared, constant pointer to the Grid Properties to use.
-    ///                        These Grid Properties are utilized by all Reconstruction VoxelGrids.
+    /// @param grid_properties Shared, constant pointer to the `Grid::Properties` to use.
+    ///                        These `Grid::Properties` are utilized by all Reconstruction VoxelGrids.
     explicit Manager(const std::shared_ptr<const Grid::Properties>& grid_properties)
         : grid_properties(grid_properties),
           reconstruction(data::Reconstruction::create(this->grid_properties))
@@ -382,7 +382,7 @@ private:
     /// @return Shared reference to the active Policy.
     /// @throws std::runtime_error If no Policies have been added to the Manager.
     /// @note Unlike the public method, this is used to access a non-constant-qualified pointer
-    ///       to the active policy. Many of the Manager's public policy methods use this overload. 
+    ///       to the active policy. Many of the Manager's public Policy methods use this overload.
     std::shared_ptr<policies::Policy> policyGetActiveNonConst()
     {
         this->throwIfNoActivePolicy();
@@ -469,7 +469,7 @@ private:
     ///        When a new Policy is added, it is appended to the end of this vector.
     std::vector<std::shared_ptr<policies::Policy>> policy_vec;
 
-    /// @brief Index within the list for which Policy is active. Default, and initialized, to 0. 
+    /// @brief Index within the list for which Policy is active. Default, and initialized, to 0.
     size_t active_policy_idx = 0;
 
     /// @brief Map of Metric type names to Metric. A map ensures we cannot add two Metrics of the

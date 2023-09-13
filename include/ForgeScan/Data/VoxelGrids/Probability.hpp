@@ -18,8 +18,8 @@ class Probability : public VoxelGrid
 {
 public:
     /// @brief Constructor for a shared pointer to a Probability VoxelGrid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @param parser Arg Parser with arguments to construct an Probability Grid from.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
+    /// @param parser ArgParser with arguments to construct an Probability Grid from.
     /// @return Shared pointer to a Probability Grid.
     /// @throws std::invalid_argument if any probability values are not in the range 0<= p <= 1.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
@@ -39,7 +39,7 @@ public:
 
 
     /// @brief Constructor for a shared pointer to a Probability VoxelGrid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param dist_min   Minimum update distance. Default -0.2.
     /// @param dist_max   Maximum update distance. Default +0.2.
     /// @param p_max      Probability for voxel maximum voxel value saturation. Default 0.98.
@@ -107,7 +107,7 @@ public:
 
 private:
     /// @brief Private constructor to enforce shared pointer usage.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param dist_min   Minimum trace update distance for this VoxelGrid.
     /// @param dist_max   Maximum trace update distance for this VoxelGrid.
     /// @param p_max      Probability for voxel maximum voxel value saturation.
@@ -194,7 +194,7 @@ private:
 
         /// @brief Gets the occupation probability for a location on the ray.
         /// @param iter Iterator for the ray trace.
-        /// @return Occupation probability for the iterator's location on the ray.  
+        /// @return Occupation probability for the iterator's location on the ray.
         float get_px(const Trace::const_iterator& iter)
         {
             using namespace forge_scan::utilities::math;
@@ -244,7 +244,7 @@ private:
     /// @brief Probability for sensed point.
     const float p_sensed;
 
-    /// @brief Probability for voxels far in front of the sensed point. 
+    /// @brief Probability for voxels far in front of the sensed point.
     const float p_far;
 
     /// @brief Subclass callable that std::visit uses to perform updates with typed information.
@@ -265,19 +265,19 @@ const float Probability::default_p_past   = 0.50f,
             Probability::default_p_init   = 0.50f;
 
 /// @brief ArgParser key for the maximum occupation probability a voxel may have.
-const std::string Probability::parse_p_max = "--p-max"; 
+const std::string Probability::parse_p_max = "--p-max";
 
 /// @brief ArgParser key for the minimum occupation probability a voxel may have.
-const std::string Probability::parse_p_min = "--p-min"; 
+const std::string Probability::parse_p_min = "--p-min";
 
 /// @brief ArgParser key for the occupation probability at d-min.
-const std::string Probability::parse_p_past = "--p-past"; 
+const std::string Probability::parse_p_past = "--p-past";
 
 /// @brief ArgParser key for the occupation probability at the sensed point.
-const std::string Probability::parse_p_sensed = "--p-sensed"; 
+const std::string Probability::parse_p_sensed = "--p-sensed";
 
 /// @brief ArgParser key for the occupation probability at d-max and above.
-const std::string Probability::parse_p_far = "--p-far"; 
+const std::string Probability::parse_p_far = "--p-far";
 
 /// @brief ArgParser key for the occupation probability to initialize a voxel to.
 const std::string Probability::parse_p_init = "--p-init";

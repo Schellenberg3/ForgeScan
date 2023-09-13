@@ -79,7 +79,7 @@ class Occupancy : public Grid
 
 public:
     /// @brief Creates a shared pointer to a Ground Truth Occupancy Grid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @return Shared pointer to an Occupancy Grid.
     static std::shared_ptr<Occupancy> create(const std::shared_ptr<const Grid::Properties>& properties)
     {
@@ -88,10 +88,10 @@ public:
 
 
     /// @brief Creates a shared pointer to a Ground Truth Occupancy Grid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param data The data (typically loaded from an HDF5) for the Occupancy Grid.
     /// @return Shared pointer to an Occupancy Grid.
-    /// @throws GridPropertyError If the data vector length does not match the Grid Properties
+    /// @throws GridPropertyError If the data vector length does not match the `Grid::Properties`
     ///         number of voxels.
     /// @note   This uses `swap` to exchange the contents of the provided vector with the contents of
     ///         the internal data without copying data.
@@ -193,7 +193,7 @@ protected:
 
 private:
     /// @brief Private constructor to enforce use of shared pointers.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     explicit Occupancy(const std::shared_ptr<const Grid::Properties>& properties)
         : Grid(properties,
                DataType::UINT8_T)
@@ -203,8 +203,8 @@ private:
 
 
     /// @brief Private constructor to enforce use of shared pointers.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @throws GridPropertyError If the data vector length does not match the Grid Properties
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
+    /// @throws GridPropertyError If the data vector length does not match the `Grid::Properties`
     ///         number of voxels.
     /// @note   This uses `swap` to exchange the contents of the provided vector with the contents of
     ///         the internal data without copying data.
@@ -232,7 +232,7 @@ private:
     }
 
 
-    /// @brief Tests the false-negative case where an occupied voxel is labeled as free or is unknown. 
+    /// @brief Tests the false-negative case where an occupied voxel is labeled as free or is unknown.
     /// @param truth Occupancy enumeration value for the voxel in the Ground Truth Occupancy Grid.
     /// @param measurement Experiments measurement for the same voxel in an Occupancy VoxelGrid.
     /// @return True if truth is OCCUPIED and the measurement is FREE or UNKNOWN.
@@ -254,7 +254,7 @@ private:
     }
 
 
-    /// @brief Tests the true-negative case where the voxel is free. 
+    /// @brief Tests the true-negative case where the voxel is free.
     /// @param truth Occupancy enumeration value for the voxel in the Ground Truth Occupancy Grid.
     /// @param measurement Experiments measurement for the same voxel in an Occupancy VoxelGrid.
     /// @return True if truth is FREE and the measurement is FREE.

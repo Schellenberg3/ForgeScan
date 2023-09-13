@@ -284,7 +284,7 @@ struct Entity
         Eigen::Vector3f translation = extr.translation();
         extr.setIdentity();
 
-        float scale = parser.has(Entity::parse_rotation_degrees) ? M_PI / 180.0f : 1;      
+        float scale = parser.has(Entity::parse_rotation_degrees) ? M_PI / 180.0f : 1;
         extr.rotate(Eigen::AngleAxisf(scale * parser.get<float>(Entity::parse_rx, Entity::default_rotation), Ray::UnitX()) *
                     Eigen::AngleAxisf(scale * parser.get<float>(Entity::parse_ry, Entity::default_rotation), Ray::UnitY()) *
                     Eigen::AngleAxisf(scale * parser.get<float>(Entity::parse_rz, Entity::default_rotation), Ray::UnitZ()));

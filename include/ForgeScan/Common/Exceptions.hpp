@@ -29,7 +29,7 @@ struct Exception : public std::runtime_error
 /// @details All the maps used by these classes link a string key to a shared pointer
 ///          and may be accessed at runtime. This exception class describes the errors
 ///          that may be encountered then.
-struct InvalidMapKey : public Exception 
+struct InvalidMapKey : public Exception
 {
     /// @brief Constructs an InvalidMapKey exception.
     /// @param what Exception message.
@@ -84,7 +84,7 @@ struct ReservedMapKey : public InvalidMapKey
 
 /// @brief Exception class for Constructor factories when parsing ArgParser to
 ///        select which of a base class's derived classes to create.
-struct ConstructorError : public Exception 
+struct ConstructorError : public Exception
 {
     /// @brief Constructs an ConstructorError exception.
     /// @param what Exception message.
@@ -106,8 +106,8 @@ struct ConstructorError : public Exception
 };
 
 
-/// @brief Exception class for issues with the Grid Properties class.
-struct GridPropertyError : public Exception 
+/// @brief Exception class for issues with the `Grid::Properties` class.
+struct GridPropertyError : public Exception
 {
     /// @brief Constructs a GridPropertyError exception.
     /// @param what Exception message.
@@ -118,7 +118,7 @@ struct GridPropertyError : public Exception
     }
 
 
-    /// @brief Constructor for non-matching Grid Properties between a source and destination Grid. 
+    /// @brief Constructor for non-matching `Grid::Properties` between a source and destination Grid.
     /// @param x Identifier or name for one grid.
     /// @param y Identifier or name for the other grid.
     /// @return GridPropertyError with message.
@@ -129,7 +129,7 @@ struct GridPropertyError : public Exception
     }
 
 
-    /// @brief Constructor for non-matching GridSize and data vector length 
+    /// @brief Constructor for non-matching GridSize and data vector length
     /// @param size Dimensions of the Grid.
     /// @param len  Length of the data vector.
     /// @return GridPropertyError with message.
@@ -143,7 +143,7 @@ struct GridPropertyError : public Exception
 };
 
 
-/// @brief Exception class for if Index exceeds a Grid Properties GridSize.
+/// @brief Exception class for if Index exceeds a `Grid::Properties` GridSize.
 struct VoxelOutOfRange : public GridPropertyError
 {
     /// @brief Constructs a VoxelOutOfRange exception.
@@ -175,7 +175,7 @@ private:
 
 
 /// @brief Exception class for failed downcasts from VoxelGrid pointer to a derived class.
-struct BadVoxelGridDownCast : public Exception 
+struct BadVoxelGridDownCast : public Exception
 {
     /// @brief Constructs a GridPropertyError exception.
     /// @param derived_type_name Name of the derived class.
@@ -188,7 +188,7 @@ struct BadVoxelGridDownCast : public Exception
 
 
 /// @brief Exception class for DataVariant and DataType issues.
-struct DataVariantError : public Exception 
+struct DataVariantError : public Exception
 {
     /// @brief Constructs a DataVariantError exception.
     /// @param what Exception message.
@@ -217,7 +217,7 @@ struct DataVariantError : public Exception
     static DataVariantError AttemptedUseOfTypeCheckingDataType(const std::string& data_type)
     {
         return DataVariantError("Cannot use type checking DataType of \"" + data_type +
-                                " to construct a DataVariant.");  
+                                " to construct a DataVariant.");
     }
 
 

@@ -207,7 +207,7 @@ int main()
     // Add ground truth metrics
     add_metrics(parser, manager);
     auto bin_conf = forge_scan::metrics::OccupancyConfusion::create(manager->reconstruction,
-                                                                    scene->getGroundTruthOccupancy(), 
+                                                                    scene->getGroundTruthOccupancy(),
                                                                     "binary");
     manager->metricAdd(bin_conf);
 
@@ -224,7 +224,7 @@ int main()
     {
         forge_scan::Extrinsic camera_pose = manager->policyGetView();
 
-        float val = rand_sample.uniform(); 
+        float val = rand_sample.uniform();
         if (val >= reject_rate)
         {
             manager->policyAcceptView();

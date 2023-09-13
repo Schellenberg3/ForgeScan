@@ -17,7 +17,7 @@ namespace forge_scan {
 namespace simulation {
 
 
-/// @brief A simple analytical Sphere.
+/// @brief A simple analytical sphere.
 /// @note The reference frame for the Sphere is located at its center.
 struct Sphere : public Primitive
 {
@@ -26,7 +26,7 @@ struct Sphere : public Primitive
     /// @param extr  Transformation to the world frame to the center of the Sphere.
     Sphere(const float& radius = 1, const Extrinsic& extr = Extrinsic::Identity())
         : Primitive(extr,
-                    getAABBbound(std::abs(radius)), 
+                    getAABBbound(std::abs(radius)),
                     getAABBbound(-1 * std::abs(radius))),
           radius(std::abs(radius)),
           radius_squared(this->radius * this->radius)
@@ -47,7 +47,7 @@ struct Sphere : public Primitive
 
 
     /// @brief Constructor for a shared pointer to a Sphere.
-    /// @param parser Arg Parser with arguments to construct a Sphere from.
+    /// @param parser ArgParser with arguments to construct a Sphere from.
     /// @return Shared pointer to a Sphere.
     static std::shared_ptr<Sphere> create(const utilities::ArgParser& parser)
     {
@@ -89,7 +89,7 @@ struct Sphere : public Primitive
 
         // Adapted from https://stackoverflow.com/questions/6533856 with a partial quadratic solver
         // for only the real-valued solutions of the intersection.
-        // Note that we require the start/end point to be relative to the Sphere's reference frame 
+        // Note that we require the start/end point to be relative to the Sphere's reference frame
         // thus the value of "center" used in the references above is always equal to zero here.
         // See also: http://paulbourke.net/geometry/circlesphere/.
 
@@ -119,8 +119,8 @@ struct Sphere : public Primitive
         //         X_2 = 2*C / (-B - D)
         // In short, the first case lets us add two positives and the second lets us subtract two
         // negatives. This is ideal as it avoids any case where we subtract quantities with the
-        // same sign. In cases where these values are similar in magnitude (for this case, when 
-        // 4*A*C is small) this leads to imprecision in rounding. For details on this numeric 
+        // same sign. In cases where these values are similar in magnitude (for this case, when
+        // 4*A*C is small) this leads to imprecision in rounding. For details on this numeric
         // stability see: https://people.csail.mit.edu/bkph/articles/Quadratics.pdf
 
         // Both cases require the following values which we may pre-compute
@@ -234,7 +234,7 @@ private:
     }
 
 
-    /// @brief Prints information about the Sphere to the output stream. 
+    /// @brief Prints information about the Sphere to the output stream.
     /// @param out Output stream to write to.
     void print(std::ostream& out) const override final
     {

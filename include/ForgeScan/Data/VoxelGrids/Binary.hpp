@@ -9,13 +9,13 @@ namespace data {
 
 
 /// @brief Tracks binary occupancy values for each voxel. The whole VoxelGrid begins as "occupied"
-///        and are updated to be "free" rays travel through them. 
+///        and are updated to be "free" rays travel through them.
 class Binary : public VoxelGrid
 {
 public:
     /// @brief Constructor for a shared pointer to an Binary VoxelGrid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @param parser Arg Parser with arguments to construct an Binary Grid from.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
+    /// @param parser ArgParser with arguments to construct an Binary Grid from.
     /// @return Shared pointer to a Binary Grid.
     static std::shared_ptr<Binary> create(const std::shared_ptr<const Grid::Properties>& properties,
                                              const utilities::ArgParser& parser)
@@ -26,7 +26,7 @@ public:
 
 
     /// @brief Constructor for a shared pointer to an Binary VoxelGrid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param dist_min    Minimum update distance. Default 0.
     /// @param dist_max    Maximum update distance. Default infinity.
     /// @return Shared pointer to an Binary Grid.
@@ -52,9 +52,9 @@ public:
         return name;
     }
 
-    /// @brief Accessor for `metrics::ground_truth::ExperimentOccupancy` in 
+    /// @brief Accessor for `metrics::ground_truth::ExperimentOccupancy` in
     ///       `metrics::OccupancyConfusion`
-    /// @return Read-only reference to the Occupancy data vector.  
+    /// @return Read-only reference to the Occupancy data vector.
     const std::vector<uint8_t>& getOccupancyData() const
     {
         return std::get<std::vector<uint8_t>>(this->data);
@@ -73,7 +73,7 @@ public:
 
 private:
     /// @brief Private constructor to enforce shared pointer usage.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param dist_min   Minimum trace update distance for this VoxelGrid.
     /// @param dist_max   Maximum trace update distance for this VoxelGrid.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
@@ -93,7 +93,7 @@ private:
 
 
     /// @brief Subclass provides update functions for each supported DataType/VectorVariant of
-    ///        the data vector. 
+    ///        the data vector.
     struct UpdateCallable : public VoxelGrid::UpdateCallable
     {
         using VoxelGrid::UpdateCallable::operator();
@@ -101,7 +101,7 @@ private:
         // ************************************************************************************* //
         // *                                SUPPORTED DATATYPES                                * //
         // ************************************************************************************* //
-    
+
 
         void operator()(std::vector<uint8_t>& vector)
         {

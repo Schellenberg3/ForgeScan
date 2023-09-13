@@ -39,7 +39,7 @@ class TSDF : public Grid
 
 public:
     /// @brief Creates a shared pointer to a Ground Truth TSDF Grid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @return Shared pointer to a TSDF Grid.
     static std::shared_ptr<TSDF> create(const std::shared_ptr<const Grid::Properties>& properties)
     {
@@ -48,10 +48,10 @@ public:
 
 
     /// @brief Creates a shared pointer to a Ground Truth TSDF Grid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param data The data (typically loaded from an HDF5) for the TSDF Grid.
     /// @return Shared pointer to a TSDF Grid.
-    /// @throws GridPropertyError If the data vector length does not match the Grid Properties
+    /// @throws GridPropertyError If the data vector length does not match the `Grid::Properties`
     ///         number of voxels.
     /// @note   This uses `swap` to exchange the contents of the provided vector with the contents of
     ///         the internal data without copying data.
@@ -154,7 +154,7 @@ protected:
 
 private:
     /// @brief Private constructor to enforce use of shared pointers.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     explicit TSDF(const std::shared_ptr<const Grid::Properties>& properties)
         : Grid(properties,
                DataType::DOUBLE)
@@ -164,8 +164,8 @@ private:
 
 
     /// @brief Private constructor to enforce use of shared pointers.
-    /// @param properties Shared, constant Grid properties.
-    /// @throws GridPropertyError If the data vector length does not match the Grid Properties
+    /// @param properties Shared, constant `Grid::Properties`.
+    /// @throws GridPropertyError If the data vector length does not match the `Grid::Properties`
     ///         number of voxels.
     /// @note   This uses `swap` to exchange the contents of the provided vector with the contents of
     ///         the internal data without copying data.
@@ -179,7 +179,7 @@ private:
             throw GridPropertyError::DataVectorDoesNotMatch(this->properties->size, data.size());
         }
         this->data.swap(data);
-    } 
+    }
 };
 
 

@@ -75,14 +75,14 @@ struct Intrinsics
 
 
     /// @brief Creates a shared pointer to an Intrinsics struct.
-    /// @param parser Arg Parser with arguments to construct Grid Properties from.
+    /// @param parser ArgParser with arguments to construct Intrinsics from.
     /// @return Shared pointer to an Intrinsics struct.
     static std::shared_ptr<Intrinsics> create(const utilities::ArgParser& parser)
     {
         if (parser.has(Intrinsics::parse_d455))
         {
             float scale =  std::clamp(parser.get<float>(Intrinsics::parse_d455, 1.0f), 0.01f, 2.0f);
-            return std::shared_ptr<Intrinsics>(new Intrinsics(Intrinsics::default_width  * scale, 
+            return std::shared_ptr<Intrinsics>(new Intrinsics(Intrinsics::default_width  * scale,
                                                               Intrinsics::default_height * scale,
                                                               Intrinsics::realsense_min_d,
                                                               Intrinsics::realsense_max_d,
@@ -123,7 +123,7 @@ struct Intrinsics
     }
 
     static const size_t default_width, default_height;
-    
+
     static const float default_min_d, default_max_d, default_fov, default_fov_x, default_fov_y,
                        realsense_min_d, realsense_max_d;
 
@@ -139,7 +139,7 @@ struct Intrinsics
     // ***************************************************************************************** //
 
 
-    /// @brief Returns the intrinsic matrix.
+    /// @brief Returns the Intrinsic matrix.
     /// @return Eigen matrix of the Camera Intrinsic properties.
     Eigen::Matrix3f getMatrix() const
     {
@@ -152,7 +152,7 @@ struct Intrinsics
     }
 
 
-    /// @brief Sets focal lengths and center offsets based on the provided intrinsic matrix.
+    /// @brief Sets focal lengths and center offsets based on the provided Intrinsic matrix.
     /// @param K New intrinsic matrix. Assumed to be valid.
     void setFromMatrix(const Eigen::Matrix3f& K)
     {
@@ -164,7 +164,7 @@ struct Intrinsics
 
 
     /// @brief Calculates how many pixels the Depth Camera has.
-    /// @return Total number of pixels in the camera. 
+    /// @return Total number of pixels in the camera.
     size_t size() const
     {
         return this->width * this->height;
@@ -359,7 +359,7 @@ const std::string Intrinsics::default_arguments_2 =
     Intrinsics::parse_fov + " " + std::to_string(Intrinsics::default_fov);
 
 /// @brief String explaining what arguments this class accepts for the independent FOV option.
-const std::string Intrinsics::help_string_3 = 
+const std::string Intrinsics::help_string_3 =
     "["  + Intrinsics::parse_width + " <pixels in x>]" +
     " [" + Intrinsics::parse_height + " <pixels in y>]" +
     " [" + Intrinsics::parse_min_d + " <depth min>]" +

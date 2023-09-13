@@ -130,7 +130,7 @@ protected:
 
 
     /// @brief Protected constructor for derived classes only.
-    /// @param extr Transformation from the world frame to the derived class's reference frame. 
+    /// @param extr Transformation from the world frame to the derived class's reference frame.
     /// @param upperAABBbound Upper bound position, relative to the derived class's reference frame.
     /// @param lowerAABBbound Lower bound position, relative to the derived class's reference frame.
     Primitive(const Extrinsic& extr, const Point& upperAABBbound, const Point& lowerAABBbound)
@@ -157,7 +157,7 @@ protected:
     /// @param start  Starting point of the ray, relative to the derived class's reference frame.
     /// @param end    Ending point of the ray, relative to the derived class's reference frame.
     /// @param [out] t Scaling factor for the ray to intersect the AABB. Describes when the ray first
-    ///                hits a face of the AABB. Values 0 <= t <= 1 are valid on the line segment 
+    ///                hits a face of the AABB. Values 0 <= t <= 1 are valid on the line segment
     ///                between start and end.
     /// @return True if the ray has any intersection with the primitive's bounding box.
     /// @warning The output variable, `t`, is valid only when this function returns true.
@@ -170,7 +170,7 @@ protected:
     }
 
 
-    /// @brief Prints information about the Primitive to the output stream. 
+    /// @brief Prints information about the Primitive to the output stream.
     /// @param out Output stream to write to.
     virtual void print(std::ostream& out) const
     {

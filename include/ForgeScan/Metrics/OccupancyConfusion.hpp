@@ -23,16 +23,16 @@ public:
 
 
     /// @brief Creates an OccupancyConfusion Metric.
-    /// @param reconstruction Shared pointer to the Reconstruction that the Metric observes.
-    /// @param ground_truth   The ground truth Occupancy Grid to compare Reconstruction data against.
-    /// @param use_channel    The name of the Reconstruction channel to use. If this is an empty 
-    ///                       string, the grid does not exist in the reconstruction, or the existing
-    ///                       grid is the wrong type, then a default Occupancy VoxelGrid is created.
+    /// @param reconstruction Shared pointer to the `data::Reconstruction` that the Metric observes.
+    /// @param ground_truth   The `ground_truth::Occupancy` Grid to compare `data::Reconstruction` data against.
+    /// @param use_channel    The name of the `data::Reconstruction` channel to use. If this is an empty
+    ///                       string, the grid does not exist in the `data::Reconstruction`, or the existing
+    ///                       grid is the wrong type, then a default `data::Binary` `data::VoxelGrid` is created.
     /// @return Shared pointer to an an OccupancyConfusion Metric.
-    /// @throws GridPropertyError if the ground truth Occupancy Grid Properties are not equal
-    ///                           to those of the Reconstruction.
+    /// @throws GridPropertyError if the `ground_truth::Occupancy` `Grid::Properties` are not equal
+    ///                           to those of the `data::Reconstruction`.
     /// @throws BadVoxelGridDownCast if the channel from `use_channel` may not be cast to one of
-    ///                              the supported ExperimentOccupancy types.
+    ///                              the supported `ground_truth::ExperimentOccupancy` types.
     static std::shared_ptr<OccupancyConfusion> create(const std::shared_ptr<data::Reconstruction>& reconstruction,
                                                       const std::shared_ptr<const ground_truth::Occupancy>& ground_truth,
                                                       const std::string& use_channel = "")
@@ -42,9 +42,9 @@ public:
 
 
     /// @brief Changes what ground truth the class uses.
-    /// @param ground_truth The ground truth Occupancy Grid to compare Reconstruction data against.
-    /// @returns True if the ground truth was changed. False if the Grid Properties were not equal
-    ///          to those of the Reconstruction and the ground truth was not changed.
+    /// @param ground_truth The `ground_truth::Occupancy` Grid to compare Reconstruction data against.
+    /// @returns True if the ground truth was changed. False if the `Grid::Properties` were not equal
+    ///          to those of the `data::Reconstruction` and the ground truth was not changed.
     bool setGroundTruth(const std::shared_ptr<const ground_truth::Occupancy>& ground_truth)
     {
         if (this->reconstruction->grid_properties->isEqual(ground_truth->properties))
@@ -63,15 +63,15 @@ protected:
 
 
     /// @brief Private constructor to enforce use of shared pointers.
-    /// @param reconstruction Shared pointer to the Reconstruction that the Metric observes.
-    /// @param ground_truth   The ground truth Occupancy Grid to compare Reconstruction data against.
-    /// @param use_channel    The name of the Reconstruction channel to use. If this is an empty 
-    ///                       string, the grid does not exist in the reconstruction, or the existing
-    ///                       grid is the wrong type, then a default Occupancy VoxelGrid is created.
+    /// @param reconstruction Shared pointer to the `data::Reconstruction` that the Metric observes.
+    /// @param ground_truth   The `ground_truth::Occupancy` Grid to compare `data::Reconstruction` data against.
+    /// @param use_channel    The name of the `data::Reconstruction` channel to use. If this is an empty
+    ///                       string, the grid does not exist in the `data::Reconstruction`, or the existing
+    ///                       grid is the wrong type, then a default `data::Binary` `data::VoxelGrid` is created.
     /// @throws GridPropertyError if the ground truth Occupancy Grid Properties are not equal
     ///                           to those of the Reconstruction.
     /// @throws BadVoxelGridDownCast if the channel from `use_channel` may not be cast to one of
-    ///                              the supported ExperimentOccupancy types.
+    ///                              the supported `ground_truth::ExperimentOccupancy` types.
     explicit OccupancyConfusion(const std::shared_ptr<data::Reconstruction>& reconstruction,
                                 const std::shared_ptr<const ground_truth::Occupancy>& ground_truth,
                                 const std::string& use_channel = "")
@@ -116,7 +116,7 @@ protected:
     }
 
 
-    /// @brief Verifies that the Grid Properties of the Reconstruction match those of the 
+    /// @brief Verifies that the Grid Properties of the Reconstruction match those of the
     ///        ground truth data.
     /// @throws GridPropertyError if the ground truth Occupancy Grid Properties are not equal.
     void throwIfGridPropertiesDoNotMatch()
@@ -138,7 +138,7 @@ protected:
     void postUpdate(const size_t& update_count) override final
     {
         this->confusion_list.push_back({ground_truth::Confusion(), update_count});
-        
+
         auto get_occupancy_data = [](auto&& experiment){
             return experiment->getOccupancyData();
         };

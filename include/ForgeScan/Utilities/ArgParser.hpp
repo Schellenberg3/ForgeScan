@@ -27,14 +27,14 @@ friend std::ostream& operator<< (std::ostream&, const ArgParser&);
 friend std::istream& operator>> (std::istream&, ArgParser&);
 
 public:
-    /// @brief Constructs an argument parser ready to parse a string via `setArgs`.
+    /// @brief Constructs an ArgParser ready to parse a string via `setArgs`.
     ArgParser()
     {
         this->clear();
     }
 
 
-    /// @brief Constructs the argument parser from the argument count and argument array.
+    /// @brief Constructs the ArgParser from the argument count and argument array.
     /// @param argc Count of arguments in the argument vector.
     /// @param argv Argument array.
     ArgParser(const int &argc, const char **argv)
@@ -43,7 +43,7 @@ public:
     }
 
 
-    /// @brief Constructs the argument parser from the argument count and argument array.
+    /// @brief Constructs the ArgParser from the argument count and argument array.
     /// @param args A string of arguments deliminated by a space.
     ArgParser(const std::string& args)
     {
@@ -51,7 +51,7 @@ public:
     }
 
 
-    /// @brief Constructs the argument parser from the argument count and argument array.
+    /// @brief Constructs the ArgParser from the argument count and argument array.
     /// @param args A string of arguments deliminated by a space.
     ArgParser(const char* args)
     {
@@ -283,7 +283,7 @@ std::istream& operator>> (std::istream& stream, ArgParser& parser)
     static const size_t string_buffer_size = 300;
     std::string s(string_buffer_size, ' ');
     stream.getline(&s[0], string_buffer_size);
-    
+
     // Downsize the string and trim any whitespace before parsing.
     s.resize(std::char_traits<char>::length(&s[0]));
     strings::trim(s);
@@ -305,7 +305,7 @@ std::istream& operator>> (std::istream& stream, ArgParser& parser)
 /// @param parser ArgParser to write out.
 /// @return Reference to the output stream.
 std::ostream& operator<< (std::ostream &out, const ArgParser& parser)
-{   
+{
     out << "[";
     auto it = parser.tokens.begin();
     while (!parser.tokens.empty())

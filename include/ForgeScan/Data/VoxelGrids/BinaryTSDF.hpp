@@ -16,8 +16,8 @@ class BinaryTSDF : public VoxelGrid
 {
 public:
     /// @brief Constructor for a shared pointer to a Binary TSDF VoxelGrid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @param parser Arg Parser with arguments to construct an Binary TSDF Grid from.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
+    /// @param parser ArgParser with arguments to construct an Binary TSDF Grid from.
     /// @return Shared pointer to a Binary TSDF Grid.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     static std::shared_ptr<BinaryTSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
@@ -30,7 +30,7 @@ public:
 
 
     /// @brief Constructor for a shared pointer to a Binary TSDF VoxelGrid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param dist_min   Minimum update distance. Default -0.2.
     /// @param dist_max   Maximum update distance. Default +0.2.
     /// @param type_id Datatype for the Grid. Default is float.
@@ -61,9 +61,9 @@ public:
     }
 
 
-    /// @brief Accessor for `metrics::ground_truth::ExperimentOccupancy` in 
+    /// @brief Accessor for `metrics::ground_truth::ExperimentOccupancy` in
     ///       `metrics::OccupancyConfusion`
-    /// @return Read-only reference to the Occupancy data vector.  
+    /// @return Read-only reference to the Occupancy data vector.
     const std::vector<uint8_t>& getOccupancyData() const
     {
         return this->data_occupancy;
@@ -82,7 +82,7 @@ public:
 
 private:
     /// @brief Private constructor to enforce shared pointer usage.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param dist_min   Minimum trace update distance for this VoxelGrid.
     /// @param dist_max   Maximum trace update distance for this VoxelGrid.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
@@ -137,10 +137,10 @@ private:
     }
 
 
-    /// @brief Adds this VoxelGrid's data to the XDMF file provided by the Reconstruction class. 
+    /// @brief Adds this VoxelGrid's data to the XDMF file provided by the Reconstruction class.
     /// @param file An opened file stream.
     /// @param hdf5_fname File name (not the full path) of the HDF5 file that this XDMF relates to.
-    /// @param grid_name  The dictionary map name of this grid. 
+    /// @param grid_name  The dictionary map name of this grid.
     /// @param grid_type  The type name of this grid.
     /// @note  This override allows the class to add information about the multiple data vectors it has.
     void addToXDMF(std::ofstream& file,          const std::string& hdf5_fname,
@@ -169,7 +169,7 @@ private:
 
 
     /// @brief Subclass provides update functions for each supported DataType/VectorVariant of
-    ///        the data vector. 
+    ///        the data vector.
     struct UpdateCallable : public VoxelGrid::UpdateCallable
     {
         using VoxelGrid::UpdateCallable::operator();
@@ -237,7 +237,7 @@ private:
 
 
     /// @brief Stores the occupancy data that the grid uses.
-    std::vector<uint8_t> data_occupancy; 
+    std::vector<uint8_t> data_occupancy;
 
     /// @brief Subclass callable that std::visit uses to perform updates with typed information.
     /// @note  Initialization order matters. This must be declared last so the other class members that

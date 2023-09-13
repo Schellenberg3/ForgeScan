@@ -59,7 +59,7 @@ inline void trim(std::string &data)
 
 /// @brief Checks if the string has interesting contents.
 /// @param data Input string.
-/// @return False if the string is empty or only contains space characters 
+/// @return False if the string is empty or only contains space characters
 inline bool has_contents(const std::string &data)
 {
     return !data.empty() && (data.find_first_not_of(' ') != std::string::npos);

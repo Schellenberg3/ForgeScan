@@ -15,8 +15,8 @@ class UpdateCount : public VoxelGrid
 {
 public:
     /// @brief Constructor for a shared pointer to a UpdateCount VoxelGrid.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @param parser Arg Parser with arguments to construct an UpdateCount Grid from.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
+    /// @param parser ArgParser with arguments to construct an UpdateCount Grid from.
     /// @return Shared pointer to a UpdateCount Grid.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     static std::shared_ptr<UpdateCount> create(const std::shared_ptr<const Grid::Properties>& properties,
@@ -99,7 +99,7 @@ private:
 
 
     /// @brief Subclass provides update functions for each supported DataType/VectorVariant of
-    ///        the data vector. 
+    ///        the data vector.
     struct UpdateCallable : public VoxelGrid::UpdateCallable
     {
         using VoxelGrid::UpdateCallable::operator();

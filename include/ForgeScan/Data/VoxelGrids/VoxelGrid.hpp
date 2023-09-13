@@ -106,7 +106,7 @@ public:
 
 
     /// @brief Updates the VoxelGrid with new information along a ray.
-    /// @param ray_trace A trace to update the VoxelGrid along. 
+    /// @param ray_trace A trace to update the VoxelGrid along.
     virtual void update(const std::shared_ptr<const Trace>& ray_trace) = 0;
 
 
@@ -115,7 +115,7 @@ public:
     // *                                 PUBLIC CLASS MEMBERS                                  * //
     // ***************************************************************************************** //
 
-    
+
     /// @brief The minimum and maximum distance along a trace that the VoxelGrid will perform
     ///        updates at. A minimum of 0 means the Grid will start at the sensed point. A maximum
     ///        of infinity means the Grid will update until the last voxel on the trace (the ray's
@@ -145,7 +145,7 @@ protected:
     ///          only needs to define `operator()` functions for the types which its derived
     ///          VoxelGrid explicitly supports.
     /// @note To prevent name hiding of this class's default `operator()` functions in a derived
-    ///       VoxelGrid's UpdateCallable, the UpdateCallable body must include: 
+    ///       VoxelGrid's UpdateCallable, the UpdateCallable body must include:
     ///           `using VoxelGrid::UpdateCallable::operator();`
     struct UpdateCallable
     {
@@ -197,8 +197,8 @@ protected:
 
 
     /// @brief Protected constructor to enforce use of derived classes.
-    /// @param properties Shared, constant pointer to the Grid Properties to use.
-    ///                   These Grid Properties are utilized by all VoxelGrids.
+    /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
+    ///                   These `Grid::Properties` are utilized by all VoxelGrids.
     /// @param dist_min   Minimum trace update distance for this VoxelGrid.
     /// @param dist_max   Maximum trace update distance for this VoxelGrid.
     /// @param default_value  Initialization value for all voxels in this VoxelGrid.
@@ -332,10 +332,10 @@ protected:
 
 
 
-    /// @brief Adds this VoxelGrid's data to the XDMF file provided by the Reconstruction class. 
+    /// @brief Adds this VoxelGrid's data to the XDMF file provided by the Reconstruction class.
     /// @param file An opened file stream.
     /// @param hdf5_fname File name (not the full path) of the HDF5 file that this XDMF relates to.
-    /// @param grid_name  The dictionary map name of this grid. 
+    /// @param grid_name  The dictionary map name of this grid.
     /// @param grid_type  The type name of this grid.
     /// @note This is virtual so VoxelGrid with multiple data channels may specifically handle
     ///       their channels. But most derived VoxelGrids may uses this method.
@@ -369,7 +369,7 @@ private:
     // ***************************************************************************************** //
     // *                                PRIVATE CLASS METHODS                                  * //
     // ***************************************************************************************** //
- 
+
 
     /// @brief Helper function to ensure the DataVariant passed into the VoxelGrid constructor
     ///        is set to the correct data type before it is used to initialize the data vector.

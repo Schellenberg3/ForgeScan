@@ -24,7 +24,7 @@ def precision(true_positive: int, false_positive: int) -> float:
 
 def get_metric_occupancy_confusion_group(hdf5_path: pathlib.Path) -> h5py.Group:
     """
-    Opens an HDF5 file and access the location of the Confusion Matrix data. 
+    Opens an HDF5 file and access the location of the Confusion Matrix data.
     """
     h5_file  = h5py.File(hdf5_path, "r")
     h5_group = h5_file["Metric"]["OccupancyConfusion"]
@@ -71,8 +71,8 @@ def plot_acc_pre(hdf5_path: pathlib.Path, data: h5py.Dataset,
     """
     acc = [ accuracy(data[i, 1], data[i, 2], data[i, 3], data[i, 4]) for i in range(data.shape[0])]
     pre = [precision(data[i, 1], data[i, 3]) for i in range(data.shape[0])]
-    
-    
+
+
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
 
@@ -81,7 +81,7 @@ def plot_acc_pre(hdf5_path: pathlib.Path, data: h5py.Dataset,
     ax.set_xlabel("Views Added")
 
     ax.plot(data[:, 0], acc, "r:", linewidth=2, label='Accuracy')
-    ax.plot(data[:, 0], pre, "b",  linewidth=2, label='Precision') 
+    ax.plot(data[:, 0], pre, "b",  linewidth=2, label='Precision')
 
     ax.legend()
 
@@ -116,7 +116,7 @@ def main(parsed_args: argparse.Namespace):
         print("File or directory does not exits. Please check your path.")
         return
 
-    # Convert a single file to a list or a generate a list of all HDF5 files in a directory. 
+    # Convert a single file to a list or a generate a list of all HDF5 files in a directory.
     fpath_list = [fpath] if fpath.is_file() else list(fpath.glob(f"**/*{HDF5_EXTENSION}"))
 
     n = len(fpath_list)

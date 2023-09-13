@@ -48,7 +48,7 @@ public:
         {
             this->generate();
         }
-        assert(views.empty() == false && 
+        assert(views.empty() == false &&
                "The current Policy was unable to suggest views, even after calling generate.");
         return views.front();
     }
@@ -88,7 +88,7 @@ public:
     virtual const std::string& getTypeName() const = 0;
 
 
-    /// @brief Prints information about the Policy to the output stream. 
+    /// @brief Prints information about the Policy to the output stream.
     /// @param out Output stream to write to.
     virtual void print(std::ostream& out) const = 0;
 
@@ -103,7 +103,7 @@ public:
 
     static const int default_n_views;
 
-    static const float default_seed; 
+    static const float default_seed;
 
     static const std::string parse_set_active, parse_type, parse_n_views, parse_seed;
 
@@ -247,7 +247,7 @@ protected:
 
 /// @brief Prints info about the Primitive to the output stream.
 /// @param out Output stream to write to.
-/// @param policy The policy to write to the output stream.
+/// @param policy The Policy to write to the output stream.
 /// @return Reference to the output stream.
 std::ostream& operator<<(std::ostream &out, const Policy& policy)
 {
@@ -259,7 +259,7 @@ std::ostream& operator<<(std::ostream &out, const Policy& policy)
 /// @brief Default number of views for a Policy to collect.
 const int Policy::default_n_views = 10;
 
-/// @brief Default RNG seed for a Policy to use. 
+/// @brief Default RNG seed for a Policy to use.
 const float Policy::default_seed = -1;
 
 /// @brief ArgParser key for the flag to set a new Policy as the active one.
@@ -268,7 +268,7 @@ const std::string Policy::parse_set_active = "--set-active";
 /// @brief ArgParser key for the type of Policy to add.
 const std::string Policy::parse_type = "--type";
 
-/// @brief ArgParser key for number of views a policy should collect. Policies may generate more
+/// @brief ArgParser key for number of views a Policy should collect. Policies may generate more
 ///        views than this but some require an expected number up-front or use this to judge if
 ///        they have reached completion.
 const std::string Policy::parse_n_views = "--n-views";

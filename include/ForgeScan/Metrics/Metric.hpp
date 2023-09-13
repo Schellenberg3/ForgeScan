@@ -45,7 +45,7 @@ protected:
 
 
     /// @brief Protected constructor for derived classes only.
-    /// @param reconstruction Shared pointer to the Reconstruction that the Metric observes.
+    /// @param reconstruction Shared pointer to the `data::Reconstruction` that the Metric observes.
     Metric(const std::shared_ptr<data::Reconstruction>& reconstruction)
         : reconstruction(reconstruction)
     {
@@ -90,7 +90,7 @@ protected:
 
 
     /// @brief Runs after the Manager has processed an update.
-    /// @param update_count A count of how many times the Reconstruction has been updated with
+    /// @param update_count A count of how many times the `data::Reconstruction` has been updated with
     ///                     new data. This is tracked by the Manager class.
     virtual void postUpdate([[maybe_unused]] const size_t& update_count)
     {

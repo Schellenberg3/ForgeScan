@@ -48,7 +48,7 @@ def arr_precision(arr: np.ndarray):
 
 def get_metric_occupancy_confusion_group(hdf5_path: pathlib.Path) -> h5py.Group:
     """
-    Opens an HDF5 file and access the location of the Confusion Matrix data. 
+    Opens an HDF5 file and access the location of the Confusion Matrix data.
     """
     h5_file  = h5py.File(hdf5_path, "r")
     h5_group = h5_file["Metric"]["OccupancyConfusion"]
@@ -64,7 +64,7 @@ def select_experiment() -> pathlib.Path:
         print("No experiment directories available")
     elif len(experiments) == 1:
         return experiments[0]
-    
+
     print("Please select which experiment directory to use:")
     for i, experiment in enumerate(experiments):
         print(f"[{i}] {experiment.name}")

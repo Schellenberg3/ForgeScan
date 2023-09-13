@@ -74,14 +74,15 @@ protected:
 
     }
 
+
     /// @brief Runs before the Manager processes an update.
     /// @param sensed The sensed points passed to `Manager::reconstructionUpdate`.
     /// @param extr   The reference frame and common origin for the `sensed` points passed to
     ///               `Manager::reconstructionUpdate`.
     /// @param update_count A count of how many times the Reconstruction has been updated with
     ///                     new data. This is tracked by the Manager class.
-    virtual void preUpdate(const PointMatrix& /*sensed*/, const Extrinsic& /*extr*/,
-                           const size_t& /*update_count*/)
+    virtual void preUpdate([[maybe_unused]] const PointMatrix& sensed, [[maybe_unused]] const Extrinsic& extr,
+                           [[maybe_unused]] const size_t& update_count)
     {
 
     }
@@ -90,7 +91,7 @@ protected:
     /// @brief Runs after the Manager has processed an update.
     /// @param update_count A count of how many times the Reconstruction has been updated with
     ///                     new data. This is tracked by the Manager class.
-    virtual void postUpdate(const size_t& /*update_count*/)
+    virtual void postUpdate([[maybe_unused]] const size_t& update_count)
     {
 
     }

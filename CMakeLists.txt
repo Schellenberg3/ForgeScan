@@ -28,6 +28,10 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 endif()
 
 
+option(FORGE_SCAN_EXAMPLES    "Enable compilation of example executables"     ON)
+option(FORGE_SCAN_EXPERIMENTS "Enable compilation of experiment executables"  ON)
+
+
 ## --------------------------------------------------------------------------------------------- ## 
 ## ---------------------------------- FIND EXTERNAL PACKAGES ----------------------------------- ##
 ## --------------------------------------------------------------------------------------------- ## 

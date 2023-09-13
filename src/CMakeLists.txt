@@ -14,6 +14,11 @@ target_compile_definitions(
         FORGE_SCAN_SHARE_DIR="${FORGE_SCAN_ROOT_DIR}/share"
 )
 
-add_subdirectory(Examples)
 
-add_subdirectory(Experiments)
+if(FORGE_SCAN_BUILD_EXAMPLES)
+  add_subdirectory(Examples)
+endif()
+
+if(FORGE_SCAN_BUILD_EXPERIMENTS)
+  add_subdirectory(Experiments)
+endif()

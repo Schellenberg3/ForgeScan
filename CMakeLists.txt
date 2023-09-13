@@ -30,6 +30,7 @@ endif()
 
 option(FORGE_SCAN_EXAMPLES    "Enable compilation of example executables"     ON)
 option(FORGE_SCAN_EXPERIMENTS "Enable compilation of experiment executables"  ON)
+option(FORGE_SCAN_BUILD_DOCS  "Enable building project documentation"         ON)
 
 
 ## --------------------------------------------------------------------------------------------- ## 
@@ -109,6 +110,11 @@ set_target_properties(
 
 # Add project executable targets.
 add_subdirectory(src)
+
+if(FORGE_SCAN_BUILD_DOCS)
+  add_subdirectory(doc)
+endif()
+
 
 
 ## --------------------------------------------------------------------------------------------- ## 

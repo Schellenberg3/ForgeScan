@@ -9,7 +9,7 @@
 
 
 // *********************************************************************************************************************** //
-// * This implements the ray traversal of a Voxel Grid, as used by the Reconstruction class.                             * //
+// * This implements the ray traversal of a VoxelGrid, as used by the Reconstruction class.                             * //
 // *                                                                                                                     * //
 // * The methods in this file follow the the Amanatides-Woo algorithm for fast voxel traversal. See:                     * //
 // *     http://www.cse.yorku.ca/~amana/research/grid.pdf                                                                * //
@@ -230,7 +230,7 @@ inline std::ptrdiff_t get_min_dist(const float* dist)
 /// @brief Gets the correct enumeration value for the location of the sensed voxel, relative to the
 ///        rest of the Trace.
 /// @param d_min Distance parameter for the minimum of the trace.
-/// @param d_min Distance parameter for the maximum of the trace.
+/// @param d_max Distance parameter for the maximum of the trace.
 /// @return One of SensedLocation IN, BEFORE, or AFTER as appropriate.
 /// @note The distance parameter for the sensed location is implicitly at `0`.
 /// @warning This should only be called by `get_ray_trace`.
@@ -249,12 +249,12 @@ inline Trace::SensedLocation get_sensed_location(const float& d_min,  const floa
 
 
 /// @brief Calculates what voxels are hit on the ray between `sensed` and `origin`.
-/// @param ray_trace[out] A trace of what voxels were hit and the distance from that voxel to the `sensed` voxel. 
+/// @param [out] ray_trace A trace of what voxels were hit and the distance from that voxel to the `sensed` voxel. 
 /// @param sensed Sensed point, the start of the ray.
 /// @param origin Origin point, the end of the ray.
-/// @param properties Shared Grid Properties for the Voxel Grids begin traversed.
+/// @param properties Shared Grid Properties for the VoxelGrids begin traversed.
 /// @param dist_min Minimum distance to trace along the ray, relative to the `sensed` point.
-/// @param dist_min Maximum distance to trace along the ray, relative to the `sensed` point.
+/// @param dist_max Maximum distance to trace along the ray, relative to the `sensed` point.
 /// @return True if the ray intersected the Grid, this indicates that `ray_trace` has valid data to add.
 inline bool get_ray_trace(const std::shared_ptr<Trace>& ray_trace,
                           const Point& sensed, const Point& origin,
@@ -317,7 +317,7 @@ inline bool get_ray_trace(const std::shared_ptr<Trace>& ray_trace,
         catch (const std::out_of_range& e)
         {
             // Algorithm should never go out of bounds. But catching here dose not impact performance and prevents
-            // undefined behavior and silent errors in a Voxel Grid update where all indicies are assumed to be valid.
+            // undefined behavior and silent errors in a VoxelGrid update where all indicies are assumed to be valid.
             const std::string e_what(e.what());
             throw std::out_of_range("Ray tracing failed. This should not happen. Failed with: " + e_what);
         }

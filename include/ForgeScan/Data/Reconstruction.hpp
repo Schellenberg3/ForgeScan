@@ -62,7 +62,7 @@ public:
 
     /// @brief Creates a shared pointer to a Reconstruction.
     /// @param grid_properties Shared, constant pointer to the Grid Properties to use.
-    ///                        These Grid Properties are utilized by all Voxel Grids.
+    ///                        These Grid Properties are utilized by all VoxelGrids.
     /// @return Shared pointer to a Reconstruction.
     static std::shared_ptr<Reconstruction> create(std::shared_ptr<const Grid::Properties> grid_properties)
     {
@@ -70,8 +70,8 @@ public:
     }
 
 
-    /// @brief Updates each Voxel Grid based on the provided set of rays.
-    /// @param sensed A set of measurements which act as the end points for a collection of rays.
+    /// @brief Updates each VoxelGrid based on the provided set of rays.
+    /// @param sensed_points A set of measurements which act as the end points for a collection of rays.
     /// @param origin Common origin of the sensed points.
     /// @note Both `sensed` and `origin` are assumed to be in the Reconstruction's reference frame.
     void update(const PointMatrix& sensed_points, const Point& origin)
@@ -90,12 +90,12 @@ public:
     }
 
 
-    /// @brief Adds a Voxel Grid data channel to the Reconstruction.
-    /// @param parser Arg Parser with arguments to construct a new Voxel Grid from.
+    /// @brief Adds a VoxelGrid data channel to the Reconstruction.
+    /// @param parser Arg Parser with arguments to construct a new VoxelGrid from.
     ///               See `forge_scan::data::Reconstruction::addChannel` for details.
     /// @throws `std::invalid_argument` If no name was provided for the channel.
     /// @throws `std::invalid_argument` If there is already a channel with that name.
-    /// @throws `std::invalid_argument` If there is an issue with the Voxel Grid creation process.
+    /// @throws `std::invalid_argument` If there is an issue with the VoxelGrid creation process.
     void addChannel(const utilities::ArgParser& parser)
     {
         std::string channel_name = parser.get(Reconstruction::parse_name);
@@ -113,9 +113,9 @@ public:
     }
 
 
-    /// @brief If a g a read-only reference to the Voxel Grid data channel.
+    /// @brief If a g a read-only reference to the VoxelGrid data channel.
     /// @param name Name of the channel in the channel dictionary to retrieve.
-    /// @returns Read-only reference to the requested Voxel Grid data channel.
+    /// @returns Read-only reference to the requested VoxelGrid data channel.
     /// @throws `std::runtime_error` If a channel with that name does not exist.
     std::shared_ptr<const forge_scan::data::VoxelGrid> getChannel(const std::string& name) const
     {
@@ -130,7 +130,7 @@ public:
     }
 
     
-    /// @brief Removes a Voxel Grid data channel.
+    /// @brief Removes a VoxelGrid data channel.
     /// @param name Name of the channel in the channel dictionary to remove.
     /// @returns True if successful. False if that channel did not exits or if it is owned by a
     ///          Metric or a Policy.
@@ -154,7 +154,7 @@ public:
     // ***************************************************************************************** //
 
 
-    /// @brief Shared, constant Grid Properties used by all Voxel Grids. 
+    /// @brief Shared, constant Grid Properties used by all VoxelGrids. 
     const std::shared_ptr<const Grid::Properties> grid_properties;
 
     static const std::string parse_name;
@@ -168,7 +168,7 @@ private:
 
     /// @brief Private constructor to enforce use of shared pointers.
     /// @param grid_properties Shared, constant pointer to the Grid Properties to use.
-    ///                        These Grid Properties are utilized by all Voxel Grids.
+    ///                        These Grid Properties are utilized by all VoxelGrids.
     explicit Reconstruction(const std::shared_ptr<const Grid::Properties>& grid_properties)
         : grid_properties(grid_properties),
           ray_trace(std::make_shared<Trace>())
@@ -178,7 +178,7 @@ private:
 
 
     /// @brief Saves Grid Properties into the HDF5 file as attributes and calls the save method
-    ///        for each Voxel Grid in the channel dictionary.
+    ///        for each VoxelGrid in the channel dictionary.
     /// @param h5_file An opened HDF5 file to write data into.
     void save(HighFive::File& h5_file)
     {
@@ -196,7 +196,7 @@ private:
     }
 
 
-    /// @brief Adds each Voxel Grid's data to the XDMF file provided by the Manager. 
+    /// @brief Adds each VoxelGrid's data to the XDMF file provided by the Manager. 
     /// @param file An opened file stream.
     /// @param hdf5_fname File name (not the full path) of the HDF5 file that this XDMF relates to.
     void addToXDMF(std::ofstream& file, const std::string& hdf5_fname) const
@@ -229,8 +229,8 @@ private:
     }
 
 
-    /// @brief Used by the Metric class to request a new Voxel Grid channel be added. 
-    /// @param channel Shared pointer to the Voxel Grid channel to add.
+    /// @brief Used by the Metric class to request a new VoxelGrid channel be added. 
+    /// @param channel Shared pointer to the VoxelGrid channel to add.
     /// @param metric_name Name of the Metric class adding the channel.
     /// @throws std::invalid_argument If `metic_name` is empty.
     /// @throws std::invalid_argument If a channel of the same name already exists.
@@ -253,8 +253,8 @@ private:
     }
 
 
-    /// @brief Used by the Policy class to request a new Voxel Grid channel be added. 
-    /// @param channel Shared pointer to the Voxel Grid channel to add.
+    /// @brief Used by the Policy class to request a new VoxelGrid channel be added. 
+    /// @param channel Shared pointer to the VoxelGrid channel to add.
     /// @param metric_name Name of the Policy class adding the channel.
     /// @throws std::invalid_argument If `policy_name` is empty.
     /// @throws std::invalid_argument If a channel of the same name already exists.
@@ -327,14 +327,14 @@ private:
     // ***************************************************************************************** //
 
 
-    /// @brief Dictionary mapping the name of a channel to its Voxel Grid.
+    /// @brief Dictionary mapping the name of a channel to its VoxelGrid.
     std::map<std::string, std::shared_ptr<VoxelGrid>> channels;
 
-    /// @brief Record the extreme min and max dist for across all Voxel Grids. This constrains ray
-    ///        trace calculations to only the regions which Voxel Grids will actually update.
+    /// @brief Record the extreme min and max dist for across all VoxelGrids. This constrains ray
+    ///        trace calculations to only the regions which VoxelGrids will actually update.
     float min_dist_min = 0, max_dist_max = 0;
 
-    /// @brief Stores an ray trace used for performing updates on each Voxel Grid. 
+    /// @brief Stores an ray trace used for performing updates on each VoxelGrid. 
     std::shared_ptr<Trace> ray_trace;
 };
 

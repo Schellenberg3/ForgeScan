@@ -22,8 +22,8 @@ static constexpr std::ptrdiff_t X = 0, Y = 1, Z = 2;
 ///          https://tavianator.com/2022/ray_box_boundary.html#boundaries
 /// @param dist_b1  Normalized signed distance from the start point to the first corner of the AABB.
 /// @param dist_b2  Normalized signed distance from the start point to the second corner of the AABB.
-/// @param tmin[out] If the intersection is valid: the time the ray enters the box.
-/// @param tmax[out] If the intersection is valid: the time the ray exits the box.
+/// @param [out] tmin If the intersection is valid: the time the ray enters the box.
+/// @param [out] tmax If the intersection is valid: the time the ray exits the box.
 /// @return  True if the intersection is valid: `tmin<=tmax`.
 /// @warning This function is a helper for `find_bounded_intersection` and
 ///          `find_zero_bounded_intersection`. It should not be called on its own.
@@ -61,8 +61,8 @@ inline bool find_intersection(const Eigen::Vector3f& dist_b1,
 ///                (which makes the outputs distances to the box in the same units of the ray)
 /// @param tmin_bound Lower bound time for the intersection to be valid.
 /// @param tmax_bound Upper bound time for the intersection to be valid.
-/// @param tmin[out] If the intersection is valid: the time the ray enters the box.
-/// @param tmax[out] If the intersection is valid: the time the ray exits the box.
+/// @param [out] tmin If the intersection is valid: the time the ray enters the box.
+/// @param [out] tmax If the intersection is valid: the time the ray exits the box.
 /// @return True if the intersection is valid: `tmin<=tmax` and `tmin<=max_bound` and
 ///         `tmin_bound<=tmax`.
 inline bool find_bounded_intersection(const Point& bound1,     const Point& bound2,
@@ -88,8 +88,8 @@ inline bool find_bounded_intersection(const Point& bound1,     const Point& boun
 ///                (which makes the outputs distances to the box in the same units of the ray)
 /// @param tmin_bound Lower bound time for the intersection to be valid.
 /// @param tmax_bound Upper bound time for the intersection to be valid.
-/// @param tmin[out] If the intersection is valid: the time the ray enters the box.
-/// @param tmax[out] If the intersection is valid: the time the ray exits the box.
+/// @param [out] tmin If the intersection is valid: the time the ray enters the box.
+/// @param [out] tmax If the intersection is valid: the time the ray exits the box.
 /// @return True if the intersection is valid: `tmin<=tmax`.
 inline bool find_zero_bounded_intersection(const Point& bound,
                                              const Point& start,      const Direction& inv_ray,
@@ -160,10 +160,10 @@ inline bool fast_eigen_intersection_check(const Eigen::Vector3f& min_dist,
 ///               ray's direction.
 /// @param e_dist End of the intersection segment. Distance from the ray's origin along the ray's
 ///               direction.
-/// @param s_dist_bound[out] Adjusted beginning of the segment. Distance from the ray's origin
-///                          along the ray's direction to when the ray enters the AABB.
-/// @param e_dist_bound[out] Adjusted end of the segment. Distance from the ray's origin along
-///                          the ray's direction to when the ray exits the AABB.
+/// @param [out] s_dist_bound Adjusted beginning of the segment. Distance from the ray's origin
+///                           along the ray's direction to when the ray enters the AABB.
+/// @param [out] e_dist_bound Adjusted end of the segment. Distance from the ray's origin along
+///                           the ray's direction to when the ray exits the AABB.
 /// @return  True if the ray intersects the AABB over the specified segment. False else.
 /// @warning - If this returns false then `s_dist_bound` and `e_dist_bound` should not be used.
 /// @warning - This assumes that `inv_normal` is normalized but does neither checks nor performs
@@ -194,10 +194,10 @@ inline bool fast_eigen_find_intersection(const Point& lower_bound, const Point& 
 ///               ray's direction.
 /// @param e_dist End of the intersection segment. Distance from the ray's origin along the ray's
 ///               direction.
-/// @param s_dist_bound[out] Adjusted beginning of the segment. Distance from the ray's origin
-///                          along the ray's direction to when the ray enters the AABB.
-/// @param e_dist_bound[out] Adjusted end of the segment. Distance from the ray's origin along
-///                          the ray's direction to when the ray exits the AABB.
+/// @param [out] s_dist_bound Adjusted beginning of the segment. Distance from the ray's origin
+///                           along the ray's direction to when the ray enters the AABB.
+/// @param [out] e_dist_bound Adjusted end of the segment. Distance from the ray's origin along
+///                           the ray's direction to when the ray exits the AABB.
 /// @return  True if the ray intersects the AABB over the specified segment. False else.
 /// @warning - If this returns false then `s_dist_bound` and `e_dist_bound` should not be used.
 /// @warning - This assumes that `inv_normal` is normalized but does neither checks nor performs

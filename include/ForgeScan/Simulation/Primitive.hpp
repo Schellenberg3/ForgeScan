@@ -51,8 +51,8 @@ public:
     ///        the geometry.
     /// @param start  Start point, relative to the derived class's reference frame.
     /// @param end    End point, relative to the derived class's reference frame.
-    /// @param t[out] Parameterization value for the intersection. Values `0<=t<=1` are valid
-    ///               on the line segment where `t=0` is the start point and `t=1` is the end point.
+    /// @param [out] t Parameterization value for the intersection. Values `0<=t<=1` are valid
+    ///                on the line segment where `t=0` is the start point and `t=1` is the end point.
     /// @return True if the line intersects and does so in a valid region of the line.
     /// @note If the line DOES NOT intersect we return false with t unchanged.
     virtual bool hit(const Point& start, const Point& end, float& t) const = 0;
@@ -68,8 +68,8 @@ public:
     /// @brief Calculates is the point is inside the Primitive.
     /// @param input Point in space.
     /// @param extr  Transformation from the world frame to the frame the `input` is in.
-    /// @param input_this_f[out] The point transformed to the Primitive's frame. Useful if
-    ///                          calling `getSignedDistance` or `getNearestSurfacePoint` after this.
+    /// @param [out] input_this_f The point transformed to the Primitive's frame. Useful if
+    ///                           calling `getSignedDistance` or `getNearestSurfacePoint` after this.
     /// @return True if the point is inside, false if not.
     virtual bool isInside(const Point& input, const Extrinsic& extr, Point& input_this_f) const = 0;
 
@@ -155,9 +155,9 @@ protected:
     ////        geometric primitive. This prevents needless intersection checks for some rays.
     /// @param start  Starting point of the ray, relative to the derived class's reference frame.
     /// @param end    Ending point of the ray, relative to the derived class's reference frame.
-    /// @param t[out] Scaling factor for the ray to intersect the AABB. Describes when the ray first
-    ///               hits a face of the AABB. Values 0 <= t <= 1 are valid on the line segment 
-    ///               between start and end.
+    /// @param [out] t Scaling factor for the ray to intersect the AABB. Describes when the ray first
+    ///                hits a face of the AABB. Values 0 <= t <= 1 are valid on the line segment 
+    ///                between start and end.
     /// @return True if the ray has any intersection with the primitive's bounding box.
     /// @warning The output variable, `t`, is valid only when this function returns true.
     ///          Otherwise it does not describe an intersection and should not be trusted.
@@ -180,6 +180,7 @@ protected:
 
 /// @brief Prints info about the Primitive to the output stream.
 /// @param out Output stream to write to.
+/// @param primitive Primitive to write to the output stream
 /// @return Reference to the output stream.
 std::ostream& operator<<(std::ostream &out, const Primitive& primitive)
 {

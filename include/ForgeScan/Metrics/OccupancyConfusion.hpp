@@ -27,7 +27,7 @@ public:
     /// @param ground_truth   The ground truth Occupancy Grid to compare Reconstruction data against.
     /// @param use_channel    The name of the Reconstruction channel to use. If this is an empty 
     ///                       string, the grid does not exist in the reconstruction, or the existing
-    ///                       grid is the wrong type, then a default Occupancy Voxel Grid is created.
+    ///                       grid is the wrong type, then a default Occupancy VoxelGrid is created.
     /// @return Shared pointer to an an OccupancyConfusion Metric.
     /// @throws `std::invalid_argument` if the ground truth Occupancy Grid Properties are not equal
     ///         to those of the Reconstruction.
@@ -65,7 +65,7 @@ protected:
     /// @param ground_truth   The ground truth Occupancy Grid to compare Reconstruction data against.
     /// @param use_channel    The name of the Reconstruction channel to use. If this is an empty 
     ///                       string, the grid does not exist in the reconstruction, or the existing
-    ///                       grid is the wrong type, then a default Occupancy Voxel Grid is created.
+    ///                       grid is the wrong type, then a default Occupancy VoxelGrid is created.
     /// @throws `std::invalid_argument` if the ground truth Occupancy Grid Properties are not equal
     ///          to those of the Reconstruction.
     explicit OccupancyConfusion(const std::shared_ptr<data::Reconstruction>& reconstruction,
@@ -78,7 +78,7 @@ protected:
         this->throwIfGridPropertiesDoNotMatch();
         try
         {
-            if (use_channel.empty()) throw std::invalid_argument("A Voxel Grid name must be provided.");
+            if (use_channel.empty()) throw std::invalid_argument("A VoxelGrid name must be provided.");
             auto voxel_grid = this->reconstruction->getChannel(use_channel);
             this->experiment = ground_truth::dynamic_cast_to_experimental_occupancy(voxel_grid);
         }
@@ -132,9 +132,9 @@ protected:
     // ***************************************************************************************** //
 
 
-    void postUpdate(const size_t& reconstruction_update_count) override final
+    void postUpdate(const size_t& update_count) override final
     {
-        this->confusion_list.push_back({ground_truth::Confusion(), reconstruction_update_count});
+        this->confusion_list.push_back({ground_truth::Confusion(), update_count});
         
         auto get_occupancy_data = [](auto&& experiment){
             return experiment->getOccupancyData();
@@ -178,7 +178,7 @@ protected:
     /// @brief The ground truth Occupancy Grid to compare Reconstruction data against.
     std::shared_ptr<const ground_truth::Occupancy> ground_truth;
 
-    /// @brief Reference to the Reconstruction Voxel Grid that this Metric uses.
+    /// @brief Reference to the Reconstruction VoxelGrid that this Metric uses.
     ground_truth::ExperimentOccupancy experiment;
 };
 

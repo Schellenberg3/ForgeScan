@@ -33,7 +33,7 @@ namespace forge_scan {
 namespace data {
 
 
-/// @brief A base class for a Voxel Grid of various data types. Derived classes define what datatypes they accept
+/// @brief A base class for a VoxelGrid of various data types. Derived classes define what datatypes they accept
 ///        and implement strategies for updating with new data.
 class VoxelGrid : public Grid
 {
@@ -53,7 +53,7 @@ public:
 
     virtual ~VoxelGrid() { }
 
-    /// @return Help message for constructing a derived Voxel Grid with ArgParser.
+    /// @return Help message for constructing a derived VoxelGrid with ArgParser.
     static std::string helpMessage()
     {
         /// TODO: Return an fill this in.
@@ -62,8 +62,8 @@ public:
 
 
     /// @brief Calculates how much space the data vector is using.
-    /// @param size_bytes[out]     Number of bytes used by the vector.
-    /// @param capacity_bytes[out] Number of bytes used by the vector, including capacity.
+    /// @param [out] size_bytes     Number of bytes used by the vector.
+    /// @param [out] capacity_bytes Number of bytes used by the vector, including capacity.
     virtual void getDataMemoryUsage(size_t& size_bytes, size_t& capacity_bytes) const
     {
         auto visit_memory_usage = [&size_bytes, &capacity_bytes](auto&& vec)
@@ -76,8 +76,8 @@ public:
 
 
     /// @brief Calculates how much space the data vector is using.
-    /// @param size_bytes[out]     Number of megabytes used by the vector.
-    /// @param capacity_bytes[out] Number of megabytes used by the vector, including capacity.
+    /// @param [out] size_mb     Number of megabytes used by the vector.
+    /// @param [out] capacity_mb Number of megabytes used by the vector, including capacity.
     virtual void getDataMemoryUsage(float& size_mb, float& capacity_mb) const
     {
         size_t size_bytes, capacity_bytes;
@@ -87,7 +87,7 @@ public:
     }
 
 
-    /// @brief Gets a constant reference to the VectorVariant data the Voxel Grid stores.
+    /// @brief Gets a constant reference to the VectorVariant data the VoxelGrid stores.
     /// @return Read-only reference to the data.
     const VectorVariant& getData() const
     {
@@ -100,12 +100,12 @@ public:
     // *                             PUBLIC PURE VIRTUAL METHODS                               * //
     // ***************************************************************************************** //
 
-    /// @brief Returns the class type name for the Voxel Grid.
+    /// @brief Returns the class type name for the VoxelGrid.
     virtual const std::string& getTypeName() const = 0;
 
 
-    /// @brief Updates the Voxel Grid with new information along a ray.
-    /// @param ray_trace A trace to update the Voxel Grid along. 
+    /// @brief Updates the VoxelGrid with new information along a ray.
+    /// @param ray_trace A trace to update the VoxelGrid along. 
     virtual void update(const std::shared_ptr<const Trace>& ray_trace) = 0;
 
 
@@ -115,14 +115,14 @@ public:
     // ***************************************************************************************** //
 
     
-    /// @brief The minimum and maximum distance along a trace that the Voxel Grid will perform
+    /// @brief The minimum and maximum distance along a trace that the VoxelGrid will perform
     ///        updates at. A minimum of 0 means the Grid will start at the sensed point. A maximum
     ///        of infinity means the Grid will update until the last voxel on the trace (the ray's
     ///        origin or the Grid's boundary). Negative values are valid too.
     ///        The VoxelGrid constructor guarantees that dist_min <= dist_max.
     const float dist_min, dist_max;
 
-    /// @brief Variant type which holds the default value for the Voxel Grid.
+    /// @brief Variant type which holds the default value for the VoxelGrid.
     ///        All elements are initialized to this value.
     DataVariant default_value;
 
@@ -138,13 +138,13 @@ protected:
     // ***************************************************************************************** //
 
 
-    /// @brief A base for the UpdateCallable structure that all derived Voxel Grid classes to use
+    /// @brief A base for the UpdateCallable structure that all derived VoxelGrid classes to use
     ///        when performing an update to their data with `std::visit`.
     /// @details This provides a default unsupported definition for all datatypes. A derived class
     ///          only needs to define `operator()` functions for the types which its derived
-    ///          Voxel Grid explicitly supports.
+    ///          VoxelGrid explicitly supports.
     /// @note To prevent name hiding of this class's default `operator()` functions in a derived
-    ///       Voxel Grid's UpdateCallable, the UpdateCallable body must include: 
+    ///       VoxelGrid's UpdateCallable, the UpdateCallable body must include: 
     ///           `using VoxelGrid::UpdateCallable::operator();`
     struct UpdateCallable
     {
@@ -197,14 +197,14 @@ protected:
 
     /// @brief Protected constructor to enforce use of derived classes.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
-    ///                   These Grid Properties are utilized by all Voxel Grids.
-    /// @param dist_min   Minimum trace update distance for this Voxel Grid.
-    /// @param dist_max   Maximum trace update distance for this Voxel Grid.
-    /// @param default_value  Initialization value for all voxels in this Voxel Grid.
+    ///                   These Grid Properties are utilized by all VoxelGrids.
+    /// @param dist_min   Minimum trace update distance for this VoxelGrid.
+    /// @param dist_max   Maximum trace update distance for this VoxelGrid.
+    /// @param default_value  Initialization value for all voxels in this VoxelGrid.
     /// @param type_id        DataType enumeration to identify what the data type this Voxel
     ///                       Grid's data vector holds.
-    /// @param valid_type_ids Bit field of data types this a derived Voxel Grid will accept.
-    /// @throws `std::invalid_argument` if the DataType of `type_id` is not supported by this Voxel Grid.
+    /// @param valid_type_ids Bit field of data types this a derived VoxelGrid will accept.
+    /// @throws `std::invalid_argument` if the DataType of `type_id` is not supported by this VoxelGrid.
     VoxelGrid(std::shared_ptr<const Grid::Properties> properties,
               const float& dist_min,
               const float& dist_max,
@@ -266,14 +266,14 @@ protected:
     }
 
 
-    /// @brief Writes the Voxel Grid's data vector to the provided HDF5 group.
+    /// @brief Writes the VoxelGrid's data vector to the provided HDF5 group.
     /// @param g_channel Group in for the opened HDF5 file.
     /// @param grid_type Name of the derived class.
     /// @throws `std::runtime_error` If there is a bad variant access.
-    /// @throws `std::runtime_error` If the Voxel Grid's `type_id` is not recognized.
-    ///         (However, this error should be caught earlier in the Voxel Grid constructor.)
-    /// @note This is virtual so Voxel Grid with multiple data channels may specifically handle
-    ///       their channels. But most derived Voxel Grids may uses this method.
+    /// @throws `std::runtime_error` If the VoxelGrid's `type_id` is not recognized.
+    ///         (However, this error should be caught earlier in the VoxelGrid constructor.)
+    /// @note This is virtual so VoxelGrid with multiple data channels may specifically handle
+    ///       their channels. But most derived VoxelGrids may uses this method.
     virtual void save(HighFive::Group& g_channel, const std::string& grid_type) const
     {
         try
@@ -331,13 +331,13 @@ protected:
 
 
 
-    /// @brief Adds this Voxel Grid's data to the XDMF file provided by the Reconstruction class. 
+    /// @brief Adds this VoxelGrid's data to the XDMF file provided by the Reconstruction class. 
     /// @param file An opened file stream.
     /// @param hdf5_fname File name (not the full path) of the HDF5 file that this XDMF relates to.
     /// @param grid_name  The dictionary map name of this grid. 
     /// @param grid_type  The type name of this grid.
-    /// @note This is virtual so Voxel Grid with multiple data channels may specifically handle
-    ///       their channels. But most derived Voxel Grids may uses this method.
+    /// @note This is virtual so VoxelGrid with multiple data channels may specifically handle
+    ///       their channels. But most derived VoxelGrids may uses this method.
     virtual void addToXDMF(std::ofstream& file,          const std::string& hdf5_fname,
                            const std::string& grid_name, const std::string& grid_type) const
     {
@@ -370,12 +370,12 @@ private:
     // ***************************************************************************************** //
  
 
-    /// @brief Helper function to ensure the DataVariant passed into the Voxel Grid constructor
+    /// @brief Helper function to ensure the DataVariant passed into the VoxelGrid constructor
     ///        is set to the correct data type before it is used to initialize the data vector.
     /// @param x The input to cast.
     /// @return A DataVariant that has the input's value cast to the correct data type.
-    /// @throws `std::runtime_error` If the Voxel Grid's `type_id` is not recognized.
-    ///         (However, this error should be caught earlier in the Voxel Grid constructor.)
+    /// @throws `std::runtime_error` If the VoxelGrid's `type_id` is not recognized.
+    ///         (However, this error should be caught earlier in the VoxelGrid constructor.)
     DataVariant setDefaultValue(const DataVariant& x)
     {
         DataVariant res;
@@ -474,11 +474,11 @@ private:
 
 // Provide definition for the static variable declared in Callable base class.
 const std::string VoxelGrid::UpdateCallable::type_not_supported_message =
-    std::string("A Voxel Grid's Update Callable encountered a vector variant of an unsupported data type. "
+    std::string("A VoxelGrid's Update Callable encountered a vector variant of an unsupported data type. "
                 "PLEASE CHECK WHAT YOU HAVE DONE: THIS EXCEPTION SHOULD NEVER BE REACHED.");
 
 
-/// @brief Default values for common distances or initialization values used by derived Voxel Grids.
+/// @brief Default values for common distances or initialization values used by derived VoxelGrids.
 const float VoxelGrid::default_zero     = 0.0f,
             VoxelGrid::default_infinity = INFINITY,
             VoxelGrid::default_d_min      = -0.2f,

@@ -49,6 +49,7 @@ public:
 
     /// @brief Creates a shared pointer to a Ground Truth TSDF Grid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
+    /// @param data The data (typically loaded from an HDF5) for the TSDF Grid.
     /// @return Shared pointer to a TSDF Grid.
     /// @throws `std::runtime_error` If the data vector length does not match the Grid Properties
     ///         number of voxels.
@@ -61,7 +62,7 @@ public:
     }
 
 
-    /// @brief Returns the class type name for the Voxel Grid.
+    /// @brief Returns the class type name for the Grid.
     const std::string& getTypeName() const
     {
         static const std::string name = "TSDF";
@@ -74,10 +75,10 @@ protected:
     /// @brief Compares the ground truth to another vector
     /// @param experiment Vector of experimentally collected data to compare.
     /// @return True of the vectors were the same size and the comparison was performed.
-    bool compare(const std::vector<double>& other) const
+    bool compare(const std::vector<double>& experiment) const
     {
         const size_t n = this->data.size();
-        if (other.size() != n)
+        if (experiment.size() != n)
         {
             return false;
         }
@@ -95,10 +96,10 @@ protected:
     //// @brief Compares the ground truth to another vector
     /// @param experiment Vector of experimentally collected data to compare.
     /// @return True of the vectors were the same size and the comparison was performed.
-    bool compare(const std::vector<float>& other) const
+    bool compare(const std::vector<float>& experiment) const
     {
         const size_t n = this->data.size();
-        if (other.size() != n)
+        if (experiment.size() != n)
         {
             return false;
         }

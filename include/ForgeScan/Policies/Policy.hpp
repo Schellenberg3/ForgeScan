@@ -215,10 +215,10 @@ protected:
 
 
     /// @param policy_name Name of the policy.
-    /// @return Path in an HDF5 file  where the Metric should read/write information from.
-    static std::string getDatasetPathHDF5(const std::string& metric_name)
+    /// @return Path in an HDF5 file  where the Policy should read/write information from.
+    static std::string getDatasetPathHDF5(const std::string& policy_name)
     {
-        return "/" FS_HDF5_METRIC_GROUP "/" + metric_name + "/data";
+        return "/" FS_HDF5_POLICY_GROUP "/" + policy_name + "/data";
     }
 
 
@@ -246,6 +246,7 @@ protected:
 
 /// @brief Prints info about the Primitive to the output stream.
 /// @param out Output stream to write to.
+/// @param policy The policy to write to the output stream.
 /// @return Reference to the output stream.
 std::ostream& operator<<(std::ostream &out, const Policy& policy)
 {

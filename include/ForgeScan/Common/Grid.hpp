@@ -282,7 +282,7 @@ struct Grid
     /// @brief Enumeration to identify the data type stored in this Grid.
     /// @details This is used by all Grid implementation when writing XDMF files (indicating
     ///          NumberType and Precision) It also identifies the DataVariant/VectorVariant
-    ///          that a Voxel Grid has at runtime.
+    ///          that a VoxelGrid has at runtime.
     const DataType type_id;
 
 

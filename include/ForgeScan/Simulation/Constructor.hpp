@@ -15,7 +15,7 @@ namespace simulation {
 
 
 /// @brief Factory function to create different Primitive types.
-/// @param args Arguments to pass into the Primitive's create functions.
+/// @param parser Arguments to pass into the Primitive's create functions.
 /// @return A pointer to the requested implementation of the Primitive class.
 /// @throws std::invalid_argument if the primitive type is not recognized.
 std::shared_ptr<Primitive> primitive_constructor(const utilities::ArgParser& parser)

@@ -108,15 +108,17 @@ protected:
     ///                       views for.
     /// @param axis    The View Axis about which points are sampled.
     /// @param n_views The number of sampled points.
+    /// @param n_repeat Number or rings to linearly space between `height` and `height_max`.
     /// @param radius  Radius at which points are sampled.
     /// @param height  Hight of the first ring of points.
     /// @param height_max Height of the last ring of points.
-    /// @param n_repeat Number or rings to linearly space between `height` and `height_max`.
     /// @param target_center Flag to target all views to the grid center, if true. Otherwise
     ///                      views point at the view axis.
     /// @param uniform  Flag to begin with a uniform sampling strategy. If false or if
     ///                 more than `n_view_requested` have been generated in the uniform manner,
     ///                 then the policy samples randomly between `height` and `height_max`. 
+    /// @param change_random Flag, if true will not use `height`/`height_max` and instead randomly select
+    ///                      a new axis to rotate around.
     /// @param seed     Seed for the random generator the Policy uses. Default -1 for a random seed.
     explicit Axis(const std::shared_ptr<const data::Reconstruction>& reconstruction,
                   const Direction& axis,
@@ -189,7 +191,6 @@ protected:
 
     /// @brief Generate the position for a random view along the axis between the heigh bounds.
     /// @param dest Extrinsic matrix in which the position is stored.
-    /// @param view_number[unused] The view number being generated.
     /// @note When returned `dest` is still in the Axis's reference frame.
     void generateRandom(Extrinsic& dest, const size_t&)
     {
@@ -228,9 +229,8 @@ protected:
 
 
     /// @brief Returns where the Z-axis should point.
-    /// @param z_axis[out] The output Z-axis to uses for the view.
+    /// @param [out] z_axis The output Z-axis to uses for the view.
     /// @param position Cartesian position of the view, relative to the Grid's reference frame.
-    /// @param UNUSED   View target location on the axis.  
     /// @return The z-axis to use for this view.
     void targetAtCenter(Direction& z_axis, const Direction& position, const Direction&)
     {
@@ -240,7 +240,7 @@ protected:
 
 
     /// @brief Returns where the Z-axis should point.
-    /// @param z_axis[out] The output Z-axis to uses for the view.
+    /// @param [out] z_axis The output Z-axis to uses for the view.
     /// @param position    Cartesian position of the view, relative to the Grid's reference frame.
     /// @param axis_target View target location on the axis.  
     void targetAtAxis(Direction& z_axis, const Direction& position, const Direction& axis_target)

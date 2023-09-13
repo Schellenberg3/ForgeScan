@@ -287,7 +287,7 @@ private:
 
 /// @brief Writes the contents of a Intrinsics to the output stream.
 /// @param out Output stream to write to.
-/// @param parser Intrinsics to write out.
+/// @param intr Intrinsics to write out.
 /// @return Reference to the output stream.
 std::ostream& operator<< (std::ostream &out, const Intrinsics& intr)
 {

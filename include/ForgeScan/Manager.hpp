@@ -34,7 +34,7 @@ public:
 
     /// @brief Creates a shared pointer to a Manager.
     /// @param parser Arg Parser with arguments to construct Grid Properties from.
-    ///               These Grid Properties are utilized by all Reconstruction Voxel Grids.
+    ///               These Grid Properties are utilized by all Reconstruction VoxelGrids.
     ///               See `forge_scan::Grid::Properties` for details.
     /// @return Shared pointer to a Manager.
     static std::shared_ptr<Manager> create(const utilities::ArgParser& parser)
@@ -45,7 +45,7 @@ public:
 
     /// @brief Creates a shared pointer to a Manager
     /// @param grid_properties Shared, constant pointer to the Grid Properties to use.
-    ///                        These Grid Properties are utilized by all Reconstruction Voxel Grids.
+    ///                        These Grid Properties are utilized by all Reconstruction VoxelGrids.
     /// @return Shared pointer to a Manager.
     static std::shared_ptr<Manager> create(const std::shared_ptr<const Grid::Properties>& grid_properties)
     {
@@ -53,7 +53,7 @@ public:
     }
 
 
-    /// @brief Saves the current state of all items (Voxel Grids, Policies, Metrics, etc.) handled by the Manager. 
+    /// @brief Saves the current state of all items (VoxelGrids, Policies, Metrics, etc.) handled by the Manager. 
     /// @param fpath File path and file name for the data.
     /// @returns Full path to the location the file was saved, including name and file extension.
     /// @note  - If the file path does not already have the `.h5` extension, then this is added.
@@ -215,17 +215,17 @@ public:
     // ***************************************************************************************** //
 
 
-    /// @brief Adds a Voxel Grid data channel to the Reconstruction.
-    /// @param parser Arg Parser with arguments to construct a new Voxel Grid from.
+    /// @brief Adds a VoxelGrid data channel to the Reconstruction.
+    /// @param parser Arg Parser with arguments to construct a new VoxelGrid from.
     ///               See `forge_scan::data::Reconstruction::addChannel` for details.
-    /// @throws `std::invalid_argument` If there is an issue with the Voxel Grid creation process.
+    /// @throws `std::invalid_argument` If there is an issue with the VoxelGrid creation process.
     void reconstructionAddChannel(const utilities::ArgParser& parser)
     {
         this->reconstruction->addChannel(parser);
     }
 
 
-    /// @brief Removes a Voxel Grid data channel from the Reconstruction.
+    /// @brief Removes a VoxelGrid data channel from the Reconstruction.
     /// @param name Name of the channel in the Reconstruction's channel dictionary to remove.
     /// @returns True if successful. False if that channel did not exits or if it is owned by a
     ///          Metric or a Policy.
@@ -235,7 +235,7 @@ public:
     }
 
 
-    /// @brief Updates each Voxel Grid in the Reconstruction based on the provided set of rays.
+    /// @brief Updates each VoxelGrid in the Reconstruction based on the provided set of rays.
     /// @param sensed A set of measurements which act as the end points for a collection of rays.
     /// @param extr   Reference frame for the `sensed` measurements and their common origin.
     /// @warning This transforms the sensed points in-place.
@@ -309,7 +309,7 @@ private:
 
     /// @brief Private constructor to enforce use of shared pointers.
     /// @param parser Arg Parser with arguments to construct Grid Properties from.
-    ///               These Grid Properties are utilized by all Reconstruction Voxel Grids.
+    ///               These Grid Properties are utilized by all Reconstruction VoxelGrids.
     ///               See `forge_scan::Grid::Properties` for details.
     explicit Manager(const utilities::ArgParser& parser)
         : grid_properties(Grid::Properties::createConst(parser)),
@@ -320,7 +320,7 @@ private:
 
     /// @brief Private constructor to enforce use of shared pointers.
     /// @param grid_properties Shared, constant pointer to the Grid Properties to use.
-    ///                        These Grid Properties are utilized by all Reconstruction Voxel Grids.
+    ///                        These Grid Properties are utilized by all Reconstruction VoxelGrids.
     explicit Manager(const std::shared_ptr<const Grid::Properties>& grid_properties)
         : grid_properties(grid_properties),
           reconstruction(data::Reconstruction::create(this->grid_properties))

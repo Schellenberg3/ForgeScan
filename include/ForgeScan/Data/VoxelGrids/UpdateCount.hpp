@@ -14,7 +14,7 @@ namespace data {
 class UpdateCount : public VoxelGrid
 {
 public:
-    /// @brief Constructor for a shared pointer to a UpdateCount Voxel Grid.
+    /// @brief Constructor for a shared pointer to a UpdateCount VoxelGrid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param parser Arg Parser with arguments to construct an UpdateCount Grid from.
     /// @return Shared pointer to a UpdateCount Grid.
@@ -47,7 +47,7 @@ public:
     }
 
 
-    /// @return Help message for constructing a UpdateCount Voxel Grid with ArgParser.
+    /// @return Help message for constructing a UpdateCount VoxelGrid with ArgParser.
     static std::string helpMessage()
     {
         /// TODO: Return an fill this in.
@@ -55,7 +55,7 @@ public:
     }
 
 
-    /// @brief Returns the class type name for the Voxel Grid.
+    /// @brief Returns the class type name for the VoxelGrid.
     const std::string& getTypeName() const override final
     {
         static const std::string name = "UpdateCount";

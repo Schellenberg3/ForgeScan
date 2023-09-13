@@ -16,7 +16,7 @@ namespace forge_scan {
 namespace data {
 
 
-/// @brief Factory function to create different Voxel Grid types.
+/// @brief Factory function to create different VoxelGrid types.
 /// @param args Arguments to pass into the VoxelGrid's create functions.
 /// @param properties A shared, constant reference to the properties for this reconstruction.
 /// @return A pointer to the requested implementation of the VoxelGrid class.

@@ -6,7 +6,7 @@
 
 
 /// @brief Helper to create a camera model.
-/// @param parser[out] ArgParser to use. On return this is set to the last arguments used for the camera.
+/// @param [out] parser ArgParser to use. On return this is set to the last arguments used for the camera.
 /// @return Shared camera object.
 inline std::shared_ptr<forge_scan::sensor::Camera> get_camera(forge_scan::utilities::ArgParser& parser)
 {
@@ -29,8 +29,8 @@ inline std::shared_ptr<forge_scan::sensor::Camera> get_camera(forge_scan::utilit
 
 
 /// @brief Helper to add a polity to the Manager.
-/// @param parser[out] ArgParser to use. On return this is set to the last arguments used to make a Metric.
-/// @param manager[out] Manager to update.
+/// @param [out] parser ArgParser to use. On return this is set to the last arguments used to make a Metric.
+/// @param [out] manager Manager to update.
 inline void add_policy(forge_scan::utilities::ArgParser& parser,
                        std::shared_ptr<forge_scan::Manager>& manager)
 {
@@ -71,8 +71,8 @@ inline void add_policy(forge_scan::utilities::ArgParser& parser,
 
 
 /// @brief Helper to add Data Channels to the Manager.
-/// @param parser[out] ArgParser to use. On return this is set to the last arguments used to make a Data Channel.
-/// @param manager[out] Manager to update.
+/// @param [out] parser ArgParser to use. On return this is set to the last arguments used to make a Data Channel.
+/// @param [out] manager Manager to update.
 inline void add_data_channels(forge_scan::utilities::ArgParser& parser,
                               std::shared_ptr<forge_scan::Manager>& manager)
 {
@@ -126,8 +126,8 @@ inline void add_data_channels(forge_scan::utilities::ArgParser& parser,
 
 
 /// @brief Helper to add Metrics to the Manager.
-/// @param parser[out] ArgParser to use. On return this is set to the last arguments used to make a Metric.
-/// @param manager[out] Manager to update.
+/// @param [out] parser ArgParser to use. On return this is set to the last arguments used to make a Metric.
+/// @param [out] manager Manager to update.
 inline void add_metrics(forge_scan::utilities::ArgParser& parser,
                         std::shared_ptr<forge_scan::Manager>& manager)
 {

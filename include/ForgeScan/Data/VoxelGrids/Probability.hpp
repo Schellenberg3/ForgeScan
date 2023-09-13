@@ -17,7 +17,7 @@ namespace data {
 class Probability : public VoxelGrid
 {
 public:
-    /// @brief Constructor for a shared pointer to a Probability Voxel Grid.
+    /// @brief Constructor for a shared pointer to a Probability VoxelGrid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param parser Arg Parser with arguments to construct an Probability Grid from.
     /// @return Shared pointer to a Probability Grid.
@@ -38,7 +38,7 @@ public:
     }
 
 
-    /// @brief Constructor for a shared pointer to a Probability Voxel Grid.
+    /// @brief Constructor for a shared pointer to a Probability VoxelGrid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param dist_min   Minimum update distance. Default -0.2.
     /// @param dist_max   Maximum update distance. Default +0.2.
@@ -74,7 +74,7 @@ public:
     }
 
 
-    /// @return Help message for constructing a Probability Voxel Grid with ArgParser.
+    /// @return Help message for constructing a Probability VoxelGrid with ArgParser.
     static std::string helpMessage()
     {
         /// TODO: Return an fill this in.
@@ -82,7 +82,7 @@ public:
     }
 
 
-    /// @brief Returns the class type name for the Voxel Grid.
+    /// @brief Returns the class type name for the VoxelGrid.
     const std::string& getTypeName() const override final
     {
         static const std::string name = "Probability";
@@ -108,8 +108,8 @@ public:
 private:
     /// @brief Private constructor to enforce shared pointer usage.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @param dist_min   Minimum trace update distance for this Voxel Grid.
-    /// @param dist_max   Maximum trace update distance for this Voxel Grid.
+    /// @param dist_min   Minimum trace update distance for this VoxelGrid.
+    /// @param dist_max   Maximum trace update distance for this VoxelGrid.
     /// @param p_max      Probability for voxel maximum voxel value saturation.
     /// @param p_min      Probability for voxel minimum voxel value saturation.
     /// @param p_past     Probability for voxels pst the sensed point.

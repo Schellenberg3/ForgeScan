@@ -15,7 +15,7 @@ namespace data {
 class BinaryTSDF : public VoxelGrid
 {
 public:
-    /// @brief Constructor for a shared pointer to a Binary TSDF Voxel Grid.
+    /// @brief Constructor for a shared pointer to a Binary TSDF VoxelGrid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param parser Arg Parser with arguments to construct an Binary TSDF Grid from.
     /// @return Shared pointer to a Binary TSDF Grid.
@@ -29,7 +29,7 @@ public:
     }
 
 
-    /// @brief Constructor for a shared pointer to a Binary TSDF Voxel Grid.
+    /// @brief Constructor for a shared pointer to a Binary TSDF VoxelGrid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param dist_min   Minimum update distance. Default -0.2.
     /// @param dist_max   Maximum update distance. Default +0.2.
@@ -45,7 +45,7 @@ public:
     }
 
 
-    /// @return Help message for constructing a Binary TSDF Voxel Grid with ArgParser.
+    /// @return Help message for constructing a Binary TSDF VoxelGrid with ArgParser.
     static std::string helpMessage()
     {
         /// TODO: Return an fill this in.
@@ -53,7 +53,7 @@ public:
     }
 
 
-    /// @brief Returns the class type name for the Voxel Grid.
+    /// @brief Returns the class type name for the VoxelGrid.
     const std::string& getTypeName() const override final
     {
         static const std::string name = "BinaryTSDF";
@@ -83,8 +83,8 @@ public:
 private:
     /// @brief Private constructor to enforce shared pointer usage.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @param dist_min   Minimum trace update distance for this Voxel Grid.
-    /// @param dist_max   Maximum trace update distance for this Voxel Grid.
+    /// @param dist_min   Minimum trace update distance for this VoxelGrid.
+    /// @param dist_max   Maximum trace update distance for this VoxelGrid.
     /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
     explicit BinaryTSDF(const std::shared_ptr<const Grid::Properties>& properties,
                            const float& dist_min,
@@ -104,13 +104,13 @@ private:
     }
 
 
-    /// @brief Writes the Voxel Grid's data vector to the provided HDF5 group.
+    /// @brief Writes the VoxelGrid's data vector to the provided HDF5 group.
     /// @param g_channel Group in for the opened HDF5 file.
     /// @param grid_type Name of the derived class.
     /// @throws `std::runtime_error` If there is a bad variant access.
-    ///         (However, this error should be caught earlier in the Voxel Grid constructor.)
-    /// @throws `std::runtime_error` If the Voxel Grid's `type_id` is not recognized or supported.
-    ///         (However, this error should be caught earlier in the Voxel Grid constructor.)
+    ///         (However, this error should be caught earlier in the VoxelGrid constructor.)
+    /// @throws `std::runtime_error` If the VoxelGrid's `type_id` is not recognized or supported.
+    ///         (However, this error should be caught earlier in the VoxelGrid constructor.)
     /// @note  This override allows the class to add information about the multiple data vectors it has.
     void save(HighFive::Group& g_channel, const std::string& grid_type) const override final
     {
@@ -138,7 +138,7 @@ private:
     }
 
 
-    /// @brief Adds this Voxel Grid's data to the XDMF file provided by the Reconstruction class. 
+    /// @brief Adds this VoxelGrid's data to the XDMF file provided by the Reconstruction class. 
     /// @param file An opened file stream.
     /// @param hdf5_fname File name (not the full path) of the HDF5 file that this XDMF relates to.
     /// @param grid_name  The dictionary map name of this grid. 

@@ -11,8 +11,8 @@ namespace vector_math {
 /// @brief Calculates and returns the normal and length for the ray between the two points.
 /// @param start Start of the ray.
 /// @param end   End of the ray.
-/// @param length[out] Length between the start and end Point.
-/// @param normal[out] The direction of the vector, normalized.
+/// @param [out] length Length between the start and end Point.
+/// @param [out] normal The direction of the vector, normalized.
 inline void get_length_and_normal(const Point& start, const Point& end,
                                  float& length, Direction& normal)
 {
@@ -25,9 +25,9 @@ inline void get_length_and_normal(const Point& start, const Point& end,
 /// @brief Calculates and returns the normal and length for the ray between the two points.
 /// @param start Start of the ray.
 /// @param end   End of the ray.
-/// @param length[out] Length between the start and end Point.
-/// @param normal[out] The direction of the vector, normalized.
-/// @param inv_normal[out] Elementwise inverse of the normal.
+/// @param [out] length Length between the start and end Point.
+/// @param [out] normal The direction of the vector, normalized.
+/// @param [out] inv_normal Elementwise inverse of the normal.
 /// @note  This function is typically used for ray-tracing-related code where both the normal
 ///        and a pre-computed inverse normal are useful.
 inline void get_length_normal_and_inverse_normal(const Point& start, const Point& end,
@@ -50,7 +50,7 @@ inline Eigen::Quaternionf get_rotation_to_orient_to_axis(const Point& position, 
 
 
 /// @brief Calculates the rotation needed to point the Z-Axis of an reference frame to the target point.
-/// @param position Extrinsic matrix of the reference frame.
+/// @param extr Extrinsic matrix of the reference frame.
 /// @param target Target to point the axis at.
 /// @param axis Axis of the .
 /// @return Quaternion rotation to apply.
@@ -73,7 +73,7 @@ inline Eigen::Quaternionf get_rotation_to_orient_z_axis(const Point& position, c
 
 
 /// @brief Calculates the rotation needed to point the Z-Axis of an reference frame to the target point.
-/// @param position Extrinsic matrix of the reference frame.
+/// @param extr Extrinsic matrix of the reference frame.
 /// @param target Target to point the z-axis at.
 /// @return Quaternion rotation to apply.
 inline Eigen::Quaternionf get_rotation_to_orient_z_axis(const Extrinsic& extr, const Point& target)

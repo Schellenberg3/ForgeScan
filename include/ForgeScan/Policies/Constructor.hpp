@@ -17,7 +17,7 @@ namespace policies {
 
 
 /// @brief Factory function to create different Policy types.
-/// @param args Arguments to pass into the Policy's create functions.
+/// @param parser Arguments to pass into the Policy's create functions.
 /// @param reconstruction Shared, constant pointer to the Reconstruction passed to the Policy's create function.
 /// @return A pointer to the requested implementation of the Policy class.
 /// @throws std::invalid_argument if the Policy type is not recognized.

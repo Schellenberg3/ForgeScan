@@ -61,7 +61,7 @@ struct Camera : public Entity
     /// @param image Depth image.
     /// @param row Pixel row in the image.
     /// @param col Pixel column in the image.
-    /// @param out[out] Output point.
+    /// @param [out] out Output point.
     /// @note The ouput point is implicitly relative to the optical frame of the camera
     ///       that generated the depth image.
     /// @throws `std::invalid_argument` If the pixel was out of bounds.
@@ -79,7 +79,7 @@ struct Camera : public Entity
     /// @brief Static method for turning a depth image and Intrinsic properties into a list of Points.
     /// @param intr  Intrinsics for the Camera that took the image.
     /// @param image Depth image.
-    /// @param dest[out] Matrix to store the depth image's Points in.
+    /// @param [out] dest Matrix to store the depth image's Points in.
     /// @note The ouput points are implicitly relative to the optical frame of the camera
     ///       that generated the depth image.
     static void getPointsFromImageAndIntrinsics(const std::shared_ptr<Intrinsics>& intr, 
@@ -118,7 +118,7 @@ struct Camera : public Entity
 
 
     /// @brief Turns the Camera's depth image into a list of Points, relative to the camera's frame.
-    /// @param dest[out] Matrix to store the depth image's Points in.
+    /// @param [out] dest Matrix to store the depth image's Points in.
     void getPointMatrix(PointMatrix& dest)
     {
         dest.setConstant(3, this->intr->size(), 0);
@@ -152,7 +152,7 @@ struct Camera : public Entity
     /// @brief Extracts a 3D point from the depth image.
     /// @param row Row of the image.
     /// @param col Column of the image.
-    /// @param out[out] The Point represented by the specified pixel, relative to the camera's frame.
+    /// @param [out] out The Point represented by the specified pixel, relative to the camera's frame.
     /// @throws `std::invalid_argument` If the pixel was out of bounds.
     void getPoint(const size_t& row, const size_t col, Point& out)
     {

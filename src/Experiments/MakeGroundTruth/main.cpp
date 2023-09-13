@@ -13,8 +13,8 @@ inline std::shared_ptr<const forge_scan::Grid::Properties> get_properties()
 
 
 /// @brief Helper to set the lower bounds rotation.
-/// @param parser[out] ArgParser to use. On return this is set to the arguments used for rotation.
-/// @param scan_lower_bound[out] Lower bounds to rotate.
+/// @param [out] parser ArgParser to use. On return this is set to the arguments used for rotation.
+/// @param [out] scan_lower_bound Lower bounds to rotate.
 inline void get_rotation(forge_scan::utilities::ArgParser& parser,
                          forge_scan::Extrinsic& scan_lower_bound)
 {
@@ -37,8 +37,8 @@ inline void get_rotation(forge_scan::utilities::ArgParser& parser,
 
 
 /// @brief Helper to set the lower bounds rotation.
-/// @param parser[out] ArgParser to use. On return this is set to the arguments used for rotation.
-/// @param scan_lower_bound[out] Lower bounds to translate.
+/// @param [out] parser ArgParser to use. On return this is set to the arguments used for rotation.
+/// @param [out] scan_lower_bound Lower bounds to translate.
 inline void get_translation(forge_scan::utilities::ArgParser& parser,
                             forge_scan::Extrinsic& scan_lower_bound)
 {
@@ -59,8 +59,8 @@ inline void get_translation(forge_scan::utilities::ArgParser& parser,
 
 
 /// @brief Helper to add shapes to a Scene.
-/// @param parser[out] ArgParser to use. On return this is set to the last arguments used to make a shape.
-/// @param scene[out]  Scene to add shapes to.
+/// @param [out] parser ArgParser to use. On return this is set to the last arguments used to make a shape.
+/// @param [out] scene  Scene to add shapes to.
 inline void add_shapes(forge_scan::utilities::ArgParser& parser,
                        const std::shared_ptr<forge_scan::simulation::Scene>& scene)
 {

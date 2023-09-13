@@ -171,6 +171,7 @@ struct Entity
 
     /// @brief Transforms the Point into this entity's frame, from the other entity's frame.
     /// @param x Input Point.
+    /// @param other Extrinsic matrix or reference frame for the other entity.
     /// @returns Transformed Point.
     Point toThisFromOther(const Point& x, const Extrinsic& other) const
     {
@@ -180,6 +181,7 @@ struct Entity
 
     /// @brief Transforms the Point into this entity's frame, from the other entity's frame.
     /// @param x Input Point. Transformed in place.
+    /// @param other Extrinsic matrix or reference frame for the other entity.
     void toThisFromOther(Point& x, const Extrinsic& other) const
     {
         x = this->getToThisFromOther(other) * x.homogeneous();
@@ -188,6 +190,7 @@ struct Entity
 
     /// @brief Transforms the Point into the other entity's frame, from this entity's frame.
     /// @param x Input Point.
+    /// @param other Extrinsic matrix or reference frame for the other entity.
     /// @returns Transformed Point.
     Point toOtherFromThis(const Point& x, const Extrinsic& other) const
     {
@@ -197,6 +200,7 @@ struct Entity
 
     /// @brief Transforms the Point into the other entity's frame, from this entity's frame.
     /// @param x Input Point. Transformed in place.
+    /// @param other Extrinsic matrix or reference frame for the other entity.
     void toOtherFromThis(Point& x, const Extrinsic& other) const
     {
         x = this->getToOtherFromThis(other) * x.homogeneous();
@@ -223,6 +227,7 @@ struct Entity
 
     /// @brief Transforms the Point into this entity's frame, from the other entity's frame.
     /// @param x Input Point. Transformed in place.
+    /// @param other Extrinsic matrix or reference frame for the other entity.
     void toThisFromOther(PointMatrix& x, const Extrinsic& other) const
     {
         x = this->getToThisFromOther(other) * x.colwise().homogeneous();
@@ -231,6 +236,7 @@ struct Entity
 
     /// @brief Transforms the Point into the other entity's frame, from this entity's frame.
     /// @param x Input Point. Transformed in place.
+    /// @param other Extrinsic matrix or reference frame for the other entity.
     void toOtherFromThis(PointMatrix& x, const Extrinsic& other) const
     {
         x = this->getToOtherFromThis(other) * x.colwise().homogeneous();

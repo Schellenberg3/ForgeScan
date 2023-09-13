@@ -8,12 +8,12 @@ namespace forge_scan {
 namespace data {
 
 
-/// @brief Tracks binary occupancy values for each voxel. The whole Voxel Grid begins as "occupied"
+/// @brief Tracks binary occupancy values for each voxel. The whole VoxelGrid begins as "occupied"
 ///        and are updated to be "free" rays travel through them. 
 class Binary : public VoxelGrid
 {
 public:
-    /// @brief Constructor for a shared pointer to an Binary Voxel Grid.
+    /// @brief Constructor for a shared pointer to an Binary VoxelGrid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param parser Arg Parser with arguments to construct an Binary Grid from.
     /// @return Shared pointer to a Binary Grid.
@@ -25,7 +25,7 @@ public:
     }
 
 
-    /// @brief Constructor for a shared pointer to an Binary Voxel Grid.
+    /// @brief Constructor for a shared pointer to an Binary VoxelGrid.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param dist_min    Minimum update distance. Default 0.
     /// @param dist_max    Maximum update distance. Default infinity.
@@ -38,14 +38,14 @@ public:
     }
 
 
-    /// @return Help message for constructing a Binary Voxel Grid with ArgParser.
+    /// @return Help message for constructing a Binary VoxelGrid with ArgParser.
     static std::string helpMessage()
     {
         /// TODO: Return an fill this in.
         return "TODO: Binary help message";
     }
 
-    /// @brief Returns the class type name for the Voxel Grid.
+    /// @brief Returns the class type name for the VoxelGrid.
     const std::string& getTypeName() const override final
     {
         static const std::string name = "Binary";
@@ -74,8 +74,8 @@ public:
 private:
     /// @brief Private constructor to enforce shared pointer usage.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @param dist_min   Minimum trace update distance for this Voxel Grid.
-    /// @param dist_max   Maximum trace update distance for this Voxel Grid.
+    /// @param dist_min   Minimum trace update distance for this VoxelGrid.
+    /// @param dist_max   Maximum trace update distance for this VoxelGrid.
     /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
     ///         (This should not happen.)
     explicit Binary(const std::shared_ptr<const Grid::Properties>& properties,

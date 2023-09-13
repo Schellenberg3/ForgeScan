@@ -13,7 +13,7 @@ namespace utilities {
 /// @brief Generates a default time-stamped filename whe one is not provided.
 /// @param prefix    A generic name to place before the timestamp.
 /// @param extension A file extension to place after the time stamp.
-/// @param timestamp_default If true, will add a timestamp.
+/// @param timestamp If true, will add a timestamp.
 /// @returns A string to be used as a file name with the structure `[prefix]-[timestamp][extension]`.
 inline std::string getDefaultFilename(const std::string& prefix = "",
                                       const std::string& extension = "",

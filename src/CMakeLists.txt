@@ -15,10 +15,10 @@ target_compile_definitions(
 )
 
 
-if(FORGE_SCAN_BUILD_EXAMPLES)
+if(FORGE_SCAN_EXAMPLES)
   add_subdirectory(Examples)
 endif()
 
-if(FORGE_SCAN_BUILD_EXPERIMENTS)
+if(FORGE_SCAN_EXPERIMENTS)
   add_subdirectory(Experiments)
 endif()

@@ -91,7 +91,7 @@ public:
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param data The data (typically loaded from an HDF5) for the Occupancy Grid.
     /// @return Shared pointer to an Occupancy Grid.
-    /// @throws `std::runtime_error` If the data vector length does not match the Grid Properties
+    /// @throws GridPropertyError If the data vector length does not match the Grid Properties
     ///         number of voxels.
     /// @note   This uses `swap` to exchange the contents of the provided vector with the contents of
     ///         the internal data without copying data.
@@ -204,7 +204,7 @@ private:
 
     /// @brief Private constructor to enforce use of shared pointers.
     /// @param properties Shared, constant pointer to the Grid Properties to use.
-    /// @throws `std::runtime_error` If the data vector length does not match the Grid Properties
+    /// @throws GridPropertyError If the data vector length does not match the Grid Properties
     ///         number of voxels.
     /// @note   This uses `swap` to exchange the contents of the provided vector with the contents of
     ///         the internal data without copying data.
@@ -215,7 +215,7 @@ private:
     {
         if (this->properties->getNumVoxels() != data.size())
         {
-            throw std::runtime_error("Cannot create Occupancy. Grid properties and provided data are not the same size.");
+            throw GridPropertyError::DataVectorDoesNotMatch(this->properties->size, data.size());
         }
         this->data.swap(data);
     }

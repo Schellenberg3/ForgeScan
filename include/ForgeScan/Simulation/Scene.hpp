@@ -12,6 +12,7 @@
 
 #include "ForgeScan/Common/Definitions.hpp"
 #include "ForgeScan/Common/Entity.hpp"
+#include "ForgeScan/Common/Exceptions.hpp"
 #include "ForgeScan/Metrics/GroundTruth/Occupancy.hpp"
 #include "ForgeScan/Metrics/GroundTruth/TSDF.hpp"
 #include "ForgeScan/Simulation/Constructor.hpp"
@@ -199,18 +200,18 @@ public:
 
     /// @brief Adds a new Primitive Shape to the scene.
     /// @param parser Argument parser with parameters for the Primitive Shape.
-    /// @throw `std::runtime_error` If no name was provided.
-    /// @throw `std::runtime_error` If a shape with the same name already exists.
+    /// @throws InvalidMapKey If no name was provided.
+    /// @throws InvalidMapKey If a shape with the same name already exists.
     void add(const utilities::ArgParser& parser)
     {
         const std::string name = parser.get(Primitive::parse_name);
         if (name.empty())
         {
-            throw std::runtime_error("No name provided for the shape.");
+            throw InvalidMapKey::NoNameProvided();
         }
         else if (this->shapes_map.count(name) != 0)
         {
-            throw std::runtime_error("A shape named \"" + name + "\" already exists in the Scene.");
+            throw InvalidMapKey::NameAlreadyExists(name);
         }
         this->shapes_map.insert( {name, primitive_constructor(parser)} );
     }
@@ -456,7 +457,7 @@ private:
     /// @brief Writes an XDMF to pair with the HDF5 file for visualizing the data in tools like
     ///        ParaView.
     /// @param fpath File path, with file name, for the HDF5 file.
-    /// @throws `std::runtime_error` If any issues are ofstream failures are encountered when
+    /// @throws std::runtime_error If any issues are ofstream failures are encountered when
     ///         writing the XDMF file.
     void makeXDMF(std::filesystem::path fpath) const
     {
@@ -515,9 +516,7 @@ private:
         }
         catch (const std::ofstream::failure& e)
         {
-            std::stringstream ss("Encountered a std::ofstream failure while saving file: ");
-            ss << e.what();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error("Encountered a std::ofstream failure while saving the Scene XDMF file.");
         }
     }
 

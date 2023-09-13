@@ -18,7 +18,7 @@ public:
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param parser Arg Parser with arguments to construct an UpdateCount Grid from.
     /// @return Shared pointer to a UpdateCount Grid.
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     static std::shared_ptr<UpdateCount> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const utilities::ArgParser& parser)
     {
@@ -36,7 +36,7 @@ public:
     /// @param default_value Value to initialize the Grid to. Default 0.
     /// @param type_id       Datatype for the Grid. Default is unsigned 32-bit integer.
     /// @return Shared pointer to a UpdateCount Grid.
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     static std::shared_ptr<UpdateCount> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const float& dist_min = 0,
                                                const float& dist_max = INFINITY,
@@ -80,7 +80,7 @@ private:
     /// @param dist_max   Maximum update distance.
     /// @param default_value Value to initialize the Grid to
     /// @param type_id       Datatype for the Grid.
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     explicit UpdateCount(const std::shared_ptr<const Grid::Properties>& properties,
                          const float& dist_min,
                          const float& dist_max,

@@ -76,8 +76,7 @@ private:
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param dist_min   Minimum trace update distance for this VoxelGrid.
     /// @param dist_max   Maximum trace update distance for this VoxelGrid.
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
-    ///         (This should not happen.)
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     explicit Binary(const std::shared_ptr<const Grid::Properties>& properties,
                        const float& dist_min,
                        const float& dist_max)

@@ -109,7 +109,7 @@ public:
     /// @return Index position in the Policy list if the Policy was successfully added.
     /// @note   - If `--set-active` is passed as a flag then the new Policy will immediately be
     ///           the active one used for view suggestions.
-    /// @throws Any exceptions thrown by `forge_scan::policies::policy_constructor` pass through this.
+    /// @throws Any exceptions thrown by policy_constructor pass through this.
     size_t policyAdd(const utilities::ArgParser& parser)
     {
         this->policy_vec.push_back(policies::policy_constructor(parser, this->reconstruction));
@@ -141,7 +141,7 @@ public:
     
     /// @brief Gets the Policy the Manager is currently using to suggest views.
     /// @return Shared, constant reference to the active Policy.
-    /// @throws `std::runtime_error` If no Policies have been added to the Manager.
+    /// @throws std::runtime_error If no Policies have been added to the Manager.
     std::shared_ptr<const policies::Policy> policyGetActive() const
     {
         this->throwIfNoActivePolicy();
@@ -150,7 +150,7 @@ public:
 
 
     /// @brief Signals to the active Policy that it should generate a new set of suggested views.
-    /// @throws `std::runtime_error` If no Policies have been added to the Manager.
+    /// @throws std::runtime_error If no Policies have been added to the Manager.
     void policyGenerate()
     {
         this->throwIfNoActivePolicy();
@@ -160,8 +160,7 @@ public:
 
     /// @brief Queries the active Policy to get its suggested view.
     /// @return Gets a constant reference to the best view suggested by the active Policy.
-    /// @throws `std::runtime_error` If no Policies have been added to the Manager.
-    /// @throws `std::runtime_error` If the active Policy could not generate a view.
+    /// @throws std::runtime_error If no Policies have been added to the Manager.
     const Extrinsic& policyGetView()
     {
         this->throwIfNoActivePolicy();
@@ -171,7 +170,7 @@ public:
 
     /// @brief Signals to the active Policy that the last view it suggested was accepted.
     /// @returns True if the suggested view was accepted. False if there was no view to accept.
-    /// @throws `std::runtime_error` If no Policies have been added to the Manager.
+    /// @throws std::runtime_error If no Policies have been added to the Manager.
     bool policyAcceptView()
     {
         this->throwIfNoActivePolicy();
@@ -186,7 +185,7 @@ public:
 
     /// @brief Signals to the active Policy that the last view it suggested was rejected.
     /// @returns True if the suggested view was rejected. False if there was no view to accept.
-    /// @throws `std::runtime_error` If no Policies have been added to the Manager.
+    /// @throws std::runtime_error If no Policies have been added to the Manager.
     bool policyRejectView()
     {
         this->throwIfNoActivePolicy();
@@ -201,7 +200,7 @@ public:
 
     /// @brief Queries the active Policy to check if it is complete.
     /// @return True if the active Policy believes the Reconstruction to be complete.
-    /// @throws `std::runtime_error` If no Policies have been added to the Manager.
+    /// @throws std::runtime_error If no Policies have been added to the Manager.
     bool policyIsComplete() const
     {
         this->throwIfNoActivePolicy();
@@ -218,7 +217,7 @@ public:
     /// @brief Adds a VoxelGrid data channel to the Reconstruction.
     /// @param parser Arg Parser with arguments to construct a new VoxelGrid from.
     ///               See `forge_scan::data::Reconstruction::addChannel` for details.
-    /// @throws `std::invalid_argument` If there is an issue with the VoxelGrid creation process.
+    /// @throws Any exceptions thrown by Reconstruction::addChannel pass through this.
     void reconstructionAddChannel(const utilities::ArgParser& parser)
     {
         this->reconstruction->addChannel(parser);
@@ -266,8 +265,7 @@ public:
     /// @brief Adds a new Metric to track information about the Reconstruction.
     /// @param parser Arg Parser with arguments to construct a new Metric from.
     ///               See `forge_scan::metrics::metric_constructor` for details.
-    /// @throws `std::invalid_argument` If there is an issue with the Metric creation process.
-    /// @throws `std::runtime_error` If a Metric of the requested type is already in use.
+    /// @throws InvalidMapKey If a Metric of the requested type is already in use.
     void metricAdd(const utilities::ArgParser& parser)
     {
         this->metricAdd(metrics::metric_constructor(parser, this->reconstruction));
@@ -276,13 +274,13 @@ public:
 
     /// @brief Adds a new Metric to track information about the Reconstruction.
     /// @param metric A pre-constructed Metric to add.
-    /// @throws `std::runtime_error` If a Metric of the requested type is already in use.
+    /// @throws InvalidMapKey If a Metric of the requested type is already in use.
     void metricAdd(std::shared_ptr<metrics::Metric> metric)
     {
         std::string metric_name = metric->getTypeName();
         if (this->metrics_map.count(metric_name) != 0)
         {
-            throw std::runtime_error("MetricOfThisTypeAlreadyExists");
+            throw InvalidMapKey::NameAlreadyExists(metric_name);
         }
         metric->setup();
         this->metrics_map.insert({metric_name, metric});
@@ -332,7 +330,7 @@ private:
     /// @brief Writes an XDMF to pair with the HDF5 file for visualizing the data in tools like
     ///        ParaView.
     /// @param fpath File path, with file name, for the HDF5 file.
-    /// @throws `std::runtime_error` If any issues are ofstream failures are encountered when
+    /// @throws std::runtime_error If any issues are ofstream failures are encountered when
     ///         writing the XDMF file.
     void makeXDMF(std::filesystem::path fpath) const
     {
@@ -368,9 +366,8 @@ private:
         }
         catch (const std::ofstream::failure& e)
         {
-            std::stringstream ss("Encountered a std::ofstream failure while creating XDMF file: ");
-            ss << e.what();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error("Encountered a std::ofstream failure while saving the Reconstruction XDMF file.");
+
         }
     }
 
@@ -383,7 +380,7 @@ private:
 
     /// @brief Gets the Policy the Manager is currently using to suggest views.
     /// @return Shared reference to the active Policy.
-    /// @throws `std::runtime_error` If no Policies have been added to the Manager.
+    /// @throws std::runtime_error If no Policies have been added to the Manager.
     /// @note Unlike the public method, this is used to access a non-constant-qualified pointer
     ///       to the active policy. Many of the Manager's public policy methods use this overload. 
     std::shared_ptr<policies::Policy> policyGetActiveNonConst()
@@ -394,12 +391,12 @@ private:
 
 
     /// @brief Prevents calling Policy methods when there is no active Policy.
-    /// @throw `std::runtime_error` if `hasPolicy` returns false for the current `active_policy_idx`.
+    /// @throws std::runtime_error if `hasPolicy` returns false for the current `active_policy_idx`.
     void throwIfNoActivePolicy() const
     {
         if (!this->hasPolicy(this->active_policy_idx))
         {
-            throw std::runtime_error("ManagerHasNoPolicy");
+            throw std::runtime_error("Manager has no policies to use.");
         }
     }
 

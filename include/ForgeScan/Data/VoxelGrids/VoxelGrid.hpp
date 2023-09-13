@@ -10,6 +10,7 @@
 #include <highfive/H5File.hpp>
 
 #include "ForgeScan/Common/Definitions.hpp"
+#include "ForgeScan/Common/Exceptions.hpp"
 #include "ForgeScan/Common/Grid.hpp"
 #include "ForgeScan/Common/VoxelData.hpp"
 #include "ForgeScan/Common/Types.hpp"
@@ -174,19 +175,19 @@ protected:
         // *                               UNSUPPORTED DATATYPES                               * //
         // * These should be unreachable; the VoxelGrid constructor should ensure no invalid   * //
         // * vectors are used in this derived class. But for safety these are still defined to * //
-        // * throw a runtime error if they are ever reached.                                   * //
+        // * throw a DataVariantError error if they are ever reached.                                   * //
         // ************************************************************************************* //
 
-        void operator()(std::vector<int8_t>&)   { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<int16_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<int32_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<int64_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<uint8_t>&)  { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<uint16_t>&) { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<uint32_t>&) { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<size_t>&)   { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<float>&)    { throw std::runtime_error(this->type_not_supported_message); }
-        void operator()(std::vector<double>&)   { throw std::runtime_error(this->type_not_supported_message); }
+        void operator()(std::vector<int8_t>&)   { throw DataVariantError(this->type_not_supported_message); }
+        void operator()(std::vector<int16_t>&)  { throw DataVariantError(this->type_not_supported_message); }
+        void operator()(std::vector<int32_t>&)  { throw DataVariantError(this->type_not_supported_message); }
+        void operator()(std::vector<int64_t>&)  { throw DataVariantError(this->type_not_supported_message); }
+        void operator()(std::vector<uint8_t>&)  { throw DataVariantError(this->type_not_supported_message); }
+        void operator()(std::vector<uint16_t>&) { throw DataVariantError(this->type_not_supported_message); }
+        void operator()(std::vector<uint32_t>&) { throw DataVariantError(this->type_not_supported_message); }
+        void operator()(std::vector<size_t>&)   { throw DataVariantError(this->type_not_supported_message); }
+        void operator()(std::vector<float>&)    { throw DataVariantError(this->type_not_supported_message); }
+        void operator()(std::vector<double>&)   { throw DataVariantError(this->type_not_supported_message); }
     };
 
 
@@ -204,7 +205,7 @@ protected:
     /// @param type_id        DataType enumeration to identify what the data type this Voxel
     ///                       Grid's data vector holds.
     /// @param valid_type_ids Bit field of data types this a derived VoxelGrid will accept.
-    /// @throws `std::invalid_argument` if the DataType of `type_id` is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType of `type_id` is not supported by this VoxelGrid.
     VoxelGrid(std::shared_ptr<const Grid::Properties> properties,
               const float& dist_min,
               const float& dist_max,
@@ -218,7 +219,7 @@ protected:
     {
         const size_t n = this->properties->getNumVoxels();
 
-        /* Factory for the correct type_id of vector into the variant. */
+        // Factory for the correct type_id of vector into the variant.
         if (this->type_id == DataType::INT8_T)
         {
             this->data = std::vector<int8_t>(n, std::get<int8_t>(this->default_value));
@@ -261,7 +262,7 @@ protected:
         }
         else
         {
-            throw std::invalid_argument("Unrecognized data type_id: " + std::to_string(this->type_id) + ". Cannot set up the container's vector.");
+            throw DataVariantError::UnrecognizedEnumeration(this->type_id);
         }
     }
 
@@ -269,8 +270,8 @@ protected:
     /// @brief Writes the VoxelGrid's data vector to the provided HDF5 group.
     /// @param g_channel Group in for the opened HDF5 file.
     /// @param grid_type Name of the derived class.
-    /// @throws `std::runtime_error` If there is a bad variant access.
-    /// @throws `std::runtime_error` If the VoxelGrid's `type_id` is not recognized.
+    /// @throws std::runtime_error If there is a bad variant access.
+    /// @throws DataVariantError If the VoxelGrid's `type_id` is not recognized.
     ///         (However, this error should be caught earlier in the VoxelGrid constructor.)
     /// @note This is virtual so VoxelGrid with multiple data channels may specifically handle
     ///       their channels. But most derived VoxelGrids may uses this method.
@@ -320,7 +321,7 @@ protected:
             }
             else
             {
-                throw std::runtime_error("Cannot save Grid's Data vector to HDF5 file: Unrecognized data type_id.");
+                DataVariantError::UnrecognizedEnumeration(this->type_id);
             }
         }
         catch (const std::bad_variant_access& e)
@@ -374,7 +375,7 @@ private:
     ///        is set to the correct data type before it is used to initialize the data vector.
     /// @param x The input to cast.
     /// @return A DataVariant that has the input's value cast to the correct data type.
-    /// @throws `std::runtime_error` If the VoxelGrid's `type_id` is not recognized.
+    /// @throws DataVariantError If the VoxelGrid's `type_id` is not recognized.
     ///         (However, this error should be caught earlier in the VoxelGrid constructor.)
     DataVariant setDefaultValue(const DataVariant& x)
     {
@@ -431,8 +432,7 @@ private:
         }
         else
         {
-            throw std::invalid_argument("Unrecognized data type_id: " + std::to_string(this->type_id)
-                                        + ". Cannot set up the container's default value.");
+            DataVariantError::UnrecognizedEnumeration(this->type_id);
         }
         return res;
     }
@@ -449,25 +449,20 @@ private:
     /// @param requested ID value for the requested data type.
     /// @param should_be ID value for the valid data types.
     /// @return Returns the input if it is valid
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
-    /// @throws std::invalid_argument if the DataType is a type checking bitfield and does
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is a type checking bitfield and does
     ///         not actually represent a data type.
     static DataType validDataTypeID(const DataType& requested, const DataType& should_be)
     {
         if ( !(requested & DataType::TYPE_NOT_A_TYPE_CHECK) )
         {
-            throw std::invalid_argument("The requested VoxelGrid can only accept " +
-                                        DataTypeToString.at(should_be) + " but the type " +
-                                        DataTypeToString.at(requested) + " was requested. "
-                                        "Cannot use type checking enumeration values as data type IDs.");
+            throw DataVariantError::AttemptedUseOfTypeCheckingDataType(DataTypeToString.at(requested));
         }
         if (requested & should_be)
         {
             return requested;
         }
-        throw std::invalid_argument("The requested VoxelGrid can only accept " +
-                                    DataTypeToString.at(should_be) + " but the type " +
-                                    DataTypeToString.at(requested) + " was requested.");
+        throw DataVariantError::VoxelGridDoesNotSupport(DataTypeToString.at(requested), DataTypeToString.at(should_be));
     }
 };
 

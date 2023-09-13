@@ -34,7 +34,7 @@ ExperimentTSDF;
 /// @brief Ensures that the input voxel grid may be cast to one of the variant types in `ExperimentOccupancy`.
 /// @param voxel_grid The grid to test.
 /// @return An `ExperimentOccupancy` which references the grid.
-/// @throws `std::runtime_error` If the VoxelGrid may not be cast to one of the supporting types.
+/// @throws BadVoxelGridDownCast If the VoxelGrid may not be cast to one of the supporting types.
 inline ExperimentOccupancy dynamic_cast_to_experimental_occupancy(const std::shared_ptr<const forge_scan::data::VoxelGrid>& voxel_grid)
 {
     auto voxel_grid_cast_binary = std::dynamic_pointer_cast<const data::Binary>(voxel_grid);
@@ -49,14 +49,14 @@ inline ExperimentOccupancy dynamic_cast_to_experimental_occupancy(const std::sha
         return voxel_grid_cast_binary_tsdf;
     }
 
-    throw std::runtime_error("Failed to cast VoxelGrid to a ExperimentOccupancy type.");
+    throw BadVoxelGridDownCast("ExperimentOccupancy");
 }
 
 
 /// @brief Ensures that the input voxel grid may be cast to one of the variant types in `ExperimentTSDF`.
 /// @param voxel_grid The grid to test.
 /// @return An `ExperimentTSDF` which references the grid.
-/// @throws `std::runtime_error` If the VoxelGrid may not be cast to one of the supporting types.
+/// @throws BadVoxelGridDownCast If the VoxelGrid may not be cast to one of the supporting types.
 inline ExperimentTSDF dynamic_cast_to_experimental_tsdf(const std::shared_ptr<const forge_scan::data::VoxelGrid>& voxel_grid)
 {
     auto voxel_grid_cast_tsdf = std::dynamic_pointer_cast<const data::TSDF>(voxel_grid);
@@ -71,7 +71,7 @@ inline ExperimentTSDF dynamic_cast_to_experimental_tsdf(const std::shared_ptr<co
         return voxel_grid_cast_binary_tsdf;
     }
 
-    throw std::runtime_error("Failed to cast VoxelGrid to a ExperimentTSDF type.");
+    throw BadVoxelGridDownCast("ExperimentTSDF");
 }
 
 

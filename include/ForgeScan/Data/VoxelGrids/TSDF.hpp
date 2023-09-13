@@ -19,7 +19,7 @@ public:
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param parser Arg Parser with arguments to construct an TSDF Grid from.
     /// @return Shared pointer to a TSDF Grid.
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     static std::shared_ptr<TSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
                                         const utilities::ArgParser& parser)
     {
@@ -35,7 +35,7 @@ public:
     /// @param dist_max   Maximum update distance. Default +0.2.
     /// @param type_id Datatype for the Grid. Default is float.
     /// @return Shared pointer to a TSDF Grid.
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     static std::shared_ptr<TSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
                                         const float& dist_min = -0.2,
                                         const float& dist_max =  0.2,
@@ -76,7 +76,7 @@ private:
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param dist_min   Minimum trace update distance for this VoxelGrid.
     /// @param dist_max   Maximum trace update distance for this VoxelGrid.
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     explicit TSDF(const std::shared_ptr<const Grid::Properties>& properties,
                   const float& dist_min,
                   const float& dist_max,

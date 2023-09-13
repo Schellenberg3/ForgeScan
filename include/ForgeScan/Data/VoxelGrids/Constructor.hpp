@@ -20,7 +20,8 @@ namespace data {
 /// @param args Arguments to pass into the VoxelGrid's create functions.
 /// @param properties A shared, constant reference to the properties for this reconstruction.
 /// @return A pointer to the requested implementation of the VoxelGrid class.
-/// @throws std::invalid_argument if the VoxelGrid type is not recognized or if the DataType is not supported by this VoxelGrid
+/// @throws ConstructorError if the VoxelGrid type is not recognized.
+/// @throws DataVariantError if the requested DataType is not supported by the requested VoxelGrid.
 inline std::shared_ptr<VoxelGrid> grid_constructor(const utilities::ArgParser& args,
                                                    std::shared_ptr<const Grid::Properties> properties)
 {
@@ -47,10 +48,8 @@ inline std::shared_ptr<VoxelGrid> grid_constructor(const utilities::ArgParser& a
     {
         return UpdateCount::create(properties, args);
     }
-    else
-    {
-        throw std::invalid_argument("The Grid type of \"" + grid_type + "\" was not recognized.");
-    }
+
+    throw ConstructorError::UnkownType(grid_type, "VoxelGrid");
 }
 
 

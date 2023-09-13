@@ -64,7 +64,7 @@ struct Camera : public Entity
     /// @param [out] out Output point.
     /// @note The ouput point is implicitly relative to the optical frame of the camera
     ///       that generated the depth image.
-    /// @throws `std::invalid_argument` If the pixel was out of bounds.
+    /// @throws std::invalid_argument If the pixel was out of bounds.
     static void getPoint(const std::shared_ptr<Intrinsics>& intr,
                          const DepthImage& image, const Eigen::Index& row, const Eigen::Index col,
                          Point& out)
@@ -140,7 +140,7 @@ struct Camera : public Entity
     /// @param row Pixel row in the image.
     /// @param col Pixel column in the image.
     /// @returns The Point represented by the specified pixel, relative to the camera's frame.
-    /// @throws `std::invalid_argument` If the pixel was out of bounds.
+    /// @throws std::invalid_argument If the pixel was out of bounds.
     Point getPoint(const size_t& row, const size_t col)
     {
         Point out;
@@ -153,7 +153,7 @@ struct Camera : public Entity
     /// @param row Row of the image.
     /// @param col Column of the image.
     /// @param [out] out The Point represented by the specified pixel, relative to the camera's frame.
-    /// @throws `std::invalid_argument` If the pixel was out of bounds.
+    /// @throws std::invalid_argument If the pixel was out of bounds.
     void getPoint(const size_t& row, const size_t col, Point& out)
     {
         this->throwIfPixelIsInvalid(row, col);
@@ -216,7 +216,7 @@ private:
     /// @param intr Intrinsic properties for the camera.
     /// @param row Row location to check.
     /// @param col Column location to check.
-    /// @throws `std::invalid_argument` If the pixel was out of bounds.
+    /// @throws std::invalid_argument If the pixel was out of bounds.
     void throwIfPixelIsInvalid(const size_t& row, const size_t col)
     {
         if (row >= this->intr->height || col >= this->intr->width)
@@ -230,7 +230,7 @@ private:
     /// @param image Depth image of a specific size.
     /// @param row Row location to check.
     /// @param col Column location to check.
-    /// @throws `std::invalid_argument` If the pixel was out of bounds.
+    /// @throws std::invalid_argument If the pixel was out of bounds.
     static void throwIfPixelIsInvalid(const DepthImage& image,
                                       const Eigen::Index& row, const Eigen::Index col)
     {

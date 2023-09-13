@@ -17,7 +17,7 @@ namespace simulation {
 /// @brief Factory function to create different Primitive types.
 /// @param parser Arguments to pass into the Primitive's create functions.
 /// @return A pointer to the requested implementation of the Primitive class.
-/// @throws std::invalid_argument if the primitive type is not recognized.
+/// @throws ConstructorError if the Primitive type is not recognized.
 std::shared_ptr<Primitive> primitive_constructor(const utilities::ArgParser& parser)
 {
     std::string shape = parser.get(Primitive::parse_shape);
@@ -31,10 +31,8 @@ std::shared_ptr<Primitive> primitive_constructor(const utilities::ArgParser& par
     {
         return Sphere::create(parser);
     }
-    else
-    {
-        throw std::invalid_argument("The primitive shape type of \"" + shape + "\" was not recognized.");
-    }
+
+    throw ConstructorError::UnkownType(shape, "Primitive");
 }
 
 

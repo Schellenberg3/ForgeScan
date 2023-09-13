@@ -14,7 +14,8 @@ namespace metrics {
 /// @brief Factory function to create different Metric types.
 /// @param args Arguments to pass into the Metric's create functions.
 /// @return A pointer to the requested implementation of the Metric class.
-/// @throws std::invalid_argument if the Metric type is not recognized.
+/// @throws ConstructorError if the Metric type is not recognized.
+/// @throws std::invalid_argument for OccupancyConfusion type. This type must be added manually.
 inline std::shared_ptr<Metric> metric_constructor(const utilities::ArgParser& args,
                                                   std::shared_ptr<data::Reconstruction> /*reconstruction*/)
 {
@@ -28,7 +29,8 @@ inline std::shared_ptr<Metric> metric_constructor(const utilities::ArgParser& ar
     else
     {
     }
-    throw std::invalid_argument("The Metric type of \"" + metric_type + "\" was not recognized.");
+
+    throw ConstructorError::UnkownType(metric_type, "Metric");
 }
 
 

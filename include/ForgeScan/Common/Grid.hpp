@@ -180,7 +180,7 @@ struct Grid
         /// @brief Finds the vector Index for the provided voxel location.
         ///        Verifies that this voxel is in the Grid.
         /// @param voxel Index for the desired voxel.
-        /// @throw `std::out_of_range` if the requested Index exceeds the Grid's size in any dimension.
+        /// @throws VoxelOutOfRange if the requested Index exceeds the Grid's size in any dimension.
         size_t at(const Index& voxel) const
         {
             return this->indexToVectorThrowOutOfRange(voxel);
@@ -259,16 +259,14 @@ struct Grid
         /// @brief Retrieves the vector Index for the given X, Y, Z Index in the Grid.
         /// @param voxel Index for the desired voxel.
         /// @return Vector position for the desired voxel.
-        /// @throw `std::out_of_range` if the requested voxel Index exceed the Grid's size in any dimension.
+        /// @throws VoxelOutOfRange if the requested voxel Index exceed the Grid's size in any dimension.
         size_t indexToVectorThrowOutOfRange(const Index& voxel) const
         {
-            if (!this->indexIsValid(voxel))
+            if (this->indexIsValid(voxel))
             {
-                std::stringstream ss("Requested voxel was not within the bounds of the 3D Grid. ");
-                ss << voxel.transpose() << " > " << this->size.transpose();
-                throw std::out_of_range(ss.str());
+                return indexToVector(voxel);
             }
-            return indexToVector(voxel);
+            throw VoxelOutOfRange(this->size, voxel);
         }
     };
 

@@ -4,6 +4,7 @@
 /// Using H5-easy because of Eigen errors.
 #include <highfive/H5Easy.hpp>
 
+#include "ForgeScan/Common/Exceptions.hpp"
 #include "ForgeScan/Common/Types.hpp"
 #include "ForgeScan/Data/Reconstruction.hpp"
 #include "ForgeScan/Utilities/ArgParser.hpp"

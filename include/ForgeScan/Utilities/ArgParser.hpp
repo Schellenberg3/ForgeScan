@@ -100,7 +100,7 @@ public:
     /// @brief Gets the command in the specified position.
     /// @param x Position to retrieve.
     /// @return A cast of that position's command string to the requested type.
-    /// @throws `std::invalid_argument` if the number of parsed tokens is less than X.
+    /// @throws std::invalid_argument if the number of parsed tokens is less than X.
     template <typename T>
     T get(const size_t& x) const
     {

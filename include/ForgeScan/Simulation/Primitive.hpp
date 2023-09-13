@@ -8,6 +8,7 @@
 #include "ForgeScan/Common/AABB.hpp"
 #include "ForgeScan/Common/Types.hpp"
 #include "ForgeScan/Common/Entity.hpp"
+#include "ForgeScan/Common/Exceptions.hpp"
 
 // Helper constant for saving data in HDF5 files.
 // Used by derived classes and Scene.

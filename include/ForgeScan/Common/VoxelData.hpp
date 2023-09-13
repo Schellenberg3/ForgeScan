@@ -9,6 +9,7 @@
 #include <map>
 
 
+#include "ForgeScan/Common/Exceptions.hpp"
 #include "ForgeScan/Utilities/Strings.hpp"
 
 
@@ -162,11 +163,11 @@ inline DataType stringToDataType(const std::string& type_id_string, const DataTy
 /// @brief Returns a string for an XDMF DataItem's NumberType field.
 /// @param x The DataType to get a NumberType string for.
 /// @throws invalid_argument if `x` is not recognized as a DataType.
+/// @details The types int8_t and uint8_t specifically correlate to the Char and UChar in XDMF to match
+///          with the precision value of "1" There's poor documentation on this. The best reference I
+///          found on XDMF DataItem tags is [here](https://visit-sphinx-github-user-manual.readthedocs.io/en/task-allen-vtk9_master_ospray/data_into_visit/XdmfFormat.html#dataitem)
 inline std::string getNumberTypeXDMF(const DataType& x)
 {
-    // The types int8_t and uint8_t specifically correlate to the Char and UChar in XDMF to match with the precision value of "1"
-    // There's poor documentation on this. The best reference I found on XDMF DataItem tags is:
-    //   https://visit-sphinx-github-user-manual.readthedocs.io/en/task-allen-vtk9_master_ospray/data_into_visit/XdmfFormat.html#dataitem
     if (x == DataType::UINT8_T)
     {
         return "UChar";
@@ -187,11 +188,8 @@ inline std::string getNumberTypeXDMF(const DataType& x)
     {
         return "Float";
     }
-    else
-    {
-        throw std::invalid_argument("Unrecognized data type_id: " + std::to_string(x) +
-                                    ". Cannot return the XDMF number type.");
-    }
+
+    throw DataVariantError("DataType \"" + std::to_string(x) + "\" does not have an XDMF number type.");
 }
 
 
@@ -222,11 +220,8 @@ inline std::string getNumberPrecisionXDMF(const DataType& x)
     {
         return "8";
     }
-    else
-    {
-        throw std::invalid_argument("Unrecognized data type_id: " + std::to_string(x) +
-                                    ". Cannot return the XDMF number precision.");
-    }
+
+    throw DataVariantError("DataType \"" + std::to_string(x) + "\" does not have an XDMF number precision.");
 }
 
 

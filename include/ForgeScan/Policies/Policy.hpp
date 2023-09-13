@@ -5,6 +5,7 @@
 
 #include <highfive/H5Easy.hpp>
 
+#include "ForgeScan/Common/Exceptions.hpp"
 #include "ForgeScan/Data/Reconstruction.hpp"
 
 

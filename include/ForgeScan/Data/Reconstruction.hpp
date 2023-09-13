@@ -93,19 +93,20 @@ public:
     /// @brief Adds a VoxelGrid data channel to the Reconstruction.
     /// @param parser Arg Parser with arguments to construct a new VoxelGrid from.
     ///               See `forge_scan::data::Reconstruction::addChannel` for details.
-    /// @throws `std::invalid_argument` If no name was provided for the channel.
-    /// @throws `std::invalid_argument` If there is already a channel with that name.
-    /// @throws `std::invalid_argument` If there is an issue with the VoxelGrid creation process.
+    /// @throws InvalidMapKey If no name was provided for the channel.
+    /// @throws InvalidMapKey If there is already a channel with that name.
+    /// @throws ReservedMapKey if the channel name is reserved for Metrics or Policies.
+    /// @throws Any exceptions thrown by grid_constructor pass through this.
     void addChannel(const utilities::ArgParser& parser)
     {
         std::string channel_name = parser.get(Reconstruction::parse_name);
         if (channel_name.empty())
         {
-            throw std::invalid_argument("Must provide a name for the new channel before it may be added to the reconstruction.");
+            throw InvalidMapKey::NoNameProvided();
         }
         else if (this->channels.count(channel_name) == 1)
         {
-            throw std::invalid_argument("A channel named \"" + channel_name +"\" already exists.");
+            throw InvalidMapKey::NameAlreadyExists(channel_name);
         }
         this->checkChannelNameIsNotReserved(channel_name);
         this->channels.insert( {channel_name, grid_constructor(parser, this->grid_properties)} );
@@ -116,7 +117,7 @@ public:
     /// @brief If a g a read-only reference to the VoxelGrid data channel.
     /// @param name Name of the channel in the channel dictionary to retrieve.
     /// @returns Read-only reference to the requested VoxelGrid data channel.
-    /// @throws `std::runtime_error` If a channel with that name does not exist.
+    /// @throws InvalidMapKey If a channel with that name does not exist.
     std::shared_ptr<const forge_scan::data::VoxelGrid> getChannel(const std::string& name) const
     {
         for (auto iter = this->channels.begin(); iter != this->channels.end(); ++iter)
@@ -126,7 +127,7 @@ public:
                 return iter->second;
             }
         }
-        throw std::runtime_error("No channel with the name \"" + name + "\" exists.");
+        throw InvalidMapKey::NonexistantValue(name);
     }
 
     
@@ -232,20 +233,20 @@ private:
     /// @brief Used by the Metric class to request a new VoxelGrid channel be added. 
     /// @param channel Shared pointer to the VoxelGrid channel to add.
     /// @param metric_name Name of the Metric class adding the channel.
-    /// @throws std::invalid_argument If `metic_name` is empty.
-    /// @throws std::invalid_argument If a channel of the same name already exists.
+    /// @throws InvalidMapKey If `metic_name` is empty.
+    /// @throws InvalidMapKey If a channel of the same name already exists.
     void metricAddChannel(std::shared_ptr<data::VoxelGrid> channel,
                           const std::string& metric_name)
     {
         if (metric_name.empty())
         {
-            throw std::invalid_argument("Metric must provide a name to add a new channel.");
+            throw InvalidMapKey::NoNameProvided();
         }
 
         const std::string channel_name = FS_METRIC_CHANNEL_PREFIX + metric_name;
         if (this->channels.count(channel_name) == 1)
         {
-            throw std::invalid_argument("A channel named \"" + channel_name +"\" already exists.");
+            throw InvalidMapKey::NameAlreadyExists(channel_name);
         }
 
         this->channels.insert( {channel_name, channel} );
@@ -256,20 +257,20 @@ private:
     /// @brief Used by the Policy class to request a new VoxelGrid channel be added. 
     /// @param channel Shared pointer to the VoxelGrid channel to add.
     /// @param metric_name Name of the Policy class adding the channel.
-    /// @throws std::invalid_argument If `policy_name` is empty.
-    /// @throws std::invalid_argument If a channel of the same name already exists.
+    /// @throws ReservedMapKey If `policy_name` is empty.
+    /// @throws ReservedMapKey If a channel of the same name already exists.
     void policyAddChannel(std::shared_ptr<data::VoxelGrid> channel,
                           const std::string& policy_name)
     {
         if (policy_name.empty())
         {
-            throw std::invalid_argument("Policy must provide a name to add a new channel.");
+            throw ReservedMapKey("Policy must provide a name to add a new channel.");
         }
 
         const std::string channel_name = FS_POLICY_CHANNEL_PREFIX + policy_name;
         if (this->channels.count(channel_name) == 1)
         {
-            throw std::invalid_argument("A channel named \"" + channel_name +"\" already exists.");
+            throw ReservedMapKey("A channel named \"" + channel_name +"\" already exists.");
         }
 
         this->channels.insert( {channel_name, channel} );
@@ -285,18 +286,18 @@ private:
 
     /// @brief Verifies that the requested channel name does not begin with a reserved prefix.
     /// @param name A channel name to check.
-    /// @throws `std::invalid_argument` if the channel name is reserved for Metrics or Policies.
+    /// @throws ReservedMapKey if the channel name is reserved for Metrics or Policies.
     static void checkChannelNameIsNotReserved(const std::string& name)
     {
         if (channelNameIsForPolicies(name))
         {
-            throw std::invalid_argument("A name beginning with \"Policy\" is reserved "
-                                        "and may not be created or destroyed." );
+            throw ReservedMapKey("A name beginning with \"Policy\" is reserved "
+                                "and may not be created or destroyed." );
         }
         else if (channelNameIsForMetrics(name))
         {
-            throw std::invalid_argument("A name beginning with \"Metric\" is reserved "
-                                        "and may not be created or destroyed." );
+            throw ReservedMapKey("A name beginning with \"Metric\" is reserved "
+                                "and may not be created or destroyed." );
         }
     }
 

@@ -20,7 +20,7 @@ namespace policies {
 /// @param parser Arguments to pass into the Policy's create functions.
 /// @param reconstruction Shared, constant pointer to the Reconstruction passed to the Policy's create function.
 /// @return A pointer to the requested implementation of the Policy class.
-/// @throws std::invalid_argument if the Policy type is not recognized.
+/// @throws ConstructorError if the Policy type is not recognized.
 inline std::shared_ptr<Policy> policy_constructor(const utilities::ArgParser& parser,
                                                   std::shared_ptr<const data::Reconstruction> reconstruction)
 {
@@ -35,10 +35,8 @@ inline std::shared_ptr<Policy> policy_constructor(const utilities::ArgParser& pa
     {
         return Axis::create(reconstruction, parser);
     }
-    else
-    {
-        throw std::invalid_argument("The Policy type of \"" + policy_type + "\" was not recognized.");
-    }
+
+    throw ConstructorError::UnkownType(policy_type, "Policy");
 }
 
 

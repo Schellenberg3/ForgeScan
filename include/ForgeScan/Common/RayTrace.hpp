@@ -314,12 +314,11 @@ inline bool get_ray_trace(const std::shared_ptr<Trace>& ray_trace,
                 i = ray_trace_helpers::get_min_dist(dist);
             }
         }
-        catch (const std::out_of_range& e)
+        catch (const VoxelOutOfRange& e)
         {
             // Algorithm should never go out of bounds. But catching here dose not impact performance and prevents
             // undefined behavior and silent errors in a VoxelGrid update where all indicies are assumed to be valid.
-            const std::string e_what(e.what());
-            throw std::out_of_range("Ray tracing failed. This should not happen. Failed with: " + e_what);
+            throw VoxelOutOfRange("Ray tracing failed: This should not happen. Failed with: " +  std::string(e.what()));
         }
 
         ray_trace->set_sensed(properties->operator[](properties->pointToIndex(sensed)),

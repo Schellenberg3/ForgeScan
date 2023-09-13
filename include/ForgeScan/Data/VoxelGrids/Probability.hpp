@@ -21,8 +21,8 @@ public:
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param parser Arg Parser with arguments to construct an Probability Grid from.
     /// @return Shared pointer to a Probability Grid.
-    /// @throws `std::invalid_argument` if any probability values are not in the range 0<= p <= 1.
-    /// @throws `std::invalid_argument` if the DataType is not supported by this VoxelGrid.
+    /// @throws std::invalid_argument if any probability values are not in the range 0<= p <= 1.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     static std::shared_ptr<Probability> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const utilities::ArgParser& parser)
     {
@@ -50,8 +50,8 @@ public:
     /// @param p_init     Probability for voxel initialization. Default 0.50.
     /// @param type_id Datatype for the Grid. Default is float.
     /// @return Shared pointer to a Probability Grid.
-    /// @throws `std::invalid_argument` if any probability values are not in the range 0<= p <= 1.
-    /// @throws `std::invalid_argument` if the DataType is not supported by this VoxelGrid.
+    /// @note Probability values clamped to the range 0<= p <= 1.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     static std::shared_ptr<Probability> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const float& dist_min = -0.2,
                                                const float& dist_max =  0.2,
@@ -117,8 +117,7 @@ private:
     /// @param p_far      Probability for voxels far in front of the sensed point.
     /// @param p_init     Probability for voxel initialization.
     /// @param type_id Datatype for the Grid.
-    /// @throws `std::invalid_argument` if any probability values are not in the range 0<= p <= 1.
-    /// @throws `std::invalid_argument` if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     explicit Probability(const std::shared_ptr<const Grid::Properties>& properties,
                          const float& dist_min,
                          const float& dist_max,

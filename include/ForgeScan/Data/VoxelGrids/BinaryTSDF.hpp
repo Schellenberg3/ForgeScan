@@ -19,7 +19,7 @@ public:
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param parser Arg Parser with arguments to construct an Binary TSDF Grid from.
     /// @return Shared pointer to a Binary TSDF Grid.
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     static std::shared_ptr<BinaryTSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                  const utilities::ArgParser& parser)
     {
@@ -35,7 +35,7 @@ public:
     /// @param dist_max   Maximum update distance. Default +0.2.
     /// @param type_id Datatype for the Grid. Default is float.
     /// @return Shared pointer to a Binary TSDF Grid.
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     static std::shared_ptr<BinaryTSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                  const float& dist_min = -0.2,
                                                  const float& dist_max =  0.2,
@@ -85,7 +85,7 @@ private:
     /// @param properties Shared, constant pointer to the Grid Properties to use.
     /// @param dist_min   Minimum trace update distance for this VoxelGrid.
     /// @param dist_max   Maximum trace update distance for this VoxelGrid.
-    /// @throws std::invalid_argument if the DataType is not supported by this VoxelGrid.
+    /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     explicit BinaryTSDF(const std::shared_ptr<const Grid::Properties>& properties,
                            const float& dist_min,
                            const float& dist_max,
@@ -107,9 +107,8 @@ private:
     /// @brief Writes the VoxelGrid's data vector to the provided HDF5 group.
     /// @param g_channel Group in for the opened HDF5 file.
     /// @param grid_type Name of the derived class.
-    /// @throws `std::runtime_error` If there is a bad variant access.
-    ///         (However, this error should be caught earlier in the VoxelGrid constructor.)
-    /// @throws `std::runtime_error` If the VoxelGrid's `type_id` is not recognized or supported.
+    /// @throws std::runtime_error If there is a bad variant access.
+    /// @throws DataVariantError If the VoxelGrid's `type_id` is not recognized.
     ///         (However, this error should be caught earlier in the VoxelGrid constructor.)
     /// @note  This override allows the class to add information about the multiple data vectors it has.
     void save(HighFive::Group& g_channel, const std::string& grid_type) const override final
@@ -128,7 +127,7 @@ private:
             }
             else
             {
-                throw std::runtime_error("Cannot save Grid's Data vector to HDF5 file: Unsupported data type_id.");
+                throw DataVariantError::UnrecognizedEnumeration(this->type_id);
             }
         }
         catch (const std::bad_variant_access& e)

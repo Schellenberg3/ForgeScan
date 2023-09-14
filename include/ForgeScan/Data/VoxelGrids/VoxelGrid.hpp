@@ -454,13 +454,13 @@ private:
     {
         if ( !(requested & DataType::TYPE_NOT_A_TYPE_CHECK) )
         {
-            throw DataVariantError::AttemptedUseOfTypeCheckingDataType(DataTypeToString.at(requested));
+            throw DataVariantError::AttemptedUseOfTypeCheckingDataType(dataTypeToString(requested));
         }
         if (requested & should_be)
         {
             return requested;
         }
-        throw DataVariantError::VoxelGridDoesNotSupport(DataTypeToString.at(requested), DataTypeToString.at(should_be));
+        throw DataVariantError::VoxelGridDoesNotSupport(dataTypeToString(requested), dataTypeToString(should_be));
     }
 };
 

@@ -144,7 +144,7 @@ const std::map<std::string, DataType> StringToDataType = {
 /// @brief Performs safe conversion between a string and a DataType enumeration
 /// @param type_id_string Input string to the StringToDataType dict.
 /// @param default_value Default value to return if the string was not found.
-/// @return
+/// @return DataType enumeration for the string. Or default DataType enumeration.
 inline DataType stringToDataType(const std::string& type_id_string, const DataType& default_value)
 {
     std::string type_id_string_upper = type_id_string;
@@ -153,7 +153,25 @@ inline DataType stringToDataType(const std::string& type_id_string, const DataTy
     {
         return StringToDataType.at(type_id_string_upper);
     }
-    catch (const std::exception&)
+    catch (const std::out_of_range&)
+    {
+        return default_value;
+    }
+}
+
+
+/// @brief Performs safe conversion between DataType enumeration and its string representation.
+/// @param type_id Input DataType value to the DataTypeToString dict.
+/// @param default_value Default value to return if the enumeration value was not found.
+/// @return String for the DataType enumeration. Or default string.
+inline std::string dataTypeToString(const DataType& type_id,
+                                    const std::string& default_value = "UNKNOWN TYPE")
+{
+    try
+    {
+        return DataTypeToString.at(type_id);
+    }
+    catch (const std::out_of_range&)
     {
         return default_value;
     }

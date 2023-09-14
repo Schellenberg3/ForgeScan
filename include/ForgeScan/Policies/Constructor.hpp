@@ -43,7 +43,7 @@ struct Constructor
     }
 
 
-    /// @brief Returns a string help message for a constructing Policies.
+    /// @brief Returns a string help message for constructing a Policy.
     /// @param parser Arguments to pass determine which help information to print.
     static std::string help(const utilities::ArgParser& parser)
     {

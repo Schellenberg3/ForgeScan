@@ -27,7 +27,7 @@ struct Constructor
 
         if (iequals(metric_type, OccupancyConfusion::type_name))
         {
-            throw std::invalid_argument("The Metric type of " + OccupancyConfusion::type_name + 
+            throw std::invalid_argument("The Metric type of " + OccupancyConfusion::type_name +
                                         "  requires ground-truth information that this method cannot parse.");
         }
 
@@ -35,7 +35,7 @@ struct Constructor
     }
 
 
-    /// @brief Returns a string help message for a constructing Metrics .
+    /// @brief Returns a string help message for constructing a Metric.
     /// @param parser Arguments to pass into the Metric's create functions.
     static std::string help(const utilities::ArgParser& parser)
     {

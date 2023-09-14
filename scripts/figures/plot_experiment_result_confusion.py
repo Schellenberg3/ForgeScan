@@ -98,19 +98,21 @@ def plot_policy_sweep(policy_path: pathlib.Path):
 
     for views in views_dirs:
         line_label = f"{views.name} Views"
-        xdata = list(range(int(views.name)))
+
+        views_plus_one = 1 + int(views.name)
+        xdata = list(range(views_plus_one))
 
         reps_dirs = [x for x in views.iterdir() if x.is_dir()]
         data = np.zeros((int(views.name), 4, len(reps_dirs)))
-        acc  = np.zeros((int(views.name), len(reps_dirs)))
-        pre  = np.zeros((int(views.name), len(reps_dirs)))
+        acc  = np.zeros((views_plus_one, len(reps_dirs)))
+        pre  = np.zeros((views_plus_one, len(reps_dirs)))
 
         for i, reps in enumerate(reps_dirs):
             hdf5_dir = reps / "results.h5"
             confusion_group = get_metric_occupancy_confusion_group(hdf5_dir)
             data[:, :, i] = confusion_group.get("data")[:, 1:5]
-            acc[:, i]     = np.apply_along_axis(arr_accuracy,  1, data[:, :, i])
-            pre[:, i]     = np.apply_along_axis(arr_precision, 1, data[:, :, i])
+            acc[1:, i]     = np.apply_along_axis(arr_accuracy,  1, data[:, :, i])
+            pre[1:, i]     = np.apply_along_axis(arr_precision, 1, data[:, :, i])
 
         if len(reps_dirs) > 1:
             line_label += " (Average)"
@@ -138,10 +140,10 @@ def plot_policy_sweep(policy_path: pathlib.Path):
     ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     # Split the old path to get the location of the figure.
-    image_fpath = FIGURES_PATH / policy_path.relative_to(RESULTS_PATH)
+    image_fpath = (FIGURES_PATH / policy_path.relative_to(RESULTS_PATH)).parent
     if image_fpath.exists() is False:
         image_fpath.mkdir(parents=True)
-    image_fpath /= "policy_results"
+    image_fpath /= policy_path.name + "_Results.png"
     plt.savefig(image_fpath)
     plt.close()
 

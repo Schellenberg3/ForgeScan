@@ -87,8 +87,7 @@ public:
 
     const std::string& getTypeName() const override final
     {
-        static const std::string type_name("Box");
-        return type_name;
+        return Box::type_name;
     }
 
 
@@ -159,6 +158,7 @@ public:
 
     static const std::string help_string, default_arguments;
 
+    static const std::string type_name;
 
 private:
     // ***************************************************************************************** //
@@ -285,6 +285,9 @@ private:
     }
 };
 
+
+/// @brief String for the class name.
+const std::string Box::type_name = "Box";
 
 /// @brief Default dimensions of the box.
 const float Box::default_length = 1.0, Box::default_width = 1.0, Box::default_height = 1.0;

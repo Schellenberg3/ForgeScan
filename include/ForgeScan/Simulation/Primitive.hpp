@@ -44,7 +44,7 @@ public:
     // ***************************************************************************************** //
 
 
-    /// @return String name for this type of Primitive.
+    /// @brief Returns the type name of the derived Primitive class.
     virtual const std::string& getTypeName() const = 0;
 
 
@@ -122,6 +122,8 @@ public:
 
     static const std::string help_string;
 
+    static const std::string type_name;
+
 
 protected:
     // ***************************************************************************************** //
@@ -190,6 +192,9 @@ std::ostream& operator<<(std::ostream &out, const Primitive& primitive)
 }
 
 
+/// @brief String for the class name.
+const std::string Primitive::type_name = "Primitive";
+
 /// @brief ArgParser key for the dictionary name of a shape.
 const std::string Primitive::parse_name  = "--name";
 
@@ -198,7 +203,7 @@ const std::string Primitive::parse_shape = "--shape";
 
 /// @brief String explaining what arguments this class accepts.
 const std::string Primitive::help_string =
-    "--name <unique identifier> --shape <sphere | box> [shape-specific options]";
+    "--name <unique identifier> --shape <shape> [shape-specific options]";
 
 
 } // namespace simulation

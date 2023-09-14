@@ -213,7 +213,7 @@ public:
         {
             throw InvalidMapKey::NameAlreadyExists(name);
         }
-        this->shapes_map.insert( {name, primitive_constructor(parser)} );
+        this->shapes_map.insert( {name, Constructor::create(parser)} );
     }
 
 

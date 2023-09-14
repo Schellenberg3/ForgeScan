@@ -74,8 +74,7 @@ struct Sphere : public Primitive
 
     const std::string& getTypeName() const override final
     {
-        static const std::string type_name("Sphere");
-        return type_name;
+        return Sphere::type_name;
     }
 
 
@@ -209,6 +208,7 @@ struct Sphere : public Primitive
 
     static const std::string help_string, default_arguments;
 
+    static const std::string type_name;
 
 private:
     // ***************************************************************************************** //
@@ -247,6 +247,10 @@ private:
     /// @brief Helper constant for the ray hit calculation.
     const float radius_squared;
 };
+
+
+/// @brief String for the class name.
+const std::string Sphere::type_name = "Sphere";
 
 /// @brief Default radius value.
 const float Sphere::default_radius = 1.0;

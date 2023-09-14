@@ -28,7 +28,7 @@ class Policy
     // *                                        FRIENDS                                        * //
     // ***************************************************************************************** //
 
-    /// @brief Requires access to save data.
+    /// @details Requires access to save data.
     friend class forge_scan::Manager;
 
 

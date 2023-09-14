@@ -44,13 +44,13 @@ class Reconstruction
     // *                                        FRIENDS                                        * //
     // ***************************************************************************************** //
 
-    /// @brief Required add/remove channels, call the save method, and call the update method.
+    /// @details Required add/remove channels, call the save method, and call the update method.
     friend class forge_scan::Manager;
 
-    /// @brief Required to add/remove Metric-specific channels.
+    /// @details Required to add/remove Metric-specific channels.
     friend class metrics::Metric;
 
-    /// @brief Required to add/remove Policy-specific channels.
+    /// @details Required to add/remove Policy-specific channels.
     friend class policies::Policy;
 
 

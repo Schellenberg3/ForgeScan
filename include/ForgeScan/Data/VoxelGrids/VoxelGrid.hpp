@@ -42,7 +42,7 @@ class VoxelGrid : public Grid
     // *                                        FRIENDS                                        * //
     // ***************************************************************************************** //
 
-    /// @brief Required to call the save method.
+    /// @details Required to call the save method.
     friend class Reconstruction;
 
 

@@ -30,11 +30,11 @@ namespace ground_truth {
 /// @brief Stores a ground truth for the voxel TSDF of a Scene.
 class TSDF : public Grid
 {
-    /// @brief Required to call the compare method.
+    /// @details Required to call the compare method.
     /// TODO: Create the Metric which uses this.
     /// friend class metrics::OccupancyConfusion;
 
-    /// @brief Required to call the save method and modify values in the Occupancy Grid.
+    /// @details Required to call the save method and modify values in the Occupancy Grid.
     friend struct simulation::Scene;
 
 public:

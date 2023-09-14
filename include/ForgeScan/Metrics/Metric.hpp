@@ -29,7 +29,7 @@ class Metric
     // *                                        FRIENDS                                        * //
     // ***************************************************************************************** //
 
-    /// @brief Required to call pre/post update and save methods.
+    /// @details Required to call pre/post update and save methods.
     friend class forge_scan::Manager;
 
 

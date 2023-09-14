@@ -70,10 +70,10 @@ struct Confusion
 /// @brief Stores a ground truth for the voxel occupancy of a Scene.
 class Occupancy : public Grid
 {
-    /// @brief Required to call the compare method.
+    /// @details Required to call the compare method.
     friend class metrics::OccupancyConfusion;
 
-    /// @brief Required to call the save method and modify values in the Occupancy Grid.
+    /// @details Required to call the save method and modify values in the Occupancy Grid.
     friend struct simulation::Scene;
 
 

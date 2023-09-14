@@ -42,7 +42,7 @@ namespace simulation {
 /// @brief A collection of Primitive objects which are imaged together in the same scene.
 struct Scene
 {
-    /// @brief Required to print the shape dictionary.
+    /// @details Required to print the shape dictionary.
     friend std::ostream& operator<<(std::ostream &, const Scene&);
 
 public:

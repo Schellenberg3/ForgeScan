@@ -60,7 +60,7 @@ struct TraceVoxel
 /// @note  This is sorted in ascending distance from the sensed point.
 struct Trace : public std::vector<TraceVoxel>
 {
-    /// @brief Required to set the sensed iterator for the Trace.
+    /// @details Required to set the sensed iterator for the Trace.
     friend bool get_ray_trace(const std::shared_ptr<Trace>&, const Point&, const Point&,
                               const std::shared_ptr<const Grid::Properties>&, const float&, const float&);
 

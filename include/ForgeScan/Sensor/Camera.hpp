@@ -32,11 +32,11 @@ struct Camera : public Entity
     // *                                        FRIENDS                                        * //
     // ***************************************************************************************** //
 
-    /// @brief Required to access the depth image and Intrinsics when converting an Eigen matrix
+    /// @details Required to access the depth image and Intrinsics when converting an Eigen matrix
     ///        to an OpenCV image.
     friend struct DepthImageProcessing;
 
-    /// @brief Required to directly access the depth image when generating a synthetic image.
+    /// @details Required to directly access the depth image when generating a synthetic image.
     friend struct simulation::Scene;
 
 

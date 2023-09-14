@@ -23,7 +23,7 @@ namespace simulation {
 /// @brief Base class for Primitive geometry types.
 struct Primitive : Entity
 {
-    /// @brief Required to call print method.
+    /// @details Required to call print method.
     friend std::ostream& operator<<(std::ostream&, const Primitive&);
 
 public:

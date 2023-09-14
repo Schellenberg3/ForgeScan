@@ -63,12 +63,13 @@ public:
 
 
     /// @brief Returns the class type name for the Grid.
-    const std::string& getTypeName() const
+    const std::string& getTypeName() const override final
     {
-        static const std::string name = "TSDF";
-        return name;
+        return TSDF::type_name;
     }
 
+
+    static const std::string type_name;
 
 protected:
 
@@ -181,6 +182,10 @@ private:
         this->data.swap(data);
     }
 };
+
+
+/// @brief String for the class name.
+const std::string TSDF::type_name = "TSDF";
 
 
 } // namespace ground_truth

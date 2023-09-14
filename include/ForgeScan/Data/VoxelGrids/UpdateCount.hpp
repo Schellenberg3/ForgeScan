@@ -58,8 +58,7 @@ public:
     /// @brief Returns the class type name for the VoxelGrid.
     const std::string& getTypeName() const override final
     {
-        static const std::string name = "UpdateCount";
-        return name;
+        return UpdateCount::type_name;
     }
 
 

@@ -101,9 +101,6 @@ public:
     // *                             PUBLIC PURE VIRTUAL METHODS                               * //
     // ***************************************************************************************** //
 
-    /// @brief Returns the class type name for the VoxelGrid.
-    virtual const std::string& getTypeName() const = 0;
-
 
     /// @brief Updates the VoxelGrid with new information along a ray.
     /// @param ray_trace A trace to update the VoxelGrid along.

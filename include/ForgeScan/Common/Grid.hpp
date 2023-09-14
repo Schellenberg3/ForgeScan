@@ -273,6 +273,10 @@ struct Grid
     virtual ~Grid() { }
 
 
+    /// @brief Returns the class type name for the Grid or `data::VoxelGrid`.
+    virtual const std::string& getTypeName() const = 0;
+
+
     /// @brief Shared, constant Properties of the Grid.
     const std::shared_ptr<const Grid::Properties> properties;
 

@@ -103,12 +103,13 @@ public:
 
 
     /// @brief Returns the class type name for the Grid.
-    const std::string& getTypeName() const
+    const std::string& getTypeName() const override final
     {
-        static const std::string name = "Occupancy";
-        return name;
+        return Occupancy::type_name;
     }
 
+
+    static const std::string type_name;
 
 protected:
 
@@ -264,6 +265,10 @@ private:
                truth & VoxelOccupancy::TYPE_FREE;
     }
 };
+
+
+/// @brief String for the class name.
+const std::string Occupancy::type_name = "Occupancy";
 
 
 } // namespace ground_truth

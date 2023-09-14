@@ -132,6 +132,7 @@ public:
 
     static const std::string parse_type, parse_d_min, parse_d_max, parse_default, parse_dtype;
 
+    static const std::string type_name;
 
 protected:
     // ***************************************************************************************** //
@@ -472,6 +473,8 @@ const std::string VoxelGrid::UpdateCallable::type_not_supported_message =
     std::string("A VoxelGrid's Update Callable encountered a vector variant of an unsupported data type. "
                 "PLEASE CHECK WHAT YOU HAVE DONE: THIS EXCEPTION SHOULD NEVER BE REACHED.");
 
+/// @brief String for the class name.
+const std::string VoxelGrid::type_name = "VoxelGrid";
 
 /// @brief Default values for common distances or initialization values used by derived VoxelGrids.
 const float VoxelGrid::default_zero     = 0.0f,

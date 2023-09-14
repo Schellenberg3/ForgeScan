@@ -16,41 +16,83 @@ namespace forge_scan {
 namespace data {
 
 
-/// @brief Factory function to create different VoxelGrid types.
-/// @param args Arguments to pass into the VoxelGrid's create functions.
-/// @param properties A shared, constant reference to the properties for this reconstruction.
-/// @return A pointer to the requested implementation of the VoxelGrid class.
-/// @throws ConstructorError if the VoxelGrid type is not recognized.
-/// @throws DataVariantError if the requested DataType is not supported by the requested VoxelGrid.
-inline std::shared_ptr<VoxelGrid> grid_constructor(const utilities::ArgParser& args,
-                                                   std::shared_ptr<const Grid::Properties> properties)
+/// @brief Constructor for shared VoxelGrid pointers based on ArgParser inputs.
+struct Constructor
 {
-    std::string grid_type = args.get(VoxelGrid::parse_type);
-    utilities::strings::toLower(grid_type);
+    /// @brief Factory function to create different VoxelGrid types.
+    /// @param parser Arguments to pass into the VoxelGrid's create functions.
+    /// @param properties A shared, constant reference to the `Grid::Properties` for the Reconstruction.
+    /// @return A pointer to the requested implementation of the VoxelGrid class.
+    /// @throws ConstructorError if the VoxelGrid type is not recognized.
+    static std::shared_ptr<VoxelGrid> create(const utilities::ArgParser& parser,
+                                             std::shared_ptr<const Grid::Properties> properties)
+    {
+        using namespace utilities::strings;
+        std::string grid_type = parser.get(VoxelGrid::parse_type);
 
-    if (grid_type == "binary")
-    {
-        return Binary::create(properties, args);
-    }
-    else if (grid_type == "binarytsdf")
-    {
-        return BinaryTSDF::create(properties, args);
-    }
-    else if (grid_type == "probability")
-    {
-        return Probability::create(properties, args);
-    }
-    else if (grid_type == "tsdf")
-    {
-        return TSDF::create(properties, args);
-    }
-    else if (grid_type == "updatecount")
-    {
-        return UpdateCount::create(properties, args);
+        if (iequals(grid_type, Binary::type_name))
+        {
+            return Binary::create(properties, parser);
+        }
+        if (iequals(grid_type, BinaryTSDF::type_name))
+        {
+            return BinaryTSDF::create(properties, parser);
+        }
+        if (iequals(grid_type, Probability::type_name))
+        {
+            return Probability::create(properties, parser);
+        }
+        if (iequals(grid_type, TSDF::type_name))
+        {
+            return TSDF::create(properties, parser);
+        }
+        if (iequals(grid_type, UpdateCount::type_name))
+        {
+            return UpdateCount::create(properties, parser);
+        }
+
+        throw ConstructorError::UnkownType(grid_type, VoxelGrid::type_name);
     }
 
-    throw ConstructorError::UnkownType(grid_type, "VoxelGrid");
-}
+
+    /// @brief Returns a string help message for constructing a VoxelGrid.
+    /// @param parser Arguments to pass determine which help information to print.
+    static std::string help(const utilities::ArgParser& parser)
+    {
+        using namespace utilities::strings;
+        std::string grid_type = parser.get("-h");
+
+        if (iequals(grid_type, Binary::type_name))
+        {
+            return Binary::helpMessage();
+        }
+        if (iequals(grid_type, BinaryTSDF::type_name))
+        {
+            return BinaryTSDF::helpMessage();
+        }
+        if (iequals(grid_type, Probability::type_name))
+        {
+            return Probability::helpMessage();
+        }
+        if (iequals(grid_type, TSDF::type_name))
+        {
+            return TSDF::helpMessage();
+        }
+        if (iequals(grid_type, UpdateCount::type_name))
+        {
+            return UpdateCount::helpMessage();
+        }
+        std::stringstream ss;
+        ss << VoxelGrid::helpMessage() << "\nPossible data VoxelGrids are: "
+           << Binary::type_name      << ", "
+           << BinaryTSDF::type_name  << ", "
+           << Probability::type_name << ", "
+           << TSDF::type_name        << ", "
+           << UpdateCount::type_name;
+        return ss.str();
+    }
+};
+
 
 
 } // namespace data

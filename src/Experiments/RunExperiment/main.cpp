@@ -70,30 +70,7 @@ inline void add_data_channels(forge_scan::utilities::ArgParser& parser,
         parser.getInput("\nAdd a data channels to the scene [-h for help or ENTER to finish]:");
         if (parser[0] == "-h")
         {
-            if (parser[1] == "binary")
-            {
-                std::cout << forge_scan::data::Binary::helpMessage() << std::endl;
-            }
-            else if (parser[1] == "binarytsdf")
-            {
-                std::cout << "\n" << forge_scan::data::BinaryTSDF::helpMessage() << std::endl;
-            }
-            else if (parser[1] == "probability")
-            {
-                std::cout << "\n" << forge_scan::data::Probability::helpMessage() << std::endl;
-            }
-            else if (parser[1] == "tsdf")
-            {
-                std::cout << "\n" << forge_scan::data::TSDF::helpMessage() << std::endl;
-            }
-            else if (parser[1] == "updatecount")
-            {
-                std::cout << "\n" << forge_scan::data::UpdateCount::helpMessage() << std::endl;
-            }
-            else
-            {
-                std::cout << "\n" << forge_scan::data::VoxelGrid::helpMessage() << std::endl;
-            }
+            std::cout << "\n" << forge_scan::data::Constructor::help(parser) << std::endl;
         }
         else if (!parser.hasArgs())
         {

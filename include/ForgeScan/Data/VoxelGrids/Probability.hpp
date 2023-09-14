@@ -104,6 +104,7 @@ public:
 
     static const std::string parse_p_max, parse_p_min, parse_p_past, parse_p_sensed, parse_p_far, parse_p_init;
 
+    static const std::string type_name;
 
 private:
     /// @brief Private constructor to enforce shared pointer usage.
@@ -253,6 +254,9 @@ private:
     UpdateCallable update_callable;
 };
 
+
+/// @brief String for the class name.
+const std::string Probability::type_name = "Probability";
 
 /// @brief Default occupation probability threshold values.
 const float Probability::default_p_max    = 0.98f,

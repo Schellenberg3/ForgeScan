@@ -96,7 +96,7 @@ public:
     /// @throws InvalidMapKey If no name was provided for the channel.
     /// @throws InvalidMapKey If there is already a channel with that name.
     /// @throws ReservedMapKey if the channel name is reserved for Metrics or Policies.
-    /// @throws Any exceptions thrown by grid_constructor pass through this.
+    /// @throws Any exceptions thrown by `Constructor::create` pass through this.
     void addChannel(const utilities::ArgParser& parser)
     {
         std::string channel_name = parser.get(Reconstruction::parse_name);
@@ -109,7 +109,7 @@ public:
             throw InvalidMapKey::NameAlreadyExists(channel_name);
         }
         this->checkChannelNameIsNotReserved(channel_name);
-        this->channels.insert( {channel_name, grid_constructor(parser, this->grid_properties)} );
+        this->channels.insert( {channel_name, Constructor::create(parser, this->grid_properties)} );
         this->updateMinAndMaxDist();
     }
 

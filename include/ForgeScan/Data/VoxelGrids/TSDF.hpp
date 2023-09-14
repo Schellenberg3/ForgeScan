@@ -70,6 +70,7 @@ public:
         this->update_callable.releaseRayTrace();
     }
 
+    static const std::string type_name;
 
 private:
     /// @brief Private constructor to enforce shared pointer usage.
@@ -155,6 +156,9 @@ private:
     UpdateCallable update_callable;
 };
 
+
+/// @brief String for the class name.
+const std::string TSDF::type_name = "TSDF";
 
 
 } // namespace data

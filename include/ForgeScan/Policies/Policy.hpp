@@ -84,7 +84,7 @@ public:
     // ***************************************************************************************** //
 
 
-    /// @brief Returns the name of the Policy as a string.
+    /// @brief Returns the type name of the derived Policy class.
     virtual const std::string& getTypeName() const = 0;
 
 
@@ -109,6 +109,7 @@ public:
 
     static const std::string help_string;
 
+    static const std::string type_name;
 
 protected:
     /* ***************************************************************************************** */
@@ -255,6 +256,9 @@ std::ostream& operator<<(std::ostream &out, const Policy& policy)
     return out;
 }
 
+
+/// @brief String for the class name.
+const std::string Policy::type_name = "Policy";
 
 /// @brief Default number of views for a Policy to collect.
 const int Policy::default_n_views = 10;

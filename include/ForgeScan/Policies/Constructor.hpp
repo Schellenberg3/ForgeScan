@@ -16,28 +16,55 @@ namespace forge_scan {
 namespace policies {
 
 
-/// @brief Factory function to create different Policy types.
-/// @param parser Arguments to pass into the Policy's create functions.
-/// @param reconstruction Shared, constant pointer to the Reconstruction passed to the Policy's create function.
-/// @return A pointer to the requested implementation of the Policy class.
-/// @throws ConstructorError if the Policy type is not recognized.
-inline std::shared_ptr<Policy> policy_constructor(const utilities::ArgParser& parser,
-                                                  std::shared_ptr<const data::Reconstruction> reconstruction)
+/// @brief Constructor for shared Policy pointers based on ArgParser inputs.
+struct Constructor
 {
-    std::string policy_type = parser.get(Policy::parse_type);
-    utilities::strings::toLower(policy_type);
-
-    if (policy_type == "sphere")
+    /// @brief Factory function to create different Policy types.
+    /// @param parser Arguments to pass into the Policy's create functions.
+    /// @param reconstruction Shared, constant pointer to the Reconstruction passed to the Policy's create function.
+    /// @return A pointer to the requested implementation of the Policy class.
+    /// @throws ConstructorError if the Policy type is not recognized.
+    static std::shared_ptr<Policy> create(const utilities::ArgParser& parser,
+                                          const std::shared_ptr<const data::Reconstruction>& reconstruction)
     {
-        return Sphere::create(reconstruction, parser);
-    }
-    if (policy_type == "axis")
-    {
-        return Axis::create(reconstruction, parser);
+        using namespace utilities::strings;
+        std::string policy_type = parser.get(Policy::parse_type);
+
+        if (iequals(policy_type, Sphere::type_name))
+        {
+            return Sphere::create(reconstruction, parser);
+        }
+        if (iequals(policy_type, Axis::type_name))
+        {
+            return Axis::create(reconstruction, parser);
+        }
+
+        throw ConstructorError::UnkownType(policy_type, Policy::type_name);
     }
 
-    throw ConstructorError::UnkownType(policy_type, "Policy");
-}
+
+    /// @brief Returns a string help message for a constructing Policies.
+    /// @param parser Arguments to pass determine which help information to print.
+    static std::string help(const utilities::ArgParser& parser)
+    {
+        using namespace utilities::strings;
+        std::string policy_type = parser.get("-h");
+
+        if (iequals(policy_type, Sphere::type_name))
+        {
+            return Sphere::helpMessage();
+        }
+        if (iequals(policy_type, Axis::type_name))
+        {
+            return Axis::helpMessage();
+        }
+        std::stringstream ss;
+        ss << Policy::helpMessage() << "\nPossible Policies are: "
+           << Sphere::type_name << ", "
+           << Axis::type_name;
+        return ss.str();
+    }
+};
 
 
 } // namespace policies

@@ -39,18 +39,7 @@ inline void add_policy(forge_scan::utilities::ArgParser& parser,
         parser.getInput("\nAdd a policy to the scene [-h for help]:");
         if (parser[0] == "-h")
         {
-            if (parser[1] == "sphere")
-            {
-                std::cout << forge_scan::policies::Sphere::helpMessage() << std::endl;
-            }
-            else if (parser[1] == "axis")
-            {
-                std::cout << "\n" << forge_scan::policies::Axis::helpMessage() << std::endl;
-            }
-            else
-            {
-                std::cout << "\n" << forge_scan::policies::Policy::helpMessage() << std::endl;
-            }
+            std::cout << "\n" << forge_scan::policies::Constructor::help(parser) << std::endl;
         }
         else
         {

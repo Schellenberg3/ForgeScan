@@ -102,6 +102,8 @@ public:
 
     static const std::string help_string_basic, help_string_1, help_string_2, default_arguments;
 
+    static const std::string type_name;
+
 protected:
     /// @brief Protected constructor to enforce usage of shared pointer.
     /// @param reconstruction Shared pointer to the Reconstruction that the Policy suggests new
@@ -258,15 +260,14 @@ protected:
 
     virtual const std::string& getTypeName() const override final
     {
-        const static std::string name("Axis");
-        return name;
+        return Axis::type_name;
     }
 
 
     void print(std::ostream& out) const override final
     {
         std::string method = this->start_uniform ? "uniform" : "random";
-        out << this->getTypeName() << " Policy sampling at around the axis " << this->axis.back().transpose() << " using a " << method
+        out << Axis::type_name << " Policy sampling at around the axis " << this->axis.back().transpose() << " using a " << method
             << " method at a radius of " << this->radius;
         if (this->start_uniform)
         {
@@ -327,7 +328,7 @@ protected:
 
     void save(H5Easy::File& file, HighFive::Group& g_policy) const override final
     {
-        auto g_rand_sph = g_policy.createGroup(this->getTypeName());
+        auto g_rand_sph = g_policy.createGroup(Axis::type_name);
 
         g_rand_sph.createAttribute("n_views",    this->n_views);
         g_rand_sph.createAttribute("n_repeat",   this->n_repeat);
@@ -341,7 +342,7 @@ protected:
         g_rand_sph.createAttribute("completed", static_cast<uint8_t>(this->isComplete()));
 
         int n = 0;
-        const std::string hdf5_data_root = "/" FS_HDF5_POLICY_GROUP "/" + this->getTypeName() + "/axis";
+        const std::string hdf5_data_root = "/" FS_HDF5_POLICY_GROUP "/" + Axis::type_name + "/axis";
         std::stringstream ss;
         for (const auto& ax: this->axis)
         {
@@ -351,8 +352,8 @@ protected:
             ++n;
         }
 
-        Policy::saveRejectedViews(file, this->getTypeName());
-        Policy::saveAcceptedViews(file, this->getTypeName());
+        Policy::saveRejectedViews(file, Axis::type_name);
+        Policy::saveAcceptedViews(file, Axis::type_name);
     }
 
 
@@ -410,6 +411,9 @@ protected:
     std::function<void(Direction&, const Direction&, const Direction&)> call_for_z_axis;
 };
 
+
+/// @brief String for the class name.
+const std::string Axis::type_name = "Axis";
 
 /// @brief Default number of repetitions about the sampling axis.
 const int Axis::default_n_repeat = 1;

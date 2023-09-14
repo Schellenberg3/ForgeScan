@@ -105,14 +105,14 @@ public:
 
     /// @brief Adds a new Policy option.
     /// @param parser ArgParser with arguments to construct a new Policy from.
-    ///               See `forge_scan::policies::policy_constructor` for details
+    ///               See `policies::policies::Constructor` for details
     /// @return Index position in the Policy list if the Policy was successfully added.
     /// @note   - If `--set-active` is passed as a flag then the new Policy will immediately be
     ///           the active one used for view suggestions.
-    /// @throws Any exceptions thrown by policy_constructor pass through this.
+    /// @throws Any exceptions thrown by `policies::Constructor::create` pass through this.
     size_t policyAdd(const utilities::ArgParser& parser)
     {
-        this->policy_vec.push_back(policies::policy_constructor(parser, this->reconstruction));
+        this->policy_vec.push_back(policies::Constructor::create(parser, this->reconstruction));
         this->policy_vec.back()->setup();
         size_t policy_idx = this->policy_vec.size() - 1;
         if (parser.has(policies::Policy::parse_set_active))

@@ -54,6 +54,8 @@ public:
 
     static const std::string help_string, default_arguments;
 
+    static const std::string type_name;
+
 
 protected:
     /// @brief Protected constructor to enforce usage of shared pointer.
@@ -160,8 +162,7 @@ protected:
 
     virtual const std::string& getTypeName() const override final
     {
-        const static std::string name("Sphere");
-        return name;
+        return Sphere::type_name;
     }
 
 
@@ -169,7 +170,7 @@ protected:
     {
         std::string method = this->start_uniform ? "uniform" : "random";
         std::string ordering = this->start_uniform && this->unordered ? " in an unordered manner" : "";
-        out << this->getTypeName() << " Policy sampling at radius (" << this->radius << ", " << this->radius_max << ")"
+        out << Sphere::type_name << " Policy sampling at radius (" << this->radius << ", " << this->radius_max << ")"
             << " using a " << method << ordering << " method to collect at least " << this->n_view_requested << " views";
     }
 
@@ -198,15 +199,15 @@ protected:
 
     void save(H5Easy::File& file, HighFive::Group& g_policy) const override final
     {
-        auto g_rand_sph = g_policy.createGroup(this->getTypeName());
+        auto g_rand_sph = g_policy.createGroup(Sphere::type_name);
         g_rand_sph.createAttribute("radius",     this->radius);
         g_rand_sph.createAttribute("radius_max", this->radius_max);
         g_rand_sph.createAttribute("n_view_requested", this->n_view_requested);
         g_rand_sph.createAttribute("start_uniform",    static_cast<uint8_t>(this->start_uniform));
         g_rand_sph.createAttribute("seed", this->sample.seed);
         g_rand_sph.createAttribute("completed", static_cast<uint8_t>(this->isComplete()));
-        Policy::saveRejectedViews(file, this->getTypeName());
-        Policy::saveAcceptedViews(file, this->getTypeName());
+        Policy::saveRejectedViews(file, Sphere::type_name);
+        Policy::saveAcceptedViews(file, Sphere::type_name);
     }
 
 
@@ -240,6 +241,9 @@ protected:
     std::function<void(Extrinsic&)> call_on_generate;
 };
 
+
+/// @brief String for the class name.
+const std::string Sphere::type_name = "Sphere";
 
 /// @brief Default radius (and maximum radius) for view to be sampled from.
 const float Sphere::default_r = 2.5, Sphere::default_r_max = 2.5;

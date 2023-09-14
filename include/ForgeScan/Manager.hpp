@@ -268,7 +268,7 @@ public:
     /// @throws InvalidMapKey If a Metric of the requested type is already in use.
     void metricAdd(const utilities::ArgParser& parser)
     {
-        this->metricAdd(metrics::metric_constructor(parser, this->reconstruction));
+        this->metricAdd(metrics::Constructor::create(parser, this->reconstruction));
     }
 
 

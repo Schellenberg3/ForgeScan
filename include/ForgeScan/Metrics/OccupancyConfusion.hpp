@@ -56,6 +56,17 @@ public:
     }
 
 
+    /// @return Help message for constructing a OccupancyConfusion with ArgParser.
+    static std::string helpMessage()
+    {
+        /// TODO: Return an fill this in.
+        return "TODO: OccupancyConfusion help message";
+    }
+
+
+    static const std::string type_name;
+
+
 protected:
     // ***************************************************************************************** //
     // *                               PROTECTED CLASS METHODS                                 * //
@@ -76,14 +87,14 @@ protected:
                                 const std::shared_ptr<const ground_truth::Occupancy>& ground_truth,
                                 const std::string& use_channel = "")
         : Metric(reconstruction),
-          channel_name(FS_METRIC_CHANNEL_PREFIX + this->getTypeName()),
+          channel_name(FS_METRIC_CHANNEL_PREFIX + OccupancyConfusion::type_name),
           ground_truth(ground_truth)
     {
         this->throwIfGridPropertiesDoNotMatch();
         if (use_channel.empty())
         {
             auto voxel_grid = data::Binary::create(this->reconstruction->grid_properties);
-            this->addChannel(voxel_grid, this->getTypeName());
+            this->addChannel(voxel_grid, OccupancyConfusion::type_name);
             this->experiment = voxel_grid;
         }
         else
@@ -152,7 +163,7 @@ protected:
     {
         static const std::vector<std::string> headers = {"update", "true positive", "true negative",
                                                          "false positive", "false negative", "unknown"};
-        static const std::string hdf5_data_path = getDatasetPathHDF5(this->getTypeName());
+        static const std::string hdf5_data_path = getDatasetPathHDF5(OccupancyConfusion::type_name);
 
         H5Easy::dump(file, hdf5_data_path, this->getConfusionAsMatrix());
         H5Easy::dumpAttribute(file, hdf5_data_path, "header", headers);
@@ -161,8 +172,7 @@ protected:
 
     const std::string& getTypeName() const override final
     {
-        static const std::string name = "OccupancyConfusion";
-        return name;
+        return OccupancyConfusion::type_name;
     }
 
 
@@ -184,6 +194,10 @@ protected:
     /// @brief Reference to the Reconstruction VoxelGrid that this Metric uses.
     ground_truth::ExperimentOccupancy experiment;
 };
+
+
+/// @brief String for the class name.
+const std::string OccupancyConfusion::type_name = "OccupancyConfusion";
 
 
 } // namespace metrics

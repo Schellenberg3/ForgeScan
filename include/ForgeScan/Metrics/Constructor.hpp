@@ -11,27 +11,48 @@ namespace forge_scan {
 namespace metrics {
 
 
-/// @brief Factory function to create different Metric types.
-/// @param args Arguments to pass into the Metric's create functions.
-/// @return A pointer to the requested implementation of the Metric class.
-/// @throws ConstructorError if the Metric type is not recognized.
-/// @throws std::invalid_argument for OccupancyConfusion type. This type must be added manually.
-inline std::shared_ptr<Metric> metric_constructor(const utilities::ArgParser& args,
-                                                  std::shared_ptr<data::Reconstruction> /*reconstruction*/)
+/// @brief Constructor for shared Metrics pointers based on ArgParser inputs.
+struct Constructor
 {
-    std::string metric_type = args.get(Metric::parse_type);
-    utilities::strings::toLower(metric_type);
-
-    if (metric_type == "occupancyconfusion")
+    /// @brief Factory function to create different Metrics types.
+    /// @param parser Arguments to pass into the Metrics's create functions.
+    /// @param reconstruction Shared, constant pointer to the Reconstruction passed to the Metrics's create function.
+    /// @return A pointer to the requested implementation of the Metrics class.
+    /// @throws ConstructorError if the Metrics type is not recognized.
+    static std::shared_ptr<Metric> create(const utilities::ArgParser& parser,
+                                          [[maybe_unused]] const std::shared_ptr<const data::Reconstruction>& reconstruction)
     {
-        throw std::invalid_argument("The Metric type of OccupancyConfusion requires additional parameters that this method cannot provide.");
-    }
-    else
-    {
+        using namespace utilities::strings;
+        std::string metric_type = parser.get(Metric::parse_type);
+
+        if (iequals(metric_type, OccupancyConfusion::type_name))
+        {
+            throw std::invalid_argument("The Metric type of " + OccupancyConfusion::type_name + 
+                                        "  requires ground-truth information that this method cannot parse.");
+        }
+
+        throw ConstructorError::UnkownType(metric_type, "Metric");
     }
 
-    throw ConstructorError::UnkownType(metric_type, "Metric");
-}
+
+    /// @brief Returns a string help message for a constructing Metrics .
+    /// @param parser Arguments to pass into the Metric's create functions.
+    static std::string help(const utilities::ArgParser& parser)
+    {
+        using namespace utilities::strings;
+        std::string metric_type = parser.get("-h");
+
+        if (iequals(metric_type, OccupancyConfusion::type_name))
+        {
+            return OccupancyConfusion::helpMessage();
+        }
+        std::stringstream ss;
+        ss << Metric::helpMessage() << "\nPossible Metrics are: "
+           << OccupancyConfusion::type_name;
+        return ss.str();
+    }
+};
+
 
 
 } // namespace metrics

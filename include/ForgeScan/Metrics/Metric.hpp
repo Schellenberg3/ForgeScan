@@ -36,7 +36,16 @@ class Metric
 public:
     virtual ~Metric() { }
 
+    /// @return Help message for constructing a Metric with ArgParser.
+    static std::string helpMessage()
+    {
+        /// TODO: Return an fill this in.
+        return "TODO: Metric help message";
+    }
+
     static const std::string parse_type;
+
+    static const std::string type_name;
 
 protected:
     // ***************************************************************************************** //
@@ -109,8 +118,7 @@ protected:
     virtual void save(HighFive::File& file) const = 0;
 
 
-    /// @brief Gets the name of the derived class as a string.
-    /// @returns String name for the derived Metric.
+    /// @brief Returns the type name of the derived Policy class.
     virtual const std::string& getTypeName() const = 0;
 
 
@@ -140,6 +148,9 @@ protected:
     const std::shared_ptr<data::Reconstruction> reconstruction{nullptr};
 };
 
+
+/// @brief String for the class name.
+const std::string Metric::type_name = "Metric";
 
 /// @brief ArgParser key for the type of Metric to add.
 const std::string Metric::parse_type = "--type";

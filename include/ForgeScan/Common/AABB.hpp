@@ -35,14 +35,14 @@ inline bool find_intersection(const Eigen::Vector3f& dist_b1,
     tmin = -1 * INFINITY;
     tmax =      INFINITY;
 
-    tmin = std::min(std::max(dist_b1[X], tmin), std::max(dist_b2[X], tmin));
-    tmax = std::max(std::min(dist_b1[X], tmax), std::min(dist_b2[X], tmax));
+    tmin = std::fmin(std::fmax(dist_b1[X], tmin), std::fmax(dist_b2[X], tmin));
+    tmax = std::fmax(std::fmin(dist_b1[X], tmax), std::fmin(dist_b2[X], tmax));
 
-    tmin = std::min(std::max(dist_b1[Y], tmin), std::max(dist_b2[Y], tmin));
-    tmax = std::max(std::min(dist_b1[Y], tmax), std::min(dist_b2[Y], tmax));
+    tmin = std::fmin(std::fmax(dist_b1[Y], tmin), std::fmax(dist_b2[Y], tmin));
+    tmax = std::fmax(std::fmin(dist_b1[Y], tmax), std::fmin(dist_b2[Y], tmax));
 
-    tmin = std::min(std::max(dist_b1[Z], tmin), std::max(dist_b2[Z], tmin));
-    tmax = std::max(std::min(dist_b1[Z], tmax), std::min(dist_b2[Z], tmax));
+    tmin = std::fmin(std::fmax(dist_b1[Z], tmin), std::fmax(dist_b2[Z], tmin));
+    tmax = std::fmax(std::fmin(dist_b1[Z], tmax), std::fmin(dist_b2[Z], tmax));
 
     return tmin <= tmax;
 }
@@ -66,9 +66,9 @@ inline bool find_intersection(const Eigen::Vector3f& dist_b1,
 /// @return True if the intersection is valid: `tmin<=tmax` and `tmin<=max_bound` and
 ///         `tmin_bound<=tmax`.
 inline bool find_bounded_intersection(const Point& bound1,     const Point& bound2,
-                                        const Point& start,      const Direction& inv_ray,
-                                        const float& tmin_bound, const float& tmax_bound,
-                                        float& tmin,             float& tmax)
+                                      const Point& start,      const Direction& inv_ray,
+                                      const float& tmin_bound, const float& tmax_bound,
+                                      float& tmin,             float& tmax)
 {
     const Eigen::Vector3f dist_b1 = (bound1 - start).array() * inv_ray.array();
     const Eigen::Vector3f dist_b2 = (bound2 - start).array() * inv_ray.array();
@@ -92,11 +92,11 @@ inline bool find_bounded_intersection(const Point& bound1,     const Point& boun
 /// @param [out] tmax If the intersection is valid: the time the ray exits the box.
 /// @return True if the intersection is valid: `tmin<=tmax`.
 inline bool find_zero_bounded_intersection(const Point& bound,
-                                             const Point& start,      const Direction& inv_ray,
-                                             const float& tmin_bound, const float& tmax_bound,
-                                             float& tmin,             float& tmax)
+                                           const Point& start,      const Direction& inv_ray,
+                                           const float& tmin_bound, const float& tmax_bound,
+                                           float& tmin,             float& tmax)
 {
-    const Eigen::Vector3f dist_b1 = -1 * start.array() * inv_ray.array();
+    const Eigen::Vector3f dist_b1 =     -1 * start.array()  * inv_ray.array();
     const Eigen::Vector3f dist_b2 = (bound - start).array() * inv_ray.array();
 
     bool ray_intersects = find_intersection(dist_b1, dist_b2, tmin, tmax);

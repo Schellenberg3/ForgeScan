@@ -86,8 +86,18 @@ METHODS: list[tuple[str, str, str]] = [
         RANDOM_RERUNS
     ),
     (
+        "Axis_X-axis",
+        "--type axis --x-axis --uniform --r " + str(VIEW_RADIUS),
+        REGULAR_RERUNS
+    ),
+    (
+        "Axis_Y-axis",
+        "--type axis --y-axis --uniform --r " + str(VIEW_RADIUS),
+        REGULAR_RERUNS
+    ),
+    (
         "Axis_Z-axis",
-        "--type axis --z-axis --r " + str(VIEW_RADIUS),
+        "--type axis --z-axis --uniform --r " + str(VIEW_RADIUS),
         REGULAR_RERUNS
     ),
     (

@@ -273,8 +273,8 @@ inline bool get_ray_trace(const std::shared_ptr<Trace>& ray_trace,
     vector_math::get_length_normal_and_inverse_normal(sensed, origin, length, normal, inv_normal);
     length = std::min(length, dist_max);
 
-    const bool valid_intersection = AABB::fast_eigen_find_bounded_intersection(properties->dimensions, sensed, inv_normal,
-                                                                               dist_min, length, dist_min_adj, dist_max_adj);
+    const bool valid_intersection = AABB::find_zero_bounded_intersection(properties->dimensions, sensed, inv_normal,
+                                                                         dist_min, length, dist_min_adj, dist_max_adj);
     if (valid_intersection)
     {
         dist_min_adj = std::max(dist_min_adj, dist_min);

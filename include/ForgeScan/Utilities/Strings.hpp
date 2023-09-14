@@ -87,6 +87,26 @@ inline bool hasPrefix(const std::string& str, const std::string& prefix)
 }
 
 
+/// @brief Case-insensitive character comparison.
+/// @param a First character.
+/// @param b Second character.
+/// @return True if they are the same character in either lower or upper case.
+bool ichar_equals(const char& a, const char& b)
+{
+    return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b));
+}
+
+
+/// @brief Case-insensitive string comparison.
+/// @param a First string.
+/// @param b Second string.
+/// @return True if the strings have the same contents, regardless of the capitalization of the contents.
+bool iequals(const std::string& a, const std::string& b)
+{
+    return std::equal(a.begin(), a.end(), b.begin(), b.end(), ichar_equals);
+}
+
+
 } // namespace strings
 } // namespace utilities
 } // namespace forge_scan

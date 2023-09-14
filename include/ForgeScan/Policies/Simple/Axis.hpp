@@ -222,7 +222,7 @@ protected:
         const float mod = (float)(view_number % this->n_views);
 
         const size_t height_idx = static_cast<size_t>(std::max(std::floor(div), 0.0f));
-        const float theta = (2.0 * M_PI / (this->n_views - 1)) * mod;
+        const float theta = (2.0 * M_PI / (this->n_views)) * mod;
 
         dest.translation()      = Point(std::cos(theta), std::sin(theta), 0);
         dest.translation()     *= this->radius;

@@ -102,7 +102,7 @@ METHODS: list[tuple[str, str, str]] = [
     ),
     (
         "Axis_Random",
-        "--type axis --random-axis --change-random  --r " + str(VIEW_RADIUS),
+        "--type axis --random-axis --uniform --change-random  --r " + str(VIEW_RADIUS),
         RANDOM_RERUNS
     ),
 ]
@@ -114,7 +114,7 @@ def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: str, policy_nam
                  policy: str, n_views: int, seed: int = 0, parsed_args: argparse.Namespace = None):
     stdin  = ""
     stdin += str(fpath) + STDIN_NEWLINE
-    stdin += "don't save images" + STDIN_NEWLINE
+    stdin += ("y" if parsed_args else "don't save images") + STDIN_NEWLINE
     stdin += str(scene) + STDIN_NEWLINE
     stdin += str(REJECTION_RATE) + STDIN_NEWLINE
     stdin += intr + STDIN_NEWLINE
@@ -203,6 +203,12 @@ if __name__ == "__main__":
         type=int,
         default=0,
         help="Start some number into the sweep."
+    )
+    parser.add_argument(
+        "--save-images",
+        action="store_true",
+        default=False,
+        help="Saves images for each view."
     )
 
     args = parser.parse_args()

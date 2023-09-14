@@ -136,7 +136,7 @@ int main()
     std::filesystem::path fpath = parser.get<std::string>(0, default_file_path);
 
     std::filesystem::path image_fpath = fpath;
-    const std::string image_prefix    = fpath.filename().replace_extension("").string() + "View";
+    const std::string image_prefix    = fpath.filename().replace_extension("").string() + "_view_";
     parser.getInput("Save images with reconstruction data? [y/n]:");
     const bool save_im = parser[0] == "y";
 

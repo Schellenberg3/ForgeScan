@@ -85,8 +85,10 @@ def plot_policy_sweep(policy_path: pathlib.Path):
 
     ax1.set_title("Reconstruction Accuracy")
     ax1.set_xlabel("Views Added")
+    ax1.set_ylim(0, 1.1)
     ax2.set_title("Reconstruction Precision")
     ax2.set_xlabel("Views Added")
+    ax2.set_ylim(0, 1.1)
 
     try:
         # Sort in increasing order on integer number.
@@ -137,7 +139,9 @@ def plot_policy_sweep(policy_path: pathlib.Path):
     ax2.legend()
 
     ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ax1.yaxis.set_ticks([0.2, 0.4, 0.6, 0.8, 1.0])
     ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
+    ax2.yaxis.set_ticks([0.2, 0.4, 0.6, 0.8, 1.0])
 
     # Split the old path to get the location of the figure.
     image_fpath = (FIGURES_PATH / policy_path.relative_to(RESULTS_PATH)).parent

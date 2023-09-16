@@ -199,8 +199,8 @@ private:
             float delta = update - average;
             
             var     *= n;
-            average += (delta / ++n);
-            var     += (update - average) * delta;
+            average += delta / ++n;
+            var     += delta * delta;
             var     /= n;
         }
 

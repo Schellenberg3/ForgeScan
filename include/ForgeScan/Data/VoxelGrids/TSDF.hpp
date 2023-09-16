@@ -111,6 +111,71 @@ private:
     }
 
 
+    void save(HighFive::Group& g_channel, const std::string& grid_type) const override final
+    {
+        try
+        {
+            if (this->type_id == DataType::FLOAT)
+            {
+                g_channel.createDataSet(grid_type, std::get<std::vector<float>>(this->data));
+            }
+            else if (this->type_id == DataType::DOUBLE)
+            {
+                g_channel.createDataSet(grid_type, std::get<std::vector<double>>(this->data));
+            }
+            else
+            {
+                throw DataVariantError::UnrecognizedEnumeration(this->type_id);
+            }
+        }
+        catch (const std::bad_variant_access&)
+        {
+            throw std::runtime_error("Bad variant access: Cannot save Grid's Data vector to HDF5 file.");
+        }
+
+        if (this->average)
+        {
+            g_channel.createDataSet(grid_type + "_samples", this->sample_count);
+            g_channel.createDataSet(grid_type + "_variance", this->variance);
+        }
+    }
+
+
+    void addToXDMF(std::ofstream& file,          const std::string& hdf5_fname,
+                   const std::string& grid_name, const std::string& grid_type) const override final
+    {
+        utilities::XDMF::writeVoxelGridAttribute(
+            file,
+            grid_name,
+            utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type),
+            getNumberTypeXDMF(this->type_id),
+            getNumberPrecisionXDMF(this->type_id),
+            this->properties->getNumVoxels()
+        );
+
+        if (this->average)
+        {
+            utilities::XDMF::writeVoxelGridAttribute(
+                file,
+                grid_name + "_samples",
+                utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type + "_samples"),
+                getNumberTypeXDMF(DataType::SIZE_T),
+                getNumberPrecisionXDMF(DataType::SIZE_T),
+                this->properties->getNumVoxels()
+            );
+
+            utilities::XDMF::writeVoxelGridAttribute(
+                file,
+                grid_name + "_variance",
+                utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type + "_variance"),
+                getNumberTypeXDMF(DataType::FLOAT),
+                getNumberPrecisionXDMF(DataType::FLOAT),
+                this->properties->getNumVoxels()
+            );
+        }
+    }
+
+
     /// @brief Subclass provides update functions for each supported DataType/VectorVariant of
     ///        the data vector.
     struct UpdateCallable : public VoxelGrid::UpdateCallable
@@ -197,7 +262,7 @@ private:
             size_t& n   = this->caller.sample_count[i];
 
             float delta = update - average;
-            
+
             var     *= n;
             average += delta / ++n;
             var     += delta * delta;

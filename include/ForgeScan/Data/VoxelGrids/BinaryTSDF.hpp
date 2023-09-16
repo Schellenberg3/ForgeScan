@@ -104,26 +104,17 @@ private:
     }
 
 
-    /// @brief Writes the VoxelGrid's data vector to the provided HDF5 group.
-    /// @param g_channel Group in for the opened HDF5 file.
-    /// @param grid_type Name of the derived class.
-    /// @throws std::runtime_error If there is a bad variant access.
-    /// @throws DataVariantError If the VoxelGrid's `type_id` is not recognized.
-    ///         (However, this error should be caught earlier in the VoxelGrid constructor.)
-    /// @note  This override allows the class to add information about the multiple data vectors it has.
     void save(HighFive::Group& g_channel, const std::string& grid_type) const override final
     {
         try
         {
             if (this->type_id == DataType::FLOAT)
             {
-                g_channel.createDataSet(grid_type + "_TSDF", std::get<std::vector<float>>(this->data));
-                g_channel.createDataSet(grid_type + "_Binary", this->data_occupancy);
+                g_channel.createDataSet(grid_type + "_tsdf", std::get<std::vector<float>>(this->data));
             }
             else if (this->type_id == DataType::DOUBLE)
             {
-                g_channel.createDataSet(grid_type + "_TSDF", std::get<std::vector<double>>(this->data));
-                g_channel.createDataSet(grid_type + "_Binary", this->data_occupancy);
+                g_channel.createDataSet(grid_type + "_tsdf", std::get<std::vector<double>>(this->data));
             }
             else
             {
@@ -134,19 +125,14 @@ private:
         {
             throw std::runtime_error("Bad variant access: Cannot save Grid's Data vector to HDF5 file.");
         }
+
+        g_channel.createDataSet(grid_type + "_binary", this->data_occupancy);
     }
 
 
-    /// @brief Adds this VoxelGrid's data to the XDMF file provided by the Reconstruction class.
-    /// @param file An opened file stream.
-    /// @param hdf5_fname File name (not the full path) of the HDF5 file that this XDMF relates to.
-    /// @param grid_name  The dictionary map name of this grid.
-    /// @param grid_type  The type name of this grid.
-    /// @note  This override allows the class to add information about the multiple data vectors it has.
     void addToXDMF(std::ofstream& file,          const std::string& hdf5_fname,
                    const std::string& grid_name, const std::string& grid_type) const override final
     {
-        // Write TSDF data
         utilities::XDMF::writeVoxelGridAttribute(
             file,
             grid_name + "_TSDF",
@@ -156,7 +142,6 @@ private:
             this->properties->getNumVoxels()
         );
 
-        // Write occupancy data
         utilities::XDMF::writeVoxelGridAttribute(
             file,
             grid_name + "_Binary",

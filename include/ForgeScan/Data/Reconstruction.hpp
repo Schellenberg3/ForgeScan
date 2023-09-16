@@ -139,7 +139,7 @@ public:
     {
         for (auto iter = this->channels.begin(); iter != this->channels.end(); ++iter)
         {
-            if (iter->first == name && iter->second.unique())
+            if (iter->first == name && iter->second.use_count() <= 1)
             {
                 this->channels.erase(iter);
                 return true;

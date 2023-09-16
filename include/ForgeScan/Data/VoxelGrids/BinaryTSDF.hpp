@@ -130,7 +130,7 @@ private:
                 throw DataVariantError::UnrecognizedEnumeration(this->type_id);
             }
         }
-        catch (const std::bad_variant_access& e)
+        catch (const std::bad_variant_access&)
         {
             throw std::runtime_error("Bad variant access: Cannot save Grid's Data vector to HDF5 file.");
         }

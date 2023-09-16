@@ -516,7 +516,7 @@ private:
             utilities::XDMF::writeFooter(file);
             file.close();
         }
-        catch (const std::ofstream::failure& e)
+        catch (const std::ofstream::failure&)
         {
             throw std::runtime_error("Encountered a std::ofstream failure while saving the Scene XDMF file.");
         }

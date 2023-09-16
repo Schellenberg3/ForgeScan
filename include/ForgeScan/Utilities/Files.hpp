@@ -25,11 +25,23 @@ inline std::string getDefaultFilename(const std::string& prefix = "",
         ss << prefix << "-";
     }
 
+    // This is adapted from https://stackoverflow.com/a/38034148.
+    // Need to get time with system-specific thread-safe calls. Or specifically lock the
+    // std::localtime buffer ourselves. 
     if (timestamp)
     {
-        auto t  =  std::time(nullptr);
-        auto tm = *std::localtime(&t);
-        ss << std::put_time(&tm, "%Y-%m-%d-%H-%M-%S");
+        std::time_t timer = std::time(nullptr);
+        std::tm bt {};
+#if defined(__unix__)
+        localtime_r(&timer, &bt);
+#elif defined(_MSC_VER)
+        localtime_s(&bt, &timer);
+#else
+        static std::mutex mtx;
+        std::lock_guard<std::mutex> lock(mtx);
+        bt = *std::localtime(&timer);
+#endif
+        ss << std::put_time(&bt, "%Y-%m-%d-%H-%M-%S");
     }
 
     if(!extension.empty())

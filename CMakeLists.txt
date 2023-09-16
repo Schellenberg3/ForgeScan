@@ -12,21 +12,8 @@ set(FORGE_SCAN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 ## --------------------------------------------------------------------------------------------- ##
-## ------------------------------- COMPILER OPTIONS AND WARNINGS ------------------------------- ##
+## ------------------------------------ COMPILATION OPTIONS ------------------------------------ ##
 ## --------------------------------------------------------------------------------------------- ##
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    message(STATUS "Using GNU/Clang compiler options")
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    message(STATUS "Using MSVC compiler options")
-    message(STATUS "Toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
-    message(STATUS "target triplet: ${VCPKG_TARGET_TRIPLET}")
-    message(FATAL_ERROR "MSVC is not supported. Project will not be built.")
-    # The project can likely operate on windows. But more testing is needed and
-    # some CMake code will be needed to set compiler warnings and settings
-    # for each target as they are tested and based on the build variant.
-endif()
-
 
 option(FORGE_SCAN_EXAMPLES    "Enable compilation of example executables"     ON)
 option(FORGE_SCAN_EXPERIMENTS "Enable compilation of experiment executables"  ON)

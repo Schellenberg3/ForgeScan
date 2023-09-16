@@ -14,7 +14,5 @@ target_link_libraries(
 target_compile_options(
     ${EXECUTABLE_NAME}
     PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
+        ${FORGE_SCAN_COMPILE_OPTIONS}
 )

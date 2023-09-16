@@ -68,7 +68,7 @@ public:
             std::filesystem::create_directories(fpath.parent_path());
         }
 
-        HighFive::File file(fpath, HighFive::File::Truncate);
+        HighFive::File file(fpath.string(), HighFive::File::Truncate);
         this->savePolicies(file);
         this->reconstruction->save(file);
         this->saveMetrics(file);
@@ -334,7 +334,7 @@ private:
     ///         writing the XDMF file.
     void makeXDMF(std::filesystem::path fpath) const
     {
-        const std::string hdf5_fname = fpath.filename();
+        const std::string hdf5_fname = fpath.filename().string();
         fpath.replace_extension(FS_XDMF_FILE_EXTENSION);
 
         Point lower = Point::Zero();

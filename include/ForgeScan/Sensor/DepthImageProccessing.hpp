@@ -82,7 +82,7 @@ struct DepthImageProcessing
                                const std::filesystem::path& fname)
     {
         cv::Mat cv_image = depth_image_to_opencv(camera, true);
-        cv::imwrite(fname.c_str(), cv_image);
+        cv::imwrite(fname.string(), cv_image);
     }
 };
 

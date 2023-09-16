@@ -75,7 +75,7 @@ public:
             std::filesystem::create_directories(fpath.parent_path());
         }
 
-        HighFive::File file(fpath, HighFive::File::Truncate);
+        HighFive::File file(fpath.string(), HighFive::File::Truncate);
         auto g_scene = file.createGroup(FS_HDF5_SCENE_GROUP);
         H5Easy::dump(file, FS_HDF5_SCAN_LOWER_BOUND_DSET, this->scan_lower_bound.matrix());
 
@@ -121,9 +121,11 @@ public:
     /// @brief Loads a stored scene object from disk.
     /// @param fpath Location to save the HDF5 file.
     /// @throws Any exception encountered while reading the HDF5 file.
-    void load(const std::filesystem::path& fpath)
+    void load(std::filesystem::path fpath)
     {
-        HighFive::File file(fpath, HighFive::File::ReadOnly);
+        fpath.make_preferred();
+        fpath = std::filesystem::absolute(fpath);
+        HighFive::File file(fpath.string(), HighFive::File::ReadOnly);
         auto g_scene  = file.getGroup(FS_HDF5_SCENE_GROUP);
         this->scan_lower_bound.matrix() = H5Easy::load<Eigen::Matrix4f>(file, FS_HDF5_SCAN_LOWER_BOUND_DSET);
 
@@ -461,7 +463,7 @@ private:
     ///         writing the XDMF file.
     void makeXDMF(std::filesystem::path fpath) const
     {
-        const std::string hdf5_fname = fpath.filename();
+        const std::string hdf5_fname = fpath.filename().string();
         fpath.replace_extension(FS_XDMF_FILE_EXTENSION);
 
         const size_t num_voxels = this->grid_properties->getNumVoxels();

@@ -33,7 +33,6 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     #     4127 - conditional expression is constant
     set(FORGE_SCAN_COMPILE_OPTIONS /W4 /wd4244 /wd4305 /wd4458 /wd4267 /wd4127)
     message(STATUS "[ForgeScan::Info] Using MSVC compiler options: ${FORGE_SCAN_COMPILE_OPTIONS}")
-    message(WARNING "[ForgeScan::Info] MSVC support is experimental.")
 endif()
 
 

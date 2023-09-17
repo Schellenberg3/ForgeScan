@@ -265,7 +265,7 @@ private:
 
             var     *= n;
             average += delta / ++n;
-            var     += delta * delta;
+            var     += (update - average) * delta; // Average is updated now.
             var     /= n;
         }
 

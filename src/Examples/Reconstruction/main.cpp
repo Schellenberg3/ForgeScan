@@ -57,10 +57,21 @@ int main(const int argc, const char **argv)
 
     // ******* Set up an OccupancyConfusion Metric for the Scene, add it to the Manager ******** //
 
+
+    auto bin_conf = forge_scan::metrics::OccupancyConfusion::create(manager->reconstruction,
+                                                                    scene->getGroundTruthOccupancy(),
+                                                                    "binary");
+    manager->metricAdd(bin_conf);
+
     auto occ_conf = forge_scan::metrics::OccupancyConfusion::create(manager->reconstruction,
                                                                     scene->getGroundTruthOccupancy(),
                                                                     "probability");
     manager->metricAdd(occ_conf);
+
+    auto tsdf_conf = forge_scan::metrics::OccupancyConfusion::create(manager->reconstruction,
+                                                                    scene->getGroundTruthOccupancy(),
+                                                                    "tsdf");
+    manager->metricAdd(tsdf_conf);
 
 
     // ****************************** Collect and register images ****************************** //

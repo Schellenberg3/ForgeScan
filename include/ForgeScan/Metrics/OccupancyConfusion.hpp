@@ -86,7 +86,8 @@ protected:
     explicit OccupancyConfusion(const std::shared_ptr<data::Reconstruction>& reconstruction,
                                 const std::shared_ptr<const ground_truth::Occupancy>& ground_truth,
                                 const std::string& use_channel = "")
-        : Metric(reconstruction),
+        : Metric(reconstruction,
+                 OccupancyConfusion::getMapName(use_channel)),
           channel_name(FS_METRIC_CHANNEL_PREFIX + OccupancyConfusion::type_name),
           ground_truth(ground_truth)
     {
@@ -102,6 +103,16 @@ protected:
             auto voxel_grid = this->reconstruction->getChannel(use_channel);
             this->experiment = ground_truth::dynamic_cast_to_experimental_occupancy(voxel_grid);
         }
+    }
+
+
+    static std::string getMapName(const std::string& use_channel)
+    {
+        if (use_channel.empty())
+        {
+            return OccupancyConfusion::type_name;
+        }
+        return OccupancyConfusion::type_name + "_" + use_channel;
     }
 
 
@@ -163,8 +174,8 @@ protected:
     {
         static const std::vector<std::string> headers = {"update", "true positive", "true negative",
                                                          "false positive", "false negative", "unknown"};
-        static const std::string hdf5_data_path = getDatasetPathHDF5(OccupancyConfusion::type_name);
-
+        
+        const std::string hdf5_data_path = getDatasetPathHDF5(this->map_name);
         H5Easy::dump(file, hdf5_data_path, this->getConfusionAsMatrix());
         H5Easy::dumpAttribute(file, hdf5_data_path, "header", headers);
     }

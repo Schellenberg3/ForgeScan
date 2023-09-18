@@ -47,6 +47,10 @@ public:
 
     static const std::string type_name;
 
+    /// @brief Name for this Metric in the map. If only one metric of this type should exist then
+    ///        the type name can be used.
+    const std::string map_name;
+
 protected:
     // ***************************************************************************************** //
     // *                                PROTECTED CLASS METHODS                                * //
@@ -55,8 +59,11 @@ protected:
 
     /// @brief Protected constructor for derived classes only.
     /// @param reconstruction Shared pointer to the `data::Reconstruction` that the Metric observes.
-    Metric(const std::shared_ptr<data::Reconstruction>& reconstruction)
-        : reconstruction(reconstruction)
+    /// @param map_name String key for the `Manager`'s map of names to metrics.
+    Metric(const std::shared_ptr<data::Reconstruction>& reconstruction,
+          const std::string map_name)
+        : map_name(map_name),
+          reconstruction(reconstruction)          
     {
 
     }

@@ -277,13 +277,12 @@ public:
     /// @throws InvalidMapKey If a Metric of the requested type is already in use.
     void metricAdd(std::shared_ptr<metrics::Metric> metric)
     {
-        std::string metric_name = metric->getTypeName();
-        if (this->metrics_map.count(metric_name) != 0)
+        if (this->metrics_map.count(metric->map_name) != 0)
         {
-            throw InvalidMapKey::NameAlreadyExists(metric_name);
+            throw InvalidMapKey::NameAlreadyExists(metric->map_name);
         }
         metric->setup();
-        this->metrics_map.insert({metric_name, metric});
+        this->metrics_map.insert({metric->map_name, metric});
     }
 
 
@@ -472,8 +471,8 @@ private:
     /// @brief Index within the list for which Policy is active. Default, and initialized, to 0.
     size_t active_policy_idx = 0;
 
-    /// @brief Map of Metric type names to Metric. A map ensures we cannot add two Metrics of the
-    ///        same type.
+    /// @brief Map of Metric type names to Metric. A map ensures we check if a metric exists before
+    ///        it is added.
     std::map<std::string, std::shared_ptr<metrics::Metric>> metrics_map;
 };
 

@@ -173,7 +173,13 @@ struct Camera : public Entity
     /// @brief Any depth values below the intrinsic's minimum depth are set to 0 instead.
     void saturateDepth()
     {
-        this->image = this->image.unaryExpr([this](float x){ return x < this->intr->min_d ? 0 : x; });
+        for (size_t row = 0; row < this->intr->height; ++row)
+        {
+            for (size_t col = 0; col < this->intr->width; ++col)
+            {
+                this->image(row, col) *= this->image(row, col) > this->intr->min_d;
+            }
+        }
     }
 
 

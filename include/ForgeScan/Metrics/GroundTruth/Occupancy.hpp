@@ -128,30 +128,39 @@ protected:
 
         for (size_t i = 0; i < n; ++i)
         {
-            const uint8_t& truth       = this->data[i];
-            const uint8_t& measurement = experiment[i];
-            if (true_positive(truth, measurement))
-            {
-                ++confusion.tp;
-            }
-            else if (true_negative(truth, measurement))
-            {
-                ++confusion.tn;
-            }
-            else if (false_positive(truth, measurement))
-            {
-                ++confusion.fp;
-            }
-            else if (false_negative(truth, measurement))
-            {
-                ++confusion.fn;
-            }
-            else
-            {
-                ++confusion.uk;
-            }
+            compare(this->data[i], experiment[i], confusion);
+
         }
         return true;
+    }
+
+
+    /// @brief Compares the ground truth and experimental measurement.
+    /// @param truth Ground truth occupancy value.
+    /// @param measurement Experimental data measurement.
+    /// @param [out] confusion Reference to a Confusion struct to store the results in.
+    static void compare(const uint8_t& truth, const uint8_t& measurement, Confusion& confusion)
+    {
+        if (true_positive(truth, measurement))
+        {
+            ++confusion.tp;
+        }
+        else if (true_negative(truth, measurement))
+        {
+            ++confusion.tn;
+        }
+        else if (false_positive(truth, measurement))
+        {
+            ++confusion.fp;
+        }
+        else if (false_negative(truth, measurement))
+        {
+            ++confusion.fn;
+        }
+        else
+        {
+            ++confusion.uk;
+        }
     }
 
 

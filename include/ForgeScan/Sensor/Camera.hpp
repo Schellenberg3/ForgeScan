@@ -7,7 +7,9 @@
 
 #include "ForgeScan/Common/Entity.hpp"
 #include "ForgeScan/Sensor/Intrinsics.hpp"
+
 #include "ForgeScan/Utilities/ArgParser.hpp"
+#include "ForgeScan/Utilities/Random.hpp"
 
 
 namespace forge_scan {
@@ -167,6 +169,31 @@ struct Camera : public Entity
     void resetDepth()
     {
         this->image.setConstant(this->intr->height, this->intr->width, this->intr->max_d);
+    }
+
+
+    /// @brief Adds noise to the image. The noise is gaussian with zero mean and scales the ray
+    ///        by some percent of its original length.
+    /// @param percent Defines the standard deviation of the noise. A value of `sigma=0.5*percent`
+    ///                is used so 95% of scaling values are within `[-percent, +percent]`.
+    /// @note  The seed of this function is set randomly with each call. This may be better as a
+    ///        class member to ensure repeatability. But for now this works.
+    void addNoise(const float& percent = 0.02)
+    {
+        static utilities::RandomSampler<float> sample(-1);
+        if (percent == 0)
+        {
+            return;
+        }
+
+        std::normal_distribution<float> nd(0.0f, 0.5 * percent);
+        for (size_t row = 0; row < this->intr->height; ++row)
+        {
+            for (size_t col = 0; col < this->intr->width; ++col)
+            {
+                this->image(row, col) += this->image(row, col) * nd(sample.gen);
+            }
+        }
     }
 
 

@@ -12,6 +12,7 @@ int main(const int argc, const char **argv)
     const bool  show_im       = parser.has("--show");
     const bool  save_im       = parser.has("--save");
     const bool  sphere_policy = parser.has("--sphere");
+    const float noise         = parser.get<float>("--noise", 0.0f);
 
     std::filesystem::path scene_fpath = parser.get<std::filesystem::path>("--scene", FORGE_SCAN_SHARE_DIR "/Examples/Scene.h5");
     std::filesystem::path save_fpath  = parser.get<std::filesystem::path>("--save",  FORGE_SCAN_SHARE_DIR "/Examples/Reconstruction.h5");
@@ -57,7 +58,7 @@ int main(const int argc, const char **argv)
 
     auto occ_conf = forge_scan::metrics::OccupancyConfusion::create(manager->reconstruction,
                                                                     scene->getGroundTruthOccupancy(),
-                                                                    "binary");
+                                                                    "probability");
     manager->metricAdd(occ_conf);
 
 
@@ -82,6 +83,7 @@ int main(const int argc, const char **argv)
             camera->setExtr(camera_pose);
 
             scene->image(camera);
+            camera->addNoise(noise);
             if (show_im)
             {
                 forge_scan::sensor::DepthImageProcessing::imshow(camera, true);

@@ -80,7 +80,7 @@ public:
         auto get_occupancy_data = [&](auto&& data){
             for (size_t i = 0; i < data.size(); ++i)
             {
-                if (data[i] <= 0)
+                if (data[i] < 0.0f && data[i] > NEGATIVE_INFINITY)
                 {
                     occupancy_data[i] = VoxelOccupancy::OCCUPIED;
                 }

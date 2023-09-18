@@ -22,12 +22,14 @@ public:
     /// @param parser ArgParser with arguments to construct an TSDF Grid from.
     /// @return Shared pointer to a TSDF Grid.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
+    /// @throws ConstructorError if both `average` and `minimum` flags are included.
     static std::shared_ptr<TSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
                                         const utilities::ArgParser& parser)
     {
         return create(properties, parser.get<float>(VoxelGrid::parse_d_min, VoxelGrid::default_d_min),
                                   parser.get<float>(VoxelGrid::parse_d_max, VoxelGrid::default_d_max),
                                   parser.has(TSDF::parse_average),
+                                  parser.has(TSDF::parse_minimum),
                                   stringToDataType(parser.get(VoxelGrid::parse_dtype), DataType::FLOAT));
     }
 
@@ -36,18 +38,21 @@ public:
     /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param dist_min   Minimum update distance. Default -0.2.
     /// @param dist_max   Maximum update distance. Default +0.2.
-    /// @param average  Records average TSDF value if true. Otherwise records minimum magnitude. Default true.
+    /// @param average  Records average TSDF value if true. Otherwise uses a weighted update.
+    /// @param minimum  Records the minimum magnitude TSDF value if true. Otherwise uses a weighted update.
     /// @param type_id Datatype for the Grid. Default is float.
     /// @return Shared pointer to a TSDF Grid.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
+    /// @throws ConstructorError if both `average` and `minimum` are true.
     static std::shared_ptr<TSDF> create(const std::shared_ptr<const Grid::Properties>& properties,
                                         const float& dist_min = -0.2,
                                         const float& dist_max =  0.2,
-                                        const bool& average   = true,
+                                        const bool& average   = false,
+                                        const bool& minimum   = false,
                                         const DataType& type_id = DataType::FLOAT)
     {
-        float default_value = average ? 0.0f : NEGATIVE_INFINITY;
-        return std::shared_ptr<TSDF>(new TSDF(properties, dist_min, dist_max, average, default_value, type_id));
+        float default_value = minimum ? NEGATIVE_INFINITY : 0.0f;
+        return std::shared_ptr<TSDF>(new TSDF(properties, dist_min, dist_max, average, minimum, default_value, type_id));
     }
 
 
@@ -95,7 +100,7 @@ public:
         this->update_callable.releaseRayTrace();
     }
 
-    static const std::string parse_average;
+    static const std::string parse_average, parse_minimum;
 
     static const std::string type_name;
 
@@ -104,14 +109,17 @@ private:
     /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param dist_min Minimum trace update distance for this VoxelGrid.
     /// @param dist_max Maximum trace update distance for this VoxelGrid.
-    /// @param average  Records average TSDF value if true. Otherwise records minimum magnitude.
+    /// @param average  Records average TSDF value if true. Otherwise uses a weighted update.
+    /// @param minimum  Records the minimum magnitude TSDF value if true. Otherwise uses a weighted update.
     /// @param default_value  Initialization value for all voxels in this VoxelGrid. Should be 0 for
     ///                       average or -INF for minimum magnitude.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
+    /// @throws ConstructorError if both `average` and `minimum` are true.
     explicit TSDF(const std::shared_ptr<const Grid::Properties>& properties,
                   const float& dist_min,
                   const float& dist_max,
                   const bool&  average,
+                  const bool&  minimum,
                   const float& default_value,
                   const DataType& type_id)
         : VoxelGrid(properties,
@@ -121,12 +129,25 @@ private:
                     type_id,
                     DataType::TYPE_FLOATING_POINT),
           average(average),
+          minimum(minimum),
           update_callable(*this)
     {
+        if (this->average && this->minimum)
+        {
+            throw ConstructorError::MutuallyExclusive(TSDF::type_name, "minimum", "average");
+        }
         if (this->average)
         {
             this->sample_count = std::vector<size_t>(this->properties->getNumVoxels(), 0);
             this->variance     = std::vector<float>(this->properties->getNumVoxels(), 0.0f);
+        }
+        if (this->minimum)
+        {
+            // no special action for minimum
+        }
+        else
+        {
+            this->weights = std::vector<float>(this->properties->getNumVoxels(), 0.0f);
         }
     }
 
@@ -158,6 +179,14 @@ private:
             g_channel.createDataSet(grid_type + "_samples", this->sample_count);
             g_channel.createDataSet(grid_type + "_variance", this->variance);
         }
+        else if (this->minimum)
+        {
+            // no special action for minimum
+        }
+        else
+        {
+            g_channel.createDataSet(grid_type + "_weights", this->weights);
+        }
     }
 
 
@@ -188,6 +217,21 @@ private:
                 file,
                 grid_name + "_variance",
                 utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type + "_variance"),
+                getNumberTypeXDMF(DataType::FLOAT),
+                getNumberPrecisionXDMF(DataType::FLOAT),
+                this->properties->getNumVoxels()
+            );
+        }
+        else if (this->minimum)
+        {
+            // no special action for minimum
+        }
+        else
+        {
+            utilities::XDMF::writeVoxelGridAttribute(
+                file,
+                grid_name + "_weights",
+                utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type + "_weights"),
                 getNumberTypeXDMF(DataType::FLOAT),
                 getNumberPrecisionXDMF(DataType::FLOAT),
                 this->properties->getNumVoxels()
@@ -252,9 +296,14 @@ private:
                 this->update_callback = std::bind(&UpdateCallable::update_average, this,
                                                   std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
             }
-            else
+            else if (this->caller.minimum)
             {
                 this->update_callback = std::bind(&UpdateCallable::update_min_magnitude, this,
+                                                  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+            }
+            else
+            {
+                this->update_callback = std::bind(&UpdateCallable::update_weighted, this,
                                                   std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
             }
         }
@@ -290,6 +339,22 @@ private:
         }
 
 
+        /// @brief Performs TSDF voxel value update with a weighted method on negative values.
+        /// @param [out] current Current value of the TSDF.
+        /// @param update Newly measured TSDF distance.
+        /// @param i Vector index for the voxel. See `Grid::Properties::at`.
+        void update_weighted(float& current, const float& update, const size_t& i)
+        {
+            float&  w = this->caller.weights[i];
+            float w_update = update > 0 ? 1 : utilities::math::lerp(1.0f, 0.0f, update / this->caller.dist_min);
+
+            current *= w;
+            current += update * w_update;
+            w += w_update;
+            current /= w;
+        }
+
+
         /// @brief Reference to the specific derived class calling this object.
         TSDF& caller;
 
@@ -298,14 +363,20 @@ private:
     };
 
 
-    /// @brief If true, uses the average TSDF update algorithm rather than minimum magnitude.
+    /// @brief If true, uses the average TSDF update algorithm rather than a weighted update.
     const bool average;
+
+    /// @brief If true, uses the minimum magnitude TSDF update algorithm rather than a weighted update.
+    const bool minimum;
 
     /// @brief Stores the update count data that the grid uses.
     std::vector<size_t> sample_count;
 
     /// @brief Stores the update count data that the grid uses.
     std::vector<float> variance;
+
+    /// @brief Stores the weighted update value for a voxel.
+    std::vector<float> weights;
 
     /// @brief Subclass callable that std::visit uses to perform updates with typed information.
     /// @note  Initialization order matters. This musts be declared last so the other class members that
@@ -317,8 +388,12 @@ private:
 /// @brief String for the class name.
 const std::string TSDF::type_name = "TSDF";
 
-/// @brief ArgParser flag for using an average method rather than a minimum magnitude method.
+/// @brief ArgParser flag for using an average method.
 const std::string TSDF::parse_average = "--average";
+
+/// @brief ArgParser flag for using a minimum magnitude method.
+const std::string TSDF::parse_minimum = "--minimum";
+
 
 
 } // namespace data

@@ -47,7 +47,8 @@ int main(const int argc, const char **argv)
         manager->policyAdd("--set-active --type Axis   --n-views 7 --n-repeat 3 --x -1.0 --y -1.0 --z -1.0 --seed 50 --uniform");
     }
     manager->reconstructionAddChannel("--name tsdf           --type TSDF           --dtype double");
-    manager->reconstructionAddChannel("--name tsdf_avg   --type TSDF   --average   --dtype float");
+    manager->reconstructionAddChannel("--name avg_tsdf   --type TSDF   --average   --dtype float");
+    manager->reconstructionAddChannel("--name min_tsdf   --type TSDF   --minimum   --dtype float");
     manager->reconstructionAddChannel("--name update         --type UpdateCount    --dtype uint");
     manager->reconstructionAddChannel("--name binary         --type Binary         --dtype uint");
     manager->reconstructionAddChannel("--name binary_tsdf    --type BinaryTSDF     --dtype uint");

@@ -66,6 +66,26 @@ public:
     }
 
 
+    /// @brief Accessor for `metrics::ground_truth::ExperimentOccupancy` in
+    ///       `metrics::OccupancyConfusion`
+    /// @return Occupancy data vector.
+    std::vector<uint8_t> getOccupancyData() const
+    {
+        auto occupancy_data = std::vector<uint8_t>(this->properties->getNumVoxels(), VoxelOccupancy::FREE);
+        auto get_occupancy_data = [&](auto&& data){
+            for (size_t i = 0; i < data.size(); ++i)
+            {
+                if (data[i] <= 0)
+                {
+                    occupancy_data[i] = VoxelOccupancy::OCCUPIED;
+                }
+            }
+        };
+        std::visit(get_occupancy_data, this->data);
+        return occupancy_data;
+    }
+
+
     /// @brief Updates the Grid with new information along a ray.
     /// @param ray_trace Trace with update voxel location and distances.
     void update(const std::shared_ptr<const Trace>& ray_trace) override final

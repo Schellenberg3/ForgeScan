@@ -34,6 +34,7 @@ public:
                                   parser.get<float>(Probability::parse_p_sensed, Probability::default_p_sensed),
                                   parser.get<float>(Probability::parse_p_far,    Probability::default_p_far),
                                   parser.get<float>(Probability::parse_p_init,   Probability::default_p_init),
+                                  parser.get<float>(Probability::parse_p_thresh, Probability::default_p_thresh),
                                   stringToDataType(parser.get(VoxelGrid::parse_dtype), DataType::FLOAT));
     }
 
@@ -61,6 +62,7 @@ public:
                                                const float& p_sensed =  Probability::default_p_sensed,
                                                const float& p_far    =  Probability::default_p_far,
                                                const float& p_init   =  Probability::default_p_init,
+                                               const float& p_thresh =  Probability::default_p_thresh,
                                                const DataType& type_id = DataType::FLOAT)
     {
         return std::shared_ptr<Probability>(new Probability(properties, dist_min, dist_max,
@@ -70,6 +72,7 @@ public:
                                                             std::clamp(p_sensed, 0.0f, 1.0f),
                                                             std::clamp(p_far,    0.0f, 1.0f),
                                                             std::clamp(p_init,   0.0f, 1.0f),
+                                                            std::clamp(p_thresh, 0.0f, 1.0f),
                                                             type_id));
     }
 
@@ -88,6 +91,25 @@ public:
         return Probability::type_name;
     }
 
+    /// @brief Accessor for `metrics::ground_truth::ExperimentOccupancy` in
+    ///       `metrics::OccupancyConfusion`
+    /// @return Occupancy data vector.
+    std::vector<uint8_t> getOccupancyData() const
+    {
+        auto occupancy_data = std::vector<uint8_t>(this->properties->getNumVoxels(), VoxelOccupancy::FREE);
+        auto get_occupancy_data = [&](auto&& data){
+            for (size_t i = 0; i < data.size(); ++i)
+            {
+                if (data[i] > this->log_p_thresh)
+                {
+                    occupancy_data[i] = VoxelOccupancy::OCCUPIED;
+                }
+            }
+        };
+        std::visit(get_occupancy_data, this->data);
+        return occupancy_data;
+    }
+
 
     /// @brief Updates the Grid with new information along a ray.
     /// @param ray_trace Trace with update voxel location and distances.
@@ -99,9 +121,11 @@ public:
     }
 
 
-    static const float default_p_max, default_p_min, default_p_past, default_p_sensed, default_p_far, default_p_init;
+    static const float default_p_max, default_p_min,  default_p_past, default_p_sensed,
+                       default_p_far, default_p_init, default_p_thresh;
 
-    static const std::string parse_p_max, parse_p_min, parse_p_past, parse_p_sensed, parse_p_far, parse_p_init;
+    static const std::string parse_p_max, parse_p_min,  parse_p_past, parse_p_sensed,
+                             parse_p_far, parse_p_init, parse_p_thresh;
 
     static const std::string type_name;
 
@@ -127,6 +151,7 @@ private:
                          const float& p_sensed,
                          const float& p_far,
                          const float& p_init,
+                         const float& p_thresh,
                          const DataType& type_id)
         : VoxelGrid(properties,
                     dist_min,
@@ -139,6 +164,7 @@ private:
           p_past(p_past),
           p_sensed(p_sensed),
           p_far(p_far),
+          log_p_thresh(utilities::math::log_odds(p_thresh)),
           update_callable(*this)
     {
 
@@ -247,6 +273,9 @@ private:
     /// @brief Probability for voxels far in front of the sensed point.
     const float p_far;
 
+    /// @brief Log probability for threshold above which voxels are consider occupied.
+    const float log_p_thresh;
+
     /// @brief Subclass callable that std::visit uses to perform updates with typed information.
     /// @note  Initialization order matters. This musts be declared last so the other class members that
     ///        this uses are guaranteed to be initialized.
@@ -265,7 +294,8 @@ const float Probability::default_p_max    = 0.98f,
 const float Probability::default_p_past   = 0.50f,
             Probability::default_p_sensed = 0.80f,
             Probability::default_p_far    = 0.10f,
-            Probability::default_p_init   = 0.50f;
+            Probability::default_p_init   = 0.50f,
+            Probability::default_p_thresh = 0.60f;
 
 /// @brief ArgParser key for the maximum occupation probability a voxel may have.
 const std::string Probability::parse_p_max = "--p-max";
@@ -284,6 +314,9 @@ const std::string Probability::parse_p_far = "--p-far";
 
 /// @brief ArgParser key for the occupation probability to initialize a voxel to.
 const std::string Probability::parse_p_init = "--p-init";
+
+/// @brief ArgParser key for the occupation probability above which voxels are consider occupied.
+const std::string Probability::parse_p_thresh = "--p-thresh";
 
 
 } // namespace data

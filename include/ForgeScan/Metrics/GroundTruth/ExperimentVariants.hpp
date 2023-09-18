@@ -17,7 +17,9 @@ namespace ground_truth {
 ///        Confusion Metric may compare to a ground truth Occupancy Grid.
 typedef std::variant<
     std::shared_ptr<const data::Binary>,
-    std::shared_ptr<const data::BinaryTSDF>
+    std::shared_ptr<const data::BinaryTSDF>,
+    std::shared_ptr<const data::Probability>,
+    std::shared_ptr<const data::TSDF>
 >
 ExperimentOccupancy;
 
@@ -47,6 +49,18 @@ inline ExperimentOccupancy dynamic_cast_to_experimental_occupancy(const std::sha
     if (voxel_grid_cast_binary_tsdf != nullptr)
     {
         return voxel_grid_cast_binary_tsdf;
+    }
+
+    auto voxel_grid_cast_probability = std::dynamic_pointer_cast<const data::Probability>(voxel_grid);
+    if (voxel_grid_cast_probability != nullptr)
+    {
+        return voxel_grid_cast_probability;
+    }
+
+    auto voxel_grid_cast_tsdf = std::dynamic_pointer_cast<const data::TSDF>(voxel_grid);
+    if (voxel_grid_cast_tsdf != nullptr)
+    {
+        return voxel_grid_cast_tsdf;
     }
 
     throw BadVoxelGridDownCast("ExperimentOccupancy");

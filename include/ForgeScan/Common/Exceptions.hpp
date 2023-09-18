@@ -82,8 +82,9 @@ struct ReservedMapKey : public InvalidMapKey
 };
 
 
-/// @brief Exception class for Constructor factories when parsing ArgParser to
-///        select which of a base class's derived classes to create.
+/// @brief Exception class for Constructor factories when parsing ArgParser to select which of a
+///        base class's derived classes to create. Also used in class constructors in cases where
+///        some options might be mutually exclusive. 
 struct ConstructorError : public Exception
 {
     /// @brief Constructs an ConstructorError exception.
@@ -102,6 +103,17 @@ struct ConstructorError : public Exception
     static ConstructorError UnkownType(const std::string& derived_type, const std::string& base_type)
     {
         return ConstructorError("The type \"" + derived_type + "\" in not recognized as a valid type of " + base_type + ".");
+    }
+
+
+    /// @brief Constructs message to specify that selected options are mutually exclusive.
+    /// @param type Name of the requested class.
+    /// @param a First mutually exclusive option
+    /// @param b Second mutually exclusive option.
+    /// @return ConstructorError with message.
+    static ConstructorError MutuallyExclusive(const std::string& type, const std::string& a, const std::string& b)
+    {
+        return ConstructorError("In \"" + type + "\" the options \"" + a + "\" and \"" + b + "\" are mutually exclusive.");
     }
 };
 

@@ -135,8 +135,8 @@ private:
     {
         utilities::XDMF::writeVoxelGridAttribute(
             file,
-            grid_name + "_TSDF",
-            utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type + "_TSDF"),
+            grid_name + "_tsdf",
+            utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type + "_tsdf"),
             getNumberTypeXDMF(this->type_id),
             getNumberPrecisionXDMF(this->type_id),
             this->properties->getNumVoxels()
@@ -144,8 +144,8 @@ private:
 
         utilities::XDMF::writeVoxelGridAttribute(
             file,
-            grid_name + "_Binary",
-            utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type + "_Binary"),
+            grid_name + "_binary",
+            utilities::XDMF::makeDataPath(hdf5_fname, FS_HDF5_RECONSTRUCTION_GROUP, grid_name, grid_type + "_binary"),
             getNumberTypeXDMF(DataType::UINT8_T),
             getNumberPrecisionXDMF(DataType::UINT8_T),
             this->properties->getNumVoxels()

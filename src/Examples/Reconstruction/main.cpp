@@ -28,7 +28,7 @@ int main(const int argc, const char **argv)
     // ************************************ Create a camera ************************************ //
 
     auto intr   = forge_scan::sensor::Intrinsics::create(parser);
-    auto camera = forge_scan::sensor::Camera::create(intr);
+    auto camera = forge_scan::sensor::Camera::create(intr, noise, 100);
     auto camera_pose = forge_scan::Extrinsic::Identity();
 
 
@@ -84,7 +84,6 @@ int main(const int argc, const char **argv)
             camera->setExtr(camera_pose);
 
             scene->image(camera);
-            camera->addNoise(noise);
             if (show_im)
             {
                 forge_scan::sensor::DepthImageProcessing::imshow(camera, true);

@@ -316,6 +316,9 @@ inline bool get_ray_trace(const std::shared_ptr<Trace>& ray_trace,
         }
         catch (const VoxelOutOfRange& e)
         {
+            /// TODO: Synthetic data from the Camera class with high levels of noise (0.2 to 0.5) can cause this
+            ///       loop to access (-1, -1, -1) and fail (will appear as 9223372036854775808 due to unsigned ints).
+            ///       For now solving this is not important but it is curious.
             // Algorithm should never go out of bounds. But catching here dose not impact performance and prevents
             // undefined behavior and silent errors in a VoxelGrid update where all indicies are assumed to be valid.
             throw VoxelOutOfRange("Ray tracing failed: This should not happen. Failed with: " +  std::string(e.what()));

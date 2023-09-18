@@ -50,11 +50,15 @@ struct Camera : public Entity
     /// @brief Creates a shared pointer to a Camera.
     /// @param intr Intrinsic properties for the Camera.
     /// @param extr Extrinsic pose of the Camera.
+    /// @param percent_noise Amount of gaussian noise to add.
+    /// @param seed Seed for the noise RNG. Default -1 will use a random seed.
     /// @return Shared pointer to a Camera.
     static std::shared_ptr<Camera> create(const std::shared_ptr<const Intrinsics>& intr = Intrinsics::create(),
+                                          const float& percent_noise = 0.02,
+                                          const float& seed = -1,
                                           const Extrinsic& extr = Extrinsic::Identity())
     {
-        return std::shared_ptr<Camera>(new Camera(intr, extr));
+        return std::shared_ptr<Camera>(new Camera(intr, percent_noise, seed, extr));
     }
 
 
@@ -176,11 +180,10 @@ struct Camera : public Entity
     ///        by some percent of its original length.
     /// @param percent Defines the standard deviation of the noise. A value of `sigma=0.5*percent`
     ///                is used so 95% of scaling values are within `[-percent, +percent]`.
-    /// @note  The seed of this function is set randomly with each call. This may be better as a
-    ///        class member to ensure repeatability. But for now this works.
-    void addNoise(const float& percent = 0.02)
+    /// @warning A percent value above `0.2` may cause ray tracing failures. I have not investigated why yet.
+    ///          Likely some numeric instability leading to negative voxel coordinates.
+    void addNoise(const float& percent)
     {
-        static utilities::RandomSampler<float> sample(-1);
         if (percent == 0)
         {
             return;
@@ -191,9 +194,18 @@ struct Camera : public Entity
         {
             for (size_t col = 0; col < this->intr->width; ++col)
             {
-                this->image(row, col) += this->image(row, col) * nd(sample.gen);
+                auto& x = this->image(row, col);
+                x = std::max(x + x * nd(this->sample.gen), this->intr->min_d);
             }
         }
+    }
+
+
+    /// @brief Adds noise to the image. The noise is gaussian with zero mean and scales the ray
+    ///        by some percent of its original length.
+    void addNoise()
+    {
+        this->addNoise(this->percent_noise);
     }
 
 
@@ -237,9 +249,15 @@ private:
     /// @brief Private constructor to enforce use of shared pointers.
     /// @param intr Intrinsic properties for the Camera.
     /// @param extr Extrinsic pose of the Camera.
-    explicit Camera(const std::shared_ptr<const Intrinsics>& intr, const Extrinsic& extr)
+    
+    explicit Camera(const std::shared_ptr<const Intrinsics>& intr, 
+                    const float& percent_noise = 0.02,
+                    const float& seed = -1,
+                    const Extrinsic& extr = Extrinsic::Identity())
         : Entity(extr),
-          intr(intr)
+          intr(intr),
+          percent_noise(percent_noise),
+          sample(seed)
     {
         this->resetDepth();
     }
@@ -278,6 +296,12 @@ private:
 
     /// @brief Pointer to the derived class's intrinsic parameters.
     std::shared_ptr<const Intrinsics> intr;
+
+    /// @brief Amount of noise to add.
+    float percent_noise;
+
+    /// @brief Amount of noise to add.
+    utilities::RandomSampler<float> sample;
 };
 
 

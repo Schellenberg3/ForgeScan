@@ -301,6 +301,7 @@ public:
                 }
             }
         }
+        camera->addNoise();
         camera->saturateDepth();
     }
 

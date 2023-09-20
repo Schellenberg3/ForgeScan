@@ -9,7 +9,9 @@ namespace forge_scan {
 namespace data {
 
 
-/// @brief Counts how many times the voxel has been updated.
+/// @brief Counts how many times the voxel has been viewed.
+/// @details This increments the count for a voxel only once group of updates, rather than the
+///          CountUpdates class which increments for each ray traced.
 /// @note Rollover of integer types may occur if the type is too small.
 class CountViews : public VoxelGrid
 {

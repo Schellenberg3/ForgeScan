@@ -87,6 +87,10 @@ public:
                 }
             }
         }
+        for (const auto& item : this->channels)
+        {
+            item.second->postUpdate();
+        }
     }
 
 

@@ -95,6 +95,11 @@ public:
         return this->data;
     }
 
+    /// @brief Runs after calls to `update` so a grid can preform post-processing on its data, if needed.
+    virtual void postUpdate()
+    {
+
+    }
 
 
     // ***************************************************************************************** //

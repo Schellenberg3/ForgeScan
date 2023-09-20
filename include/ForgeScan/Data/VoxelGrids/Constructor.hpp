@@ -5,6 +5,7 @@
 
 #include "ForgeScan/Data/VoxelGrids/Binary.hpp"
 #include "ForgeScan/Data/VoxelGrids/BinaryTSDF.hpp"
+#include "ForgeScan/Data/VoxelGrids/CountViews.hpp"
 #include "ForgeScan/Data/VoxelGrids/Probability.hpp"
 #include "ForgeScan/Data/VoxelGrids/TSDF.hpp"
 #include "ForgeScan/Data/VoxelGrids/UpdateCount.hpp"
@@ -38,6 +39,10 @@ struct Constructor
         {
             return BinaryTSDF::create(properties, parser);
         }
+        if (iequals(grid_type, CountViews::type_name))
+        {
+            return CountViews::create(properties, parser);
+        }
         if (iequals(grid_type, Probability::type_name))
         {
             return Probability::create(properties, parser);
@@ -69,6 +74,10 @@ struct Constructor
         if (iequals(grid_type, BinaryTSDF::type_name))
         {
             return BinaryTSDF::helpMessage();
+        }
+        if (iequals(grid_type, CountViews::type_name))
+        {
+            return CountViews::helpMessage();
         }
         if (iequals(grid_type, Probability::type_name))
         {

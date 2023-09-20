@@ -53,6 +53,7 @@ int main(const int argc, const char **argv)
     manager->reconstructionAddChannel("--name binary         --type Binary         --dtype uint");
     manager->reconstructionAddChannel("--name binary_tsdf    --type BinaryTSDF     --dtype uint");
     manager->reconstructionAddChannel("--name probability    --type Probability    --dtype float");
+    manager->reconstructionAddChannel("--name views          --type CountViews     --dtype size_t");
 
 
     // ******* Set up an OccupancyConfusion Metric for the Scene, add it to the Manager ******** //

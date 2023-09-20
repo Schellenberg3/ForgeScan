@@ -11,15 +11,15 @@ namespace data {
 
 /// @brief Counts how many times the voxel has been updated.
 /// @note Rollover of integer types may occur if the type is too small.
-class UpdateCount : public VoxelGrid
+class CountUpdates : public VoxelGrid
 {
 public:
-    /// @brief Constructor for a shared pointer to a UpdateCount VoxelGrid.
+    /// @brief Constructor for a shared pointer to a CountUpdates VoxelGrid.
     /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
-    /// @param parser ArgParser with arguments to construct an UpdateCount Grid from.
-    /// @return Shared pointer to a UpdateCount Grid.
+    /// @param parser ArgParser with arguments to construct an CountUpdates Grid from.
+    /// @return Shared pointer to a CountUpdates Grid.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
-    static std::shared_ptr<UpdateCount> create(const std::shared_ptr<const Grid::Properties>& properties,
+    static std::shared_ptr<CountUpdates> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const utilities::ArgParser& parser)
     {
         return create(properties, parser.get<float>(VoxelGrid::parse_d_min,   VoxelGrid::default_zero),
@@ -29,36 +29,36 @@ public:
     }
 
 
-    /// @brief Constructor for a shared pointer to a UpdateCount VoxelGrid.
+    /// @brief Constructor for a shared pointer to a CountUpdates VoxelGrid.
     /// @param properties Shared, constant properties for the reconstruction.
     /// @param dist_min   Minimum update distance. Default 0.
     /// @param dist_max   Maximum update distance. Default positive infinity.
     /// @param default_value Value to initialize the Grid to. Default 0.
     /// @param type_id       Datatype for the Grid. Default is unsigned 32-bit integer.
-    /// @return Shared pointer to a UpdateCount Grid.
+    /// @return Shared pointer to a CountUpdates Grid.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
-    static std::shared_ptr<UpdateCount> create(const std::shared_ptr<const Grid::Properties>& properties,
+    static std::shared_ptr<CountUpdates> create(const std::shared_ptr<const Grid::Properties>& properties,
                                                const float& dist_min = 0,
                                                const float& dist_max = INFINITY,
                                                const DataVariant& default_value = 0,
                                                const DataType& type_id = DataType::UINT32_T)
     {
-        return std::shared_ptr<UpdateCount>(new UpdateCount(properties, dist_min, dist_max, default_value, type_id));
+        return std::shared_ptr<CountUpdates>(new CountUpdates(properties, dist_min, dist_max, default_value, type_id));
     }
 
 
-    /// @return Help message for constructing a UpdateCount VoxelGrid with ArgParser.
+    /// @return Help message for constructing a CountUpdates VoxelGrid with ArgParser.
     static std::string helpMessage()
     {
         /// TODO: Return an fill this in.
-        return "TODO: UpdateCount help message";
+        return "TODO: CountUpdates help message";
     }
 
 
     /// @brief Returns the class type name for the VoxelGrid.
     const std::string& getTypeName() const override final
     {
-        return UpdateCount::type_name;
+        return CountUpdates::type_name;
     }
 
 
@@ -81,7 +81,7 @@ private:
     /// @param default_value Value to initialize the Grid to
     /// @param type_id       Datatype for the Grid.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
-    explicit UpdateCount(const std::shared_ptr<const Grid::Properties>& properties,
+    explicit CountUpdates(const std::shared_ptr<const Grid::Properties>& properties,
                          const float& dist_min,
                          const float& dist_max,
                          const DataVariant& default_value,
@@ -246,7 +246,7 @@ private:
 
         /// @brief Creates an UpdateCallable to implement the derived class's update function.
         /// @param caller Reference to the specific derived class calling this object.
-        UpdateCallable(UpdateCount& caller)
+        UpdateCallable(CountUpdates& caller)
             : caller(caller)
         {
 
@@ -254,7 +254,7 @@ private:
 
 
         /// @brief Reference to the specific derived class calling this object.
-        UpdateCount& caller;
+        CountUpdates& caller;
     };
 
 
@@ -266,7 +266,7 @@ private:
 
 
 /// @brief String for the class name.
-const std::string UpdateCount::type_name = "UpdateCount";
+const std::string CountUpdates::type_name = "CountUpdates";
 
 
 } // namespace data

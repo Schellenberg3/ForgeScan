@@ -51,9 +51,9 @@ struct Constructor
         {
             return TSDF::create(properties, parser);
         }
-        if (iequals(grid_type, UpdateCount::type_name))
+        if (iequals(grid_type, CountUpdates::type_name))
         {
-            return UpdateCount::create(properties, parser);
+            return CountUpdates::create(properties, parser);
         }
 
         throw ConstructorError::UnkownType(grid_type, VoxelGrid::type_name);
@@ -87,9 +87,9 @@ struct Constructor
         {
             return TSDF::helpMessage();
         }
-        if (iequals(grid_type, UpdateCount::type_name))
+        if (iequals(grid_type, CountUpdates::type_name))
         {
-            return UpdateCount::helpMessage();
+            return CountUpdates::helpMessage();
         }
         std::stringstream ss;
         ss << VoxelGrid::helpMessage() << "\nPossible data VoxelGrids are: "
@@ -97,7 +97,7 @@ struct Constructor
            << BinaryTSDF::type_name  << ", "
            << Probability::type_name << ", "
            << TSDF::type_name        << ", "
-           << UpdateCount::type_name;
+           << CountUpdates::type_name;
         return ss.str();
     }
 };

@@ -6,9 +6,9 @@
 #include "ForgeScan/Data/VoxelGrids/Binary.hpp"
 #include "ForgeScan/Data/VoxelGrids/BinaryTSDF.hpp"
 #include "ForgeScan/Data/VoxelGrids/CountViews.hpp"
+#include "ForgeScan/Data/VoxelGrids/CountUpdates.hpp"
 #include "ForgeScan/Data/VoxelGrids/Probability.hpp"
 #include "ForgeScan/Data/VoxelGrids/TSDF.hpp"
-#include "ForgeScan/Data/VoxelGrids/UpdateCount.hpp"
 
 #include "ForgeScan/Utilities/Strings.hpp"
 

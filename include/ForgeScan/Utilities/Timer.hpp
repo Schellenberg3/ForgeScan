@@ -40,6 +40,18 @@ struct Timer
     }
 
 
+    /// @brief  Calculates the elapsed time in microseconds, even if the timer is running.
+    /// @return Elapsed time in microseconds.
+    long long elapsedMicroseconds()
+    {
+        if (this->running)
+        {
+            return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start_time).count();
+        }
+        return std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+    }
+
+
     /// @brief  Calculates the elapsed time in seconds, even if the timer is running.
     /// @return Elapsed time in seconds.
     double elapsedSeconds()

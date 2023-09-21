@@ -1,5 +1,3 @@
-find_package(OpenCV REQUIRED)
-
 set(EXECUTABLE_NAME Scene)
 set(SOURCE_NAME     main.cpp)
 

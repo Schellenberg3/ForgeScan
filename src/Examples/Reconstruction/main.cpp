@@ -49,7 +49,7 @@ int main(const int argc, const char **argv)
     manager->reconstructionAddChannel("--name tsdf           --type TSDF           --dtype double");
     manager->reconstructionAddChannel("--name avg_tsdf   --type TSDF   --average   --dtype float");
     manager->reconstructionAddChannel("--name min_tsdf   --type TSDF   --minimum   --dtype float");
-    manager->reconstructionAddChannel("--name update         --type UpdateCount    --dtype uint");
+    manager->reconstructionAddChannel("--name update         --type CountUpdates    --dtype uint");
     manager->reconstructionAddChannel("--name binary         --type Binary         --dtype uint");
     manager->reconstructionAddChannel("--name binary_tsdf    --type BinaryTSDF     --dtype uint");
     manager->reconstructionAddChannel("--name probability    --type Probability    --dtype float");

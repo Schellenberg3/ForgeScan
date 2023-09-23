@@ -180,6 +180,15 @@ int main()
                                                                     "binary");
     manager->metricAdd(bin_conf);
 
+    auto tsdf_conf = forge_scan::metrics::OccupancyConfusion::create(manager->reconstruction,
+                                                                     scene->getGroundTruthOccupancy(),
+                                                                     "TSDF");
+    manager->metricAdd(tsdf_conf);
+
+    auto prob_conf = forge_scan::metrics::OccupancyConfusion::create(manager->reconstruction,
+                                                                     scene->getGroundTruthOccupancy(),
+                                                                     "probability");
+    manager->metricAdd(prob_conf);
 
     // ******************************** GENERATE THEN SAVE DATA ******************************** //
 

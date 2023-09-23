@@ -11,19 +11,22 @@
 inline std::shared_ptr<forge_scan::sensor::Camera> get_camera(forge_scan::utilities::ArgParser& parser)
 {
     std::shared_ptr<forge_scan::sensor::Intrinsics> intr;
+    float noise;
     while (true)
     {
         parser.getInput("\nPlease specify the camera intrinsic properties to use [-h for help]:");
         if (parser[0] != "-h")
         {
             intr = forge_scan::sensor::Intrinsics::create(parser);
+            noise = parser.get<float>("--noise", 0.0f);
             std::cout << "\nCamera model has the following intrinsics:"
                       << "\n\t" << *intr << std::endl;
+            std::cout << "\nCamera model has the a noise of " << noise * 100 << " %." << std::endl;
             break;
         }
         std::cout << "\n" << forge_scan::sensor::Intrinsics::helpMessage() << std::endl;
     }
-    return forge_scan::sensor::Camera::create(intr);
+    return forge_scan::sensor::Camera::create(intr, noise);
 }
 
 

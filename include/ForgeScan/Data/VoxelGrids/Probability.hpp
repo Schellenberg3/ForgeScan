@@ -161,6 +161,7 @@ private:
                     DataType::TYPE_FLOATING_POINT),
           log_p_max(utilities::math::log_odds(p_max)),
           log_p_min(utilities::math::log_odds(p_min)),
+          log_p_init(utilities::math::log_odds(p_init)),
           p_past(p_past),
           p_sensed(p_sensed),
           p_far(p_far),
@@ -263,6 +264,9 @@ private:
 
     /// @brief Log probability for minimum voxel values saturation.
     const float log_p_min;
+
+    /// @brief Log probability for initial voxel values.
+    const float log_p_init;
 
     /// @brief Probability for voxels past the sensed point
     const float p_past;

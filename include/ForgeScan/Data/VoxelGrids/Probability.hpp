@@ -294,8 +294,8 @@ const float Probability::default_p_max    = 0.98f,
 const float Probability::default_p_past   = 0.50f,
             Probability::default_p_sensed = 0.80f,
             Probability::default_p_far    = 0.10f,
-            Probability::default_p_init   = 0.50f,
-            Probability::default_p_thresh = 0.60f;
+            Probability::default_p_init   = 0.75f,
+            Probability::default_p_thresh = 0.65f;
 
 /// @brief ArgParser key for the maximum occupation probability a voxel may have.
 const std::string Probability::parse_p_max = "--p-max";

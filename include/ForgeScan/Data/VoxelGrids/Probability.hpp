@@ -96,17 +96,36 @@ public:
     /// @return Occupancy data vector.
     std::vector<uint8_t> getOccupancyData() const
     {
-        auto occupancy_data = std::vector<uint8_t>(this->properties->getNumVoxels(), VoxelOccupancy::FREE);
+        auto occupancy_data = std::vector<uint8_t>(this->properties->getNumVoxels(), VoxelOccupancy::OCCUPIED);
+
         auto get_occupancy_data = [&](auto&& data){
             for (size_t i = 0; i < data.size(); ++i)
             {
-                if (data[i] > this->log_p_thresh)
+                if (data[i] < this->log_p_thresh)
                 {
-                    occupancy_data[i] = VoxelOccupancy::OCCUPIED;
+                    occupancy_data[i] = VoxelOccupancy::FREE;
                 }
             }
         };
-        std::visit(get_occupancy_data, this->data);
+
+        auto get_occupancy_data_with_seen_info = [&](auto&& data){
+            for (size_t i = 0; i < data.size(); ++i)
+            {
+                if (data[i] < this->log_p_thresh || (data[i] == this->log_p_init && this->data_seen->operator[](i) == true))
+                {
+                    occupancy_data[i] = VoxelOccupancy::FREE;
+                }
+            }
+        };
+
+        if (this->data_seen != nullptr && this->data_seen->size() == this->properties->getNumVoxels())
+        {
+            std::visit(get_occupancy_data_with_seen_info, this->data);
+        }
+        else
+        {
+            std::visit(get_occupancy_data, this->data);
+        }
         return occupancy_data;
     }
 

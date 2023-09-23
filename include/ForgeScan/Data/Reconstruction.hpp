@@ -81,6 +81,11 @@ public:
             if(get_ray_trace(this->ray_trace, sensed, origin, this->grid_properties,
                              this->min_dist_min, this->max_dist_max))
             {
+                for (auto it = this->ray_trace->first_above(0.0f); it != this->ray_trace->end(); ++it)
+                {
+                    this->data_seen->operator[](it->i) = true;
+                }
+
                 for (const auto& item : this->channels)
                 {
                     item.second->update(this->ray_trace);
@@ -113,7 +118,9 @@ public:
             throw InvalidMapKey::NameAlreadyExists(channel_name);
         }
         this->checkChannelNameIsNotReserved(channel_name);
-        this->channels.insert( {channel_name, Constructor::create(parser, this->grid_properties)} );
+        std::shared_ptr<VoxelGrid> voxel_grid  = Constructor::create(parser, this->grid_properties);
+        voxel_grid->addSeenData(this->data_seen);
+        this->channels.insert( {channel_name, voxel_grid} );
         this->updateMinAndMaxDist();
     }
 
@@ -176,6 +183,7 @@ private:
     ///                        These `Grid::Properties` are utilized by all VoxelGrids.
     explicit Reconstruction(const std::shared_ptr<const Grid::Properties>& grid_properties)
         : grid_properties(grid_properties),
+          data_seen(std::make_shared<std::vector<bool>>(this->grid_properties->getNumVoxels(), false)),
           ray_trace(std::make_shared<Trace>())
     {
 
@@ -339,6 +347,11 @@ private:
     ///        trace calculations to only the regions which VoxelGrids will actually update.
     float min_dist_min = 0, max_dist_max = 0;
 
+    /// @brief Container of the same shape as `VoxelGrid::data` in any derived grid, but this stores
+    ///        a boolean flag for if a voxel was intersected by the postive region of a ray at least.
+    ///        It may be used by some grids in creating an occupancy data vector or in the update method.
+    std::shared_ptr<std::vector<bool>> data_seen;
+    
     /// @brief Stores an ray trace used for performing updates on each VoxelGrid.
     std::shared_ptr<Trace> ray_trace;
 };

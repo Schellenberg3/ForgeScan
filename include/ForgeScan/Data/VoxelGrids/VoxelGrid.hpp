@@ -62,6 +62,14 @@ public:
     }
 
 
+    /// @brief Provides the VoxelGrid with a view of the `data::Reconstruction`'s data_seen record.
+    /// @param data_seen Vector of booleans the same length as `VoxelGrid::data`.
+    void addSeenData(const std::shared_ptr<std::vector<bool>>& data_seen)
+    {
+        this->data_seen = data_seen;
+    }
+
+
     /// @brief Calculates how much space the data vector is using.
     /// @param [out] size_bytes     Number of bytes used by the vector.
     /// @param [out] capacity_bytes Number of bytes used by the vector, including capacity.
@@ -367,6 +375,11 @@ protected:
     ///       data a user might access or modify.
     VectorVariant data;
 
+
+    /// @brief Container of the same shape as `VoxelGrid::data` in any derived grid, but this stores
+    ///        a boolean flag for if a voxel was intersected by the postive region of a ray at least.
+    /// @note  This is a view of data managed by `data::Reconstruction`.
+    std::shared_ptr<const std::vector<bool>> data_seen{nullptr};
 
 private:
     // ***************************************************************************************** //

@@ -64,6 +64,14 @@ INTRINSICS: list[tuple[str, str]] = [
     (
         "RealSense_d455",
         "--d455 1.0"
+    ),
+    (
+        "RealSense_d455_Noise_02",
+        "--d455 1.0 --noise 0.02"
+    ),
+    (
+        "RealSense_d455_Noise_10",
+        "--d455 1.0 --noise 0.10"
     )
 ]
 

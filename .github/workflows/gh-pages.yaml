@@ -1,0 +1,44 @@
+name: gh-pages
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Install Doxygen
+      run: sudo apt-get update && sudo apt-get install cmake doxygen graphviz -y
+      shell: bash
+
+    - name: Run Doxygen
+      run: |
+        CMAKE_OPTIONS=(
+          -DFORGE_SCAN_ONLY_BUILD_DOCS=ON
+        )
+        cmake -B build -S . "${CMAKE_OPTIONS[@]}"
+        cmake --build build --target doc
+
+    - name: Deploy to GitHub Pages
+      if: ${{ success() && github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+      uses: crazy-max/ghaction-github-pages@v3.2.0
+      with:
+        target_branch: gh-pages
+        build_dir: build/doc/html
+        jekyll: false
+        keep_history: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

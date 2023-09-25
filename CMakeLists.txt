@@ -15,10 +15,20 @@ set(FORGE_SCAN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 ## ------------------------------------ COMPILATION OPTIONS ------------------------------------ ##
 ## --------------------------------------------------------------------------------------------- ##
 
-option(FORGE_SCAN_EXAMPLES    "Enable compilation of example executables"     ON)
-option(FORGE_SCAN_EXPERIMENTS "Enable compilation of experiment executables"  ON)
-option(FORGE_SCAN_BUILD_DOCS  "Enable building project documentation"         ON)
+option(FORGE_SCAN_EXAMPLES         "Enable compilation of example executables"     ON)
+option(FORGE_SCAN_EXPERIMENTS      "Enable compilation of experiment executables"  ON)
+option(FORGE_SCAN_BUILD_DOCS       "Enable building project documentation"         ON)
+option(FORGE_SCAN_ONLY_BUILD_DOCS  "Builds only the project documentation"         OFF)
 
+
+if(FORGE_SCAN_BUILD_DOCS)
+    add_subdirectory(doc)
+    if (FORGE_SCAN_ONLY_BUILD_DOCS)
+        # If only the Docs are built then return early instead
+        # of searching for dependencies that won't be needed.
+        return()
+    endif()
+endif()
 
 ## --------------------------------------------------------------------------------------------- ##
 ## ---------------------------------- FIND EXTERNAL PACKAGES ----------------------------------- ##
@@ -97,10 +107,6 @@ set_target_properties(
 
 # Add project executable targets.
 add_subdirectory(src)
-
-if(FORGE_SCAN_BUILD_DOCS)
-  add_subdirectory(doc)
-endif()
 
 
 

@@ -1,0 +1,43 @@
+FROM ubuntu:22.04
+ARG DEBIAN_FRONTEND=noninteractive
+
+
+# Minimal dependencies for running Docker
+# build-essential : for C++ compilation
+# wget            : for downloading
+# git             : for version managment
+# cmake           : for compilation
+# unzip           : for package extraction
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    wget \
+    git \
+    cmake \
+    unzip \
+ && rm -rf /var/lib/apt/lists/*
+
+
+# Install C++ dependencies for ForgeScan
+RUN apt-get update && apt-get install -y \
+    libeigen3-dev \
+    libhdf5-dev \
+    libopencv-dev \
+    doxygen \
+ && rm -rf /var/lib/apt/lists/*
+
+
+# Install Open3D with C++11
+ENV Open3D_DIR=/opt/open3d-devel-linux-x86_64-cxx11-abi-0.17.0
+RUN wget https://github.com/isl-org/Open3D/releases/download/v0.17.0/open3d-devel-linux-x86_64-cxx11-abi-0.17.0.tar.xz -P opt \
+ && tar -xf opt/open3d-devel-linux-x86_64-cxx11-abi-0.17.0.tar.xz -C opt \
+ && rm opt/open3d-devel-linux-x86_64-cxx11-abi-0.17.0.tar.xz
+
+
+# Set up Python dependencies for ForgeScan
+COPY ../requirements.txt .
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+ && rm -rf /var/lib/apt/lists/* \
+ && pip install -r requirements.txt \
+ && rm requirements.txt

@@ -10,8 +10,8 @@ add_library(
 target_compile_definitions(
     ${DEFNITIONS_LIBRARY}
     INTERFACE
-        FORGE_SCAN_DIR="${FORGE_SCAN_ROOT_DIR}"
-        FORGE_SCAN_SHARE_DIR="${FORGE_SCAN_ROOT_DIR}/share"
+        FORGE_SCAN_DIR=""
+        FORGE_SCAN_SHARE_DIR="share"
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

@@ -34,6 +34,7 @@ endif()
 ## ---------------------------------- FIND EXTERNAL PACKAGES ----------------------------------- ##
 ## --------------------------------------------------------------------------------------------- ##
 
+find_package(Open3D REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE)
 

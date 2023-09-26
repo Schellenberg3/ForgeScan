@@ -48,12 +48,12 @@ fail to locate the files in the project that they require.
 
 For the CPU-only [`Dockerfile`](Dockerfile).
 ```bash
-docker build --file ./docker/Dockerfile --tag forgescan/ubuntu20.04:cpu .
+docker build --file ./docker/Dockerfile --tag forgescan/ubuntu22.04:cpu .
 ```
 
 For the CUDA-enabled [`Dockerfile.cuda`](Dockerfile.cuda).
 ```bash
-docker build --file ./docker/Dockerfile.cuda --tag forgescan/ubuntu20.04:cuda .
+docker build --file ./docker/Dockerfile.cuda --tag forgescan/ubuntu22.04:cuda .
 ```
 
 ## Trying and using this Project

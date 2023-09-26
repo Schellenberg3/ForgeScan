@@ -311,8 +311,16 @@ private:
         {
             if (this->caller.average)
             {
-                assert(this->caller.sample_count.size() == this->caller.properties->getNumVoxel());
-                assert(this->caller.variance.size() == this->caller.properties->getNumVoxels());
+                const size_t grid_size = this->caller.properties->getNumVoxels();
+                if (this->caller.sample_count.size() == grid_size )
+                {
+                    throw GridPropertyError::DataVectorDoesNotMatch(this->caller.properties->size, this->caller.sample_count.size());
+                }
+                if (this->caller.variance.size() == this->caller.properties->getNumVoxels())
+                {
+                    throw GridPropertyError::DataVectorDoesNotMatch(this->caller.properties->size, this->caller.variance.size());
+                }
+                
                 this->update_callback = std::bind(&UpdateCallable::update_average, this,
                                                   std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
             }

@@ -8,12 +8,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 # git             : for version managment
 # cmake           : for compilation
 # unzip           : for package extraction
+# cppcheck        : for C++ linting
 RUN apt-get update && apt-get install -y \
     build-essential \
     wget \
     git \
     cmake \
     unzip \
+    cppcheck \
  && rm -rf /var/lib/apt/lists/*
 
 

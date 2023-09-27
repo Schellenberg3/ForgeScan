@@ -109,7 +109,36 @@ and create a file called `devcontainer.json` with the following contents.
     // Required for the CUDA image. Not needed for the CPU-only image.
     "runArgs": [
         "--gpus", "all"
-    ]
+    ],
+
+    // Select the container's non-root user to avoid filesystem issues with root-created objects.
+    "remoteUser": "forgescan-dev",
+
+    // *********************** OPTIONAL BUT HELPFUL ADDITIONAL SETTINGS ************************ //
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                // Add any VS Code extensions to run in the container: 
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-vscode.cmake-tools",
+            ],
+
+            // Ensure the container shell is bash and not sh
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash", 
+                "terminal.integrated.profiles.linux": {
+                    "bash": {
+                        "path": "/bin/bash"
+                    }
+                }
+            }
+        }
+    },
+
+    // Prevents erroneous git "detected dubious ownership in repository" warning.
+    "postAttachCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
 }
 ```
 

@@ -1,0 +1,5 @@
+# Ignore everything in this folder except for this file, README.md, and Meshes
+*
+!.gitignore
+!README.md
+!Meshes

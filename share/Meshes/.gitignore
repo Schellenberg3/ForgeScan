@@ -1,0 +1,14 @@
+# Ignore anything added to this folder except for what is explicitly tracked.
+*
+!.gitignore
+!README.md
+!abc0.stl
+!abc1.stl
+!abc2.stl
+!abc3.stl
+!abc4.stl
+!abc5.stl
+!abc6.stl
+!abc7.stl
+!abc8.stl
+!abc9.stl

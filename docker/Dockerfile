@@ -4,6 +4,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Minimal dependencies for running Docker
 # build-essential : for C++ compilation
+# clang           : for C++ compilation
+# libc++-dev      : for C++ linking (specifically used by Open3D)
+# gdb             : for debugging development
+# locales         : for file encodings
 # wget            : for downloading
 # git             : for version managment
 # cmake           : for compilation
@@ -11,6 +15,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 # cppcheck        : for C++ linting
 RUN apt-get update && apt-get install -y \
     build-essential \
+    clang \
+    libc++-dev \
+    gdb \
+    locales \
     wget \
     git \
     cmake \
@@ -18,6 +26,11 @@ RUN apt-get update && apt-get install -y \
     cppcheck \
  && rm -rf /var/lib/apt/lists/*
 
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LANG     en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL   en_US.UTF-8 
 
 # Install C++ dependencies for ForgeScan
 RUN apt-get update && apt-get install -y \

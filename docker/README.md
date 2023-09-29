@@ -35,7 +35,8 @@ it for Docker.
 To verify that the Nvidia Docker is working, run:
 
 ```bash
-docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
+# The tag for nvidia/cuda may vary. This project builds from the 12.2.0-devel-ubuntu22.04 image
+docker run --rm --gpus all nvidia/cuda:12.2.0-devel-ubuntu22.04 nvidia-smi
 ```
 
 This is required for using [`Dockerfile.cuda`](Dockerfile.cuda).

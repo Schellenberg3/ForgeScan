@@ -247,13 +247,21 @@ inline std::string getNumberPrecisionXDMF(const DataType& x)
 enum VoxelOccupancy
     : uint8_t
 {
-    UNKNOWN  = 0b0000'0000,
-    FREE     = 0b0100'0001,
-    OCCUPIED = 0b1000'0001,
-    CLIPPED  = 0b1000'0010,
+    MASK_LOWER_BITS   = 0b1111'0000,
 
-    TYPE_FREE     = 0b0100'0000,
+    TYPE_UNKNOWN      = 0b0010'0000,
+    TYPE_OCCPLANE     = 0b0010'0100, // A special case of unknown. At the boundary of unknown and free voxels.
+    UNSEEN            = 0b0010'0001, // No information. Default value.
+    OCCPLANE_UNSEEN   = 0b0010'0101,
+    OCCLUDED          = 0b0010'0010, // Behind a sensed point.
+    OCCPLANE_OCCLUDED = 0b0010'0110,
+
     TYPE_OCCUPIED = 0b1000'0000,
+    OCCUPIED      = 0b1000'0001, // A voxel that contained a sensed point.
+    CLIPPED       = 0b1000'0010,
+    
+    TYPE_FREE     = 0b0100'0000,
+    FREE          = 0b0100'0001, // A voxel that a ray has passed through.
 };
 
 

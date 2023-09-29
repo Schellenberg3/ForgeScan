@@ -84,7 +84,7 @@ private:
         : VoxelGrid(properties,
                     dist_min,
                     dist_max,
-                    VoxelOccupancy::OCCUPIED,
+                    VoxelOccupancy::UNSEEN,
                     DataType::UINT8_T,
                     DataType::UINT8_T),
           update_callable(*this)
@@ -113,7 +113,7 @@ private:
             // **************************** APPLY VOXEL UPDATE HERE **************************** //
             for ( ; iter != last_occ; ++iter)
             {
-                vector[iter->i] = VoxelOccupancy::OCCUPIED;
+                vector[iter->i] = VoxelOccupancy::OCCLUDED;
             }
             for ( ; iter != last_free; ++iter)
             {

@@ -97,7 +97,7 @@ private:
                     type_id,
                     DataType::TYPE_FLOATING_POINT),
           data_occupancy(std::vector<uint8_t>(this->properties->getNumVoxels(),
-                                              VoxelOccupancy::UNKNOWN)),
+                                              VoxelOccupancy::UNSEEN)),
           update_callable(*this)
     {
 

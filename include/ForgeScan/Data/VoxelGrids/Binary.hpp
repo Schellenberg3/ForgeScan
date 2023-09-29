@@ -61,6 +61,13 @@ public:
     }
 
 
+    /// @brief Updates the grid to mark specific voxels as Occplanes.
+    void updateOccplanes()
+    {
+        std::visit(this->update_callable_occplane, this->data);
+    }
+
+
     /// @brief Updates the Grid with new information along a ray.
     /// @param ray_trace Trace with update voxel location and distances.
     void update(const std::shared_ptr<const Trace>& ray_trace) override final
@@ -87,6 +94,7 @@ private:
                     VoxelOccupancy::UNSEEN,
                     DataType::UINT8_T,
                     DataType::UINT8_T),
+          update_callable_occplane(*this),
           update_callable(*this)
     {
 
@@ -144,6 +152,80 @@ private:
         Binary& caller;
     };
 
+
+    /// @brief Subclass provides occplane calculation functions for each supported DataType/VectorVariant of
+    ///        the data vector.
+    struct UpdateCallableOccplane : public VoxelGrid::UpdateCallable
+    {
+        using VoxelGrid::UpdateCallable::operator();
+
+        // ************************************************************************************* //
+        // *                                SUPPORTED DATATYPES                                * //
+        // ************************************************************************************* //
+
+
+        void operator()(std::vector<uint8_t>& vector)
+        {
+            /// TODO: Manual walkthrough of this method.
+            static const GridSize minGridSize = GridSize(3, 3, 3);
+            if ((this->caller.properties->size.array() < minGridSize.array()).any())
+            {
+                return;
+            }
+            const size_t dx = 1, dy = this->caller.properties->size.x(),
+                         dz = this->caller.properties->size.x() * this->caller.properties->size.y();
+
+            for (size_t z = 1; z < this->caller.properties->size.z() - 1; ++z)
+            {
+                for (size_t y = 1; y < this->caller.properties->size.y() - 1; ++y)
+                {
+                    for (size_t x = 1; x < this->caller.properties->size.x() - 1; ++x)
+                    {
+                        size_t c_idx = this->caller.properties->operator[](Index(x, y, z));
+                        VoxelOccupancy c  = static_cast<VoxelOccupancy>(vector[c_idx]);
+                        VoxelOccupancy px = static_cast<VoxelOccupancy>(vector[c_idx + dx]);
+                        VoxelOccupancy nx = static_cast<VoxelOccupancy>(vector[c_idx - dx]);
+                        VoxelOccupancy py = static_cast<VoxelOccupancy>(vector[c_idx + dy]);
+                        VoxelOccupancy ny = static_cast<VoxelOccupancy>(vector[c_idx - dy]);
+                        VoxelOccupancy pz = static_cast<VoxelOccupancy>(vector[c_idx + dz]);
+                        VoxelOccupancy nz = static_cast<VoxelOccupancy>(vector[c_idx - dz]);
+                        if (c & VoxelOccupancy::TYPE_UNKNOWN && (px & VoxelOccupancy::TYPE_FREE ||
+                                                                 nx & VoxelOccupancy::TYPE_FREE ||
+                                                                 py & VoxelOccupancy::TYPE_FREE ||
+                                                                 ny & VoxelOccupancy::TYPE_FREE ||
+                                                                 pz & VoxelOccupancy::TYPE_FREE ||
+                                                                 nz & VoxelOccupancy::TYPE_FREE))
+                        {
+                            // Promote the unknown voxel type to an occplane. Silly casting required.
+                            c = static_cast<VoxelOccupancy>(VoxelOccupancy::TYPE_OCCPLANE | c);
+                        }
+                    }
+                }
+            }
+        }
+
+
+        // ************************************************************************************* //
+        // *                         PUBLIC CLASS METHODS AND MEMBERS                          * //
+        // ************************************************************************************* //
+
+
+        /// @brief Creates an UpdateCallableOccplane to implement the derived class's update function.
+        /// @param caller Reference to the specific derived class calling this object.
+        UpdateCallableOccplane(Binary& caller)
+            : caller(caller)
+        {
+
+        }
+
+
+        /// @brief Reference to the specific derived class calling this object.
+        Binary& caller;
+    };
+
+
+    /// @brief Subclass callable that std::visit uses to perform occplane calculation with typed information.
+    UpdateCallableOccplane update_callable_occplane;
 
     /// @brief Subclass callable that std::visit uses to perform updates with typed information.
     /// @note  Initialization order matters. This musts be declared last so the other class members that

@@ -119,6 +119,10 @@ private:
             {
                 vector[iter->i] = VoxelOccupancy::FREE;
             }
+            if (this->ray_trace->hasSensed())
+            {
+                vector[last_occ->i] = VoxelOccupancy::OCCUPIED;
+            }
         }
 
 

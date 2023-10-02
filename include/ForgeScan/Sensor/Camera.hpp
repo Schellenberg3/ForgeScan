@@ -184,11 +184,6 @@ struct Camera : public Entity
     ///          Likely some numeric instability leading to negative voxel coordinates.
     void addNoise(const float& percent)
     {
-        if (percent == 0)
-        {
-            return;
-        }
-
         std::normal_distribution<float> nd(0.0f, 0.5 * percent);
         for (size_t row = 0; row < this->intr->height; ++row)
         {

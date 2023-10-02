@@ -180,6 +180,7 @@ struct Camera : public Entity
     ///        by some percent of its original length.
     /// @param percent Defines the standard deviation of the noise. A value of `sigma=0.5*percent`
     ///                is used so 95% of scaling values are within `[-percent, +percent]`.
+    /// @note This does ensure no value is set below zero.
     /// @warning A percent value above `0.2` may cause ray tracing failures. I have not investigated why yet.
     ///          Likely some numeric instability leading to negative voxel coordinates.
     void addNoise(const float& percent)
@@ -190,7 +191,8 @@ struct Camera : public Entity
             for (size_t col = 0; col < this->intr->width; ++col)
             {
                 auto& x = this->image(row, col);
-                x = std::max(x + x * nd(this->sample.gen), this->intr->min_d);
+                x = std::clamp(x, this->intr->min_d, this->intr->max_d);
+                x = std::max(0.0f, x + x * nd(this->sample.gen));
             }
         }
     }
@@ -211,7 +213,8 @@ struct Camera : public Entity
         {
             for (size_t col = 0; col < this->intr->width; ++col)
             {
-                this->image(row, col) *= this->image(row, col) > this->intr->min_d;
+                auto& x = this->image(row, col);
+                x = std::clamp(x, this->intr->min_d, this->intr->max_d);
             }
         }
     }

@@ -9,6 +9,9 @@
 
 #define H5_USE_EIGEN 1
 #include <highfive/H5File.hpp>
+#include <highfive/H5Easy.hpp>
+
+#include <open3d/t/geometry/RaycastingScene.h>
 
 #include "ForgeScan/Common/Definitions.hpp"
 #include "ForgeScan/Common/Entity.hpp"
@@ -24,12 +27,16 @@
 // Define some helper constants for HDF5.
 // These are undefined at the end of this header.
 #define FS_HDF5_SCENE_GROUP            "Scene"
+
 #define FS_HDF5_SCAN_LOWER_BOUND_DSET  "/" FS_HDF5_SCENE_GROUP "/" "scan_lower_bound"
 #define FS_HDF5_GRID_SIZE_ATTR         "size"
 #define FS_HDF5_GRID_RESOLUTION_ATTR   "resolution"
 #define FS_HDF5_GRID_DIMENSIONS_ATTR   "dimension"
-#define FS_HDF5_SHAPES_GROUP           "Shapes"
-#define FS_HDF5_SHAPES_SUB_GROUP       "/" FS_HDF5_SCENE_GROUP "/" FS_HDF5_SHAPES_GROUP
+
+#define FS_HDF5_MESHES_GROUP           "Meshes"
+#define FS_HDF5_MESHES_EXTR_SUFFIX     "extrinsic"
+#define FS_HDF5_MESHES_FILEPATH        "filepath"
+
 #define FS_HDF5_GROUND_TRUTH_GROUP     "GroundTruth"
 #define FS_HDF5_OCCUPANCY_DSET         "Occupancy"
 #define FS_HDF5_TSDF_DSET              "TSDF"
@@ -39,10 +46,10 @@ namespace forge_scan {
 namespace simulation {
 
 
-/// @brief A collection of Primitive objects which are imaged together in the same scene.
+/// @brief A collection of triangle mesh objects which are imaged together in the same scene.
 struct Scene
 {
-    /// @details Required to print the shape dictionary.
+    /// @details Required to print the Scene's contents.
     friend std::ostream& operator<<(std::ostream &, const Scene&);
 
 public:
@@ -79,14 +86,14 @@ public:
         auto g_scene = file.createGroup(FS_HDF5_SCENE_GROUP);
         H5Easy::dump(file, FS_HDF5_SCAN_LOWER_BOUND_DSET, this->scan_lower_bound.matrix());
 
-        auto g_shape = g_scene.createGroup(FS_HDF5_SHAPES_GROUP);
+        auto g_meshes = g_scene.createGroup(FS_HDF5_MESHES_GROUP);
 
-        for (const auto& dict_item : this->shapes_map)
+        int n = 0;
+        for (const auto& item : this->mesh_list)
         {
-            auto g_primitive = g_shape.createGroup(dict_item.first);
-            dict_item.second->save(g_primitive);
-            const std::string dset_path = FS_HDF5_SHAPES_SUB_GROUP "/" + dict_item.first + "/extr";
-            H5Easy::dump(file, dset_path, dict_item.second->getExtr().matrix());
+            auto g_mesh = g_meshes.createGroup(std::to_string(n++));
+            g_mesh.createAttribute(FS_HDF5_MESHES_FILEPATH, item.first.fpath.string());
+            Scene::writeExtrToHDF5(file, g_mesh.getPath(), item.first.extr);
         }
 
         if (this->grid_properties)
@@ -131,40 +138,25 @@ public:
 
         auto scene_groups = g_scene.listObjectNames();
 
-        if(std::find(scene_groups.begin(), scene_groups.end(), FS_HDF5_SHAPES_GROUP) != scene_groups.end())
+        if(std::find(scene_groups.begin(), scene_groups.end(), FS_HDF5_MESHES_GROUP) != scene_groups.end())
         {
             // Only clear all elements if we make it this far into loading the HDF5.
-            this->shapes_map.clear();
+            this->mesh_list.clear();
 
-            auto g_shapes = g_scene.getGroup(FS_HDF5_SHAPES_GROUP);
-            auto primitive_groups = g_shapes.listObjectNames();
+            auto g_meshes = g_scene.getGroup(FS_HDF5_MESHES_GROUP);
+            auto mesh_groups = g_meshes.listObjectNames();
 
             // Begin reading each shape and getting the attributes.
-            for (const auto& shape_name : primitive_groups)
+            for (const auto& group_name : mesh_groups)
             {
-                auto g_primitive = g_shapes.getGroup(shape_name);
-                const std::string type_name = g_primitive.getAttribute(FS_HDF5_PRIMITIVE_TYPE_NAME_ATTR).read<std::string>();
-
-                // Use a string stream to simulate parsed arguments from a user.
-                // Totally not 'efficient' but what is efficiency anyway?
-                std::stringstream ss("--name");
-                ss << "--name " << shape_name << " --shape " << type_name;
-                if (type_name == "Sphere")
-                {
-                    ss << " --radius " << g_primitive.getAttribute(FS_HDF5_SPHERE_R_ATTR).read<float>();
-                }
-                else if (type_name == "Box")
-                {
-                    ss << " --l " << g_primitive.getAttribute(FS_HDF5_BOX_L_ATTR).read<float>();
-                    ss << " --w " << g_primitive.getAttribute(FS_HDF5_BOX_W_ATTR).read<float>();
-                    ss << " --h " << g_primitive.getAttribute(FS_HDF5_BOX_H_ATTR).read<float>();
-                }
-                this->add(ss.str());
+                auto g_mesh = g_meshes.getGroup(group_name);
+                std::filesystem::path mesh_fpath = std::filesystem::path(g_mesh.getAttribute(FS_HDF5_MESHES_FILEPATH).read<std::string>());
 
                 Extrinsic extr;
-                const std::string dset_path = FS_HDF5_SHAPES_SUB_GROUP "/" + shape_name + "/extr";
-                extr.matrix() = H5Easy::load<Eigen::Matrix4f>(file, dset_path);
-                this->transform(shape_name, extr, true);
+                Scene::readExtrFromHDF5(file, g_mesh.getPath(), extr);
+
+                this->mesh_list.emplace_back( Constructor::create(mesh_fpath, extr, fpath) );
+                this->o3d_scene.AddTriangles(this->mesh_list.back().second);
             }
         }
 
@@ -194,65 +186,15 @@ public:
     }
 
 
-
-    // ***************************************************************************************** //
-    // *                               PUBLIC PRIMITIVE METHODS                                * //
-    // ***************************************************************************************** //
-
-
-    /// @brief Adds a new Primitive Shape to the scene.
-    /// @param parser ArgParser with parameters for the Primitive Shape.
+    /// @brief Adds a new mesh to the scene.
+    /// @param parser ArgParser with parameters for the mesh to add.
     /// @throws InvalidMapKey If no name was provided.
     /// @throws InvalidMapKey If a shape with the same name already exists.
     void add(const utilities::ArgParser& parser)
     {
-        const std::string name = parser.get(Primitive::parse_name);
-        if (name.empty())
-        {
-            throw InvalidMapKey::NoNameProvided();
-        }
-        else if (this->shapes_map.count(name) != 0)
-        {
-            throw InvalidMapKey::NameAlreadyExists(name);
-        }
-        this->shapes_map.insert( {name, Constructor::create(parser)} );
+        this->mesh_list.emplace_back(Constructor::create(parser));
+        this->o3d_scene.AddTriangles(this->mesh_list.back().second);
     }
-
-
-    /// @brief Removes a Primitive Shape from the Scene.
-    /// @param name Name of the Shape to remove.
-    /// @return True if an item was removed. False if no Shape with that name exists.
-    bool remove(const std::string& name)
-    {
-        if (this->shapes_map.erase(name) != 0)
-        {
-            return true;
-        }
-        return false;
-    }
-
-
-    /// @brief Transforms a Primitive Shape's pose in the Scene.
-    /// @param name  Name of the Shape to transform.
-    /// @param extr  Transformation to apply to the Shape.
-    /// @param world True for world frame transformation. False for body frame. Default false.
-    /// @return True if an item was removed. False if no shape with that name exists.
-    bool transform(const std::string& name, const Extrinsic& extr, const bool& world = false)
-    {
-        if (auto search = this->shapes_map.find(name); search != this->shapes_map.end()) {
-            if (world)
-            {
-                search->second->transformWorldFrame(extr);
-            }
-            else
-            {
-                search->second->transformBodyFrame(extr);
-            }
-            return true;
-        }
-        return false;
-    }
-
 
 
     // ***************************************************************************************** //
@@ -271,38 +213,29 @@ public:
     void image(const std::shared_ptr<sensor::Camera>& camera,
                const bool& pose_is_world_frame = false)
     {
-        // The camera's origin position in its own reference frame is always (0,0,0).
-        static const Point origin_camera_f = Point::Zero();
-
         // If we are placing the camera relative to the world frame then the pose is what was provided.
         // But if the pose is relative to the scene frame, then transform it to be in the world frame.
-        Extrinsic camera_pose = pose_is_world_frame ? camera->getExtr() : this->scan_lower_bound *  camera->getExtr();
+        Extrinsic camera_pose = pose_is_world_frame ? camera->extr : this->scan_lower_bound * camera->extr;
 
-        camera->resetDepth();
-        for (size_t row = 0; row < camera->intr->height; ++row)
+        open3d::core::Tensor rays({static_cast<long>(camera->intr->height), static_cast<long>(camera->intr->width), 6}, open3d::core::Float32);
+        Eigen::Map<Eigen::MatrixXf> rays_map(rays.GetDataPtr<float>(), 6, camera->intr->size());
+
+        Eigen::Matrix<float, 6, 1> r;
+        r.topRows<3>() = camera_pose.translation();
+        int64_t linear_idx = 0;
+        for (size_t y = 0; y < camera->intr->height; ++y)
         {
-            for (size_t col = 0; col < camera->intr->width; ++col)
+            for (size_t x = 0; x < camera->intr->width; ++x, ++linear_idx)
             {
-                const Point sensed_camera_f = camera->getPoint(row, col);
-                float min_scale = 1;
-                for (const auto& item : this->shapes_map)
-                {
-                    float scale = 1;
-                    Point origin_shapes_f = item.second->toThisFromOther(origin_camera_f, camera_pose);
-                    Point sensed_shapes_f = item.second->toThisFromOther(sensed_camera_f, camera_pose);
-                    if (item.second->hit(origin_shapes_f, sensed_shapes_f, scale))
-                    {
-                        min_scale = std::max(std::min(scale, min_scale), 0.0f);
-                    }
-                }
-                if (min_scale < 1)
-                {
-                    camera->image(row, col) *= min_scale;
-                }
+                Eigen::Vector3f ray_dir = camera_pose.rotation() * camera->getPoint(y, x).normalized();
+                r.bottomRows<3>() = ray_dir;
+                rays_map.col(linear_idx) = r;
             }
         }
+
+        auto result = this->o3d_scene.CastRays(rays);
+        camera->image = open3d::core::eigen_converter::TensorToEigenMatrixXf(result["t_hit"]);
         camera->addNoise();
-        camera->saturateDepth();
     }
 
 
@@ -326,37 +259,21 @@ public:
     {
         if (this->grid_properties.get() == nullptr)
         {
-            // Use default Grid Properties if non were set.
             this->grid_properties = Grid::Properties::createConst();
         }
         this->true_occupancy = metrics::ground_truth::Occupancy::create(this->grid_properties);
 
-        const float res = this->true_occupancy->properties->resolution;
-        const float half_res = res * 0.5;
-        const size_t nz = this->true_occupancy->properties->size.z();
-        const size_t ny = this->true_occupancy->properties->size.y();
-        const size_t nx = this->true_occupancy->properties->size.x();
+        const size_t n_voxels = this->grid_properties->getNumVoxels();
+        open3d::core::Tensor voxel_centers = this->getVoxelCenters();
 
-        // Current voxel position, relative to scan_lower_bound frame.
-        Point voxel_scan_f = Point::Zero();
-        size_t n = 0;
-        for (size_t z = 0; z < nz; ++z)
+        auto result = this->o3d_scene.ComputeSignedDistance(voxel_centers, 0, 5);
+        result = result.Reshape({1, static_cast<long>(n_voxels)});
+
+        Eigen::MatrixXi result_eigen = open3d::core::eigen_converter::TensorToEigenMatrixXi(result);
+        for (size_t i = 0; i < n_voxels; ++i)
         {
-            for (size_t y = 0; y < ny; ++y)
-            {
-                for (size_t x = 0; x < nx; ++x)
-                {
-                    this->true_occupancy->operator[](n) = this->voxelOccupied(voxel_scan_f, half_res);
-                    ++n;
-                    voxel_scan_f.x() += res;
-                }
-                // Re-set our X-position.
-                voxel_scan_f.x() = 0;
-                voxel_scan_f.y() += res;
-            }
-            // Re-set our Y-position.
-            voxel_scan_f.y() = 0;
-            voxel_scan_f.z() += res;
+            this->true_occupancy->operator[](i) = result_eigen(0, i) == 1 ? VoxelOccupancy::OCCUPIED :
+                                                                            VoxelOccupancy::FREE;
         }
     }
 
@@ -367,36 +284,20 @@ public:
     {
         if (this->grid_properties.get() == nullptr)
         {
-            // Use default Grid Properties if non were set.
             this->grid_properties = Grid::Properties::createConst();
         }
         this->true_tsdf = metrics::ground_truth::TSDF::create(this->grid_properties);
 
-        const float res = this->true_tsdf->properties->resolution;
-        const size_t nz = this->true_tsdf->properties->size.z();
-        const size_t ny = this->true_tsdf->properties->size.y();
-        const size_t nx = this->true_tsdf->properties->size.x();
+        const size_t n_voxels = this->grid_properties->getNumVoxels();
+        open3d::core::Tensor voxel_centers = this->getVoxelCenters();
 
-        // Current voxel position, relative to scan_lower_bound frame.
-        Point voxel_scan_f = Point::Zero();
-        size_t n = 0;
-        for (size_t z = 0; z < nz; ++z)
+        auto result = this->o3d_scene.ComputeSignedDistance(voxel_centers, 0, 5);
+        result = result.Reshape({1, static_cast<long>(n_voxels)});
+
+        Eigen::MatrixXd result_eigen = open3d::core::eigen_converter::TensorToEigenMatrixXd(result);
+        for (size_t i = 0; i < n_voxels; ++i)
         {
-            for (size_t y = 0; y < ny; ++y)
-            {
-                for (size_t x = 0; x < nx; ++x)
-                {
-                    this->true_tsdf->operator[](n) = this->voxelSignedDistance(voxel_scan_f);
-                    ++n;
-                    voxel_scan_f.x() += res;
-                }
-                // Re-set our X-position.
-                voxel_scan_f.x() = 0;
-                voxel_scan_f.y() += res;
-            }
-            // Re-set our Y-position.
-            voxel_scan_f.y() = 0;
-            voxel_scan_f.z() += res;
+            this->true_tsdf->operator[](i) = result_eigen(0, i);
         }
     }
 
@@ -524,70 +425,62 @@ private:
     }
 
 
+    /// @brief Writes an Extrinsic eigen matrix to an HDF5 file with HighFive.
+    /// @param file HDF5 file to use.
+    /// @param mesh_group_path Path to the matrix location.
+    /// @param extr The extrinsic matrix to save.
+    static void writeExtrToHDF5(HighFive::File& file, const std::string& mesh_group_path, const Extrinsic& extr)
+    {
+        H5Easy::dump(file, mesh_group_path + "/" FS_HDF5_MESHES_EXTR_SUFFIX, extr.matrix());
+    }
+
+
+    /// @brief Reads an Extrinsic eigen matrix from an HDF5 file with HighFive.
+    /// @param file HDF5 file to use.
+    /// @param mesh_group_path Path to the matrix location.
+    /// @param extr The extrinsic matrix to read.
+    static void readExtrFromHDF5(HighFive::File& file, const std::string& mesh_group_path, Extrinsic& extr)
+    {
+        extr.matrix() = H5Easy::load<Eigen::Matrix4f>(file, mesh_group_path + "/" FS_HDF5_MESHES_EXTR_SUFFIX);
+    }
+
+
 
     /*********************************************************************************************/
     /*                             PRIVATE GROUND TRUTH METHODS                                  */
     /*********************************************************************************************/
 
 
-    /// @brief Checks if the voxel is occupied by any Shapes in the Scene.
-    /// @param center   Voxel center location, relative to the scan_lowe_bound frame.
-    /// @param half_res Half of the voxel resolution; the distance from the center to any face.
-    /// @return True if the voxel is occupied.
-    VoxelOccupancy voxelOccupied(const Point& center, const float& half_res) const
+    /// @brief Gets a list of voxel center location to test for occupancy or distance.
+    /// @return A tensor of shape {n, 3} where n is the number of voxels in the grid. The tensor is
+    ///         ordered first in x, then y, then z.
+    open3d::core::Tensor getVoxelCenters()
     {
-        Point center_primitive_f;
-        VoxelOccupancy result = VoxelOccupancy::FREE;
-        for (const auto& item : this->shapes_map)
+        const size_t n_voxels = this->grid_properties->getNumVoxels();
+
+        open3d::core::Tensor        voxel_centers({static_cast<long>(n_voxels), 3}, open3d::core::Float32);
+        Eigen::Map<Eigen::MatrixXf> voxel_centers_map(voxel_centers.GetDataPtr<float>(), 3, n_voxels);
+
+        size_t linear_idx  = 0;
+        Point voxel_scan_f = Point::Zero();
+        for (size_t z = 0; z < this->grid_properties->size.z(); ++z)
         {
-            if (item.second->isInside(center, this->scan_lower_bound, center_primitive_f))
+            for (size_t y = 0; y < this->grid_properties->size.y(); ++y)
             {
-                // Mark as fully inside at least one shape. Can exit after the first is found.
-                result = VoxelOccupancy::OCCUPIED;
-                break;
-            }
-            else
-            {
-                Translation to_surface = (item.second->getNearestSurfacePoint(center_primitive_f) - center_primitive_f).cwiseAbs();
-                if ((to_surface.array() < half_res).all())
+                for (size_t x = 0; x < this->grid_properties->size.x(); ++x, ++linear_idx)
                 {
-                    // Mark as clipped by at least one shape.
-                    // But must keep searching to see if we are inside any.
-                    result = VoxelOccupancy::CLIPPED;
+                    voxel_centers_map.col(linear_idx) = this->scan_lower_bound * voxel_scan_f.homogeneous();
+                    voxel_scan_f.x() += this->grid_properties->resolution;
                 }
+                voxel_scan_f.x()  = 0;
+                voxel_scan_f.y() += this->grid_properties->resolution;
             }
+            voxel_scan_f.y()  = 0;
+            voxel_scan_f.z() += this->grid_properties->resolution;
         }
-        return result;
+
+        return voxel_centers;
     }
-
-
-    /// @return The signed distance for the voxel center point.
-
-    /// @brief Calculates the signed distance from the voxel to the closest Shape surface in
-    ///        the Scene.
-    /// @param center Voxel center location, relative to the scan_lowe_bound frame.
-    /// @return Sign distance for the voxel.
-    double voxelSignedDistance(const Point& center)
-    {
-        float dist = -1 * std::numeric_limits<double>::infinity();
-        Point center_primitive_f;
-        for (const auto& item : this->shapes_map)
-        {
-            /// TODO: I do not know how to handle the distance when inside multiple arbitrary shapes
-            if (item.second->isInside(center, this->scan_lower_bound, center_primitive_f))
-            {
-                // Fully inside at least one shape is, for now, infinitely inside all shapes.
-                return -1 * std::numeric_limits<double>::infinity();
-            }
-            // If we are outside this item then record its distance.
-            float dist_item = item.second->getSignedDistance(center, this->scan_lower_bound);
-
-            // then store the smallest distance we hae seen so far.
-            dist = utilities::math::smallest_magnitude(dist, dist_item);
-        }
-        return dist;
-    }
-
 
 
     // ***************************************************************************************** //
@@ -595,8 +488,11 @@ private:
     // ***************************************************************************************** //
 
 
-    /// @brief Dictionary of names to Primitive Shapes.
-    std::map<std::string, std::shared_ptr<Primitive>> shapes_map;
+    /// @brief Open3D's raycasting implementation.
+    open3d::t::geometry::RaycastingScene o3d_scene;
+
+    /// @brief List of information about the meshes in the scene and the mesh itself.
+    std::list<std::pair<MeshInfo, open3d::t::geometry::TriangleMesh>> mesh_list;
 
     /// @brief Shared reference to a Ground Truth Occupancy Grid for the Scene.
     std::shared_ptr<metrics::ground_truth::Occupancy> true_occupancy{nullptr};
@@ -612,12 +508,16 @@ private:
 /// @return Reference to the output stream.
 std::ostream& operator<<(std::ostream &out, const Scene& scene)
 {
-    if (!scene.shapes_map.empty())
+    if (!scene.mesh_list.empty())
     {
         out << "Scene contains:";
-        for (const auto& dict_item : scene.shapes_map)
+        for (const auto& item : scene.mesh_list)
         {
-            out << "\n\t" << dict_item.first << ": " << *dict_item.second;
+            std::string description = item.second.ToString();
+            std::replace(description.begin(), description.end(), '\n', ' ');
+            out << "\n\tMesh name: " << item.first.fpath.stem()
+                << "\n\tFrom file: " << item.first.fpath
+                << "\n\tWith properties:" << description;
         }
     }
     else
@@ -637,16 +537,12 @@ std::ostream& operator<<(std::ostream &out, const Scene& scene)
 #undef FS_HDF5_GRID_SIZE_ATTR
 #undef FS_HDF5_GRID_RESOLUTION_ATTR
 #undef FS_HDF5_GRID_DIMENSIONS_ATTR
-#undef FS_HDF5_SHAPES_GROUP
+#undef FS_HDF5_MESHES_GROUP
+#undef FS_HDF5_MESHES_EXTR_SUFFIX
+#undef FS_HDF5_MESHES_FILEPATH
 #undef FS_HDF5_GROUND_TRUTH_GROUP
 #undef FS_HDF5_OCCUPANCY_DSET
 #undef FS_HDF5_TSDF_DSET
 
-// Undefine the definitions from Primitive.hpp, Box.hpp, and Sphere.hpp:
-#undef FS_HDF5_SHAPE_TYPE_NAME_ATTR
-#undef FS_HDF5_SPHERE_R_ATTR
-#undef FS_HDF5_BOX_L_ATTR
-#undef FS_HDF5_BOX_W_ATTR
-#undef FS_HDF5_BOX_H_ATTR
 
 #endif // FORGE_SCAN_SIMULATION_SCENE_HPP

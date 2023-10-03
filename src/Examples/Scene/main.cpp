@@ -15,9 +15,9 @@ int main(const int argc, const char **argv)
 
     auto scene = forge_scan::simulation::Scene::create(scene_lower_bound);
 
-    scene->add("--name sphere1 --shape sphere --radius 0.35");
-    scene->add("--name sphere2 --shape sphere --radius 0.25 --x 0.25 --y 0.25 --z 0.25");
-    scene->add("--name box1    --shape box --l 1.25 --w 0.25 --h 0.75 --rx 6");
+    scene->add("--file abc0.stl --x 0.5");
+    scene->add("--file abc1.stl --z 0.5 --scale 5");
+    scene->add("--file abc2.stl --y 0.5 --scale 5");
 
 
     // ****************************** Calculate the ground truth ******************************* //

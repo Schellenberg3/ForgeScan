@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(
     ForgeScan
-    VERSION 0.2
+    VERSION 0.3
     DESCRIPTION
     "Policies for autonomous, iterative, and fast voxelized geometric reconstruction with simulated depth cameras."
     LANGUAGES C CXX
@@ -97,6 +97,7 @@ target_link_libraries(
         ${OpenCV_LIBS}
         Eigen3::Eigen
         HighFive
+        Open3D::Open3D
 )
 set_target_properties(
     ${INTERFACE_LIBRARY}

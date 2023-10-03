@@ -4,62 +4,130 @@
 #include <memory>
 #include <algorithm>
 
-#include "ForgeScan/Simulation/Box.hpp"
-#include "ForgeScan/Simulation/Sphere.hpp"
+#include <open3d/core/EigenConverter.h>
+#include <open3d/t/geometry/TriangleMesh.h>
+#include <open3d/t/io/TriangleMeshIO.h>
 
-#include "ForgeScan/Utilities/Strings.hpp"
+#include "ForgeScan/Common/Entity.hpp"
 
 
 namespace forge_scan {
 namespace simulation {
 
 
-/// @brief Constructor for shared Primitive pointers based on ArgParser inputs.
+/// @brief Stores extra information about a mesh file.
+struct MeshInfo
+{
+    /// @brief File path to the mesh.
+    std::filesystem::path fpath;
+
+    /// @brief Transformation applied to the mesh.
+    Extrinsic extr;
+};
+
+
+/// @brief Constructor for loading meshes into a `simulation::Scene` based on ArgParser inputs.
 struct Constructor
 {
-    /// @brief Factory function to create different Primitive types.
-    /// @param parser Arguments to pass into the Primitive's create functions.
-    /// @return A pointer to the requested implementation of the Primitive class.
-    /// @throws ConstructorError if the Primitive type is not recognized.
-    static std::shared_ptr<Primitive> create(const utilities::ArgParser& parser)
+    /// @brief Function to read meshes into a `simulation::Scene`.
+    /// @param parser Arguments to select the mesh file and describe its transformation.
+    /// @return A pair with the MeshInfo and the TriangleMesh object.
+    /// @throws ConstructorError if there was an issue loading the mesh
+    static std::pair<MeshInfo, open3d::t::geometry::TriangleMesh> create(const utilities::ArgParser& parser)
     {
-        using namespace utilities::strings;
-        std::string shape = parser.get(Primitive::parse_shape);
+        Extrinsic extr = Extrinsic::Identity();
+        Entity::setRotation(parser, extr);
+        Entity::setTranslation(parser, extr);
 
-        if (iequals(shape, Box::type_name))
-        {
-            return Box::create(parser);
-        }
-        if (iequals(shape, Sphere::type_name))
-        {
-            return Sphere::create(parser);
-        }
+        std::filesystem::path fpath = parser.get<std::filesystem::path>(Parse::file);
+        float scale = parser.get<float>(Parse::scale, Parse::d_scale);
 
-        throw ConstructorError::UnkownType(shape, Primitive::type_name);
+        return Constructor::create(fpath, extr, scale);
     }
 
 
-    /// @brief Returns a string help message for a constructing Primitive shapes.
+    /// @brief Function to read meshes into a `simulation::Scene`.
+    /// @param fpath File path to the mesh.
+    /// @param extr  Extrinsic transformation to apply to the mesh.
+    /// @param scale Scaling factor to apply to the mesh. Default 1.
+    /// @return A pair with the MeshInfo and the TriangleMesh object.
+    /// @throws ConstructorError if there was an issue loading the mesh
+    static std::pair<MeshInfo, open3d::t::geometry::TriangleMesh> create(std::filesystem::path fpath,
+                                                                         Extrinsic& extr, const float& scale = 1.0f)
+    {
+        return Constructor::create(fpath, extr, std::filesystem::path(), scale);
+    }
+
+
+    /// @brief Function to read meshes into a `simulation::Scene`.
+    /// @param fpath File path to the mesh.
+    /// @param extr  Extrinsic transformation to apply to the mesh.
+    /// @param extra_search_path One additional path to search for the mesh file at.
+    /// @param scale Scaling factor to apply to the mesh. Default 1.
+    /// @return A pair with the MeshInfo and the TriangleMesh object.
+    /// @throws ConstructorError if there was an issue loading the mesh
+    static std::pair<MeshInfo, open3d::t::geometry::TriangleMesh> create(std::filesystem::path fpath, Extrinsic& extr,
+                                                                         std::filesystem::path extra_search_path,
+                                                                         const float& scale = 1.0f)
+    {
+        const static std::filesystem::path share_mesh_path = std::filesystem::path(FORGE_SCAN_MESHES_DIR).make_preferred();
+        const static bool share_mesh_path_exists           = std::filesystem::exists(share_mesh_path);
+
+        if (std::filesystem::exists(fpath) == false)
+        {
+            if (share_mesh_path_exists &&
+                std::filesystem::exists(share_mesh_path / fpath))
+            {
+                fpath = share_mesh_path / fpath;
+            }
+            else if (extra_search_path.empty() == false         &&
+                     std::filesystem::exists(extra_search_path) &&
+                     std::filesystem::exists(share_mesh_path / fpath))
+            {
+                fpath = extra_search_path / fpath;
+            }
+        }
+
+        if (std::filesystem::exists(fpath) == false || fpath.has_filename() == false)
+        {
+            throw ConstructorError("Cannot load mesh, no file name provided or file does not exist at: " + fpath.string());
+        }
+
+        open3d::t::geometry::TriangleMesh mesh;
+        bool read_success = open3d::t::io::ReadTriangleMesh(fpath.string(), mesh);
+
+        if (read_success == false)
+        {
+            throw ConstructorError("Failed to read mesh file at: " + fpath.string());
+        }
+
+        mesh.Scale(scale, mesh.GetCenter());
+        mesh.Transform(open3d::core::eigen_converter::EigenMatrixToTensor(extr.matrix()));
+        return {{fpath.make_preferred(), extr}, mesh};
+    }
+
+        /// @brief Returns a string help message for constructing a Policy.
     /// @param parser Arguments to pass determine which help information to print.
-    static std::string help(const utilities::ArgParser& parser)
+    static std::string help([[__maybe_unused__]] const utilities::ArgParser& parser)
     {
         using namespace utilities::strings;
-        std::string shape = parser.get("-h");
-
-        if (iequals(shape, Box::type_name))
-        {
-            return Box::helpMessage();
-        }
-        if (iequals(shape, Sphere::type_name))
-        {
-            return Sphere::helpMessage();
-        }
-        std::stringstream ss;
-        ss << Primitive::helpMessage() << "\nPossible shapes are: "
-           << Box::type_name << ", "
-           << Sphere::type_name;
-        return ss.str();
+        /// TODO: Return and update this.
+        return "Help string for Simulation Constructor to be added soon.";
     }
+
+    /// @brief Describes the flags and options that the Constructor can parse.
+    struct Parse
+    {
+        /// @brief Option. Describes the location of the mesh file.
+        static constexpr char file[] = "--file";
+
+        /// @brief Option. Scaling factor for the mesh.
+        static constexpr char scale[] = "--scale";
+
+        /// @brief Default. Scaling factor of 1.
+        static constexpr float d_scale = 1.0f;
+
+    };
 };
 
 

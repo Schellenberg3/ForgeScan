@@ -169,10 +169,25 @@ struct Camera : public Entity
     }
 
 
-    /// @brief Resets the depth image to a blank scene.
-    void resetDepth()
+    /// @brief Sets all pixels in the depth image to the provided value.
+    /// @param value What depth value each pixel should hold.
+    void resetDepth(const float& value)
     {
-        this->image.setConstant(this->intr->height, this->intr->width, this->intr->max_d);
+        this->image.setConstant(this->intr->height, this->intr->width, value);
+    }
+
+
+    /// @brief Resets the depth image the maximum depth value.
+    void resetDepthMax()
+    {
+        this->resetDepth(this->intr->max_d);
+    }
+
+
+    /// @brief Resets the depth image the minimum depth value.
+    void resetDepthMin()
+    {
+        this->resetDepth(this->intr->min_d);
     }
 
 
@@ -225,7 +240,7 @@ struct Camera : public Entity
     void setIntr(const std::shared_ptr<Intrinsics>& new_intr)
     {
         this->intr = new_intr;
-        this->resetDepth();
+        this->resetDepthMax();
     }
 
 
@@ -257,7 +272,7 @@ private:
           percent_noise(percent_noise),
           sample(seed)
     {
-        this->resetDepth();
+        this->resetDepthMax();
     }
 
 

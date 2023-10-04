@@ -23,6 +23,9 @@ struct MeshInfo
 
     /// @brief Transformation applied to the mesh.
     Extrinsic extr;
+
+    /// @brief Pre-transformation scaling of the mesh about the global origin.
+    float scale;
 };
 
 
@@ -70,6 +73,8 @@ struct Constructor
                                                                          std::filesystem::path extra_search_path,
                                                                          const float& scale = 1.0f)
     {
+        const static open3d::core::Tensor origin = open3d::core::Tensor(std::vector<float>{0.0f, 0.0f, 0.0f});
+
         const static std::filesystem::path share_mesh_path = std::filesystem::path(FORGE_SCAN_MESHES_DIR).make_preferred();
         const static bool share_mesh_path_exists           = std::filesystem::exists(share_mesh_path);
 
@@ -101,12 +106,13 @@ struct Constructor
             throw ConstructorError("Failed to read mesh file at: " + fpath.string());
         }
 
-        mesh.Scale(scale, mesh.GetCenter());
+        mesh.Scale(scale, origin);
         mesh.Transform(open3d::core::eigen_converter::EigenMatrixToTensor(extr.matrix()));
-        return {{fpath.make_preferred(), extr}, mesh};
+        return {{fpath.make_preferred(), extr, scale}, mesh};
     }
 
-        /// @brief Returns a string help message for constructing a Policy.
+
+    /// @brief Returns a string help message for constructing a Policy.
     /// @param parser Arguments to pass determine which help information to print.
     static std::string help([[__maybe_unused__]] const utilities::ArgParser& parser)
     {
@@ -114,6 +120,7 @@ struct Constructor
         /// TODO: Return and update this.
         return "Help string for Simulation Constructor to be added soon.";
     }
+
 
     /// @brief Describes the flags and options that the Constructor can parse.
     struct Parse

@@ -36,6 +36,7 @@
 #define FS_HDF5_MESHES_GROUP           "Meshes"
 #define FS_HDF5_MESHES_EXTR_SUFFIX     "extrinsic"
 #define FS_HDF5_MESHES_FILEPATH        "filepath"
+#define FS_HDF5_MESHES_SCALE           "scale"
 
 #define FS_HDF5_GROUND_TRUTH_GROUP     "GroundTruth"
 #define FS_HDF5_OCCUPANCY_DSET         "Occupancy"
@@ -92,6 +93,7 @@ public:
         for (const auto& item : this->mesh_list)
         {
             auto g_mesh = g_meshes.createGroup(std::to_string(n++));
+            g_mesh.createAttribute(FS_HDF5_MESHES_SCALE, item.first.scale);
             g_mesh.createAttribute(FS_HDF5_MESHES_FILEPATH, item.first.fpath.string());
             Scene::writeExtrToHDF5(file, g_mesh.getPath(), item.first.extr);
         }
@@ -150,12 +152,14 @@ public:
             for (const auto& group_name : mesh_groups)
             {
                 auto g_mesh = g_meshes.getGroup(group_name);
+                   
+                float scale = g_mesh.getAttribute(FS_HDF5_MESHES_SCALE).read<float>();
                 std::filesystem::path mesh_fpath = std::filesystem::path(g_mesh.getAttribute(FS_HDF5_MESHES_FILEPATH).read<std::string>());
 
                 Extrinsic extr;
                 Scene::readExtrFromHDF5(file, g_mesh.getPath(), extr);
 
-                this->mesh_list.emplace_back( Constructor::create(mesh_fpath, extr, fpath) );
+                this->mesh_list.emplace_back( Constructor::create(mesh_fpath, extr, fpath.remove_filename(), scale) );
                 this->o3d_scene.AddTriangles(this->mesh_list.back().second);
             }
         }
@@ -521,8 +525,8 @@ std::ostream& operator<<(std::ostream &out, const Scene& scene)
             center.erase(center.find('\n'));
 
             out << "\n[" << n << "] Mesh name: " << item.first.fpath.stem() << " centered at " << center
-                << "\n\tFrom file: " << item.first.fpath
-                << "\n\tWith properties:" << description;
+                    << "\n\tFrom file: " << item.first.fpath
+                    << "\n\tWith properties:" << description;
             ++n;
         }
     }
@@ -546,6 +550,7 @@ std::ostream& operator<<(std::ostream &out, const Scene& scene)
 #undef FS_HDF5_MESHES_GROUP
 #undef FS_HDF5_MESHES_EXTR_SUFFIX
 #undef FS_HDF5_MESHES_FILEPATH
+#undef FS_HDF5_MESHES_SCALE
 #undef FS_HDF5_GROUND_TRUTH_GROUP
 #undef FS_HDF5_OCCUPANCY_DSET
 #undef FS_HDF5_TSDF_DSET

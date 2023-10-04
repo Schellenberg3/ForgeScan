@@ -29,6 +29,7 @@ int main(const int argc, const char **argv)
     // **************************** Write the scene to an HDF5 file **************************** //
 
     auto updated_fpath = scene->save(fpath);
+    std::cout << "Scene contains: \n" << *scene << std::endl; 
     std::cout << "Saved scene at " << updated_fpath << std::endl;
 
 
@@ -40,6 +41,7 @@ int main(const int argc, const char **argv)
     scene2->load(updated_fpath);
 
     std::cout << "Success! Reloaded the scene." << std::endl;
+    std::cout << "Reloaded scene contains: \n" << *scene << std::endl; 
 
     return 0;
 }

@@ -511,13 +511,19 @@ std::ostream& operator<<(std::ostream &out, const Scene& scene)
     if (!scene.mesh_list.empty())
     {
         out << "Scene contains:";
+        size_t n = 0;
         for (const auto& item : scene.mesh_list)
         {
             std::string description = item.second.ToString();
             std::replace(description.begin(), description.end(), '\n', ' ');
-            out << "\n\tMesh name: " << item.first.fpath.stem()
+
+            std::string center = item.second.GetCenter().ToString();
+            center.erase(center.find('\n'));
+
+            out << "\n[" << n << "] Mesh name: " << item.first.fpath.stem() << " centered at " << center
                 << "\n\tFrom file: " << item.first.fpath
                 << "\n\tWith properties:" << description;
+            ++n;
         }
     }
     else

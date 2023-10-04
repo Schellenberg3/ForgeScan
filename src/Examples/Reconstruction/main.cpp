@@ -23,6 +23,7 @@ int main(const int argc, const char **argv)
 
     auto scene = forge_scan::simulation::Scene::create();
     scene->load(scene_fpath);
+    std::cout << "Scene contains: \n" << *scene << std::endl; 
 
 
     // ************************************ Create a camera ************************************ //

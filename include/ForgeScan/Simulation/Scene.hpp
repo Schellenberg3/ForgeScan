@@ -217,6 +217,9 @@ public:
     void image(const std::shared_ptr<sensor::Camera>& camera,
                const bool& pose_is_world_frame = false)
     {
+        // Clear any previous data and ensure that raytracing is in the proper units.
+        camera->resetDepth(1.0f);
+
         // If we are placing the camera relative to the world frame then the pose is what was provided.
         // But if the pose is relative to the scene frame, then transform it to be in the world frame.
         Extrinsic camera_pose = pose_is_world_frame ? camera->extr : this->scan_lower_bound * camera->extr;
@@ -231,7 +234,7 @@ public:
         {
             for (size_t x = 0; x < camera->intr->width; ++x, ++linear_idx)
             {
-                Eigen::Vector3f ray_dir = camera_pose.rotation() * camera->getPoint(y, x).normalized();
+                Eigen::Vector3f ray_dir = camera_pose.rotation() * camera->getPoint(y, x);
                 r.bottomRows<3>() = ray_dir;
                 rays_map.col(linear_idx) = r;
             }

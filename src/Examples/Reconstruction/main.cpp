@@ -9,8 +9,8 @@ int main(const int argc, const char **argv)
 {
     forge_scan::utilities::ArgParser parser(argc, argv);
     const float reject_rate   = std::clamp(parser.get<float>("--reject", 0.0), 0.0f, 1.0f);
-    const bool  show_im       = parser.has("--show");
-    const bool  save_im       = parser.has("--save");
+    const bool  show_im       = parser.has("--show-im");
+    const bool  save_im       = parser.has("--save-im");
     const bool  sphere_policy = parser.has("--sphere");
     const float noise         = parser.get<float>("--noise", 0.0f);
 

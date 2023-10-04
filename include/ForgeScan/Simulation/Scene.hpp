@@ -273,7 +273,7 @@ public:
         const size_t n_voxels = this->grid_properties->getNumVoxels();
         open3d::core::Tensor voxel_centers = this->getVoxelCenters();
 
-        auto result = this->o3d_scene.ComputeSignedDistance(voxel_centers, 0, 5);
+        auto result = this->o3d_scene.ComputeOccupancy(voxel_centers, 0, 5);
         result = result.Reshape({1, static_cast<long>(n_voxels)});
 
         Eigen::MatrixXi result_eigen = open3d::core::eigen_converter::TensorToEigenMatrixXi(result);

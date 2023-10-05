@@ -26,8 +26,8 @@ public:
     ///                       views for.
     /// @param parser ArgParser with arguments to construct an Axis Policy from.
     /// @return Shared pointer to a Axis Policy.
-    static std::shared_ptr<Axis> create(const std::shared_ptr<const data::Reconstruction>& reconstruction,
-                                                const utilities::ArgParser& parser)
+    static std::shared_ptr<Axis> create(const std::shared_ptr<data::Reconstruction>& reconstruction,
+                                        const utilities::ArgParser& parser)
     {
         // Get the seed (in case we need a random axis).
         float seed = parser.get<float>(Policy::parse_seed, Policy::default_seed);
@@ -122,7 +122,7 @@ protected:
     /// @param change_random Flag, if true will not use `height`/`height_max` and instead randomly select
     ///                      a new axis to rotate around.
     /// @param seed     Seed for the random generator the Policy uses. Default -1 for a random seed.
-    explicit Axis(const std::shared_ptr<const data::Reconstruction>& reconstruction,
+    explicit Axis(const std::shared_ptr<data::Reconstruction>& reconstruction,
                   const Direction& axis,
                   const size_t& n_views,
                   const size_t& n_repeat,

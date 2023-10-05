@@ -24,8 +24,8 @@ public:
     ///                       views for.
     /// @param parser ArgParser with arguments to construct an Sphere Policy from.
     /// @return Shared pointer to a Sphere Policy.
-    static std::shared_ptr<Sphere> create(const std::shared_ptr<const data::Reconstruction>& reconstruction,
-                                                const utilities::ArgParser& parser)
+    static std::shared_ptr<Sphere> create(const std::shared_ptr<data::Reconstruction>& reconstruction,
+                                          const utilities::ArgParser& parser)
     {
         return std::shared_ptr<Sphere>(new Sphere(reconstruction,
                                                   parser.get<size_t>(Policy::parse_n_views, Policy::default_n_views),
@@ -73,7 +73,7 @@ protected:
     /// @param radius     Minimum radius for Camera poses.
     /// @param radius_max Maximum radius for Camera poses, used for randomly sampled views only.
     /// @param seed Seed for the random generator the Policy uses. Default -1 for a random seed.
-    explicit Sphere(const std::shared_ptr<const data::Reconstruction>& reconstruction,
+    explicit Sphere(const std::shared_ptr<data::Reconstruction>& reconstruction,
                     const size_t& n_views,
                     const bool& uniform,
                     const bool& unordered,

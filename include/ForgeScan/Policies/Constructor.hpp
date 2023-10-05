@@ -9,6 +9,8 @@
 #include "ForgeScan/Policies/Simple/Sphere.hpp"
 #include "ForgeScan/Policies/Simple/Axis.hpp"
 
+#include "ForgeScan/Policies/Heuristic/Occplane.hpp"
+
 #include "ForgeScan/Utilities/Strings.hpp"
 
 
@@ -25,7 +27,7 @@ struct Constructor
     /// @return A pointer to the requested implementation of the Policy class.
     /// @throws ConstructorError if the Policy type is not recognized.
     static std::shared_ptr<Policy> create(const utilities::ArgParser& parser,
-                                          const std::shared_ptr<const data::Reconstruction>& reconstruction)
+                                          const std::shared_ptr<data::Reconstruction>& reconstruction)
     {
         using namespace utilities::strings;
         std::string policy_type = parser.get(Policy::parse_type);

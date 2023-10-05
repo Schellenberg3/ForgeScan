@@ -120,10 +120,20 @@ protected:
     /// @brief Protected constructor for derived classes only.
     /// @param reconstruction Shared pointer to the Reconstruction that the Policy suggests
     ///                       new views for.
-    Policy(const std::shared_ptr<const data::Reconstruction>& reconstruction)
+    Policy(const std::shared_ptr<data::Reconstruction>& reconstruction)
         : reconstruction(reconstruction)
     {
 
+    }
+
+
+    /// @brief Helper for derived classes to add a channel durring set-up.
+    /// @param channel Channel (created in the derived class) to add.
+    /// @param policy_name Name of the derived Policy class.
+    void addChannel(const std::shared_ptr<data::VoxelGrid>& channel,
+                    const std::string& policy_name)
+    {
+        return this->reconstruction->policyAddChannel(channel, policy_name);
     }
 
 
@@ -242,7 +252,7 @@ protected:
 
     /// @brief Reference to the Reconstruction class. Some Policies use this to add a specific data
     ///        channel which they require.
-    std::shared_ptr<const data::Reconstruction> reconstruction;
+    const std::shared_ptr<data::Reconstruction> reconstruction;
 };
 
 

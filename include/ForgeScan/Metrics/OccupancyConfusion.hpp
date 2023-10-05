@@ -100,7 +100,7 @@ protected:
         }
         else
         {
-            auto voxel_grid = this->reconstruction->getChannel(use_channel);
+            auto voxel_grid = this->reconstruction->getChannelView(use_channel);
             this->experiment = ground_truth::dynamic_cast_to_experimental_occupancy(voxel_grid);
         }
     }

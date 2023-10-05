@@ -125,11 +125,21 @@ public:
     }
 
 
-    /// @brief If a g a read-only reference to the VoxelGrid data channel.
+    /// @brief Gets a constant reference to the VoxelGrid data channel.
     /// @param name Name of the channel in the channel dictionary to retrieve.
     /// @returns Read-only reference to the requested VoxelGrid data channel.
     /// @throws InvalidMapKey If a channel with that name does not exist.
-    std::shared_ptr<const forge_scan::data::VoxelGrid> getChannel(const std::string& name) const
+    std::shared_ptr<const forge_scan::data::VoxelGrid> getChannelView(const std::string& name) const
+    {
+        return this->getChannelRef(name);
+    }
+
+
+    /// @brief Gets a reference to the VoxelGrid data channel.
+    /// @param name Name of the channel in the channel dictionary to retrieve.
+    /// @returns Reference to the requested VoxelGrid data channel.
+    /// @throws InvalidMapKey If a channel with that name does not exist.
+    std::shared_ptr<forge_scan::data::VoxelGrid> getChannelRef(const std::string& name) const
     {
         for (auto iter = this->channels.begin(); iter != this->channels.end(); ++iter)
         {

@@ -95,7 +95,7 @@ protected:
         if (use_channel.empty())
         {
             auto voxel_grid = data::Binary::create(this->reconstruction->grid_properties);
-            this->addChannel(voxel_grid, OccupancyConfusion::type_name);
+            this->addChannel(voxel_grid, channel_name);
             this->experiment = voxel_grid;
         }
         else

@@ -161,7 +161,7 @@ public:
     /// @brief Queries the active Policy to get its suggested view.
     /// @return Gets a constant reference to the best view suggested by the active Policy.
     /// @throws std::runtime_error If no Policies have been added to the Manager.
-    const Extrinsic& policyGetView()
+    Extrinsic policyGetView()
     {
         this->throwIfNoActivePolicy();
         return this->policyGetActiveNonConst()->getView();

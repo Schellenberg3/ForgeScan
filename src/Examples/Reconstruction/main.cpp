@@ -37,16 +37,16 @@ int main(const int argc, const char **argv)
 
     auto manager = forge_scan::Manager::create(scene->grid_properties);
 
-    if (sphere_policy)
+    if (parser.has("--axis"))
     {
-        std::cout << "using Sphere policy..." << std::endl;
-        manager->policyAdd("--set-active --type Sphere --n-views 10 --uniform --unordered --seed 50");
+        std::cout << "using Axis policy..." << std::endl;
+        manager->policyAdd("--set-active --type Axis --n-views 7 --n-repeat 3 --x -1.0 --y -1.0 --z -1.0 --seed 50 --uniform");
     }
     else
     {
-        std::cout << "using Axis policy..." << std::endl;
-        manager->policyAdd("--set-active --type Axis   --n-views 7 --n-repeat 3 --x -1.0 --y -1.0 --z -1.0 --seed 50 --uniform");
+        manager->policyAdd("--set-active --type Sphere --n-views 10 --uniform --unordered --seed 50");
     }
+
     manager->reconstructionAddChannel("--name tsdf           --type TSDF           --dtype double");
     manager->reconstructionAddChannel("--name avg_tsdf   --type TSDF   --average   --dtype float");
     manager->reconstructionAddChannel("--name min_tsdf   --type TSDF   --minimum   --dtype float");

@@ -40,6 +40,10 @@ struct Constructor
         {
             return Axis::create(reconstruction, parser);
         }
+        if (iequals(policy_type, OccplaneInfo::type_name))
+        {
+            return Occplane::create(reconstruction, parser);
+        }
 
         throw ConstructorError::UnkownType(policy_type, Policy::type_name);
     }
@@ -59,6 +63,11 @@ struct Constructor
         if (iequals(policy_type, Axis::type_name))
         {
             return Axis::helpMessage();
+        }
+        if (iequals(policy_type, Occplane::type_name))
+        {
+            /// TODO: Return and implement this.
+            return "TODO: Write occplane help.";
         }
         std::stringstream ss;
         ss << Policy::helpMessage() << "\nPossible Policies are: "

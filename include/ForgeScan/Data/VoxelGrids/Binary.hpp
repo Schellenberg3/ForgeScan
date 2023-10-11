@@ -1,6 +1,8 @@
 #ifndef FORGE_SCAN_RECONSTRUCTIONS_GRID_BINARY_HPP
 #define FORGE_SCAN_RECONSTRUCTIONS_GRID_BINARY_HPP
 
+#include <functional>
+
 #include "ForgeScan/Data/VoxelGrids/VoxelGrid.hpp"
 
 
@@ -65,6 +67,18 @@ public:
     void updateOccplanes()
     {
         std::visit(this->update_callable_occplane, this->data);
+    }
+
+
+    /// @brief Updates the grid to mark specific voxels as Occplanes.
+    /// @param occplane_centers Storage location for the occplane centers. Any existing data is cleared.
+    /// @param occplane_normals Storage location for the occplane normals. Any existing data is cleared.
+    void updateOccplanes(std::vector<Eigen::Vector3d>& occplane_centers,
+                         std::vector<Eigen::Vector3d>& occplane_normals)
+    {
+        this->update_callable_occplane.acquireTracking(occplane_centers, occplane_normals);
+        std::visit(this->update_callable_occplane, this->data);
+        this->update_callable_occplane.releaseTracking();
     }
 
 
@@ -159,6 +173,10 @@ private:
     {
         using VoxelGrid::UpdateCallable::operator();
 
+        using implement_function = std::function<void(uint8_t&, const uint8_t&, const uint8_t&, const uint8_t&,
+                                                                const uint8_t&, const uint8_t&, const uint8_t&,
+                                                                const size_t&,  const size_t&,  const size_t&)>;
+
         // ************************************************************************************* //
         // *                                SUPPORTED DATATYPES                                * //
         // ************************************************************************************* //
@@ -166,14 +184,27 @@ private:
 
         void operator()(std::vector<uint8_t>& vector)
         {
-            /// TODO: Manual walkthrough of this method.
             static const GridSize minGridSize = GridSize(3, 3, 3);
             if ((this->caller.properties->size.array() < minGridSize.array()).any())
             {
                 return;
             }
-            const size_t dx = 1, dy = this->caller.properties->size.x(),
-                         dz = this->caller.properties->size.x() * this->caller.properties->size.y();
+
+            implement_function implement;
+            if (this->occplane_centers && this->occplane_normals)
+            {
+                this->occplane_centers->clear();
+                this->occplane_normals->clear();
+                implement = this->implement_track;
+            }
+            else
+            {
+                implement = this->implement_no_track;
+            }
+
+            const size_t dx = 1;
+            const size_t dy = this->caller.properties->size.x();
+            const size_t dz = this->caller.properties->size.x() * this->caller.properties->size.y();
 
             for (size_t z = 1; z < this->caller.properties->size.z() - 1; ++z)
             {
@@ -182,22 +213,17 @@ private:
                     for (size_t x = 1; x < this->caller.properties->size.x() - 1; ++x)
                     {
                         size_t c_idx = this->caller.properties->operator[](Index(x, y, z));
-                        VoxelOccupancy c  = static_cast<VoxelOccupancy>(vector[c_idx]);
-                        VoxelOccupancy px = static_cast<VoxelOccupancy>(vector[c_idx + dx]);
-                        VoxelOccupancy nx = static_cast<VoxelOccupancy>(vector[c_idx - dx]);
-                        VoxelOccupancy py = static_cast<VoxelOccupancy>(vector[c_idx + dy]);
-                        VoxelOccupancy ny = static_cast<VoxelOccupancy>(vector[c_idx - dy]);
-                        VoxelOccupancy pz = static_cast<VoxelOccupancy>(vector[c_idx + dz]);
-                        VoxelOccupancy nz = static_cast<VoxelOccupancy>(vector[c_idx - dz]);
-                        if (c & VoxelOccupancy::TYPE_UNKNOWN && (px & VoxelOccupancy::TYPE_FREE ||
-                                                                 nx & VoxelOccupancy::TYPE_FREE ||
-                                                                 py & VoxelOccupancy::TYPE_FREE ||
-                                                                 ny & VoxelOccupancy::TYPE_FREE ||
-                                                                 pz & VoxelOccupancy::TYPE_FREE ||
-                                                                 nz & VoxelOccupancy::TYPE_FREE))
+                        uint8_t& c  = vector[c_idx];
+                        uint8_t& px = vector[c_idx + dx];
+                        uint8_t& nx = vector[c_idx - dx];
+                        uint8_t& py = vector[c_idx + dy];
+                        uint8_t& ny = vector[c_idx - dy];
+                        uint8_t& pz = vector[c_idx + dz];
+                        uint8_t& nz = vector[c_idx - dz];
+
+                        if (c & VoxelOccupancy::TYPE_UNKNOWN)
                         {
-                            // Promote the unknown voxel type to an occplane. Silly casting required.
-                            c = static_cast<VoxelOccupancy>(VoxelOccupancy::TYPE_OCCPLANE | c);
+                            implement(c, px, nx, py, ny, pz, nz, x, y, z);
                         }
                     }
                 }
@@ -215,12 +241,87 @@ private:
         UpdateCallableOccplane(Binary& caller)
             : caller(caller)
         {
+            using namespace std::placeholders;
+            this->implement_track    = std::bind(&UpdateCallableOccplane::implementTrack,   this, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10);
+            this->implement_no_track = std::bind(&UpdateCallableOccplane::implementNoTrack, this, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10);
+        }
 
+
+        /// @brief Acquires the centers and normals vectors in this class' member variables.
+        /// @param occplane_centers Storage location for occplane centers.
+        /// @param occplane_normals Storage location for occplane normals.
+        void acquireTracking(std::vector<Eigen::Vector3d>& occplane_centers,
+                             std::vector<Eigen::Vector3d>& occplane_normals)
+        {
+            this->occplane_centers = &occplane_centers;
+            this->occplane_normals = &occplane_normals;
+        }
+
+
+        /// @brief Resets the class member variables pointing to the storage location of occplane centers
+        ///        and normals to nullptr, releasing temporary ownership.
+        void releaseTracking()
+        {
+            this->occplane_centers = nullptr;
+            this->occplane_normals = nullptr;
+        }
+
+
+        /// @brief Implementation that only sets the voxel label to an occplane type.
+        void implementNoTrack(uint8_t& c,
+                              const uint8_t& px, const uint8_t& nx,
+                              const uint8_t& py, const uint8_t& ny,
+                              const uint8_t& pz, const uint8_t& nz,
+                              const size_t&, const size_t&, const size_t&)
+        {
+            if (px & VoxelOccupancy::TYPE_FREE || nx & VoxelOccupancy::TYPE_FREE ||
+                py & VoxelOccupancy::TYPE_FREE || ny & VoxelOccupancy::TYPE_FREE ||
+                pz & VoxelOccupancy::TYPE_FREE || nz & VoxelOccupancy::TYPE_FREE)
+            {
+                c |= VoxelOccupancy::TYPE_OCCPLANE;
+            }
+        }
+
+
+        /// @brief That sets the voxel label to an occplane type and records the location and
+        ///        normal for each occplane.
+        void implementTrack(uint8_t& c,
+                            const uint8_t& px, const uint8_t& nx,
+                            const uint8_t& py, const uint8_t& ny,
+                            const uint8_t& pz, const uint8_t& nz,
+                            const size_t& x, const size_t& y, const size_t& z)
+        {
+            if (c & VoxelOccupancy::TYPE_UNKNOWN)
+            {
+                Eigen::Vector3d normal = Eigen::Vector3d::Zero();
+
+                normal.x() += ((px & VoxelOccupancy::TYPE_FREE) == VoxelOccupancy::TYPE_FREE) * 1;
+                normal.x() -= ((nx & VoxelOccupancy::TYPE_FREE) == VoxelOccupancy::TYPE_FREE) * 1;
+                normal.y() += ((py & VoxelOccupancy::TYPE_FREE) == VoxelOccupancy::TYPE_FREE) * 1;
+                normal.y() -= ((ny & VoxelOccupancy::TYPE_FREE) == VoxelOccupancy::TYPE_FREE) * 1;
+                normal.z() += ((pz & VoxelOccupancy::TYPE_FREE) == VoxelOccupancy::TYPE_FREE) * 1;
+                normal.z() -= ((nz & VoxelOccupancy::TYPE_FREE) == VoxelOccupancy::TYPE_FREE) * 1;
+
+                if (normal.isZero(0.0f) == false)
+                {
+                    c |= VoxelOccupancy::TYPE_OCCPLANE;
+
+                    const float& res = this->caller.properties->resolution;
+                    this->occplane_centers->emplace_back(x * res, y * res, z * res);
+                    this->occplane_normals->emplace_back(normal.normalized());
+                }
+            }
         }
 
 
         /// @brief Reference to the specific derived class calling this object.
         Binary& caller;
+
+        /// @brief Function pointers to the implementation callbacks for the two variations of the occplane update.
+        implement_function implement_track, implement_no_track;
+
+        /// @brief Locations for the `implementTrack` method to store occplane centers and normals in.
+        std::vector<Eigen::Vector3d> *occplane_centers = nullptr, *occplane_normals = nullptr;
     };
 
 

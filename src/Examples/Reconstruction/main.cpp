@@ -11,7 +11,6 @@ int main(const int argc, const char **argv)
     const float reject_rate   = std::clamp(parser.get<float>("--reject", 0.0), 0.0f, 1.0f);
     const bool  show_im       = parser.has("--show-im");
     const bool  save_im       = parser.has("--save-im");
-    const bool  sphere_policy = parser.has("--sphere");
     const float noise         = parser.get<float>("--noise", 0.0f);
 
     std::filesystem::path scene_fpath = parser.get<std::filesystem::path>("--scene", FORGE_SCAN_SHARE_DIR "/Examples/Scene.h5");
@@ -41,6 +40,11 @@ int main(const int argc, const char **argv)
     {
         std::cout << "using Axis policy..." << std::endl;
         manager->policyAdd("--set-active --type Axis --n-views 7 --n-repeat 3 --x -1.0 --y -1.0 --z -1.0 --seed 50 --uniform");
+    }
+    else if (parser.has("--occplane"))
+    {
+        std::cout << "using Occplane policy..." << std::endl;
+        manager->policyAdd("--set-active --type Occplane --min-points 30 --eps 0.5");
     }
     else
     {

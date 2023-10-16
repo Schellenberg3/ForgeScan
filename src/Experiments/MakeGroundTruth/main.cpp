@@ -1,4 +1,4 @@
-#include "ForgeScan/Simulation/Scene.hpp"
+#include "ForgeScan/Simulation/GroundTruthScene.hpp"
 
 
 /// @brief Helper to get the user's input properties.
@@ -14,20 +14,20 @@ inline std::shared_ptr<const forge_scan::Grid::Properties> get_properties()
 
 /// @brief Helper to set the lower bounds rotation.
 /// @param [out] parser ArgParser to use. On return this is set to the arguments used for rotation.
-/// @param [out] scan_lower_bound Lower bounds to rotate.
+/// @param [out] grid_lower_bound Lower bounds to rotate.
 inline void get_rotation(forge_scan::utilities::ArgParser& parser,
-                         forge_scan::Extrinsic& scan_lower_bound)
+                         forge_scan::Extrinsic& grid_lower_bound)
 {
-    scan_lower_bound = forge_scan::Extrinsic::Identity();
+    grid_lower_bound = forge_scan::Extrinsic::Identity();
     while (true)
     {
         parser.getInput("\nPlease specify rotation of the Reconstruction's lower-bound [-h for help]:");
         if (parser[0] != "-h")
         {
-            forge_scan::Entity::setRotation(parser, scan_lower_bound);
+            forge_scan::Entity::setRotation(parser, grid_lower_bound);
             std::string rotation_units = parser.has("--degrees") ? " [degrees]" : " [radians]";
             std::cout << "\nGround Truth will be generated from a lower bound with the following rotation:"
-                      << "\n" << scan_lower_bound.rotation()
+                      << "\n" << grid_lower_bound.rotation()
                       << std::endl;
             break;
         }
@@ -38,19 +38,19 @@ inline void get_rotation(forge_scan::utilities::ArgParser& parser,
 
 /// @brief Helper to set the lower bounds rotation.
 /// @param [out] parser ArgParser to use. On return this is set to the arguments used for rotation.
-/// @param [out] scan_lower_bound Lower bounds to translate.
+/// @param [out] grid_lower_bound Lower bounds to translate.
 inline void get_translation(forge_scan::utilities::ArgParser& parser,
-                            forge_scan::Extrinsic& scan_lower_bound)
+                            forge_scan::Extrinsic& grid_lower_bound)
 {
-    scan_lower_bound.translation() = forge_scan::Translation::Zero();
+    grid_lower_bound.translation() = forge_scan::Translation::Zero();
     while (true)
     {
         parser.getInput("\nPlease specify position of the Reconstruction's lower-bound [-h for help]:");
         if (parser[0] != "-h")
         {
-            forge_scan::Entity::setTranslation(parser, scan_lower_bound);
+            forge_scan::Entity::setTranslation(parser, grid_lower_bound);
             std::cout << "\nGround Truth will be generated from a lower bound at the following position:\n\t"
-                      << scan_lower_bound.translation().transpose() << std::endl;
+                      << grid_lower_bound.translation().transpose() << std::endl;
             break;
         }
         std::cout << "\n" << forge_scan::Entity::helpMessageTranslation() << std::endl;
@@ -93,7 +93,7 @@ inline void add_shapes(forge_scan::utilities::ArgParser& parser,
 
 int main()
 {
-    forge_scan::Extrinsic scan_lower_bound;
+    forge_scan::Extrinsic grid_lower_bound;
     forge_scan::utilities::ArgParser parser;
     static const std::string default_file_path = "GroundTruth.h5";
 
@@ -104,11 +104,10 @@ int main()
     // ************************************** SETUP SCENE ************************************** //
 
     auto properties = get_properties();
-    get_rotation(parser, scan_lower_bound);
-    get_translation(parser, scan_lower_bound);
+    get_rotation(parser, grid_lower_bound);
+    get_translation(parser, grid_lower_bound);
 
-    auto scene = forge_scan::simulation::Scene::create(scan_lower_bound);
-    scene->setGridProperties(properties);
+    auto scene = forge_scan::simulation::GroundTruthScene::create(grid_lower_bound, properties);
     add_shapes(parser, scene);
 
 

@@ -1,4 +1,5 @@
 #include "ForgeScan/Simulation/Scene.hpp"
+#include "ForgeScan/Simulation/GroundTruthScene.hpp"
 #include "ForgeScan/Sensor/DepthImageProccessing.hpp"
 
 
@@ -14,7 +15,7 @@ int main(const int argc, const char **argv)
     forge_scan::Extrinsic scene_lower_bound = forge_scan::Extrinsic::Identity();
     scene_lower_bound.translation() = forge_scan::Point( -1, -1, -1);
 
-    auto scene = forge_scan::simulation::Scene::create(scene_lower_bound);
+    auto scene = forge_scan::simulation::GroundTruthScene::create(scene_lower_bound);
 
     scene->add("--file abc2.stl --x -0.5 --scale  5.0");
     scene->add("--file abc3.stl --y -0.5 --scale 25.0");
@@ -38,7 +39,7 @@ int main(const int argc, const char **argv)
 
     scene->load(updated_fpath);
 
-    auto scene2 = forge_scan::simulation::Scene::create();
+    auto scene2 = forge_scan::simulation::GroundTruthScene::create();
     scene2->load(updated_fpath);
 
     std::cout << "Success! Reloaded the scene." << std::endl;

@@ -1,5 +1,5 @@
 #include "ForgeScan/Manager.hpp"
-#include "ForgeScan/Simulation/Scene.hpp"
+#include "ForgeScan/Simulation/GroundTruthScene.hpp"
 
 #include "ForgeScan/Sensor/DepthImageProccessing.hpp"
 #include "ForgeScan/Utilities/Timer.hpp"
@@ -149,7 +149,7 @@ int main()
     // Load scene; set rejection rate.
     parser.getInput("Enter a file path to the ground truth scene to use:");
     std::filesystem::path scene_fpath = parser.get<std::string>(0, default_scene_file_path);
-    auto scene = forge_scan::simulation::Scene::create();
+    auto scene = forge_scan::simulation::GroundTruthScene::create();
     scene->load(scene_fpath);
 
     parser.getInput("Enter the view rejection rate to use (0 to 1):");

@@ -1,5 +1,5 @@
 #include "ForgeScan/Manager.hpp"
-#include "ForgeScan/Simulation/Scene.hpp"
+#include "ForgeScan/Simulation/GroundTruthScene.hpp"
 
 #include "ForgeScan/Sensor/DepthImageProccessing.hpp"
 #include "ForgeScan/Utilities/Timer.hpp"
@@ -20,7 +20,7 @@ int main(const int argc, const char **argv)
 
     // ************************************ Load the scene ************************************* //
 
-    auto scene = forge_scan::simulation::Scene::create();
+    auto scene = forge_scan::simulation::GroundTruthScene::create();
     scene->load(scene_fpath);
     std::cout << "Scene contains: \n" << *scene << std::endl; 
 

@@ -18,6 +18,7 @@ namespace simulation {
 
     // Forward definition to allow friend access.
     struct Scene;
+    struct GroundTruthScene;
 
 } // namespace simulation
 } // namespace forge_scan
@@ -73,9 +74,11 @@ class Occupancy : public Grid
     /// @details Required to call the compare method.
     friend class metrics::OccupancyConfusion;
 
-    /// @details Required to call the save method and modify values in the Occupancy Grid.
+    /// @details Required to modify values in the grid.
     friend struct simulation::Scene;
 
+    /// @details Required to call the save method.
+    friend struct simulation::GroundTruthScene;
 
 public:
     /// @brief Creates a shared pointer to a Ground Truth Occupancy Grid.

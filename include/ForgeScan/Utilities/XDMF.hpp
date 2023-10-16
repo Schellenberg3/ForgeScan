@@ -77,6 +77,17 @@ inline std::string makeDataPath(const std::string& hdf5_fname,
 }
 
 
+/// @brief Constructs an XDMF data path string for the data's location in the HDF5 file.
+/// @param hdf5_fname  File name, with extention, for the HDF5 file which stores the attribute information.
+/// @param dset_path   Full internal HDF5 path to a dataset.
+/// @return XDMF data path string.
+inline std::string makeDataPath(const std::string& hdf5_fname,
+                                const std::string& dset_path)
+{
+    return hdf5_fname + ":/" + dset_path;
+}
+
+
 /// @brief Writes The attribute information about a Grid into the XDMF file.
 /// @param file An opened file stream to write to.
 /// @param attr_name   Name of the attribute. This is the user's provided name for the data channel.

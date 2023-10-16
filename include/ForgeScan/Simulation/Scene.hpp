@@ -206,6 +206,40 @@ public:
     // ***************************************************************************************** //
 
 
+    /// @brief Calculates the tensor of rays to cast into the Open3D RaycastingScene.
+    /// @param camera Camera intrinsics and pose to use
+    /// @return Tensor of shape {width, height, 6} and datatype float 32.
+    static open3d::core::Tensor getCameraRays(const std::shared_ptr<sensor::Camera>& camera)
+    {
+        return Scene::getCameraRays(camera, camera->extr);
+    }
+
+
+    /// @brief Calculates the tensor of rays to cast into the Open3D RaycastingScene.
+    /// @param camera Camera intrinsics to use.
+    /// @param extr Pose of the camera, relative to the world frame.
+    /// @return Tensor of shape {width, height, 6} and datatype float 32.
+    static open3d::core::Tensor getCameraRays(const std::shared_ptr<sensor::Camera>& camera, const Extrinsic& extr)
+    {
+        open3d::core::Tensor rays({static_cast<long>(camera->intr->height), static_cast<long>(camera->intr->width), 6}, open3d::core::Float32);
+        Eigen::Map<Eigen::MatrixXf> rays_map(rays.GetDataPtr<float>(), 6, camera->intr->size());
+
+        Eigen::Matrix<float, 6, 1> r;
+        r.topRows<3>() = extr.translation();
+        int64_t linear_idx = 0;
+        for (size_t y = 0; y < camera->intr->height; ++y)
+        {
+            for (size_t x = 0; x < camera->intr->width; ++x, ++linear_idx)
+            {
+                Eigen::Vector3f ray_dir = extr.rotation() * camera->getPoint(y, x);
+                r.bottomRows<3>() = ray_dir;
+                rays_map.col(linear_idx) = r;
+            }
+        }
+        return rays;
+    }
+
+
     /// @brief Takes an image of the Scene with the provided Camera.
     /// @param camera `sensor::Camera`to store information in.
     /// @param pose_is_world_frame  If true, treats the pose as relative to the static world frame.
@@ -217,28 +251,14 @@ public:
     void image(const std::shared_ptr<sensor::Camera>& camera,
                const bool& pose_is_world_frame = false)
     {
-        // Clear any previous data and ensure that raytracing is in the proper units.
+        // Clear any previous data and ensure that ray tracing is in the proper units.
         camera->resetDepth(1.0f);
 
         // If we are placing the camera relative to the world frame then the pose is what was provided.
         // But if the pose is relative to the scene frame, then transform it to be in the world frame.
         Extrinsic camera_pose = pose_is_world_frame ? camera->extr : this->scan_lower_bound * camera->extr;
 
-        open3d::core::Tensor rays({static_cast<long>(camera->intr->height), static_cast<long>(camera->intr->width), 6}, open3d::core::Float32);
-        Eigen::Map<Eigen::MatrixXf> rays_map(rays.GetDataPtr<float>(), 6, camera->intr->size());
-
-        Eigen::Matrix<float, 6, 1> r;
-        r.topRows<3>() = camera_pose.translation();
-        int64_t linear_idx = 0;
-        for (size_t y = 0; y < camera->intr->height; ++y)
-        {
-            for (size_t x = 0; x < camera->intr->width; ++x, ++linear_idx)
-            {
-                Eigen::Vector3f ray_dir = camera_pose.rotation() * camera->getPoint(y, x);
-                r.bottomRows<3>() = ray_dir;
-                rays_map.col(linear_idx) = r;
-            }
-        }
+        open3d::core::Tensor rays = Scene::getCameraRays(camera, camera_pose);
 
         auto result = this->o3d_scene.CastRays(rays);
         camera->image = open3d::core::eigen_converter::TensorToEigenMatrixXf(result["t_hit"]);

@@ -242,7 +242,7 @@ private:
         };
         std::sort(clusters.begin(), clusters.end(), sort_clusters);
         if (clusters.back().label == 0) { clusters.pop_back(); }
-        if (clusters.size() > this->keep_top_n)
+        if (static_cast<int>(clusters.size()) > this->keep_top_n)
         {
             clusters.resize(this->keep_top_n);
         }

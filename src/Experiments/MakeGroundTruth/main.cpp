@@ -69,7 +69,7 @@ inline void add_shapes(forge_scan::utilities::ArgParser& parser,
         parser.getInput("\nAdd primitive shapes to the scene [-h for help or ENTER to finish]:");
         if (parser.has("-h"))
         {
-            std::cout << "\n" << forge_scan::simulation::Constructor::help(parser) << std::endl;
+            std::cout << "\n" << forge_scan::simulation::MeshLoader::help(parser) << std::endl;
         }
         else if (!parser.hasArgs())
         {

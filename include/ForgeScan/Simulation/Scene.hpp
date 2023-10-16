@@ -112,7 +112,7 @@ public:
     /// @throws InvalidMapKey If a shape with the same name already exists.
     void add(const utilities::ArgParser& parser)
     {
-        this->mesh_list.emplace_back(Constructor::create(parser));
+        this->mesh_list.emplace_back(MeshLoader::create(parser));
         this->o3d_scene.AddTriangles(this->mesh_list.back().second);
     }
 
@@ -322,7 +322,7 @@ protected:
                 Extrinsic extr;
                 Scene::readExtrFromHDF5(file, g_mesh.getPath(), extr);
 
-                this->mesh_list.emplace_back( Constructor::create(mesh_fpath, extr, fpath.remove_filename(), scale) );
+                this->mesh_list.emplace_back( MeshLoader::create(mesh_fpath, extr, fpath.remove_filename(), scale) );
                 this->o3d_scene.AddTriangles(this->mesh_list.back().second);
             }
         }

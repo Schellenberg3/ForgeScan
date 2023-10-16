@@ -1,5 +1,5 @@
-#ifndef FORGE_SCAN_PRIMITIVE_CONSTRUCTOR_HPP
-#define FORGE_SCAN_PRIMITIVE_CONSTRUCTOR_HPP
+#ifndef FORGE_SCAN_SIMULATION_MESH_LOADER_HPP
+#define FORGE_SCAN_SIMULATION_MESH_LOADER_HPP
 
 #include <memory>
 #include <algorithm>
@@ -29,8 +29,8 @@ struct MeshInfo
 };
 
 
-/// @brief Constructor for loading meshes into a `simulation::Scene` based on ArgParser inputs.
-struct Constructor
+/// @brief MeshLoader for loading meshes into a `simulation::Scene` based on ArgParser inputs.
+struct MeshLoader
 {
     /// @brief Function to read meshes into a `simulation::Scene`.
     /// @param parser Arguments to select the mesh file and describe its transformation.
@@ -45,7 +45,7 @@ struct Constructor
         std::filesystem::path fpath = parser.get<std::filesystem::path>(Parse::file);
         float scale = parser.get<float>(Parse::scale, Parse::d_scale);
 
-        return Constructor::create(fpath, extr, scale);
+        return MeshLoader::create(fpath, extr, scale);
     }
 
 
@@ -58,7 +58,7 @@ struct Constructor
     static std::pair<MeshInfo, open3d::t::geometry::TriangleMesh> create(std::filesystem::path fpath,
                                                                          Extrinsic& extr, const float& scale = 1.0f)
     {
-        return Constructor::create(fpath, extr, std::filesystem::path(), scale);
+        return MeshLoader::create(fpath, extr, std::filesystem::path(), scale);
     }
 
 
@@ -118,11 +118,11 @@ struct Constructor
     {
         using namespace utilities::strings;
         /// TODO: Return and update this.
-        return "Help string for Simulation Constructor to be added soon.";
+        return "Help string for Simulation MeshLoader to be added soon.";
     }
 
 
-    /// @brief Describes the flags and options that the Constructor can parse.
+    /// @brief Describes the flags and options that the MeshLoader can parse.
     struct Parse
     {
         /// @brief Option. Describes the location of the mesh file.
@@ -142,4 +142,4 @@ struct Constructor
 } // namespace forge_scan
 
 
-#endif // FORGE_SCAN_PRIMITIVE_CONSTRUCTOR_HPP
+#endif // FORGE_SCAN_SIMULATION_MESH_LOADER_HPP

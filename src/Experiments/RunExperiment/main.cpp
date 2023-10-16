@@ -209,7 +209,7 @@ int main()
 
             camera->setExtr(camera_pose);
 
-            scene->image(camera);
+            scene->image(camera, scene->grid_lower_bound);
             if (save_im)
             {
                 image_fpath.replace_filename(image_prefix + std::to_string(n) + ".jpg");

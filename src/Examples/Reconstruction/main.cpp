@@ -100,7 +100,7 @@ int main(const int argc, const char **argv)
 
             camera->setExtr(camera_pose);
 
-            scene->image(camera);
+            scene->image(camera, scene->grid_lower_bound);
             if (show_im)
             {
                 forge_scan::sensor::DepthImageProcessing::imshow(camera, true);

@@ -16,7 +16,7 @@
 #include "ForgeScan/Common/Exceptions.hpp"
 #include "ForgeScan/Metrics/GroundTruth/Occupancy.hpp"
 #include "ForgeScan/Metrics/GroundTruth/TSDF.hpp"
-#include "ForgeScan/Simulation/Constructor.hpp"
+#include "ForgeScan/Simulation/MeshLoader.hpp"
 #include "ForgeScan/Sensor/Camera.hpp"
 
 #include "ForgeScan/Utilities/Files.hpp"

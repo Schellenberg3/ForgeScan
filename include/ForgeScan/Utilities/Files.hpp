@@ -72,6 +72,24 @@ inline void checkPathHasFileNameAndExtension(std::filesystem::path& fpath, const
 }
 
 
+/// @brief Verifies the file path has the specified file name and extension and creates any directories as needed.
+/// @param fpath Path to check and possible modify.
+/// @param extension Extension to check for.
+/// @param default_fname File name to use if none is provided.
+/// @param timestamp_default If true, will add a timestamp if the default file name is used.
+inline void validateAndCreateFilepath(std::filesystem::path& fpath, const std::string& extension = "",
+                             const std::string& default_fname = "", const bool& timestamp_default = true)
+{
+    checkPathHasFileNameAndExtension(fpath, extension, default_fname, timestamp_default);
+    fpath.make_preferred();
+    fpath = std::filesystem::absolute(fpath);
+    if (!std::filesystem::exists(fpath.parent_path()))
+    {
+        std::filesystem::create_directories(fpath.parent_path());
+    }
+}
+
+
 } // namespace utilities
 } // namespace forge_scan
 

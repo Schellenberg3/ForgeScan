@@ -2,6 +2,11 @@
 *
 !.gitignore
 !README.md
+!sphere.stl
+!box.stl
+!bin.stl
+!bunny.stl
+!rotor_blade.stl
 !abc0.stl
 !abc1.stl
 !abc2.stl

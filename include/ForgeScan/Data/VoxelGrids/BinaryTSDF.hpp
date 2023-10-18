@@ -104,7 +104,7 @@ private:
     }
 
 
-    void save(HighFive::Group& g_channel, const std::string& grid_type) const override final
+    void save(HighFive::Group& g_channel, const std::string& grid_type) override final
     {
         try
         {

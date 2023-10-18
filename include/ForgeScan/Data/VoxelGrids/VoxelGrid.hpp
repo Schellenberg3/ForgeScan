@@ -286,7 +286,7 @@ protected:
     ///         (However, this error should be caught earlier in the VoxelGrid constructor.)
     /// @note This is virtual so VoxelGrid with multiple data channels may specifically handle
     ///       their channels. But most derived VoxelGrids may uses this method.
-    virtual void save(HighFive::Group& g_channel, const std::string& grid_type) const
+    virtual void save(HighFive::Group& g_channel, const std::string& grid_type)
     {
         try
         {

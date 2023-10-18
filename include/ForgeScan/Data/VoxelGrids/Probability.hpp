@@ -35,6 +35,7 @@ public:
                                   parser.get<float>(Probability::parse_p_far,    Probability::default_p_far),
                                   parser.get<float>(Probability::parse_p_init,   Probability::default_p_init),
                                   parser.get<float>(Probability::parse_p_thresh, Probability::default_p_thresh),
+                                  parser.has(Probability::parse_save_as_log_odds),
                                   stringToDataType(parser.get(VoxelGrid::parse_dtype), DataType::FLOAT));
     }
 
@@ -49,6 +50,8 @@ public:
     /// @param p_sensed   Probability for the voxel at the sensed point. Default 0.90.
     /// @param p_far      Probability for voxels far in front of the sensed point. Default 0.15.
     /// @param p_init     Probability for voxel initialization. Default 0.50.
+    /// @param save_as_log_odds If true then the intermediate log odds value is stored. Other wise the
+    ///                        voxels are converted to probability, saved, then back to log odds.
     /// @param type_id Datatype for the Grid. Default is float.
     /// @return Shared pointer to a Probability Grid.
     /// @note Probability values clamped to the range 0<= p <= 1.
@@ -63,6 +66,7 @@ public:
                                                const float& p_far    =  Probability::default_p_far,
                                                const float& p_init   =  Probability::default_p_init,
                                                const float& p_thresh =  Probability::default_p_thresh,
+                                               const bool& save_as_log_odds = false,
                                                const DataType& type_id = DataType::FLOAT)
     {
         return std::shared_ptr<Probability>(new Probability(properties, dist_min, dist_max,
@@ -73,6 +77,7 @@ public:
                                                             std::clamp(p_far,    0.0f, 1.0f),
                                                             std::clamp(p_init,   0.0f, 1.0f),
                                                             std::clamp(p_thresh, 0.0f, 1.0f),
+                                                            save_as_log_odds,
                                                             type_id));
     }
 
@@ -144,7 +149,7 @@ public:
                        default_p_far, default_p_init, default_p_thresh;
 
     static const std::string parse_p_max, parse_p_min,  parse_p_past, parse_p_sensed,
-                             parse_p_far, parse_p_init, parse_p_thresh;
+                             parse_p_far, parse_p_init, parse_p_thresh, parse_save_as_log_odds;
 
     static const std::string type_name;
 
@@ -159,6 +164,8 @@ private:
     /// @param p_sensed   Probability for the voxel at the sensed point.
     /// @param p_far      Probability for voxels far in front of the sensed point.
     /// @param p_init     Probability for voxel initialization.
+    /// @param save_as_log_odd If true then the intermediate log odds value is stored. Other wise the
+    ///                        voxels are converted to probability, saved, then back to log odds.
     /// @param type_id Datatype for the Grid.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     explicit Probability(const std::shared_ptr<const Grid::Properties>& properties,
@@ -171,6 +178,7 @@ private:
                          const float& p_far,
                          const float& p_init,
                          const float& p_thresh,
+                         const bool& save_as_log_odds,
                          const DataType& type_id)
         : VoxelGrid(properties,
                     dist_min,
@@ -185,11 +193,30 @@ private:
           p_sensed(p_sensed),
           p_far(p_far),
           log_p_thresh(utilities::math::log_odds(p_thresh)),
-          update_callable(*this)
+          save_as_log_odds(save_as_log_odds),
+          update_callable(*this),
+          update_callable_converter(*this)
     {
 
     }
 
+
+    /// @note This is virtual so VoxelGrid with multiple data channels may specifically handle
+    ///       their channels. But most derived VoxelGrids may uses this method.
+    void save(HighFive::Group& g_channel, const std::string& grid_type) override final
+    {
+        if (this->save_as_log_odds == false)
+        {
+            this->update_callable_converter.setToProbability();
+            std::visit(this->update_callable_converter, this->data);
+        }
+        VoxelGrid::save(g_channel, grid_type);
+        if (this->save_as_log_odds == false)
+        {
+            this->update_callable_converter.setToLogOdds();
+            std::visit(this->update_callable_converter, this->data);
+        }
+    }
 
     /// @brief Subclass provides update functions for each supported DataType/VectorVariant of
     ///        the data vector.
@@ -277,6 +304,68 @@ private:
     };
 
 
+    /// @brief Subclass provides update functions for each supported DataType/VectorVariant of
+    ///        the data vector.
+    struct UpdateCallableConverter : public VoxelGrid::UpdateCallable
+    {
+        using VoxelGrid::UpdateCallable::operator();
+
+
+        // ************************************************************************************* //
+        // *                                SUPPORTED DATATYPES                                * //
+        // ************************************************************************************* //
+
+
+        void operator()(std::vector<float>& vector)
+        {
+            using namespace forge_scan::utilities::math;
+            using namespace std::placeholders;
+
+            auto convert = std::bind(this->to_probability ? probability<float> : log_odds<float>, _1);
+            for (auto& item : vector)
+            {
+                item = convert(item);
+            }
+        }
+
+
+        void operator()(std::vector<double>& vector)
+        {
+            using namespace forge_scan::utilities::math;
+            using namespace std::placeholders;
+
+            auto convert = std::bind(this->to_probability ? probability<double> : log_odds<double>, _1);
+            for (auto& item : vector)
+            {
+                item = convert(item);
+            }
+        }
+
+
+        // ************************************************************************************* //
+        // *                         PUBLIC CLASS METHODS AND MEMBERS                          * //
+        // ************************************************************************************* //
+
+
+        /// @brief Creates an UpdateCallable to implement the derived class's update function.
+        /// @param caller Reference to the specific derived class calling this object.
+        UpdateCallableConverter(Probability& caller)
+            : caller(caller)
+        {
+
+        }
+
+        void setToProbability() { this->to_probability = true; }
+        
+        void setToLogOdds() { this->to_probability = false; }
+
+        /// @brief Reference to the specific derived class calling this object.
+        Probability& caller;
+
+        bool to_probability = true;
+    };
+
+
 private:
     /// @brief Log probability for maximum voxel value saturation.
     const float log_p_max;
@@ -299,10 +388,15 @@ private:
     /// @brief Log probability for threshold above which voxels are consider occupied.
     const float log_p_thresh;
 
+    /// @brief Controls how the data is saved. If true log odds are saved.
+    const bool save_as_log_odds;
+
     /// @brief Subclass callable that std::visit uses to perform updates with typed information.
     /// @note  Initialization order matters. This musts be declared last so the other class members that
     ///        this uses are guaranteed to be initialized.
     UpdateCallable update_callable;
+
+    UpdateCallableConverter update_callable_converter;
 };
 
 
@@ -340,6 +434,10 @@ const std::string Probability::parse_p_init = "--p-init";
 
 /// @brief ArgParser key for the occupation probability above which voxels are consider occupied.
 const std::string Probability::parse_p_thresh = "--p-thresh";
+
+/// @brief ArgParser flag for saving the voxels as the intermediate log odds instead of converting
+///        to (and then back from) the probability.
+const std::string Probability::parse_save_as_log_odds = "--save-as-log-odds";
 
 
 } // namespace data

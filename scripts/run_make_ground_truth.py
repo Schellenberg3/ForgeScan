@@ -1,7 +1,6 @@
 import argparse
 import pathlib
 import subprocess
-import math
 
 EXECUTABLE_NAME = 'MakeGroundTruth'
 EXECUTABLE_PATH = None

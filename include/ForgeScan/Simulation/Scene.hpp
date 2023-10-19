@@ -233,6 +233,45 @@ public:
     }
 
 
+    /// @brief Gets a list of voxel vertex locations to test for occupancy or distance.
+    /// @param grid_properties Size, shape, and resolution of the voxel grid.
+    /// @param lower_bound Lower bound location for the grid.
+    /// @return A tensor of shape `{nx + 1, ny + 1, nz + 1, 3}` where n is the number of voxels in the grid in the specific direction.
+    open3d::core::Tensor getVoxelVertices(const std::shared_ptr<const Grid::Properties>& grid_properties,
+                                          const Extrinsic& lower_bound) const
+    {
+        const int64_t nx = static_cast<int64_t>(grid_properties->size.x() + 1),
+                      ny = static_cast<int64_t>(grid_properties->size.y() + 1),
+                      nz = static_cast<int64_t>(grid_properties->size.z() + 1);
+
+        open3d::core::Tensor voxel_vertices({nx, ny, nz, 3}, open3d::core::Float32);
+
+        const float neg_res = -1 * grid_properties->resolution;
+        Point voxel_scan_f  = Point::Ones() * neg_res;
+
+        for (int64_t z = 0; z < nz; ++z)
+        {
+            for (int64_t y = 0; y < ny; ++y)
+            {
+                for (int64_t x = 0; x < nx; ++x)
+                {
+                    Point vertex = lower_bound * voxel_scan_f.homogeneous();
+                    voxel_vertices[x][y][z][0] = vertex.x();
+                    voxel_vertices[x][y][z][1] = vertex.y();
+                    voxel_vertices[x][y][z][2] = vertex.z();
+                    voxel_scan_f.x() += grid_properties->resolution;
+                }
+                voxel_scan_f.x()  = neg_res;
+                voxel_scan_f.y() += grid_properties->resolution;
+            }
+            voxel_scan_f.y()  = neg_res;
+            voxel_scan_f.z() += grid_properties->resolution;
+        }
+
+        return voxel_vertices;
+    }
+
+
     /// @brief Calculates a `metrics::ground_truth::Occupancy` VoxelGrid.
     /// @param grid_properties Size, shape, and resolution of the voxel grid.
     /// @param lower_bound Lower bound location for the grid.
@@ -241,18 +280,33 @@ public:
     calculateGroundTruthOccupancy(const std::shared_ptr<const Grid::Properties>& grid_properties,
                                   const Extrinsic& lower_bound)
     {
-        const size_t n_voxels = grid_properties->getNumVoxels();
-
-        open3d::core::Tensor voxel_centers = Scene::getVoxelCenters(grid_properties, lower_bound);
-
-        auto result = this->o3d_scene.ComputeOccupancy(voxel_centers, 0, 5).Reshape({1, static_cast<long>(n_voxels)});
-        Eigen::MatrixXi result_eigen = open3d::core::eigen_converter::TensorToEigenMatrixXi(result);
+        static const int all_vertex_votes = 8, no_vertex_votes = 0;
+        open3d::core::Tensor voxel_vertices = Scene::getVoxelVertices(grid_properties, lower_bound);
+        auto result = this->o3d_scene.ComputeOccupancy(voxel_vertices, 0, 5);
 
         auto true_occupancy = metrics::ground_truth::Occupancy::create(grid_properties);
-        for (size_t i = 0; i < n_voxels; ++i)
+        size_t i = 0;
+        for (size_t z = 0; z < grid_properties->size.z(); ++z)
         {
-            true_occupancy->operator[](i) = result_eigen(0, i) == 1 ? VoxelOccupancy::OCCUPIED :
-                                                                      VoxelOccupancy::FREE;
+            for (size_t y = 0; y < grid_properties->size.y(); ++y)
+            {
+                for (size_t x = 0; x < grid_properties->size.x(); ++x, ++i)
+                {
+                    float votes = 0;
+                    votes += result[x]  [y]  [z].Item<float>();
+                    votes += result[x+1][y]  [z].Item<float>();
+                    votes += result[x]  [y+1][z].Item<float>();
+                    votes += result[x+1][y+1][z].Item<float>();
+                    votes += result[x]  [y]  [z+1].Item<float>();
+                    votes += result[x+1][y]  [z+1].Item<float>();
+                    votes += result[x]  [y+1][z+1].Item<float>();
+                    votes += result[x+1][y+1][z+1].Item<float>();
+                    if (votes < all_vertex_votes)
+                    {
+                        true_occupancy->operator[](i) = (votes == no_vertex_votes) ? VoxelOccupancy::FREE : VoxelOccupancy::CLIPPED;
+                    }
+                }
+            }
         }
         return true_occupancy;
     }

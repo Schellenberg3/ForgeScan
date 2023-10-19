@@ -24,12 +24,13 @@ assert EXECUTABLE_PATH is not None and \
        f"Cannot find executable at: {EXECUTABLE_PATH}"
 
 # File constants
-SPHERE_TRUTH_NAME = "sphere"
-BOX_TRUTH_NAME    = "box"
-BIN_TRUTH_NAME    = "bin"
-BAR_TRUTH_NAME    = "bar"
-
-STDIN_NEWLINE     = "\n"
+SPHERE        = "sphere"
+BOX_ALIGNED   = "box-rotated"
+BOX           = "box"
+BIN           = "bin"
+BUNNY         = "bunny"
+ROTOR_BLADE   = "rotor_blade"
+STDIN_NEWLINE = "\n"
 
 
 def get_grid_properties(nx: float = 101, ny: float = 101, nz: float = 101, resolution: float = 0.02) -> str:
@@ -60,35 +61,33 @@ def confirm_generate_data() -> str:
     """
     Returns a stdin string to confirm the generation of the occupancy and TSDF data.
     """
-    return "y" + STDIN_NEWLINE + "y" + STDIN_NEWLINE
+    return " y " + STDIN_NEWLINE + " y " + STDIN_NEWLINE
 
 
 def get_sphere() -> str:
     """
-    Returns a stdin string to add the ground truth test sphere to the scene.
+    Returns a stdin string to add the sphere mesh to the scene.
     """
-    stdin_shape = ""
+    stdin_shape  =  "--file sphere.stl "
+    stdin_shape += STDIN_NEWLINE # End shape
+    return stdin_shape
 
-    radius = math.pi / 6
 
-    stdin_shape += f" --name truth_sphere --shape sphere --radius {radius} "
+def get_box_aligned() -> str:
+    """
+    Returns a stdin string to add the box mesh to the scene.
+    """
+    stdin_shape  = " --file box.stl "
     stdin_shape += STDIN_NEWLINE # End shape
     return stdin_shape
 
 
 def get_box() -> str:
     """
-    Returns a stdin string to add the ground truth test box to the scene.
+    Returns a stdin string to add the box mesh to the scene.
+    Performs rotation on the mesh so voxel are not aligned with any of the mesh faces or edges.
     """
-    stdin_shape = ""
-
-    length = math.pi / 6
-    width  = math.e  / 2.5
-    height = (length + width) / 2
-
-    stdin_shape = ""
-
-    stdin_shape += f" --name truth_box --shape box --l {length} --w {width} --h {height} "
+    stdin_shape  = " --file box.stl "
     stdin_shape += get_rotation(23.81, 15.92, 0, degrees=True)
     stdin_shape += STDIN_NEWLINE # End shape
     return stdin_shape
@@ -96,108 +95,31 @@ def get_box() -> str:
 
 def get_bin() -> str:
     """
-    Returns a stdin string to add the ground truth test bin to the scene.
+    Returns a stdin string to add the bin mesh to the scene.
     """
-    stdin_shape = ""
-
-    # Base dimensions
-    bx = 1.20
-    by = 0.86
-    bz = 0.25
-
-    # Wall dimensions
-    wz = 1
-    wt = 0.30
-
-
-    # Dimensioning helpers
-    dx = 0.5 * bx
-
-    dy = 0.5 * by
-
-
-    # Base
-    stdin_shape += f" --name base --shape box --l {bx} --w {by} --h {bz} "
-    stdin_shape += get_translation(0, 0, -0.5*bz)
+    stdin_shape  = " --file bin.stl "
     stdin_shape += STDIN_NEWLINE # End shape
-
-    # Walls on X
-    stdin_shape += f" --name wall_nx --shape box --l {wt} --w {by} --h {wz} "
-    stdin_shape += get_translation(-dx, 0, 0.5*wz)
-    stdin_shape += STDIN_NEWLINE # End shape
-    stdin_shape += f" --name wall_px --shape box --l {wt} --w {by} --h {wz} "
-    stdin_shape += get_translation(dx, 0, 0.5*wz)
-    stdin_shape += STDIN_NEWLINE # End shape
-
-    # Walls on Y
-    stdin_shape += f" --name wall_ny --shape box --l {bx} --w {wt} --h {wz} "
-    stdin_shape += get_translation(0, -dy, 0.5*wz)
-    stdin_shape += STDIN_NEWLINE # End shape
-    stdin_shape += f" --name wall_py --shape box --l {bx} --w {wt} --h {wz} "
-    stdin_shape += get_translation(0, dy, 0.5*wz)
-    stdin_shape += STDIN_NEWLINE # End shape
-
     return stdin_shape
 
 
-def get_bar() -> str:
+def get_bunny() -> str:
     """
-    Returns a stdin string to add the ground truth test bar to the scene.
+    Returns a stdin string to add the stanford bunny mesh to the scene.
+    Scales the mesh to fit the sizing of everything else.
     """
-    stdin_shape = ""
-
-    stdin_shape = ""
-
-    # Height
-    rx = 0.25
-
-    # Rod dimensions
-    ry = 0.20
-    rz = 0.75
-
-    # Connector dimensions
-    cz = 0.4
-    ct = 0.1
-    cy = ry + cz
-
-    # End sphere radius
-    rs = 0.5 * min(rx, ry)
-
-    # Dimensioning helpers
-    dy = 0.5*(cz + ct)
-
-    dz0 = 0.5*rz + rs
-    dz1 = rs + rz + 0.5*ct
-    dz2 = dz1 + cz
-    dz3 = rs + rz + 0.5*(cz + ct)
-
-
-    # Sphere
-    stdin_shape += f" --name sphere --shape sphere --radius {rs} "
-    stdin_shape += get_translation(0, 0, rs)
+    stdin_shape  = " --file bunny.stl --scale 0.01 "
+    stdin_shape += get_translation(-0.2, 0, -0.4)
     stdin_shape += STDIN_NEWLINE # End shape
+    return stdin_shape
 
-    # Rod
-    stdin_shape += f" --name rod --shape box --l {rx} --w {ry} --h {rz} "
-    stdin_shape += get_translation(0, 0, dz0)
-    stdin_shape += STDIN_NEWLINE # End shape
 
-    # Connector walls on Z
-    stdin_shape += f" --name wall_nz --shape box --l {rx} --w {cy} --h {ct} "
-    stdin_shape += get_translation(0, 0, dz1)
+def get_rotor_blade() -> str:
+    """
+    Returns a stdin string to add the rotor blade to the scene.
+    Scales the mesh to fit the sizing of everything else.
+    """
+    stdin_shape  = " --file rotor_blade.stl --scale 0.3 "
     stdin_shape += STDIN_NEWLINE # End shape
-    stdin_shape += f" --name wall_pz --shape box --l {rx} --w {cy} --h {ct} "
-    stdin_shape += get_translation(0, 0, dz2)
-    stdin_shape += STDIN_NEWLINE # End shape
-
-    # Connector walls on Y
-    stdin_shape += f" --name wall_ny --shape box --l {rx} --w {ct} --h {cz} "
-    stdin_shape += get_translation(0, -dy, dz3)
-    stdin_shape += STDIN_NEWLINE # End shape
-    stdin_shape += f" --name wall_py --shape box --l {rx} --w {ct} --h {cz} "
-    stdin_shape += get_translation(0, dy, dz3)
-    stdin_shape += STDIN_NEWLINE # End shape
-
     return stdin_shape
 
 
@@ -207,24 +129,32 @@ def get_reconstruction_grid(parsed_args: argparse.Namespace) -> str:
     provided ground truth name.
     """
     stdin = ""
-    if (parsed_args.name == SPHERE_TRUTH_NAME):
+    if (parsed_args.name == SPHERE):
+        stdin += get_grid_properties(resolution=0.01) + STDIN_NEWLINE
+        stdin += get_rotation(0, 0, 0)                + STDIN_NEWLINE
+        stdin += get_translation(-0.5, -0.5, -0.5)    + STDIN_NEWLINE
+    elif (parsed_args.name == BOX):
         stdin += get_grid_properties()       + STDIN_NEWLINE
         stdin += get_rotation(0, 0, 0)       + STDIN_NEWLINE
         stdin += get_translation(-1, -1, -1) + STDIN_NEWLINE
-    elif (parsed_args.name == BOX_TRUTH_NAME):
+    elif (parsed_args.name == BOX_ALIGNED):
         stdin += get_grid_properties()       + STDIN_NEWLINE
         stdin += get_rotation(0, 0, 0)       + STDIN_NEWLINE
         stdin += get_translation(-1, -1, -1) + STDIN_NEWLINE
-    elif (parsed_args.name == BIN_TRUTH_NAME):
+    elif (parsed_args.name == BIN):
         stdin += get_grid_properties()         + STDIN_NEWLINE
         stdin += get_rotation(0, 0, 0)         + STDIN_NEWLINE
-        stdin += get_translation(-1, -1, -0.5) + STDIN_NEWLINE
-    elif (parsed_args.name == BAR_TRUTH_NAME):
-        stdin += get_grid_properties(121, 161, 321, 0.005)  + STDIN_NEWLINE
-        stdin += get_rotation(0, 0, 0)             + STDIN_NEWLINE
-        stdin += get_translation(-0.3, -0.4, -0.1) + STDIN_NEWLINE
+        stdin += get_translation(-1, -1, -1) + STDIN_NEWLINE
+    elif (parsed_args.name == BUNNY):
+        stdin += get_grid_properties()         + STDIN_NEWLINE
+        stdin += get_rotation(0, 0, 0)         + STDIN_NEWLINE
+        stdin += get_translation(-1, -1, -1) + STDIN_NEWLINE
+    elif (parsed_args.name == ROTOR_BLADE):
+        stdin += get_grid_properties(nx=151, ny=451, nz=101, resolution=0.01) + STDIN_NEWLINE
+        stdin += get_rotation(0, 0, 0)            + STDIN_NEWLINE
+        stdin += get_translation(-0.75, -2.25, -0.5) + STDIN_NEWLINE
     else:
-        raise ValueError("Shape name is invalid.")
+        raise ValueError("Mesh name is invalid.")
     return stdin
 
 
@@ -232,19 +162,22 @@ def get_scene(parsed_args: argparse.Namespace) -> str:
     """
     Returns a stdin string to add shapes to the scene based on the user's specified ground truth name.
     """
-    if (parsed_args.name == SPHERE_TRUTH_NAME):
+    if (parsed_args.name == SPHERE):
         stdin_shape = get_sphere()
-    elif (parsed_args.name == BOX_TRUTH_NAME):
+    elif (parsed_args.name == BOX):
         stdin_shape = get_box()
-    elif (parsed_args.name == BIN_TRUTH_NAME):
+    elif (parsed_args.name == BOX_ALIGNED):
+        stdin_shape = get_box_aligned()
+    elif (parsed_args.name == BIN):
         stdin_shape = get_bin()
-    elif (parsed_args.name == BAR_TRUTH_NAME):
-        stdin_shape = get_bar()
+    elif (parsed_args.name == BUNNY):
+        stdin_shape = get_bunny()
+    elif (parsed_args.name == ROTOR_BLADE):
+        stdin_shape = get_rotor_blade()
     else:
-        raise ValueError("Shape name is invalid.")
+        raise ValueError("Mesh file is invalid.")
     stdin_shape += STDIN_NEWLINE
     return stdin_shape
-
 
 
 def main(parsed_args: argparse.Namespace) -> None:
@@ -279,7 +212,7 @@ if __name__ == "__main__":
         type=str,
         required=False,
         default="sphere",
-        help="Which collection of shapes to use."
+        help="Which mesh to load."
     )
     parser.add_argument(
         "-d", "--dir",

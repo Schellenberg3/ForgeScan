@@ -213,7 +213,7 @@ private:
         : Grid(properties,
                DataType::UINT8_T)
     {
-        this->data.resize(this->properties->getNumVoxels(), VoxelOccupancy::UNSEEN);
+        this->data.resize(this->properties->getNumVoxels(), VoxelOccupancy::OCCUPIED);
     }
 
 

@@ -153,11 +153,17 @@ private:
             // **************************** APPLY VOXEL UPDATE HERE **************************** //
             for ( ; iter != last_occ; ++iter)
             {
-                vector[iter->i] = VoxelOccupancy::OCCLUDED;
+                if (vector[iter->i] != VoxelOccupancy::OCCUPIED)
+                {
+                    vector[iter->i] = VoxelOccupancy::OCCLUDED;
+                }
             }
             for ( ; iter != last_free; ++iter)
             {
-                vector[iter->i] = VoxelOccupancy::FREE;
+                if (vector[iter->i] != VoxelOccupancy::OCCUPIED)
+                {
+                    vector[iter->i] = VoxelOccupancy::FREE;
+                }
             }
             if (this->ray_trace->hasSensed())
             {

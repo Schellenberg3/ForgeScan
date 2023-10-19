@@ -79,8 +79,8 @@ struct Trace : public std::vector<TraceVoxel>
     void clear()
     {
         std::vector<TraceVoxel>::clear();
-        this->sensed_location   = SensedLocation::UNKNOWN;
-        this->sensed_iter       = this->end();
+        this->sensed_location = SensedLocation::UNKNOWN;
+        this->sensed_point    = Point(-1, -1, -1);
     }
 
 
@@ -93,12 +93,11 @@ struct Trace : public std::vector<TraceVoxel>
     }
 
 
-    /// @brief  Returns an iterator to the voxel containing the sensed point it in.
-    /// @return The voxel with the sensed point. If the point is before the Trace then this is the
-    ///         `begin` iterator and if it is after the Trace then this is the `end` iterator.
-    Trace::const_iterator sensed() const
+    /// @brief  Gets the point location for the ray's sensed point. The distance here is implicitly zero.
+    /// @return Read only reference to the ray's sensed point location.
+    const Point& sensedPoint() const
     {
-       return this->sensed_iter;
+       return this->sensed_point;
     }
 
 
@@ -153,36 +152,24 @@ private:
 
 
     /// @brief Sets the sensed_iter used by the `sensed` function.
-    /// @param idx Vector index for the voxel containing the sensed point. Only used if the sensed
-    ///            point is located within the trace.
+    /// @param sensed_point    The location which this ray measured, relative the the grid.
     /// @param sensed_location Flag describing the sensed point's position relative to the traced ray.
-    void set_sensed(const size_t& idx, const SensedLocation& sensed_location)
+    void set_sensed(const Point& sensed_point, const SensedLocation& sensed_location)
     {
         if (sensed_location == SensedLocation::UNKNOWN)
         {
             throw std::runtime_error("Cannot set with an unknown sensed location.");
         }
-        this->sensed_location   = sensed_location;
-
-        // Offset to set the iters to `end` only if the location is after the Trace.
-        const size_t offset = (1 + this->size()) * (this->sensed_location == SensedLocation::AFTER);
-        this->sensed_iter       = this->begin() + offset;
-
-        if(this->sensed_location == SensedLocation::IN)
-        {
-            while (this->sensed_iter != this->end() && this->sensed_iter->i != idx)
-            {
-                ++this->sensed_iter;
-            }
-        }
+        this->sensed_location = sensed_location;
+        this->sensed_point    = sensed_point;
     }
+
+    /// @brief The measured surface point for the ray.
+    Point sensed_point = Point(-1, -1, -1);
 
 
     /// @brief Flag for the status of the sensed point relative to the Trace.
     SensedLocation sensed_location = SensedLocation::UNKNOWN;
-
-    /// @brief Iterator to the voxel containing the sensed point.
-    Trace::const_iterator sensed_iter;
 };
 
 
@@ -324,8 +311,7 @@ inline bool get_ray_trace(const std::shared_ptr<Trace>& ray_trace,
             throw VoxelOutOfRange("Ray tracing failed: This should not happen. Failed with: " +  std::string(e.what()));
         }
 
-        ray_trace->set_sensed(properties->operator[](properties->pointToIndex(sensed)),
-                              ray_trace_helpers::get_sensed_location(dist_min_adj, dist_max_adj));
+        ray_trace->set_sensed(sensed, ray_trace_helpers::get_sensed_location(dist_min_adj, dist_max_adj));
     }
     return valid_intersection;
 }

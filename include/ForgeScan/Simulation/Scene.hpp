@@ -207,27 +207,30 @@ public:
     open3d::core::Tensor getVoxelCenters(const std::shared_ptr<const Grid::Properties>& grid_properties,
                                          const Extrinsic& lower_bound) const
     {
-        const size_t n_voxels = grid_properties->getNumVoxels();
+        const int64_t nx = static_cast<int64_t>(grid_properties->size.x()),
+                      ny = static_cast<int64_t>(grid_properties->size.y()),
+                      nz = static_cast<int64_t>(grid_properties->size.z());
 
-        open3d::core::Tensor        voxel_centers({static_cast<long>(n_voxels), 3}, open3d::core::Float32);
-        Eigen::Map<Eigen::MatrixXf> voxel_centers_map(voxel_centers.GetDataPtr<float>(), 3, n_voxels);
+        open3d::core::Tensor voxel_centers({nx, ny, nz, 3}, open3d::core::Float32);
 
-        size_t linear_idx  = 0;
-        Point voxel_scan_f = Point::Zero();
-        for (size_t z = 0; z < grid_properties->size.z(); ++z)
+        Point center_lower_bound_f = Point::Zero();
+        for (int64_t z = 0; z < nz; ++z)
         {
-            for (size_t y = 0; y < grid_properties->size.y(); ++y)
+            for (int64_t y = 0; y < ny; ++y)
             {
-                for (size_t x = 0; x < grid_properties->size.x(); ++x, ++linear_idx)
+                for (int64_t x = 0; x < nx; ++x)
                 {
-                    voxel_centers_map.col(linear_idx) = lower_bound * voxel_scan_f.homogeneous();
-                    voxel_scan_f.x() += grid_properties->resolution;
+                    Point center = lower_bound * center_lower_bound_f.homogeneous();
+                    voxel_centers[x][y][z][0] = center.x();
+                    voxel_centers[x][y][z][1] = center.y();
+                    voxel_centers[x][y][z][2] = center.z();
+                    center_lower_bound_f.x() += grid_properties->resolution;
                 }
-                voxel_scan_f.x()  = 0;
-                voxel_scan_f.y() += grid_properties->resolution;
+                center_lower_bound_f.x()  = 0;
+                center_lower_bound_f.y() += grid_properties->resolution;
             }
-            voxel_scan_f.y()  = 0;
-            voxel_scan_f.z() += grid_properties->resolution;
+            center_lower_bound_f.y()  = 0;
+            center_lower_bound_f.z() += grid_properties->resolution;
         }
         return voxel_centers;
     }
@@ -247,7 +250,7 @@ public:
         open3d::core::Tensor voxel_vertices({nx, ny, nz, 3}, open3d::core::Float32);
 
         const float neg_res = -1 * grid_properties->resolution;
-        Point voxel_scan_f  = Point::Ones() * neg_res;
+        Point vertex_lower_bound_f = Point::Ones() * neg_res;
 
         for (int64_t z = 0; z < nz; ++z)
         {
@@ -255,17 +258,17 @@ public:
             {
                 for (int64_t x = 0; x < nx; ++x)
                 {
-                    Point vertex = lower_bound * voxel_scan_f.homogeneous();
+                    Point vertex = lower_bound * vertex_lower_bound_f.homogeneous();
                     voxel_vertices[x][y][z][0] = vertex.x();
                     voxel_vertices[x][y][z][1] = vertex.y();
                     voxel_vertices[x][y][z][2] = vertex.z();
-                    voxel_scan_f.x() += grid_properties->resolution;
+                    vertex_lower_bound_f.x() += grid_properties->resolution;
                 }
-                voxel_scan_f.x()  = neg_res;
-                voxel_scan_f.y() += grid_properties->resolution;
+                vertex_lower_bound_f.x()  = neg_res;
+                vertex_lower_bound_f.y() += grid_properties->resolution;
             }
-            voxel_scan_f.y()  = neg_res;
-            voxel_scan_f.z() += grid_properties->resolution;
+            vertex_lower_bound_f.y()  = neg_res;
+            vertex_lower_bound_f.z() += grid_properties->resolution;
         }
 
         return voxel_vertices;
@@ -281,6 +284,7 @@ public:
                                   const Extrinsic& lower_bound)
     {
         static const int all_vertex_votes = 8, no_vertex_votes = 0;
+
         open3d::core::Tensor voxel_vertices = Scene::getVoxelVertices(grid_properties, lower_bound);
         auto result = this->o3d_scene.ComputeOccupancy(voxel_vertices, 0, 5);
 
@@ -320,17 +324,20 @@ public:
     calculateGroundTruthTSDF(const std::shared_ptr<const Grid::Properties>& grid_properties,
                              const Extrinsic& lower_bound)
     {
-        const size_t n_voxels = grid_properties->getNumVoxels();
-
         open3d::core::Tensor voxel_centers = Scene::getVoxelCenters(grid_properties, lower_bound);
-
-        auto result = this->o3d_scene.ComputeSignedDistance(voxel_centers, 0, 5).Reshape({1, static_cast<long>(n_voxels)});
-        Eigen::MatrixXd result_eigen = open3d::core::eigen_converter::TensorToEigenMatrixXd(result);
+        auto result = this->o3d_scene.ComputeSignedDistance(voxel_centers, 0, 5);
 
         auto true_tsdf = metrics::ground_truth::TSDF::create(grid_properties);
-        for (size_t i = 0; i < n_voxels; ++i)
+        size_t i = 0;
+        for (size_t z = 0; z < grid_properties->size.z(); ++z)
         {
-            true_tsdf->operator[](i) = result_eigen(0, i);
+            for (size_t y = 0; y < grid_properties->size.y(); ++y)
+            {
+                for (size_t x = 0; x < grid_properties->size.x(); ++x, ++i)
+                {
+                    true_tsdf->operator[](i) = result[x][y][z].Item<float>();
+                }
+            }
         }
         return true_tsdf;
     }

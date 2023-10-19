@@ -23,7 +23,8 @@ public:
                                              const utilities::ArgParser& parser)
     {
         return create(properties, parser.get<float>(VoxelGrid::parse_d_min, VoxelGrid::default_zero),
-                                  parser.get<float>(VoxelGrid::parse_d_max, VoxelGrid::default_infinity));
+                                  parser.get<float>(VoxelGrid::parse_d_max, VoxelGrid::default_infinity),
+                                  parser.has(Binary::parse_no_occplane));
     }
 
 
@@ -31,12 +32,14 @@ public:
     /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param dist_min    Minimum update distance. Default 0.
     /// @param dist_max    Maximum update distance. Default infinity.
+    /// @param no_occplane If true will skips calculating occplane voxel after each update.
     /// @return Shared pointer to an Binary Grid.
     static std::shared_ptr<Binary> create(const std::shared_ptr<const Grid::Properties>& properties,
-                                             const float& dist_min = 0,
-                                             const float& dist_max = INFINITY)
+                                          const float& dist_min = 0,
+                                          const float& dist_max = INFINITY,
+                                          const bool& no_occplane = false)
     {
-        return std::shared_ptr<Binary>(new Binary(properties, dist_min, dist_max));
+        return std::shared_ptr<Binary>(new Binary(properties, dist_min, dist_max, no_occplane));
     }
 
 
@@ -91,23 +94,38 @@ public:
         this->update_callable.releaseRayTrace();
     }
 
+
+    void postUpdate() override final
+    {
+        if (this->no_occplane == false)
+        {
+            this->updateOccplanes();
+        }
+    }
+
+
     static const std::string type_name;
+
+    static const std::string parse_no_occplane;
 
 private:
     /// @brief Private constructor to enforce shared pointer usage.
     /// @param properties Shared, constant pointer to the `Grid::Properties` to use.
     /// @param dist_min   Minimum trace update distance for this VoxelGrid.
     /// @param dist_max   Maximum trace update distance for this VoxelGrid.
+    /// @param no_occplane If true will skips calculating occplane voxel after each update.
     /// @throws DataVariantError if the DataType is not supported by this VoxelGrid.
     explicit Binary(const std::shared_ptr<const Grid::Properties>& properties,
-                       const float& dist_min,
-                       const float& dist_max)
+                    const float& dist_min,
+                    const float& dist_max,
+                    const bool& no_occplane)
         : VoxelGrid(properties,
                     dist_min,
                     dist_max,
                     VoxelOccupancy::UNSEEN,
                     DataType::UINT8_T,
                     DataType::UINT8_T),
+          no_occplane(no_occplane),
           update_callable_occplane(*this),
           update_callable(*this)
     {
@@ -325,6 +343,9 @@ private:
     };
 
 
+    /// @brief If true will skip calculating the occplanes after each update.
+    bool no_occplane;
+
     /// @brief Subclass callable that std::visit uses to perform occplane calculation with typed information.
     UpdateCallableOccplane update_callable_occplane;
 
@@ -337,6 +358,9 @@ private:
 
 /// @brief String for the class name.
 const std::string Binary::type_name = "Binary";
+
+/// @brief Parser flag to skip calculating the occplanes.
+const std::string Binary::parse_no_occplane = "--no-occplane";
 
 
 } // namespace data

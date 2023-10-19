@@ -161,7 +161,7 @@ private:
             }
             if (this->ray_trace->hasSensed())
             {
-                vector[last_occ->i] = VoxelOccupancy::OCCUPIED;
+                vector[caller.properties->at(this->ray_trace->sensedPoint())] = VoxelOccupancy::OCCUPIED;
             }
         }
 

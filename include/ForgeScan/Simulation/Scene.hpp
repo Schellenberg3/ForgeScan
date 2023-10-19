@@ -123,11 +123,28 @@ public:
 
 
     /// @brief Calculates the tensor of rays to cast into the Open3D RaycastingScene.
-    /// @param camera Camera intrinsics and pose to use
+    /// @param camera Shared pointer to camera intrinsics to use.
     /// @return Tensor of shape {width, height, 6} and datatype float 32.
     static open3d::core::Tensor getCameraRays(const std::shared_ptr<sensor::Camera>& camera)
     {
         return Scene::getCameraRays(camera, camera->extr);
+    }
+
+    /// @brief Calculates the tensor of rays to cast into the Open3D RaycastingScene.
+    /// @param camera Camera intrinsics and pose to use
+    /// @return Tensor of shape {width, height, 6} and datatype float 32.
+    static open3d::core::Tensor getCameraRays(sensor::Camera& camera)
+    {
+        return Scene::getCameraRays(camera, camera.extr);
+    }
+
+    /// @brief Calculates the tensor of rays to cast into the Open3D RaycastingScene.
+    /// @param camera Shared pointer to camera intrinsics to use.
+    /// @param extr Pose of the camera, relative to the world frame.
+    /// @return Tensor of shape {width, height, 6} and datatype float 32.
+    static open3d::core::Tensor getCameraRays(const std::shared_ptr<sensor::Camera>& camera, const Extrinsic& extr)
+    {
+        return Scene::getCameraRays(*camera, extr);
     }
 
 
@@ -135,19 +152,19 @@ public:
     /// @param camera Camera intrinsics to use.
     /// @param extr Pose of the camera, relative to the world frame.
     /// @return Tensor of shape {width, height, 6} and datatype float 32.
-    static open3d::core::Tensor getCameraRays(const std::shared_ptr<sensor::Camera>& camera, const Extrinsic& extr)
+    static open3d::core::Tensor getCameraRays(sensor::Camera& camera, const Extrinsic& extr)
     {
-        open3d::core::Tensor rays({static_cast<long>(camera->intr->height), static_cast<long>(camera->intr->width), 6}, open3d::core::Float32);
-        Eigen::Map<Eigen::MatrixXf> rays_map(rays.GetDataPtr<float>(), 6, camera->intr->size());
+        open3d::core::Tensor rays({static_cast<long>(camera.intr->height), static_cast<long>(camera.intr->width), 6}, open3d::core::Float32);
+        Eigen::Map<Eigen::MatrixXf> rays_map(rays.GetDataPtr<float>(), 6, camera.intr->size());
 
         Eigen::Matrix<float, 6, 1> r;
         r.topRows<3>() = extr.translation();
         int64_t linear_idx = 0;
-        for (size_t y = 0; y < camera->intr->height; ++y)
+        for (size_t y = 0; y < camera.intr->height; ++y)
         {
-            for (size_t x = 0; x < camera->intr->width; ++x, ++linear_idx)
+            for (size_t x = 0; x < camera.intr->width; ++x, ++linear_idx)
             {
-                Eigen::Vector3f ray_dir = extr.rotation() * camera->getPoint(y, x);
+                Eigen::Vector3f ray_dir = extr.rotation() * camera.getPoint(y, x);
                 r.bottomRows<3>() = ray_dir;
                 rays_map.col(linear_idx) = r;
             }

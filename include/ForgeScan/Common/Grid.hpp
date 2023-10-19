@@ -186,6 +186,15 @@ struct Grid
             return this->indexToVectorThrowOutOfRange(voxel);
         }
 
+        /// @brief Finds the vector Index for the provided point location.
+        ///        Verifies that this voxel is in the Grid.
+        /// @param point Location, relative to the grid's reference frame, retrieve a voxel vector index for.
+        /// @throws VoxelOutOfRange if the requested Index exceeds the Grid's size in any dimension.
+        size_t at(const Point& point) const
+        {
+            return this->indexToVectorThrowOutOfRange(this->pointToIndex(point));
+        }
+
 
         /// @brief Calculates to Index that the Point falls into within the Grid.
         /// @param input Cartesian position of the Point, relative to the Grid origin.

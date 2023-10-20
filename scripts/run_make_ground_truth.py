@@ -28,7 +28,7 @@ BOX_ALIGNED   = "box-rotated"
 BOX           = "box"
 BIN           = "bin"
 BUNNY         = "bunny"
-ROTOR_BLADE   = "rotor_blade"
+ROTOR_BLADE   = "rotor-blade"
 STDIN_NEWLINE = "\n"
 
 
@@ -187,7 +187,6 @@ def main(parsed_args: argparse.Namespace) -> None:
     if fpath.exists() is False:
         fpath.mkdir(parents=True)
     fpath /= parsed_args.name
-    print(fpath)
 
     proc = subprocess.Popen(executable=EXECUTABLE_PATH, args=[], text=True,
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE)

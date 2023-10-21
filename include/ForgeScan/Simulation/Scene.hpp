@@ -112,8 +112,9 @@ public:
     /// @throws InvalidMapKey If a shape with the same name already exists.
     void add(const utilities::ArgParser& parser)
     {
-        this->mesh_list.emplace_back(MeshLoader::create(parser));
-        this->o3d_scene.AddTriangles(this->mesh_list.back().second);
+        auto map_item = MeshLoader::create(parser);
+        uint32_t id = this->o3d_scene.AddTriangles(map_item.second);
+        this->mesh_map.insert({id, std::move(map_item)});
     }
 
 
@@ -364,12 +365,12 @@ protected:
         auto g_meshes = g_scene.createGroup(FS_HDF5_MESHES_GROUP);
 
         int n = 0;
-        for (const auto& item : this->mesh_list)
+        for (const auto& item : this->mesh_map)
         {
             auto g_mesh = g_meshes.createGroup(std::to_string(n++));
-            g_mesh.createAttribute(FS_HDF5_MESHES_SCALE, item.first.scale);
-            g_mesh.createAttribute(FS_HDF5_MESHES_FILEPATH, item.first.fpath.string());
-            Scene::writeExtrToHDF5(file, g_mesh.getPath(), item.first.extr);
+            g_mesh.createAttribute(FS_HDF5_MESHES_SCALE,    item.second.first.scale);
+            g_mesh.createAttribute(FS_HDF5_MESHES_FILEPATH, item.second.first.fpath.string());
+            Scene::writeExtrToHDF5(file, g_mesh.getPath(),  item.second.first.extr);
         }
     }
 
@@ -384,7 +385,7 @@ protected:
         if(std::find(scene_groups.begin(), scene_groups.end(), FS_HDF5_MESHES_GROUP) != scene_groups.end())
         {
             // Only clear all elements if we make it this far into loading the HDF5.
-            this->mesh_list.clear();
+            this->mesh_map.clear();
 
             auto g_meshes = g_scene.getGroup(FS_HDF5_MESHES_GROUP);
             auto mesh_groups = g_meshes.listObjectNames();
@@ -400,8 +401,9 @@ protected:
                 Extrinsic extr;
                 Scene::readExtrFromHDF5(file, g_mesh.getPath(), extr);
 
-                this->mesh_list.emplace_back( MeshLoader::create(mesh_fpath, extr, fpath.remove_filename(), scale) );
-                this->o3d_scene.AddTriangles(this->mesh_list.back().second);
+                auto map_item = MeshLoader::create(mesh_fpath, extr, fpath.remove_filename(), scale);
+                uint32_t id = this->o3d_scene.AddTriangles(map_item.second);
+                this->mesh_map.insert({id, std::move(map_item)});
             }
         }
     }
@@ -417,7 +419,7 @@ protected:
     open3d::t::geometry::RaycastingScene o3d_scene;
 
     /// @brief List of information about the meshes in the scene and the mesh itself.
-    std::list<std::pair<MeshInfo, open3d::t::geometry::TriangleMesh>> mesh_list;
+    std::map<uint32_t, std::pair<MeshInfo, open3d::t::geometry::TriangleMesh>> mesh_map;
 };
 
 
@@ -427,20 +429,20 @@ protected:
 /// @return Reference to the output stream.
 std::ostream& operator<<(std::ostream &out, const Scene& scene)
 {
-    if (!scene.mesh_list.empty())
+    if (!scene.mesh_map.empty())
     {
         out << "Scene contains:";
         size_t n = 0;
-        for (const auto& item : scene.mesh_list)
+        for (const auto& item : scene.mesh_map)
         {
-            std::string description = item.second.ToString();
+            std::string description = item.second.second.ToString();
             std::replace(description.begin(), description.end(), '\n', ' ');
 
-            std::string center = item.second.GetCenter().ToString();
+            std::string center = item.second.second.GetCenter().ToString();
             center.erase(center.find('\n'));
 
-            out << "\n[" << n << "] Mesh name: " << item.first.fpath.stem() << " centered at " << center
-                    << "\n\tFrom file: " << item.first.fpath
+            out << "\n[" << n << "] Mesh name: " << item.second.first.fpath.stem() << " centered at " << center
+                    << "\n\tFrom file: " << item.second.first.fpath
                     << "\n\tWith properties:" << description;
             ++n;
         }

@@ -24,8 +24,8 @@ assert EXECUTABLE_PATH is not None and \
 
 # File constants
 SPHERE        = "sphere"
-BOX_ALIGNED   = "box-rotated"
 BOX           = "box"
+BOX_ROTATED   = "box-rotated"
 BIN           = "bin"
 BUNNY         = "bunny"
 ROTOR_BLADE   = "rotor-blade"
@@ -72,7 +72,7 @@ def get_sphere() -> str:
     return stdin_shape
 
 
-def get_box_aligned() -> str:
+def get_box() -> str:
     """
     Returns a stdin string to add the box mesh to the scene.
     """
@@ -81,7 +81,7 @@ def get_box_aligned() -> str:
     return stdin_shape
 
 
-def get_box() -> str:
+def get_box_rotated() -> str:
     """
     Returns a stdin string to add the box mesh to the scene.
     Performs rotation on the mesh so voxel are not aligned with any of the mesh faces or edges.
@@ -136,7 +136,7 @@ def get_reconstruction_grid(parsed_args: argparse.Namespace) -> str:
         stdin += get_grid_properties()       + STDIN_NEWLINE
         stdin += get_rotation(0, 0, 0)       + STDIN_NEWLINE
         stdin += get_translation(-1, -1, -1) + STDIN_NEWLINE
-    elif (parsed_args.name == BOX_ALIGNED):
+    elif (parsed_args.name == BOX_ROTATED):
         stdin += get_grid_properties()       + STDIN_NEWLINE
         stdin += get_rotation(0, 0, 0)       + STDIN_NEWLINE
         stdin += get_translation(-1, -1, -1) + STDIN_NEWLINE
@@ -165,8 +165,8 @@ def get_scene(parsed_args: argparse.Namespace) -> str:
         stdin_shape = get_sphere()
     elif (parsed_args.name == BOX):
         stdin_shape = get_box()
-    elif (parsed_args.name == BOX_ALIGNED):
-        stdin_shape = get_box_aligned()
+    elif (parsed_args.name == BOX_ROTATED):
+        stdin_shape = get_box_rotated()
     elif (parsed_args.name == BIN):
         stdin_shape = get_bin()
     elif (parsed_args.name == BUNNY):

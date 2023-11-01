@@ -46,6 +46,11 @@ int main(const int argc, const char **argv)
         std::cout << "using Occplane policy..." << std::endl;
         manager->policyAdd("--set-active --type Occplane --min-points 30 --eps 0.5");
     }
+    else if (parser.has("--normal"))
+    {
+        std::cout << "using Normal policy..." << std::endl;
+        manager->policyAdd("--set-active --type Normal --file share/pre.h5");
+    }
     else
     {
         manager->policyAdd("--set-active --type Sphere --n-views 10 --uniform --unordered --seed 50");

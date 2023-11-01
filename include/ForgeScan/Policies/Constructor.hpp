@@ -11,6 +11,8 @@
 
 #include "ForgeScan/Policies/Heuristic/Occplane.hpp"
 
+#include "ForgeScan/Policies/Precomputed/Normal.hpp"
+
 #include "ForgeScan/Utilities/Strings.hpp"
 
 
@@ -44,6 +46,10 @@ struct Constructor
         {
             return Occplane::create(reconstruction, parser);
         }
+        if (iequals(policy_type, NormalInfo::type_name))
+        {
+            return Normal::create(reconstruction, parser);
+        }
 
         throw ConstructorError::UnkownType(policy_type, Policy::type_name);
     }
@@ -68,6 +74,11 @@ struct Constructor
         {
             /// TODO: Return and implement this.
             return "TODO: Write occplane help.";
+        }
+        if (iequals(policy_type, NormalInfo::type_name))
+        {
+            /// TODO: Return and implement this.
+            return "TODO: Write normal help.";
         }
         std::stringstream ss;
         ss << Policy::helpMessage() << "\nPossible Policies are: "

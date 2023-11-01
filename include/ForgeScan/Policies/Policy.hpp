@@ -2,7 +2,9 @@
 #define FORGE_SCAN_POLICIES_POLICY_HPP
 
 #include <memory>
+#include <list>
 
+#define H5_USE_EIGEN 1
 #include <highfive/H5Easy.hpp>
 
 #include "ForgeScan/Common/Exceptions.hpp"
@@ -169,19 +171,27 @@ protected:
     }
 
 
+    static void saveViews(H5Easy::File& file, const std::string& policy_name,
+                          std::list<std::pair<size_t, forge_scan::Extrinsic>> id_and_view,
+                          const std::string& label)
+    {
+        const std::string hdf5_data_root = "/" FS_HDF5_POLICY_GROUP "/" + policy_name + "/" + label;
+        std::stringstream ss;
+        for (const auto& list_item : id_and_view)
+        {
+            ss << hdf5_data_root << "/" << list_item.first;
+            H5Easy::dump(file, ss.str(), list_item.second.matrix());
+            ss.str(std::string());
+        }
+    }
+
+
     /// @brief Saves the rejected views, and their order identifier, to the HDF5 file.
     /// @param file File to write to.
     /// @param policy_name Name of the derived Policy class.
     void saveRejectedViews(H5Easy::File& file, const std::string& policy_name) const
     {
-        const std::string hdf5_data_root = "/" FS_HDF5_POLICY_GROUP "/" + policy_name + "/REJECT";
-        std::stringstream ss;
-        for (const auto& reject : this->rejected_views)
-        {
-            ss << hdf5_data_root << "/" << reject.first;
-            H5Easy::dump(file, ss.str(), reject.second.matrix());
-            ss.str(std::string());
-        }
+        saveViews(file, policy_name, this->rejected_views, "rejected");
     }
 
     /// @brief Saves the accepted views, and their order identifier, to the HDF5 file.
@@ -189,14 +199,7 @@ protected:
     /// @param policy_name Name of the derived Policy class.
     void saveAcceptedViews(H5Easy::File& file, const std::string& policy_name) const
     {
-        const std::string hdf5_data_root = "/" FS_HDF5_POLICY_GROUP "/" + policy_name + "/ACCEPT";
-        std::stringstream ss;
-        for (const auto& accept : this->accepted_views)
-        {
-            ss << hdf5_data_root << "/" << accept.first;
-            H5Easy::dump(file, ss.str(), accept.second.matrix());
-            ss.str(std::string());
-        }
+        saveViews(file, policy_name, this->accepted_views, "accepted");
     }
 
 

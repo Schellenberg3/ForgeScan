@@ -4,6 +4,7 @@
 #include <ctime>
 #include <sstream>
 #include <iomanip>
+#include <filesystem>
 
 
 namespace forge_scan {
@@ -78,7 +79,7 @@ inline void checkPathHasFileNameAndExtension(std::filesystem::path& fpath, const
 /// @param default_fname File name to use if none is provided.
 /// @param timestamp_default If true, will add a timestamp if the default file name is used.
 inline void validateAndCreateFilepath(std::filesystem::path& fpath, const std::string& extension = "",
-                             const std::string& default_fname = "", const bool& timestamp_default = true)
+                                      const std::string& default_fname = "", const bool& timestamp_default = true)
 {
     checkPathHasFileNameAndExtension(fpath, extension, default_fname, timestamp_default);
     fpath.make_preferred();

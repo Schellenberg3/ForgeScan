@@ -379,7 +379,7 @@ protected:
     /// @param g_scene Reference to the location to store the mesh information at.
     /// @param file Reference to the opened HDF5 file.
     /// @param fpath Filesystem path to the opened HDF5 file.
-    void readMeshesFromHDF5(HighFive::Group& g_scene,  HighFive::File& file, std::filesystem::path fpath)
+    void readMeshesFromHDF5(HighFive::Group& g_scene,  HighFive::File& file, std::filesystem::path fpath = std::filesystem::path())
     {
         auto scene_groups = g_scene.listObjectNames();
         if(std::find(scene_groups.begin(), scene_groups.end(), FS_HDF5_MESHES_GROUP) != scene_groups.end())

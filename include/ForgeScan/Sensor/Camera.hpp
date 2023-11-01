@@ -258,6 +258,10 @@ struct Camera : public Entity
     }
 
 
+    /// @brief The depth image which the camera takes
+    DepthImage image;
+
+
 private:
     /// @brief Private constructor to enforce use of shared pointers.
     /// @param intr Intrinsic properties for the Camera.
@@ -304,8 +308,6 @@ private:
         }
     }
 
-    /// @brief The depth image which the camera takes
-    DepthImage image;
 
     /// @brief Pointer to the derived class's intrinsic parameters.
     std::shared_ptr<const Intrinsics> intr;

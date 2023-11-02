@@ -46,13 +46,34 @@ def arr_precision(arr: np.ndarray):
     return precision(arr[0], arr[2])
 
 
-def get_metric_occupancy_confusion_group(hdf5_path: pathlib.Path) -> h5py.Group:
+def get_metric_group(hdf5_path: pathlib.Path) -> h5py.Group:
     """
-    Opens an HDF5 file and access the location of the Confusion Matrix data.
+    Opens an HDF5 file and access the location of the Metic group.
     """
     h5_file  = h5py.File(hdf5_path, "r")
-    h5_group = h5_file["Metric"]["OccupancyConfusion"]
-    return h5_group
+    return h5_file["Metric"]
+
+
+def get_figures(part: str, policy: str, reconstructions: list[str]) -> list[tuple[plt.Figure, plt.Axes, plt.Axes]]:
+    """
+    Returns multiple matplotlib figures with different titles.
+    """
+    plots = []
+    for label in reconstructions:
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[12.8, 6.4], dpi=200)
+
+        fig_title = f"{label} Reconstruction of {part} using {policy}".replace("_", " ")
+        fig.suptitle(fig_title)
+
+        ax1.set_title("Reconstruction Accuracy")
+        ax1.set_xlabel("Views Added")
+        ax1.set_ylim(0, 1.1)
+        ax2.set_title("Reconstruction Precision")
+        ax2.set_xlabel("Views Added")
+        ax2.set_ylim(0, 1.1)
+
+        plots.append((fig, ax1, ax2))
+    return plots
 
 
 def select_experiment() -> pathlib.Path:
@@ -78,17 +99,14 @@ def plot_policy_sweep(policy_path: pathlib.Path):
     if the policy was repeated then it plots the min/max and average with standard deviation bars.
     The generated figure is then saved.
     """
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[12.8, 6.4], dpi=200)
 
-    fig_title = f"{policy_path.parent.name.capitalize()}: {policy_path.name}".replace("_", " ")
-    fig.suptitle(fig_title)
+    confusion_groups = ["OccupancyConfusion_TSDF", "OccupancyConfusion_binary", "OccupancyConfusion_probability"]
+    confusion_grid_labels = ["TSDF", "Space Carving", "Occupation Probability"]
+    n_group = len(confusion_groups)
 
-    ax1.set_title("Reconstruction Accuracy")
-    ax1.set_xlabel("Views Added")
-    ax1.set_ylim(0, 1.1)
-    ax2.set_title("Reconstruction Precision")
-    ax2.set_xlabel("Views Added")
-    ax2.set_ylim(0, 1.1)
+    part_name   = policy_path.parent.name.capitalize()
+    policy_name = policy_path.name
+    plots = get_figures(part_name, policy_name, confusion_grid_labels)
 
     try:
         # Sort in increasing order on integer number.
@@ -105,51 +123,59 @@ def plot_policy_sweep(policy_path: pathlib.Path):
         xdata = list(range(views_plus_one))
 
         reps_dirs = [x for x in views.iterdir() if x.is_dir()]
-        data = np.zeros((int(views.name), 4, len(reps_dirs)))
-        acc  = np.zeros((views_plus_one, len(reps_dirs)))
-        pre  = np.zeros((views_plus_one, len(reps_dirs)))
+        data = [ np.zeros((int(views.name), 4, len(reps_dirs))) ] * n_group
+        acc  = [ np.zeros((views_plus_one, len(reps_dirs)))     ] * n_group
+        pre  = [ np.zeros((views_plus_one, len(reps_dirs)))     ] * n_group
 
         for i, reps in enumerate(reps_dirs):
             hdf5_dir = reps / "results.h5"
-            confusion_group = get_metric_occupancy_confusion_group(hdf5_dir)
-            data[:, :, i] = confusion_group.get("data")[:, 1:5]
-            acc[1:, i]     = np.apply_along_axis(arr_accuracy,  1, data[:, :, i])
-            pre[1:, i]     = np.apply_along_axis(arr_precision, 1, data[:, :, i])
+            metric_group = get_metric_group(hdf5_dir)
+            for g, group in enumerate(confusion_groups):
+                confusion_group = metric_group[group]
+                data[g][:, :, i] = confusion_group.get("data")[:, 1:5]
+                acc[g][1:, i]    = np.apply_along_axis(arr_accuracy,  1, data[g][:, :, i])
+                pre[g][1:, i]    = np.apply_along_axis(arr_precision, 1, data[g][:, :, i])
 
         if len(reps_dirs) > 1:
-            line_label += " (Average)"
-            acc_avg = acc.mean(axis=1)
-            acc_std = acc.std(axis=1)
-            acc_min = acc.min(axis=1)
-            acc_max = acc.max(axis=1)
-            ax1.errorbar(xdata, acc_avg, acc_std, linewidth=2, label=line_label, elinewidth=1, alpha=0.75, capsize=4.5)
-            ax1.fill_between(xdata, acc_min, acc_max, alpha=0.2)
+                line_label += " (Average)"
+        for g in range(n_group):
+            if len(reps_dirs) > 1:
+                acc_avg = acc[g].mean(axis=1)
+                acc_std = acc[g].std(axis=1)
+                acc_min = acc[g].min(axis=1)
+                acc_max = acc[g].max(axis=1)
+                plots[g][1].errorbar(xdata, acc_avg, acc_std, linewidth=2, label=line_label, elinewidth=1, alpha=0.75, capsize=4.5)
+                plots[g][1].fill_between(xdata, acc_min, acc_max, alpha=0.2)
 
-            pre_avg = pre.mean(axis=1)
-            pre_std = pre.std(axis=1)
-            pre_min = pre.min(axis=1)
-            pre_max = pre.max(axis=1)
-            ax2.errorbar(xdata, pre_avg, pre_std, linewidth=2, label=line_label, elinewidth=1, alpha=0.75, capsize=4.5)
-            ax2.fill_between(xdata, pre_min, pre_max, alpha=0.2)
-        else:
-            ax1.plot(xdata, acc[:, 0], linewidth=2, label=line_label)
-            ax2.plot(xdata, pre[:, 0], linewidth=2, label=line_label)
+                pre_avg = pre[g].mean(axis=1)
+                pre_std = pre[g].std(axis=1)
+                pre_min = pre[g].min(axis=1)
+                pre_max = pre[g].max(axis=1)
+                plots[g][2].errorbar(xdata, pre_avg, pre_std, linewidth=2, label=line_label, elinewidth=1, alpha=0.75, capsize=4.5)
+                plots[g][2].fill_between(xdata, pre_min, pre_max, alpha=0.2)
+            else:
+                plots[g][1].plot(xdata, acc[g][:, 0], linewidth=2, label=line_label)
+                plots[g][2].plot(xdata, pre[g][:, 0], linewidth=2, label=line_label)
 
-    ax1.legend()
-    ax2.legend()
+    image_fpath_root = (FIGURES_PATH / policy_path.relative_to(RESULTS_PATH)).parent
+    for g in range(n_group):
+        plots[g][1].legend(loc='lower right')
+        plots[g][2].legend(loc='lower right')
 
-    ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ax1.yaxis.set_ticks([0.2, 0.4, 0.6, 0.8, 1.0])
-    ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ax2.yaxis.set_ticks([0.2, 0.4, 0.6, 0.8, 1.0])
+        plots[g][1].xaxis.set_major_locator(MaxNLocator(integer=True))
+        plots[g][1].yaxis.set_ticks([0.2, 0.4, 0.6, 0.8, 1.0])
+        plots[g][2].xaxis.set_major_locator(MaxNLocator(integer=True))
+        plots[g][2].yaxis.set_ticks([0.2, 0.4, 0.6, 0.8, 1.0])
 
-    # Split the old path to get the location of the figure.
-    image_fpath = (FIGURES_PATH / policy_path.relative_to(RESULTS_PATH)).parent
-    if image_fpath.exists() is False:
-        image_fpath.mkdir(parents=True)
-    image_fpath /= policy_path.name + "_Results.png"
-    plt.savefig(image_fpath)
-    plt.close()
+        image_fpath = image_fpath_root / confusion_grid_labels[g]
+        # Split the old path to get the location of the figure.
+        if image_fpath.exists() is False:
+            image_fpath.mkdir(parents=True)
+        image_fpath /= policy_path.name + "_Results.png"
+
+        plots[g][0].savefig(image_fpath)
+        plt.close(plots[g][0])
+
 
 
 def main(_: argparse.Namespace) -> None:

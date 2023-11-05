@@ -408,11 +408,11 @@ const float Probability::default_p_max    = 0.98f,
             Probability::default_p_min    = 0.02f;
 
 /// @brief Default occupation probability values at specific positions along a ray.
-const float Probability::default_p_past   = 0.50f,
+const float Probability::default_p_past   = 0.60f,
             Probability::default_p_sensed = 0.80f,
             Probability::default_p_far    = 0.10f,
-            Probability::default_p_init   = 0.75f,
-            Probability::default_p_thresh = 0.65f;
+            Probability::default_p_init   = 0.60f,
+            Probability::default_p_thresh = 0.51f;
 
 /// @brief ArgParser key for the maximum occupation probability a voxel may have.
 const std::string Probability::parse_p_max = "--p-max";

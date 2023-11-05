@@ -160,7 +160,7 @@ private:
             }
             for ( ; iter != last_free; ++iter)
             {
-                if (vector[iter->i] != VoxelOccupancy::OCCUPIED)
+                // if (vector[iter->i] != VoxelOccupancy::OCCUPIED)
                 {
                     vector[iter->i] = VoxelOccupancy::FREE;
                 }

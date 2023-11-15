@@ -14,7 +14,7 @@ import random
 HDF5_EXTENSION  = ".h5"
 EXECUTABLE_NAME = 'RunExperiment'
 EXECUTABLE_PATH = None
-TRUTH_FILES = ["rotor-blade", "bunny"]
+TRUTH_FILES = ["rotor-blade-real"]
 
 # Find the project root and binary directory and the executable (regardless of its file extension).
 PROJECT_ROOT_PATH = pathlib.Path(__file__).parent.resolve().parent.parent
@@ -47,8 +47,8 @@ for item in GROUND_TRUTH_PATH.iterdir():
         if fname in TRUTH_FILES:
             GROUND_TRUTH_FILES.append(item)
 
-assert len(GROUND_TRUTH_FILES) == 2, \
-       f"Found {len(GROUND_TRUTH_FILES)} of 2 expected files in: {GROUND_TRUTH_PATH} \
+assert len(GROUND_TRUTH_FILES) == len(TRUTH_FILES), \
+       f"Found {len(GROUND_TRUTH_FILES)} of {len(TRUTH_FILES)} expected files in: {GROUND_TRUTH_PATH} \
          \n\tfiles were: {GROUND_TRUTH_FILES}]"
 
 
@@ -59,9 +59,9 @@ STDIN_NEWLINE = "\n"
 
 # Exploration space
 REGULAR_RERUNS = 1
-RANDOM_RERUNS  = 10
+RANDOM_RERUNS  = 1
 
-VIEW_RADIUS = 2.5
+VIEW_RADIUS = 0.90
 REJECTION_RATE = 0.0
 
 # Use RealSense uncertainty model
@@ -72,10 +72,14 @@ RANDOM_SEED = False
 N_VIEWS = [6, 12, 18]
 
 
+
 # ([d1], [d2], [noise percentage])
 #     tsdf        = [-d1, +d1]
 #     probability = [-d1, +d2]
 DIST_AND_NOISE: list[tuple[float, float, float]] = [
+    (
+        0.06, 0.03, 0.0
+    ),
     (
         0.06, 0.03, 0.02
     ),
@@ -97,11 +101,17 @@ INTRINSICS: list[tuple[str, str, int]] = [
         f"--d455 1.0 --noise {DIST_AND_NOISE[1][2]}",
         1
     ),
+    (
+        f"RealSense_D455_Noise_{int(DIST_AND_NOISE[2][2]*100)}",
+        f"--d455 1.0 --noise {DIST_AND_NOISE[2][2]}",
+        2
+    ),
 ]
 
 
 # ([Name], [Policy arg string], [Number of re-runs])
 METHODS: list[tuple[str, str, str]] = [
+
     (
         "Sphere_Uniform",
         "--type sphere --uniform --r " + str(VIEW_RADIUS),
@@ -116,19 +126,7 @@ METHODS: list[tuple[str, str, str]] = [
         "Axis_Random",
         "--type axis --random-axis --uniform --change-random  --r " + str(VIEW_RADIUS),
         RANDOM_RERUNS
-    ),
-    # (
-    #     # Bad axis for bin
-    #     "Axis_Y-axis",
-    #     "--type axis --y-axis --uniform --r " + str(VIEW_RADIUS),
-    #     REGULAR_RERUNS
-    # ),
-    # (
-    #     # Best (or as good as X-axis) for bin
-    #     "Axis_Z-axis",
-    #     "--type axis --z-axis --uniform --r " + str(VIEW_RADIUS),
-    #     REGULAR_RERUNS
-    # ),
+    )
 ]
 
 
@@ -144,11 +142,9 @@ def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: list[tuple[str,
     stdin += str(REJECTION_RATE) + STDIN_NEWLINE
     stdin += intr[1] + STDIN_NEWLINE
     stdin += policy
-    if (policy_name == "Axis_Random"):
-        # Axis Random always takes six views before taking a random axis.
-        stdin += " --n-views 6 --n-repeat " + str(n_views / 6)
-    else:
-        stdin += " --n-views " + str(n_views)
+    stdin += " --n-views " + str(n_views)
+
+    # Occplane does not accept `seed` as an option yet.
     stdin += " --seed "  + str(seed) + STDIN_NEWLINE
 
     # Add data channels
@@ -178,7 +174,7 @@ def main(parsed_args: argparse.Namespace) -> None:
         len(N_VIEWS) * sum([m[2] for m in METHODS])
     print(f"Generating {N} experiments, beginning at experiment {start}...")
 
-    fpath_base = PROJECT_ROOT_PATH / "share" / "Experiments" / "Experiment_2" / "Results"
+    fpath_base = PROJECT_ROOT_PATH / "share" / "Experiments" / "Experiment_4" / "Results"
     for intr in INTRINSICS:
         for scene in GROUND_TRUTH_FILES:
             for policy in METHODS:

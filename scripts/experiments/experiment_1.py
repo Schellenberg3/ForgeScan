@@ -14,7 +14,7 @@ import random
 HDF5_EXTENSION  = ".h5"
 EXECUTABLE_NAME = 'RunExperiment'
 EXECUTABLE_PATH = None
-TRUTH_FILES = ["sphere", "box"]
+TRUTH_FILES = ["sphere", "bin"]
 
 # Find the project root and binary directory and the executable (regardless of its file extension).
 PROJECT_ROOT_PATH = pathlib.Path(__file__).parent.resolve().parent.parent
@@ -72,19 +72,38 @@ RANDOM_SEED = False
 N_VIEWS = [6, 12, 18]
 
 
+# ([d1], [d2], [noise percentage])
+#     tsdf        = [-d1, +d1]
+#     probability = [-d1, +d2]
+DIST_AND_NOISE: list[tuple[float, float, float]] = [
+    (
+        0.06, 0.03, 0.0
+    ),
+    (
+        0.06, 0.03, 0.02
+    ),
+    (
+        0.18, 0.10, 0.06
+    )
+]
+
+
 # ([Name], [Intrinsic args])
-INTRINSICS: list[tuple[str, str]] = [
+INTRINSICS: list[tuple[str, str, int]] = [
     (
-        "RealSense_d455",
-        "--d455 1.0"
+        f"RealSense_D455_Noise_{int(DIST_AND_NOISE[0][2]*100)}",
+        f"--d455 1.0 --noise {DIST_AND_NOISE[0][2]}",
+        0
     ),
     (
-        "RealSense_d455_Noise_02",
-        "--d455 1.0 --noise 0.02"
+        f"RealSense_D455_Noise_{int(DIST_AND_NOISE[1][2]*100)}",
+        f"--d455 1.0 --noise {DIST_AND_NOISE[1][2]}",
+        1
     ),
     (
-        "RealSense_d455_Noise_10",
-        "--d455 1.0 --noise 0.10"
+        f"RealSense_D455_Noise_{int(DIST_AND_NOISE[2][2]*100)}",
+        f"--d455 1.0 --noise {DIST_AND_NOISE[2][2]}",
+        2
     )
 ]
 
@@ -96,25 +115,25 @@ METHODS: list[tuple[str, str, str]] = [
         "--type sphere --uniform --r " + str(VIEW_RADIUS),
         REGULAR_RERUNS
     ),
-    (
-        "Sphere_Unordered",
-        "--type sphere --uniform --unordered --r " + str(VIEW_RADIUS),
-        RANDOM_RERUNS
-    ),
+    # (
+    #     "Sphere_Unordered",
+    #     "--type sphere --uniform --unordered --r " + str(VIEW_RADIUS),
+    #     RANDOM_RERUNS
+    # ),
 ]
 
 
 ## ------------------------------ SCRIPT METHODS AND ENTRY POINT ------------------------------- ##
 
 
-def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: str, policy_name: str,
+def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: list[tuple[str, str, int]], policy_name: str,
                  policy: str, n_views: int, seed: int = 0, parsed_args: argparse.Namespace = None):
     stdin  = ""
     stdin += str(fpath) + STDIN_NEWLINE
     stdin += ("y" if parsed_args.save_images else "don't save images") + STDIN_NEWLINE
     stdin += str(scene) + STDIN_NEWLINE
     stdin += str(REJECTION_RATE) + STDIN_NEWLINE
-    stdin += intr + STDIN_NEWLINE
+    stdin += intr[1] + STDIN_NEWLINE
     stdin += policy
 
     # Add requested views and a random seed
@@ -122,9 +141,9 @@ def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: str, policy_nam
     stdin += " --seed "  + str(seed) + STDIN_NEWLINE
 
     # Add data channels
-    stdin += f"--name probability  --type Probability  --d-min -{DIST} --d-max {DIST} --dtype float" + STDIN_NEWLINE
-    stdin += f"--name TSDF         --type TSDF         --d-min -{DIST} --d-max {DIST} --dtype float" + STDIN_NEWLINE
-    stdin +=  "--name binary       --type binary" + STDIN_NEWLINE
+    stdin += f"--name probability   --type Probability  --d-min -{DIST_AND_NOISE[intr[2]][0]} --d-max {DIST_AND_NOISE[intr[2]][1]} --dtype float" + STDIN_NEWLINE
+    stdin += f"--name TSDF          --type TSDF         --d-min -{DIST_AND_NOISE[intr[2]][0]} --d-max {DIST_AND_NOISE[intr[2]][0]} --dtype float" + STDIN_NEWLINE
+    stdin +=  "--name binary --type binary" + STDIN_NEWLINE
 
     # Add metrics
     stdin += STDIN_NEWLINE
@@ -173,7 +192,7 @@ def main(parsed_args: argparse.Namespace) -> None:
                             print("\tAlready exists. Skipping experiment...")
                             continue
 
-                        call_process(fpath, scene, intr[1], policy[0], policy[1], n_views, seed, parsed_args)
+                        call_process(fpath, scene, intr, policy[0], policy[1], n_views, seed, parsed_args)
 
 
 if __name__ == "__main__":

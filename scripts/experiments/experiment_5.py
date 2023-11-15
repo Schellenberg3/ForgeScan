@@ -14,7 +14,7 @@ import random
 HDF5_EXTENSION  = ".h5"
 EXECUTABLE_NAME = 'RunExperiment'
 EXECUTABLE_PATH = None
-TRUTH_FILES = ["rotor-blade", "bunny"]
+TRUTH_FILES = ["bunny"]
 
 # Find the project root and binary directory and the executable (regardless of its file extension).
 PROJECT_ROOT_PATH = pathlib.Path(__file__).parent.resolve().parent.parent
@@ -47,8 +47,8 @@ for item in GROUND_TRUTH_PATH.iterdir():
         if fname in TRUTH_FILES:
             GROUND_TRUTH_FILES.append(item)
 
-assert len(GROUND_TRUTH_FILES) == 2, \
-       f"Found {len(GROUND_TRUTH_FILES)} of 2 expected files in: {GROUND_TRUTH_PATH} \
+assert len(GROUND_TRUTH_FILES) == len(TRUTH_FILES), \
+       f"Found {len(GROUND_TRUTH_FILES)} of {len(TRUTH_FILES)} expected files in: {GROUND_TRUTH_PATH} \
          \n\tfiles were: {GROUND_TRUTH_FILES}]"
 
 
@@ -59,17 +59,10 @@ STDIN_NEWLINE = "\n"
 
 # Exploration space
 REGULAR_RERUNS = 1
-RANDOM_RERUNS  = 10
 
-VIEW_RADIUS = 2.5
 REJECTION_RATE = 0.0
 
-# Use RealSense uncertainty model
-DIST = 0.02 * VIEW_RADIUS
-
 RANDOM_SEED = False
-
-N_VIEWS = [6, 12, 18]
 
 
 # ([d1], [d2], [noise percentage])
@@ -78,9 +71,6 @@ N_VIEWS = [6, 12, 18]
 DIST_AND_NOISE: list[tuple[float, float, float]] = [
     (
         0.06, 0.03, 0.02
-    ),
-    (
-        0.18, 0.10, 0.06
     )
 ]
 
@@ -92,43 +82,22 @@ INTRINSICS: list[tuple[str, str, int]] = [
         f"--d455 1.0 --noise {DIST_AND_NOISE[0][2]}",
         0
     ),
-    (
-        f"RealSense_D455_Noise_{int(DIST_AND_NOISE[1][2]*100)}",
-        f"--d455 1.0 --noise {DIST_AND_NOISE[1][2]}",
-        1
-    ),
 ]
 
 
 # ([Name], [Policy arg string], [Number of re-runs])
 METHODS: list[tuple[str, str, str]] = [
     (
-        "Sphere_Uniform",
-        "--type sphere --uniform --r " + str(VIEW_RADIUS),
+        "Precomputed",
+        "--type Normal --file ",
         REGULAR_RERUNS
-    ),
-    (
-        "Sphere_Unordered",
-        "--type sphere --uniform --unordered --r " + str(VIEW_RADIUS),
-        RANDOM_RERUNS
-    ),
-    (
-        "Axis_Random",
-        "--type axis --random-axis --uniform --change-random  --r " + str(VIEW_RADIUS),
-        RANDOM_RERUNS
-    ),
-    # (
-    #     # Bad axis for bin
-    #     "Axis_Y-axis",
-    #     "--type axis --y-axis --uniform --r " + str(VIEW_RADIUS),
-    #     REGULAR_RERUNS
-    # ),
-    # (
-    #     # Best (or as good as X-axis) for bin
-    #     "Axis_Z-axis",
-    #     "--type axis --z-axis --uniform --r " + str(VIEW_RADIUS),
-    #     REGULAR_RERUNS
-    # ),
+    )
+]
+
+FILES: list[pathlib.Path] = [
+    pathlib.Path("share/Experiments/Precomputed/box.h5"),
+    pathlib.Path("share/Experiments/Precomputed/hull.h5"),
+    pathlib.Path("share/Experiments/Precomputed/bunny.h5"),
 ]
 
 
@@ -136,20 +105,14 @@ METHODS: list[tuple[str, str, str]] = [
 
 
 def call_process(fpath: pathlib.Path, scene: pathlib.Path, intr: list[tuple[str, str, int]], policy_name: str,
-                 policy: str, n_views: int, seed: int = 0, parsed_args: argparse.Namespace = None):
+                 policy: str, file: str, parsed_args: argparse.Namespace = None):
     stdin  = ""
     stdin += str(fpath) + STDIN_NEWLINE
     stdin += ("y" if parsed_args.save_images else "don't save images") + STDIN_NEWLINE
     stdin += str(scene) + STDIN_NEWLINE
     stdin += str(REJECTION_RATE) + STDIN_NEWLINE
     stdin += intr[1] + STDIN_NEWLINE
-    stdin += policy
-    if (policy_name == "Axis_Random"):
-        # Axis Random always takes six views before taking a random axis.
-        stdin += " --n-views 6 --n-repeat " + str(n_views / 6)
-    else:
-        stdin += " --n-views " + str(n_views)
-    stdin += " --seed "  + str(seed) + STDIN_NEWLINE
+    stdin += policy + str(file)  + STDIN_NEWLINE
 
     # Add data channels
     stdin += f"--name probability   --type Probability  --d-min -{DIST_AND_NOISE[intr[2]][0]} --d-max {DIST_AND_NOISE[intr[2]][1]} --dtype float" + STDIN_NEWLINE
@@ -175,35 +138,31 @@ def main(parsed_args: argparse.Namespace) -> None:
     start = parsed_args.start_at
     n = 0
     N = len(INTRINSICS) * len(GROUND_TRUTH_FILES) * \
-        len(N_VIEWS) * sum([m[2] for m in METHODS])
+        len(FILES) * sum([m[2] for m in METHODS])
     print(f"Generating {N} experiments, beginning at experiment {start}...")
 
-    fpath_base = PROJECT_ROOT_PATH / "share" / "Experiments" / "Experiment_2" / "Results"
+    fpath_base = PROJECT_ROOT_PATH / "share" / "Experiments" / "Experiment_5" / "Results"
     for intr in INTRINSICS:
         for scene in GROUND_TRUTH_FILES:
             for policy in METHODS:
-                for n_views in N_VIEWS:
-                    for rep in range(1, policy[2] + 1):
-                        n += 1
-                        if (n < start):
-                            continue
+                for file in FILES:
+                    n += 1
+                    if (n < start):
+                        continue
+                    fpath = pathlib.Path(intr[0], scene.name.removesuffix(HDF5_EXTENSION),
+                                            policy[0], file.name.removesuffix(HDF5_EXTENSION), str(10), str(1))
+                    print(f"({n} / {N}) {fpath}")
 
-                        seed = random.randrange(1, 1e8) if RANDOM_SEED else rep
+                    fpath = fpath_base / fpath
+                    if fpath.exists() is False:
+                        fpath.mkdir(parents=True)
+                    fpath /= "results" + HDF5_EXTENSION
 
-                        fpath = pathlib.Path(intr[0], scene.name.removesuffix(HDF5_EXTENSION),
-                                             policy[0], str(n_views), str(rep))
-                        print(f"({n} / {N}) {fpath}")
+                    if fpath.exists() is True and parsed_args.no_override:
+                        print("\tAlready exists. Skipping experiment...")
+                        continue
 
-                        fpath = fpath_base / fpath
-                        if fpath.exists() is False:
-                            fpath.mkdir(parents=True)
-                        fpath /= "results" + HDF5_EXTENSION
-
-                        if fpath.exists() is True and parsed_args.no_override:
-                            print("\tAlready exists. Skipping experiment...")
-                            continue
-
-                        call_process(fpath, scene, intr, policy[0], policy[1], n_views, seed, parsed_args)
+                    call_process(fpath, scene, intr, policy[0], policy[1], file, parsed_args)
 
 
 if __name__ == "__main__":

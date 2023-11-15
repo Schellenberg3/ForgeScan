@@ -351,7 +351,7 @@ private:
 
     bool isComplete() const override final
     {
-        return this->numAccepted() + this->numRejected() > this->n_sample;
+        return this->numAccepted() + this->numRejected() >= this->n_store;
     }
 
 

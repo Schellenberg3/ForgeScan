@@ -122,7 +122,7 @@ public:
 
         this->radius         = g_normal.getAttribute("radius").read<float>();
         this->min_similarity = g_normal.getAttribute("min_similarity").read<float>();
-        this->n_sample       = g_normal.getAttribute("n_sample").read<int>();
+        this->n_sample       = g_normal.getAttribute("n_sample").read<size_t>();
         this->n_store        = g_normal.getAttribute("n_store").read<int>();
         this->alpha          = g_normal.getAttribute("alpha").read<float>();
 

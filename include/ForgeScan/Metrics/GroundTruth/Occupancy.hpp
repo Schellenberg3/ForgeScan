@@ -243,6 +243,8 @@ private:
     /// @return True if truth is OCCUPIED and the measurement is OCCUPIED.
     static bool true_positive(const uint8_t& truth_type, const uint8_t& measurement_type)
     {
+        // static const uint8_t TYPE_UNKNOWN_OR_OCCUPIED = VoxelOccupancy::TYPE_UNKNOWN | VoxelOccupancy::TYPE_OCCUPIED;
+        // return measurement_type & TYPE_UNKNOWN_OR_OCCUPIED &&
         return measurement_type & VoxelOccupancy::TYPE_OCCUPIED &&
                      truth_type & VoxelOccupancy::TYPE_OCCUPIED;
     }
@@ -255,8 +257,7 @@ private:
     ///         is OCCUPIED.
     static bool false_negative(const uint8_t& truth_type, const uint8_t& measurement_type)
     {
-        static const uint8_t TYPE_UNKNOWN_OR_FREE = VoxelOccupancy::TYPE_UNKNOWN | VoxelOccupancy::TYPE_FREE;
-        return measurement_type & TYPE_UNKNOWN_OR_FREE &&
+        return measurement_type & VoxelOccupancy::TYPE_FREE &&
                      truth_type & VoxelOccupancy::TYPE_OCCUPIED;
     }
 

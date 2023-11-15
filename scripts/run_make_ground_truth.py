@@ -29,6 +29,7 @@ BOX_ROTATED   = "box-rotated"
 BIN           = "bin"
 BUNNY         = "bunny"
 ROTOR_BLADE   = "rotor-blade"
+ROTOR_BLADE_REAL   = "rotor-blade-real"
 STDIN_NEWLINE = "\n"
 
 
@@ -122,6 +123,16 @@ def get_rotor_blade() -> str:
     return stdin_shape
 
 
+def get_rotor_blade_real() -> str:
+    """
+    Returns a stdin string to add the rotor blade to the scene.
+    Scales the mesh to fit the sizing of the real part
+    """
+    stdin_shape  = " --file rotor_blade.stl --scale 0.02 "
+    stdin_shape += STDIN_NEWLINE # End shape
+    return stdin_shape
+
+
 def get_reconstruction_grid(parsed_args: argparse.Namespace) -> str:
     """
     Returns a stdin string to set the grid properties, rotation, and translation based on the user's
@@ -152,6 +163,10 @@ def get_reconstruction_grid(parsed_args: argparse.Namespace) -> str:
         stdin += get_grid_properties(nx=151, ny=451, nz=101, resolution=0.01) + STDIN_NEWLINE
         stdin += get_rotation(0, 0, 0)            + STDIN_NEWLINE
         stdin += get_translation(-0.75, -2.25, -0.5) + STDIN_NEWLINE
+    elif (parsed_args.name == ROTOR_BLADE_REAL):
+        stdin += get_grid_properties(nx=201, ny=501, nz=101, resolution=0.0005) + STDIN_NEWLINE
+        stdin += get_rotation(0, 0, 0)            + STDIN_NEWLINE
+        stdin += get_translation(-0.05, -0.125, -0.025) + STDIN_NEWLINE
     else:
         raise ValueError("Mesh name is invalid.")
     return stdin
@@ -173,6 +188,8 @@ def get_scene(parsed_args: argparse.Namespace) -> str:
         stdin_shape = get_bunny()
     elif (parsed_args.name == ROTOR_BLADE):
         stdin_shape = get_rotor_blade()
+    elif (parsed_args.name == ROTOR_BLADE_REAL):
+        stdin_shape = get_rotor_blade_real()
     else:
         raise ValueError("Mesh file is invalid.")
     stdin_shape += STDIN_NEWLINE

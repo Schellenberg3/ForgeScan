@@ -77,7 +77,7 @@ public:
     std::vector<uint8_t> getOccupancyData() const
     {
         float default_value = this->minimum ? NEGATIVE_INFINITY : 0.0f;
-        auto occupancy_data = std::vector<uint8_t>(this->properties->getNumVoxels(), VoxelOccupancy::OCCUPIED);
+        auto occupancy_data = std::vector<uint8_t>(this->properties->getNumVoxels(), VoxelOccupancy::UNSEEN);
         auto get_occupancy_data = [&](auto&& data){
             for (size_t i = 0; i < data.size(); ++i)
             {
@@ -94,6 +94,10 @@ public:
                 if (data[i] > 0.0f || (data[i] == default_value && this->data_seen->operator[](i) == true))
                 {
                     occupancy_data[i] = VoxelOccupancy::FREE;
+                }
+                else // if (data[i] != default_value)
+                {
+                    occupancy_data[i] = VoxelOccupancy::OCCUPIED;
                 }
             }
         };
@@ -379,7 +383,12 @@ private:
             current *= w;
             current += update * w_update;
             w += w_update;
-            current /= w;
+            // Stops NAN values. Need a better method here when `w` and `w_update` are both zero.
+            // The real root is the `lerp` function returning 0 when `update == dist_min`.
+            if (w != 0)
+            {
+                current /= w;
+            }
         }
 
 

@@ -38,6 +38,9 @@ struct OccplaneInfo
 
         inline static const std::string keep_top_n =
             "--keep-top-n";
+
+        inline static const std::string complete_after =
+            "--complete-after";
     };
 
     struct Help
@@ -56,6 +59,9 @@ struct OccplaneInfo
 
         inline static const std::string keep_top_n =
             "The maximum number of views to keep in each generation step";
+
+        inline static const std::string complete_after =
+            "Policy.isComplete returns true after this many views";
     };
 
     struct Def
@@ -70,7 +76,10 @@ struct OccplaneInfo
             6;
 
         inline static const int keep_top_n =
-            5;
+            3;
+
+        inline static const int complete_after =
+            9;
     };
 };
 
@@ -92,6 +101,7 @@ public:
             std::abs(parser.get<float>(OccplaneInfo::Parse::eps, OccplaneInfo::Def::eps)),
             std::max(parser.get<int>(OccplaneInfo::Parse::min_points, OccplaneInfo::Def::min_points), 1),
             std::max(parser.get<int>(OccplaneInfo::Parse::keep_top_n, OccplaneInfo::Def::keep_top_n), 1),
+            std::max(parser.get<int>(OccplaneInfo::Parse::complete_after, OccplaneInfo::Def::complete_after), 1),
             parser.get(OccplaneInfo::Parse::channel))
         );
     }
@@ -103,12 +113,14 @@ private:
              const float& eps,
              const int& min_points,
              const int keep_top_n,
+             const int complete_after,
              const std::string& use_channel)
         : Policy(reconstruction),
           radius(radius),
           eps(eps),
           min_points(min_points),
-          keep_top_n(keep_top_n)
+          keep_top_n(keep_top_n),
+          complete_after(complete_after)
     {
         if (use_channel.empty())
         {
@@ -280,7 +292,8 @@ private:
     {
         if (this->accepted_views.size() == 0)
         {
-            this->generateDefault();
+            // For now, force this to be random.
+            this->generateDefault(true);
         }
         else
         {
@@ -295,7 +308,8 @@ private:
         const bool no_occplane_in_last_update = this->n_occplane == 0;
         const bool no_occplane_after_at_least_one_update = at_least_one_non_default_view_accepted &&
                                                            no_occplane_in_last_update;
-        return no_occplane_after_at_least_one_update;
+        return no_occplane_after_at_least_one_update ||
+               this->numAccepted() + this->numRejected() > (size_t)this->complete_after;
     }
 
 
@@ -325,6 +339,9 @@ private:
 
     /// @brief Maximum number of views to keep after each call to generate.
     const int keep_top_n;
+
+    /// @brief Policy is complete after this many views.
+    const int complete_after;
 
     /// @brief Records the number of occplanes and clusters they were sorted into.
     size_t n_occplane = 0, n_clusters = 0;

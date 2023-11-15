@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+title: ForgeScan
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Andrew
+    family-names: Schellenberg
+    email: schellenberg.3@osu.edu
+    affiliation: The Ohio State University
+repository-code: 'https://github.com/Schellenberg3/ForgeScan'
+license: Apache-2.0
+date-released: '2023-11-15'

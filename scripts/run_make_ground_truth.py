@@ -106,7 +106,7 @@ def get_bunny() -> str:
     Returns a stdin string to add the stanford bunny mesh to the scene.
     Scales the mesh to fit the sizing of everything else.
     """
-    stdin_shape  = " --file bunny.stl --scale 0.01 "
+    stdin_shape  = " --file bunny.stl "
     stdin_shape += get_translation(-0.2, 0, -0.4)
     stdin_shape += STDIN_NEWLINE # End shape
     return stdin_shape

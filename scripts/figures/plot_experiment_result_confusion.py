@@ -3,13 +3,14 @@ import pathlib
 
 import h5py
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-
+from matplotlib.ticker import MaxNLocator, MultipleLocator, AutoMinorLocator
 import numpy as np
 
 
 PROJECT_ROOT_PATH = pathlib.Path(__file__).parent.parent.resolve().parent
 
+
+## ------------------------------- CONFUSION MATRIX CALCULATIONS ------------------------------- ##
 
 
 def accuracy(true_positive: int,  true_negative: int,
@@ -27,6 +28,27 @@ def precision(true_positive: int, false_positive: int) -> float:
     return true_positive / float(true_positive + false_positive)
 
 
+def recall(true_positive: int, false_negative: int) -> float:
+    """
+    Returns the recall or true positive rate (TPR) value for the given confusion matrix.
+    """
+    return true_positive / float(true_positive + false_negative)
+
+
+def fall_out(true_negative: int, false_positive: int) -> float:
+    """
+    Returns the fall-out or false positive rate (FPR) value for the given confusion matrix.
+    """
+    return false_positive / float(false_positive + true_negative)
+
+
+def miss_rate(true_positive: int, false_negative: int) -> float:
+    """
+    Returns the miss rate or False negative rate (FNR) value for the given confusion matrix.
+    """
+    return false_negative / float(false_negative + true_positive)
+
+
 def arr_accuracy(arr: np.ndarray):
     """
     Calls the `accuracy` function on the input array.
@@ -41,6 +63,40 @@ def arr_precision(arr: np.ndarray):
     return precision(arr[0], arr[2])
 
 
+def arr_recall(arr: np.ndarray):
+    """
+    Calls the `recall` function on the input array.
+    """
+    return recall(arr[0], arr[3])
+
+
+def arr_fall_out(arr: np.ndarray):
+    """
+    Calls the `fall_out` function on the input array.
+    """
+    return fall_out(arr[1], arr[2])
+
+
+def arr_miss_rate(arr: np.ndarray):
+    """
+    Calls the `miss_rate` function on the input array.
+    """
+    return miss_rate(arr[0], arr[2])
+
+
+PLOT_OPTIONS = {
+    "accuracy"  : arr_accuracy,
+    "precision" : arr_precision,
+    "recall"    : arr_recall,
+    "fall-out"  : arr_fall_out,
+    "miss-rate" : arr_miss_rate,
+}
+
+
+
+## ------------------------------ SCRIPT METHODS AND ENTRY POINT ------------------------------- ##
+
+
 def get_metric_group(hdf5_path: pathlib.Path) -> h5py.Group:
     """
     Opens an HDF5 file and access the location of the Metic group.
@@ -49,25 +105,24 @@ def get_metric_group(hdf5_path: pathlib.Path) -> h5py.Group:
     return h5_file["Metric"]
 
 
-def get_figures(part: str, policy: str, reconstructions: list[str]) -> list[tuple[plt.Figure, plt.Axes, plt.Axes]]:
+def get_figures(part: str, policy: str, plot_type: str, reconstructions: list[str]) -> list[tuple[plt.Figure, plt.Axes]]:
     """
     Returns multiple matplotlib figures with different titles.
     """
     plots = []
     for label in reconstructions:
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[12.8, 6.4], dpi=200)
+        fig, ax = plt.subplots(figsize=[5.5, 3.75], dpi=200)
 
-        fig_title = f"{label} Reconstruction of {part} using {policy}".replace("_", " ")
-        fig.suptitle(fig_title)
+        # fig_title = f"{label} Reconstruction of {part} using {policy}".replace("_", " ")
+        # fig.suptitle(fig_title)
 
-        ax1.set_title("Reconstruction Accuracy")
-        ax1.set_xlabel("Views Added")
-        ax1.set_ylim(0, 1.1)
-        ax2.set_title("Reconstruction Precision")
-        ax2.set_xlabel("Views Added")
-        ax2.set_ylim(0, 1.1)
+        ax.set_title(f"Reconstruction {plot_type}")
+        # ax.set_xlabel("Views Added")
+        ax.set_ylim(0, 1.1)
+        ax.grid(axis='y', which='major', color='0.80')
+        ax.grid(axis='y', which='minor', color='0.95')
 
-        plots.append((fig, ax1, ax2))
+        plots.append((fig, ax))
     return plots
 
 
@@ -88,7 +143,7 @@ def select_experiment(dir : pathlib.Path) -> pathlib.Path:
     return experiments[idx]
 
 
-def plot_policy_sweep(policy_path: pathlib.Path, figure_root: pathlib.Path):
+def plot_policy_sweep(policy_path: pathlib.Path, figure_root: pathlib.Path, plot_key: str):
     """
     Generates the accuracy and precision plots. Combines the multiple policy view into one plot and
     if the policy was repeated then it plots the min/max and average with standard deviation bars.
@@ -101,7 +156,7 @@ def plot_policy_sweep(policy_path: pathlib.Path, figure_root: pathlib.Path):
 
     part_name   = policy_path.parent.name.capitalize()
     policy_name = policy_path.name
-    plots = get_figures(part_name, policy_name, confusion_grid_labels)
+    plots = get_figures(part_name, policy_name, plot_key, confusion_grid_labels)
 
     try:
         # Sort in increasing order on integer number.
@@ -118,9 +173,8 @@ def plot_policy_sweep(policy_path: pathlib.Path, figure_root: pathlib.Path):
         xdata = list(range(views_plus_one))
 
         reps_dirs = [x for x in views.iterdir() if x.is_dir()]
-        data = [ np.zeros((int(views.name), 4, len(reps_dirs))) ] * n_group
-        acc  = [ np.zeros((views_plus_one, len(reps_dirs)))     ] * n_group
-        pre  = [ np.zeros((views_plus_one, len(reps_dirs)))     ] * n_group
+        data   = [ np.zeros((int(views.name), 4, len(reps_dirs))) ] * n_group
+        result = [ np.zeros((views_plus_one, len(reps_dirs)))     ] * n_group
 
         for i, reps in enumerate(reps_dirs):
             hdf5_dir = reps / "results.h5"
@@ -128,44 +182,38 @@ def plot_policy_sweep(policy_path: pathlib.Path, figure_root: pathlib.Path):
             for g, group in enumerate(confusion_groups):
                 confusion_group = metric_group[group]
                 data[g][:, :, i] = confusion_group.get("data")[:, 1:5]
-                acc[g][1:, i]    = np.apply_along_axis(arr_accuracy,  1, data[g][:, :, i])
-                pre[g][1:, i]    = np.apply_along_axis(arr_precision, 1, data[g][:, :, i])
+                result[g][1:, i] = np.apply_along_axis(PLOT_OPTIONS[plot_key], 1, data[g][:, :, i])
 
         if len(reps_dirs) > 1:
                 line_label += " (Average)"
         for g in range(n_group):
             if len(reps_dirs) > 1:
-                acc_avg = acc[g].mean(axis=1)
-                acc_std = acc[g].std(axis=1)
-                acc_min = acc[g].min(axis=1)
-                acc_max = acc[g].max(axis=1)
-                plots[g][1].errorbar(xdata, acc_avg, acc_std, linewidth=2, label=line_label, elinewidth=1, alpha=0.75, capsize=4.5)
-                plots[g][1].fill_between(xdata, acc_min, acc_max, alpha=0.2)
-
-                pre_avg = pre[g].mean(axis=1)
-                pre_std = pre[g].std(axis=1)
-                pre_min = pre[g].min(axis=1)
-                pre_max = pre[g].max(axis=1)
-                plots[g][2].errorbar(xdata, pre_avg, pre_std, linewidth=2, label=line_label, elinewidth=1, alpha=0.75, capsize=4.5)
-                plots[g][2].fill_between(xdata, pre_min, pre_max, alpha=0.2)
+                result_avg = result[g].mean(axis=1)
+                result_std = result[g].std(axis=1)
+                result_min = result[g].min(axis=1)
+                result_max = result[g].max(axis=1)
+                plots[g][1].errorbar(xdata, result_avg, result_std, linewidth=2, label=line_label, elinewidth=1, alpha=0.75, capsize=4.5)
+                plots[g][1].fill_between(xdata, result_min, result_max, alpha=0.2)
+                save_data = result_avg
             else:
-                plots[g][1].plot(xdata, acc[g][:, 0], linewidth=2, label=line_label)
-                plots[g][2].plot(xdata, pre[g][:, 0], linewidth=2, label=line_label)
+                plots[g][1].plot(xdata, result[g][:, 0], linewidth=2, label=line_label)
+                save_data = result
 
     for g in range(n_group):
-        plots[g][1].legend(loc='lower right')
-        plots[g][2].legend(loc='lower right')
-
+        # plots[g][1].legend(loc='right')
         plots[g][1].xaxis.set_major_locator(MaxNLocator(integer=True))
-        plots[g][1].yaxis.set_ticks([0.2, 0.4, 0.6, 0.8, 1.0])
-        plots[g][2].xaxis.set_major_locator(MaxNLocator(integer=True))
-        plots[g][2].yaxis.set_ticks([0.2, 0.4, 0.6, 0.8, 1.0])
+        plots[g][1].yaxis.set_ticks(list(np.linspace(0.2, 1, 5)))
+        plots[g][1].yaxis.set_minor_locator(AutoMinorLocator())
+        # plots[g][1].tick_params(axis='y', which='minor', bottom=False)
+        # plots[g][1].yaxis.set_minor_locator(MultipleLocator(3))
+
 
         image_fpath = figure_root / policy_path.parent.name / confusion_grid_labels[g]
         # Split the old path to get the location of the figure.
         if image_fpath.exists() is False:
             image_fpath.mkdir(parents=True)
-        image_fpath /= policy_path.name + "_Results.png"
+
+        image_fpath /= "_".join([policy_path.name, plot_key.capitalize(), "Results.jpeg"])
 
         plots[g][0].savefig(image_fpath)
         plt.close(plots[g][0])
@@ -176,14 +224,18 @@ def main(parsed_args: argparse.Namespace) -> None:
     """
     Program entry point.
     """
+    assert parsed_args.plot in PLOT_OPTIONS.keys(), \
+           f"The option {parsed_args.plot} is not a valid plotting option."
+
     results_dir = select_experiment(parsed_args.dir)
     figures_root = parsed_args.dir / 'Figures' / results_dir.name
+
 
     shape_dirs = [x for x in results_dir.iterdir() if x.is_dir()]
     for shape in shape_dirs:
         policy_dirs = [x for x in shape.iterdir() if x.is_dir()]
         for policy in policy_dirs:
-            plot_policy_sweep(policy, figures_root)
+            plot_policy_sweep(policy, figures_root, parsed_args.plot)
 
 
 if __name__ == "__main__":
@@ -199,6 +251,13 @@ if __name__ == "__main__":
         required=False,
         default=PROJECT_ROOT_PATH / "share" / "Experiments" / 'Results',
         help="Where to save the generated data."
+    )
+
+    parser.add_argument(
+        "-p", "--plot",
+        type=str,
+        required=True,
+        help="What metric to plot. E.g., accuracy, precision."
     )
 
     args = parser.parse_args()

@@ -193,21 +193,20 @@ struct Camera : public Entity
 
     /// @brief Adds noise to the image. The noise is gaussian with zero mean and scales the ray
     ///        by some percent of its original length.
-    /// @param percent Defines the standard deviation of the noise. A value of `sigma=0.5*percent`
-    ///                is used so 95% of scaling values are within `[-percent, +percent]`.
+    /// @param percent Uniform sampling factor. The ray is scaled a random percentage between [-p, +p]
     /// @note This does ensure no value is set below zero.
     /// @warning A percent value above `0.2` may cause ray tracing failures. I have not investigated why yet.
     ///          Likely some numeric instability leading to negative voxel coordinates.
     void addNoise(const float& percent)
     {
-        std::normal_distribution<float> nd(0.0f, 0.5 * percent);
+        std::uniform_real_distribution<float> ud(-1 * percent, percent);
         for (size_t row = 0; row < this->intr->height; ++row)
         {
             for (size_t col = 0; col < this->intr->width; ++col)
             {
                 auto& x = this->image(row, col);
                 x = std::clamp(x, this->intr->min_d, this->intr->max_d);
-                x = std::max(0.0f, x + x * nd(this->sample.gen));
+                x = std::max(0.0f, x + x * ud(this->sample.gen));
             }
         }
     }

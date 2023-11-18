@@ -1,0 +1,4 @@
+<map id="forge_scan::Trace" name="forge_scan::Trace">
+<area shape="rect" id="node1" title="Collection of voxels hit by a ray. Stores pairs of the voxel&#39;s vector index and its distance from the..." alt="" coords="33,80,168,107"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,196,32"/>
+</map>

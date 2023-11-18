@@ -1,0 +1,27 @@
+<map id="ForgeScan/Common/Definitions.hpp" name="ForgeScan/Common/Definitions.hpp">
+<area shape="rect" id="node1" title=" " alt="" coords="241,5,495,32"/>
+<area shape="rect" id="node2" href="$_a_a_b_b_8hpp.html" title=" " alt="" coords="258,87,478,114"/>
+<area shape="rect" id="node5" href="$_manager_8hpp.html" title=" " alt="" coords="699,691,877,717"/>
+<area shape="rect" id="node7" href="$_occupancy_confusion_8hpp.html" title=" " alt="" coords="1071,512,1287,553"/>
+<area shape="rect" id="node15" href="$_voxel_grid_8hpp.html" title=" " alt="" coords="784,80,981,121"/>
+<area shape="rect" id="node24" href="$_scene_8hpp.html" title=" " alt="" coords="71,80,233,121"/>
+<area shape="rect" id="node3" href="$_ray_trace_8hpp.html" title=" " alt="" coords="349,266,592,293"/>
+<area shape="rect" id="node4" href="$_reconstruction_8hpp.html" title=" " alt="" coords="745,348,999,375"/>
+<area shape="rect" id="node6" href="$_metric_8hpp.html" title=" " alt="" coords="953,430,1167,457"/>
+<area shape="rect" id="node9" href="$_policy_8hpp.html" title=" " alt="" coords="553,423,695,464"/>
+<area shape="rect" id="node8" href="$_metrics_2_constructor_8hpp.html" title=" " alt="" coords="1006,609,1253,635"/>
+<area shape="rect" id="node10" href="$_policies_2_constructor_8hpp.html" title=" " alt="" coords="551,601,694,643"/>
+<area shape="rect" id="node11" href="$_occplane_8hpp.html" title=" " alt="" coords="268,512,444,553"/>
+<area shape="rect" id="node12" href="$_normal_8hpp.html" title=" " alt="" coords="52,512,244,553"/>
+<area shape="rect" id="node13" href="$_axis_8hpp.html" title=" " alt="" coords="469,512,611,553"/>
+<area shape="rect" id="node14" href="$_sphere_8hpp.html" title=" " alt="" coords="635,512,783,553"/>
+<area shape="rect" id="node16" href="$_binary_8hpp.html" title=" " alt="" coords="1448,169,1645,211"/>
+<area shape="rect" id="node19" href="$_binary_t_s_d_f_8hpp.html" title=" " alt="" coords="1005,169,1203,211"/>
+<area shape="rect" id="node20" href="$_count_updates_8hpp.html" title=" " alt="" coords="784,169,981,211"/>
+<area shape="rect" id="node21" href="$_count_views_8hpp.html" title=" " alt="" coords="341,169,539,211"/>
+<area shape="rect" id="node22" href="$_probability_8hpp.html" title=" " alt="" coords="563,169,760,211"/>
+<area shape="rect" id="node23" href="$_data_2_voxel_grids_2_t_s_d_f_8hpp.html" title=" " alt="" coords="1227,169,1424,211"/>
+<area shape="rect" id="node17" href="$_data_2_voxel_grids_2_constructor_8hpp.html" title=" " alt="" coords="784,259,981,300"/>
+<area shape="rect" id="node18" href="$_experiment_variants_8hpp.html" title=" " alt="" coords="1205,259,1419,300"/>
+<area shape="rect" id="node25" href="$_ground_truth_scene_8hpp.html" title=" " alt="" coords="94,169,266,211"/>
+</map>

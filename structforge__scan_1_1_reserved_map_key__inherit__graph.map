@@ -1,0 +1,6 @@
+<map id="forge_scan::ReservedMapKey" name="forge_scan::ReservedMapKey">
+<area shape="rect" id="node1" title="Exception class for InvalidMapKey when the key is otherwise acceptable but is reserved for another us..." alt="" coords="5,229,220,256"/>
+<area shape="rect" id="node2" href="$structforge__scan_1_1_invalid_map_key.html" title="Exception class for invalid access of maps used in Manager, Reconstruction, Scene,..." alt="" coords="14,155,211,181"/>
+<area shape="rect" id="node3" href="$structforge__scan_1_1_exception.html" title="Base class for all ForgeScan exceptions." alt="" coords="30,80,195,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="43,5,182,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="forge_scan::BadVoxelGridDownCast" name="forge_scan::BadVoxelGridDownCast">
+<area shape="rect" id="node1" title="Exception class for failed downcasts from VoxelGrid pointer to a derived class." alt="" coords="5,155,193,196"/>
+<area shape="rect" id="node2" href="$structforge__scan_1_1_exception.html" title="Base class for all ForgeScan exceptions." alt="" coords="17,80,182,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="30,5,169,32"/>
+</map>

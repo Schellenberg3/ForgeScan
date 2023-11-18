@@ -1,0 +1,11 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" title=" " alt="" coords="5,122,144,149"/>
+<area shape="rect" id="node2" href="$structforge__scan_1_1_exception.html" title="Base class for all ForgeScan exceptions." alt="" coords="192,122,357,149"/>
+<area shape="rect" id="node3" href="$structforge__scan_1_1_bad_voxel_grid_down_cast.html" title="Exception class for failed downcasts from VoxelGrid pointer to a derived class." alt="" coords="416,5,604,47"/>
+<area shape="rect" id="node4" href="$structforge__scan_1_1_constructor_error.html" title="Exception class for Constructor factories when parsing ArgParser to select which of a base class&#39;s de..." alt="" coords="407,71,613,98"/>
+<area shape="rect" id="node5" href="$structforge__scan_1_1_data_variant_error.html" title="Exception class for DataVariant and DataType issues." alt="" coords="405,122,615,149"/>
+<area shape="rect" id="node6" href="$structforge__scan_1_1_grid_property_error.html" title="Exception class for issues with the Grid::Properties class." alt="" coords="419,173,601,215"/>
+<area shape="rect" id="node8" href="$structforge__scan_1_1_invalid_map_key.html" title="Exception class for invalid access of maps used in Manager, Reconstruction, Scene,..." alt="" coords="411,239,609,266"/>
+<area shape="rect" id="node7" href="$structforge__scan_1_1_voxel_out_of_range.html" title="Exception class for if Index exceeds a Grid::Properties GridSize." alt="" coords="663,181,877,207"/>
+<area shape="rect" id="node9" href="$structforge__scan_1_1_reserved_map_key.html" title="Exception class for InvalidMapKey when the key is otherwise acceptable but is reserved for another us..." alt="" coords="663,239,877,266"/>
+</map>

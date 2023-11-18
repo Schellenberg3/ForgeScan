@@ -1,0 +1,4 @@
+<map id="forge_scan::sensor::Camera" name="forge_scan::sensor::Camera">
+<area shape="rect" id="node1" title="Simulates a simple pinhole depth camera. Stores a depth image in an Eigen Matrix. May be used with th..." alt="" coords="5,80,149,121"/>
+<area shape="rect" id="node2" href="$structforge__scan_1_1_entity.html" title="Generic entity (sensor, primitive etc) that exists in 3D space." alt="" coords="8,5,147,32"/>
+</map>

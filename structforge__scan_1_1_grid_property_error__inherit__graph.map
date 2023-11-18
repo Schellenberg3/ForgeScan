@@ -1,0 +1,6 @@
+<map id="forge_scan::GridPropertyError" name="forge_scan::GridPropertyError">
+<area shape="rect" id="node1" title="Exception class for issues with the Grid::Properties class." alt="" coords="21,155,204,196"/>
+<area shape="rect" id="node4" href="$structforge__scan_1_1_voxel_out_of_range.html" title="Exception class for if Index exceeds a Grid::Properties GridSize." alt="" coords="5,244,220,271"/>
+<area shape="rect" id="node2" href="$structforge__scan_1_1_exception.html" title="Base class for all ForgeScan exceptions." alt="" coords="30,80,195,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="43,5,182,32"/>
+</map>

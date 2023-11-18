@@ -1,0 +1,5 @@
+<map id="forge_scan::policies::Normal" name="forge_scan::policies::Normal">
+<area shape="rect" id="node1" title=" " alt="" coords="97,95,248,136"/>
+<area shape="rect" id="node2" href="$classforge__scan_1_1policies_1_1_policy.html" title="Base implementation for a Policy that suggests new views for Reconstruction." alt="" coords="5,5,156,47"/>
+<area shape="rect" id="node3" href="$structforge__scan_1_1simulation_1_1_scene.html" title="A collection of triangle mesh objects which are imaged together in the same scene." alt="" coords="181,5,351,47"/>
+</map>

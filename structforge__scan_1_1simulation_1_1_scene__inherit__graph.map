@@ -1,0 +1,5 @@
+<map id="forge_scan::simulation::Scene" name="forge_scan::simulation::Scene">
+<area shape="rect" id="node1" title="A collection of triangle mesh objects which are imaged together in the same scene." alt="" coords="87,5,258,47"/>
+<area shape="rect" id="node2" href="$classforge__scan_1_1policies_1_1_normal.html" title=" " alt="" coords="5,95,156,136"/>
+<area shape="rect" id="node3" href="$structforge__scan_1_1simulation_1_1_ground_truth_scene.html" title=" " alt="" coords="181,95,351,136"/>
+</map>

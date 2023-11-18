@@ -1,0 +1,5 @@
+<map id="forge_scan::data::CountUpdates" name="forge_scan::data::CountUpdates">
+<area shape="rect" id="node1" title="Counts how many times the voxel has been updated." alt="" coords="5,155,236,181"/>
+<area shape="rect" id="node2" href="$classforge__scan_1_1data_1_1_voxel_grid.html" title="A base class for a VoxelGrid of various data types. Derived classes define what datatypes they accept..." alt="" coords="21,80,221,107"/>
+<area shape="rect" id="node3" href="$structforge__scan_1_1_grid.html" title="Base interface for Grid of uniformly&#45;sized voxels." alt="" coords="57,5,185,32"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="forge_scan::metrics::ground_truth::Occupancy" name="forge_scan::metrics::ground_truth::Occupancy">
+<area shape="rect" id="node1" title="Stores a ground truth for the voxel occupancy of a Scene." alt="" coords="5,80,197,121"/>
+<area shape="rect" id="node2" href="$structforge__scan_1_1_grid.html" title="Base interface for Grid of uniformly&#45;sized voxels." alt="" coords="37,5,165,32"/>
+</map>

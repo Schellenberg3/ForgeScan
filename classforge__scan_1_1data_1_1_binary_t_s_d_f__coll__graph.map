@@ -1,0 +1,5 @@
+<map id="forge_scan::data::BinaryTSDF" name="forge_scan::data::BinaryTSDF">
+<area shape="rect" id="node1" title="Represents a truncated signed&#45;distance function and binary occupation." alt="" coords="5,155,220,181"/>
+<area shape="rect" id="node2" href="$classforge__scan_1_1data_1_1_voxel_grid.html" title="A base class for a VoxelGrid of various data types. Derived classes define what datatypes they accept..." alt="" coords="13,80,213,107"/>
+<area shape="rect" id="node3" href="$structforge__scan_1_1_grid.html" title="Base interface for Grid of uniformly&#45;sized voxels." alt="" coords="49,5,177,32"/>
+</map>

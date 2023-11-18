@@ -1,0 +1,30 @@
+<map id="ForgeScan/Policies" name="ForgeScan/Policies">
+<area shape="rect" id="node1" href="dir_46b720a94b26c8b8cab12ed16a2852bb.html" title="Common" alt="" coords="202,447,283,495"/>
+<area shape="rect" id="node3" href="dir_7c7ca78fac4220b00e062e71b7f29cc7.html" title="Utilities" alt="" coords="173,543,246,591"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000002_000013.html" title="3" alt="" coords="227,521,236,536"/>
+<area shape="rect" id="node2" href="dir_5025bb85b030365f6372ffff9cdf7183.html" title="Data" alt="" coords="328,351,400,399"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000003_000002.html" title="6" alt="" coords="287,435,297,450"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000003_000013.html" title="9" alt="" coords="261,539,271,554"/>
+<area shape="rect" id="node4" href="dir_44e371748127d50745576df75732b77e.html" title="Simulation" alt="" coords="137,255,229,303"/>
+<area shape="rect" id="edge14-headlabel" href="dir_000012_000002.html" title="3" alt="" coords="233,419,243,434"/>
+<area shape="rect" id="edge16-headlabel" href="dir_000012_000013.html" title="2" alt="" coords="199,515,209,530"/>
+<area shape="rect" id="node5" href="dir_7039352b357d78dcf46ac4ad57cd8a7e.html" title="Sensor" alt="" coords="85,351,157,399"/>
+<area shape="rect" id="edge15-headlabel" href="dir_000012_000011.html" title="1" alt="" coords="149,333,158,347"/>
+<area shape="rect" id="edge12-headlabel" href="dir_000011_000002.html" title="2" alt="" coords="199,421,208,436"/>
+<area shape="rect" id="edge13-headlabel" href="dir_000011_000013.html" title="3" alt="" coords="189,515,198,530"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000006_000002.html" title="3" alt="" coords="269,428,279,443"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000006_000003.html" title="1" alt="" coords="380,328,390,343"/>
+<area shape="rect" id="node7" href="dir_65667cdaa95a2eed084b645bbe789b77.html" title="Heuristic" alt="" coords="37,159,117,207"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000006_000008.html" title="1" alt="" coords="133,157,142,172"/>
+<area shape="rect" id="node8" href="dir_6cc79bb634676db74f7efe0116c5590c.html" title="Precomputed" alt="" coords="142,159,250,207"/>
+<area shape="rect" id="edge11-headlabel" href="dir_000006_000009.html" title="1" alt="" coords="239,146,248,161"/>
+<area shape="rect" id="node9" href="dir_0c6b91d3784d6f76f384050172e4a5f9.html" title="Simple" alt="" coords="275,159,347,207"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000006_000010.html" title="2" alt="" coords="314,133,324,148"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000008_000013.html" title="2" alt="" coords="168,517,178,531"/>
+<area shape="rect" id="edge17-headlabel" href="dir_000009_000012.html" title="1" alt="" coords="192,230,202,245"/>
+<area shape="rect" id="edge18-headlabel" href="dir_000009_000011.html" title="1" alt="" coords="118,324,128,339"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000010_000002.html" title="2" alt="" coords="255,423,264,438"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000010_000013.html" title="4" alt="" coords="261,535,270,549"/>
+<area shape="rect" id="clust2" href="dir_9261688c06ca195f9bb04320697aad75.html" alt="" coords="27,52,357,217"/>
+<area shape="rect" id="clust1" href="dir_9d4c49e3522cc564fee476c09a518860.html" title="ForgeScan" alt="" coords="16,16,411,601"/>
+</map>

@@ -1,0 +1,12 @@
+<map id="forge_scan::Grid" name="forge_scan::Grid">
+<area shape="rect" id="node1" title="Base interface for Grid of uniformly&#45;sized voxels." alt="" coords="5,191,133,217"/>
+<area shape="rect" id="node2" href="$classforge__scan_1_1data_1_1_voxel_grid.html" title="A base class for a VoxelGrid of various data types. Derived classes define what datatypes they accept..." alt="" coords="181,132,381,159"/>
+<area shape="rect" id="node9" href="$classforge__scan_1_1metrics_1_1ground__truth_1_1_occupancy.html" title="Stores a ground truth for the voxel occupancy of a Scene." alt="" coords="185,183,377,225"/>
+<area shape="rect" id="node10" href="$classforge__scan_1_1metrics_1_1ground__truth_1_1_t_s_d_f.html" title="Stores a ground truth for the voxel TSDF of a Scene." alt="" coords="204,249,359,290"/>
+<area shape="rect" id="node3" href="$classforge__scan_1_1data_1_1_binary.html" title="Tracks binary occupancy values for each voxel. The whole VoxelGrid begins as &quot;occupied&quot; and are updat..." alt="" coords="455,5,635,32"/>
+<area shape="rect" id="node4" href="$classforge__scan_1_1data_1_1_binary_t_s_d_f.html" title="Represents a truncated signed&#45;distance function and binary occupation." alt="" coords="437,56,652,83"/>
+<area shape="rect" id="node5" href="$classforge__scan_1_1data_1_1_count_updates.html" title="Counts how many times the voxel has been updated." alt="" coords="429,107,660,133"/>
+<area shape="rect" id="node6" href="$classforge__scan_1_1data_1_1_count_views.html" title="Counts how many times the voxel has been viewed." alt="" coords="437,157,652,184"/>
+<area shape="rect" id="node7" href="$classforge__scan_1_1data_1_1_probability.html" title="Represents occupation probability via log&#45;odds. This implements similar logic to what the OctoMap lib..." alt="" coords="441,208,649,235"/>
+<area shape="rect" id="node8" href="$classforge__scan_1_1data_1_1_t_s_d_f.html" title="Represents a truncated signed&#45;distance function (TSDF)." alt="" coords="459,259,631,285"/>
+</map>

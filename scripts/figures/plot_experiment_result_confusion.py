@@ -34,9 +34,9 @@ def precision(true_positive: int, false_positive: int) -> float:
     return true_positive / float(true_positive + false_positive)
 
 
-def recall(true_positive: int, false_negative: int) -> float:
+def sensitivity(true_positive: int, false_negative: int) -> float:
     """
-    Returns the recall or true positive rate (TPR) value for the given confusion matrix.
+    Returns the sensitivity or true positive rate (TPR) value for the given confusion matrix.
     """
     return true_positive / float(true_positive + false_negative)
 
@@ -69,11 +69,11 @@ def arr_precision(arr: np.ndarray):
     return precision(arr[TP], arr[FP])
 
 
-def arr_recall(arr: np.ndarray):
+def arr_sensitivity(arr: np.ndarray):
     """
-    Calls the `recall` function on the input array.
+    Calls the `sensitivity` function on the input array.
     """
-    return recall(arr[TP], arr[FN])
+    return sensitivity(arr[TP], arr[FN])
 
 
 def arr_fall_out(arr: np.ndarray):
@@ -91,11 +91,11 @@ def arr_miss_rate(arr: np.ndarray):
 
 
 PLOT_OPTIONS = {
-    "accuracy"  : arr_accuracy,
-    "precision" : arr_precision,
-    "recall"    : arr_recall,
-    "fall-out"  : arr_fall_out,
-    "miss-rate" : arr_miss_rate,
+    "accuracy"    : arr_accuracy,
+    "precision"   : arr_precision,
+    "sensitivity" : arr_sensitivity,
+    "fall-out"    : arr_fall_out,
+    "miss-rate"   : arr_miss_rate,
 }
 
 

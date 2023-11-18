@@ -12,6 +12,12 @@ PROJECT_ROOT_PATH = pathlib.Path(__file__).parent.parent.resolve().parent
 
 ## ------------------------------- CONFUSION MATRIX CALCULATIONS ------------------------------- ##
 
+# Index location in the extracted Nx4 matrix
+TP = 0
+TN = 1
+FP = 2
+FN = 3
+
 
 def accuracy(true_positive: int,  true_negative: int,
              false_positive: int, false_negative: int) -> float:
@@ -53,35 +59,35 @@ def arr_accuracy(arr: np.ndarray):
     """
     Calls the `accuracy` function on the input array.
     """
-    return accuracy(arr[0], arr[1], arr[2], arr[3])
+    return accuracy(arr[TP], arr[TN], arr[FP], arr[FN])
 
 
 def arr_precision(arr: np.ndarray):
     """
     Calls the `precision` function on the input array.
     """
-    return precision(arr[0], arr[2])
+    return precision(arr[TP], arr[FP])
 
 
 def arr_recall(arr: np.ndarray):
     """
     Calls the `recall` function on the input array.
     """
-    return recall(arr[0], arr[3])
+    return recall(arr[TP], arr[FN])
 
 
 def arr_fall_out(arr: np.ndarray):
     """
     Calls the `fall_out` function on the input array.
     """
-    return fall_out(arr[1], arr[2])
+    return fall_out(arr[TN], arr[FP])
 
 
 def arr_miss_rate(arr: np.ndarray):
     """
     Calls the `miss_rate` function on the input array.
     """
-    return miss_rate(arr[0], arr[3])
+    return miss_rate(arr[TP], arr[FN])
 
 
 PLOT_OPTIONS = {

@@ -41,6 +41,13 @@ def sensitivity(true_positive: int, false_negative: int) -> float:
     return true_positive / float(true_positive + false_negative)
 
 
+def specificity(true_negative: int, false_positive: int) -> float:
+    """
+    Returns the specificity or true negative rate (TPR) value for the given confusion matrix.
+    """
+    return true_negative / float(true_negative + false_positive)
+
+
 def fall_out(true_negative: int, false_positive: int) -> float:
     """
     Returns the fall-out or false positive rate (FPR) value for the given confusion matrix.
@@ -76,6 +83,20 @@ def arr_sensitivity(arr: np.ndarray):
     return sensitivity(arr[TP], arr[FN])
 
 
+def arr_specificity(arr: np.ndarray):
+    """
+    Calls the `specificity` function on the input array.
+    """
+    return specificity(arr[TN], arr[FP])
+
+
+def arr_balanced_accuracy(arr: np.ndarray):
+    """
+    Calls the `sensitivity` and `specificity` function on the input array to get the balanced accuracy.
+    """
+    return 0.5*( sensitivity(arr[TP], arr[FN]) + specificity(arr[TN], arr[FP]) )
+
+
 def arr_fall_out(arr: np.ndarray):
     """
     Calls the `fall_out` function on the input array.
@@ -91,11 +112,13 @@ def arr_miss_rate(arr: np.ndarray):
 
 
 PLOT_OPTIONS = {
-    "accuracy"    : arr_accuracy,
-    "precision"   : arr_precision,
-    "sensitivity" : arr_sensitivity,
-    "fall-out"    : arr_fall_out,
-    "miss-rate"   : arr_miss_rate,
+    "accuracy"          : arr_accuracy,
+    "precision"         : arr_precision,
+    "sensitivity"       : arr_sensitivity,
+    "specificity"       : arr_specificity,
+    "balanced-accuracy" : arr_balanced_accuracy,
+    "fall-out"          : arr_fall_out,
+    "miss-rate"         : arr_miss_rate,
 }
 
 

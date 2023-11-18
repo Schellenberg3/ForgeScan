@@ -81,7 +81,7 @@ def arr_miss_rate(arr: np.ndarray):
     """
     Calls the `miss_rate` function on the input array.
     """
-    return miss_rate(arr[0], arr[2])
+    return miss_rate(arr[0], arr[3])
 
 
 PLOT_OPTIONS = {
